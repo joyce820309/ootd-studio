@@ -1,0 +1,92 @@
+/*
+ * 風格 B・OOTD 手帳 — 設計 token（唯一來源）
+ * 規則：
+ *  - 預設 Tailwind 色盤已停用，只能使用這裡定義的顏色。
+ *  - 每個品牌色有三種用法：實色（面積）、wash（半透明疊色，搭配 mix-blend-multiply）、deep（文字與圖示，對比 ≥ 4.5:1）。
+ *  - 文字永遠放在實色或紙張上，不放在疊色交界處。
+ */
+@theme {
+  --color-*: initial;
+  --font-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+
+  /* 紙張與文字 */
+  --color-paper: #FBF4E8;
+  --color-card: #FFFCF6;
+  --color-apricot: #F6E9D3;
+  --color-tile: #F3E7D4;
+  --color-line: #EADCC6;
+  --color-line-strong: #D9C7AC;
+  --color-ink: #3B2F25;
+  --color-ink-2: #5A4A3C;
+  --color-ink-3: #74624F;
+  --color-white: #FFFFFF;
+  --color-scrim: rgb(59 47 37 / 0.42);
+
+  /* 燕麥黃（品牌色） */
+  --color-oat: #F2CF8E;
+  --color-oat-edge: #E2B866;
+  --color-oat-soft: #F6E7C6;
+  --color-oat-deep: #7C5A1E;
+  --color-oat-ink: #5A3F12;
+  --color-oat-wash: rgb(240 196 118 / 0.55);
+
+  /* 霧藍：選取、連結、焦點、外套 */
+  --color-mist: #A9C6CF;
+  --color-mist-soft: #DCE8EC;
+  --color-mist-deep: #3E6270;
+  --color-mist-ink: #24424D;
+  --color-mist-wash: rgb(150 186 198 / 0.55);
+
+  /* 乾燥玫瑰：喜愛、提醒、危險、鞋包、未購買 */
+  --color-rose: #E2B4A8;
+  --color-rose-soft: #F4DDD6;
+  --color-rose-edge: #C9A296;
+  --color-rose-deep: #8E4A3E;
+  --color-rose-ink: #5E2E25;
+  --color-rose-wash: rgb(222 166 152 / 0.5);
+
+  /* 鼠尾草綠：AI 建議、成功、可穿、下身 */
+  --color-sage: #B7CBB0;
+  --color-sage-soft: #E6EEE2;
+  --color-sage-deep: #4A6245;
+  --color-sage-ink: #2E3F2B;
+  --color-sage-wash: rgb(167 192 158 / 0.6);
+
+  /* 狀態標籤（底色 / 文字） */
+  --color-status-ok-bg: #DCE7D8;
+  --color-status-ok-fg: #3F5A3B;
+  --color-status-cleaning-bg: #DCE8EC;
+  --color-status-cleaning-fg: #335562;
+  --color-status-repair-bg: #F4DDD6;
+  --color-status-repair-fg: #7E3F34;
+  --color-status-lent-bg: #F6E7C6;
+  --color-status-lent-fg: #6E4F18;
+  --color-status-stored-bg: #EDE4D6;
+  --color-status-stored-fg: #5A4A3C;
+
+  /* 字體 */
+  --font-sans: "Noto Sans TC", system-ui, sans-serif;
+  --font-hd: "LXGW WenKai TC", "Noto Sans TC", serif;
+  --font-num: "Nunito", "Noto Sans TC", sans-serif;
+  --font-logo: "Fredoka", "Noto Sans TC", sans-serif;
+
+  /* 圓角 */
+  --radius-tag: 3px;
+  --radius-sm: 8px;
+  --radius-btn: 10px;
+  --radius-tile: 12px;
+  --radius-card: 14px;
+  --radius-block: 20px;
+
+  /* 陰影：紙張微微浮起 */
+  --shadow-paper: 0 1px 0 rgb(59 47 37 / 0.05), 0 12px 24px -14px rgb(59 47 37 / 0.22);
+  --shadow-sticker: 0 2px 4px rgb(59 47 37 / 0.14);
+  --shadow-float: 0 14px 30px -10px rgb(59 47 37 / 0.45);
+  --shadow-sheet: 0 -14px 30px rgb(59 47 37 / 0.16);
+  --shadow-oat: 0 8px 16px -6px rgb(124 90 30 / 0.45);
+
+  /* 去背衣物投影：淺色衣物在紙色上也看得清楚 */
+  --drop-shadow-garment: 0 6px 8px rgb(59 47 37 / 0.16);
+}

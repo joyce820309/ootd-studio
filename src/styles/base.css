@@ -1,0 +1,47 @@
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2.5px solid var(--color-mist-deep);
+    outline-offset: 2px;
+  }
+  a {
+    color: var(--color-mist-deep);
+  }
+  button {
+    font-family: inherit;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* 點格紙背景：搭配板與畫布使用 */
+@utility bg-dot-grid {
+  background-image: radial-gradient(rgb(59 47 37 / 0.12) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* 等寬數字：價格、尺寸、日期 */
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 手帳橫線紙：筆記欄位 */
+@utility bg-ruled {
+  background-image: repeating-linear-gradient(transparent 0 31px, var(--color-line) 31px 32px);
+  line-height: 32px;
+}
