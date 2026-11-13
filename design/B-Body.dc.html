@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>個人體態資料（風格 B）</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',serif}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.lbl{display:inline-flex;align-items:center;height:34px;padding:0 14px;font:700 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer}
+.chip.on{background:#3B2F25;color:#FBF4E8;border-color:#3B2F25}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+.nav-a:hover{border-bottom-color:#EADCC6;color:#3B2F25}
+details{position:relative;background:#FFFCF6;border-radius:16px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -16px rgba(59,47,37,.22);overflow:hidden}
+summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;min-height:62px;padding:0 20px;position:relative}
+summary::-webkit-details-marker{display:none}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld label{font-size:13px;color:#3B2F25}
+.mi{display:flex;align-items:center;height:48px;border:1.5px solid #E2D2B8;border-radius:10px;background:#FBF4E8;padding:0 12px;gap:8px}
+.mi input{flex:1;min-width:0;border:0;background:transparent;font:700 17px Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums;color:#3B2F25;text-align:right;height:100%}
+.mi span{font:600 13px Nunito;color:#5A4A3C;width:22px}
+.wash{position:absolute;right:-18px;top:-18px;width:70px;height:70px;border-radius:16px;mix-blend-mode:multiply;transform:rotate(14deg)}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+</style>
+</helmet>
+<div style="width:100%;min-height:2160px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
+      <a class="nav-a" href="B-Home.dc.html">首頁</a>
+      <a class="nav-a" href="B-Closet.dc.html">我的衣櫃</a>
+      <a class="nav-a" href="B-Outfit.dc.html">今日搭配</a>
+      <a class="nav-a" href="#diary">穿搭日記</a>
+      <a class="nav-a" href="B-Wishlist.dc.html">選購清單</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:4px;padding-bottom:10px">
+      <button class="ibtn" type="button" aria-label="通知" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"></path></svg></button>
+      <a href="B-Body.dc.html" aria-label="個人資料" aria-current="page" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#3B2F25;color:#FBF4E8;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span></a>
+    </div>
+  </header>
+
+  <main style="max-width:1200px;margin:0 auto;padding:32px clamp(16px,4vw,48px) 64px;display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start">
+    <div style="flex:2 1 520px;min-width:0;display:flex;flex-direction:column;gap:18px">
+      <span class="lbl" style="align-self:flex-start;background:#A9C6CF;transform:rotate(-2deg)">我的尺寸筆記</span>
+      <h1 class="hd" style="margin:0;font-size:34px;font-weight:700">個人資料</h1>
+      <p style="margin:0;font-size:15px;line-height:1.85;color:#5A4A3C;max-width:580px">記下你的尺寸，讓合身比對和搭配建議更貼近你。每一格都可以留白，想到再補就好。</p>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div aria-hidden="true" style="flex:1;display:flex;gap:4px"><sc-for list="{{prog}}" as="p" hint-placeholder-count="5"><span style="flex:1;height:6px;border-radius:3px;background:{{p}}"></span></sc-for></div>
+        <span class="num" style="font-size:13px;color:#5A4A3C;white-space:nowrap">記了 4 / 5 組・慢慢來就好</span>
+      </div>
+
+      <section aria-label="這次量測" style="position:relative;display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 18px;padding:16px 20px;border-radius:16px;background:#F6E7C6;overflow:hidden">
+        <span aria-hidden="true" style="position:absolute;right:-16px;top:-20px;width:84px;height:84px;border-radius:18px;background:rgba(150,186,198,.45);mix-blend-mode:multiply;transform:rotate(12deg)"></span>
+        <div class="fld" style="flex:0 1 300px;position:relative">
+          <label for="md" style="font-weight:500">這次量測日期 <span style="color:#8E4A3E">*</span></label>
+          <button id="md" type="button" aria-haspopup="dialog" aria-expanded="false" style="display:flex;align-items:center;gap:10px;height:50px;padding:0 14px;border-radius:12px;border:1.5px solid #D9C7AC;background:#FFFCF6;font:400 15px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;text-align:left">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg>
+            2026 年 11 月 12 日（四）
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="margin-left:auto;width:18px;height:18px;color:#74624F"><path d="M6 9l6 6 6-6"></path></svg>
+          </button>
+        </div>
+        <p style="flex:1 1 260px;margin:0 0 4px;font-size:13px;line-height:1.75;color:#5A4A3C;position:relative">欄位已帶入<b style="font-weight:500;color:#3B2F25">上次（10/02）</b>的數字，只改有變的就好。儲存後會多一筆新的量測紀錄，舊紀錄都會保留。</p>
+      </section>
+
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+        <details open>
+          <summary><span class="wash" aria-hidden="true" style="background:{{g.wash}}"></span><span class="hd" style="font-size:19px;font-weight:700">{{g.t}}</span><span style="font-size:12px;color:{{g.stColor}};position:relative">{{g.st}}</span><svg class="ic" viewBox="0 0 24 24" style="margin-left:auto;position:relative" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></summary>
+          <div style="padding:0 20px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+            <sc-for list="{{g.f}}" as="f" hint-placeholder-count="3">
+              <div class="fld"><label for="{{f.id}}">{{f.k}}<sc-if value="{{f.ch}}" hint-placeholder-val="{{ false }}"><span style="margin-left:6px;font-size:11px;padding:1px 7px;border-radius:999px;background:#F6E7C6;color:#5A3F12">已修改</span></sc-if></label><div class="mi" style="border-style:{{f.bs}};border-color:{{f.bc}};background:{{f.bg}}"><input id="{{f.id}}" value="{{f.v}}" placeholder="選填"><span>{{f.u}}</span></div><span style="font-size:11px;color:#74624F">{{f.prev}}</span></div>
+            </sc-for>
+          </div>
+        </details>
+      </sc-for>
+
+      <details open>
+        <summary><span class="wash" aria-hidden="true" style="background:rgba(222,166,152,.5)"></span><span class="hd" style="font-size:19px;font-weight:700">腳</span><span style="font-size:12px;color:#5A4A3C;position:relative">3 種狀態・各 4 項</span><svg class="ic" viewBox="0 0 24 24" style="margin-left:auto;position:relative" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></summary>
+        <div style="padding:0 20px 20px;display:flex;flex-direction:column;gap:12px">
+          <p style="margin:0;font-size:12px;line-height:1.7;color:#5A4A3C">襪子厚度會影響尺寸，所以分開記。買鞋時可以選要用哪一組來比對，例如五指襪配運動鞋、裸腳配涼鞋。</p>
+          <div role="table" aria-label="腳的尺寸（公分）" style="display:grid;grid-template-columns:92px repeat(4,minmax(0,1fr));gap:8px 10px;align-items:center">
+            <span role="columnheader" style="font-size:12px;color:#74624F">狀態</span>
+            <span role="columnheader" style="font-size:13px">腳長</span>
+            <span role="columnheader" style="font-size:13px">腳寬</span>
+            <span role="columnheader" style="font-size:13px">前掌圍</span>
+            <span role="columnheader" style="font-size:13px">腳背圍</span>
+            <sc-for list="{{feet}}" as="r" hint-placeholder-count="3">
+              <span role="rowheader" style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500"><span aria-hidden="true" style="width:10px;height:10px;border-radius:3px;background:{{r.c}}"></span>{{r.t}}</span>
+              <sc-for list="{{r.v}}" as="c" hint-placeholder-count="4">
+                <div role="cell" class="mi" style="height:46px;border-style:{{c.bs}};border-color:{{c.bc}};background:{{c.bg}}"><input aria-label="{{r.t}}・{{c.k}}" value="{{c.v}}" placeholder="選填" style="font-size:16px"><span>cm</span></div>
+              </sc-for>
+            </sc-for>
+          </div>
+        </div>
+      </details>
+
+      <details open>
+        <summary><span class="wash" aria-hidden="true" style="background:rgba(222,166,152,.5)"></span><span class="hd" style="font-size:19px;font-weight:700">鞋碼對照</span><span style="font-size:12px;color:#4A6245;position:relative">已填寫</span><svg class="ic" viewBox="0 0 24 24" style="margin-left:auto;position:relative" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></summary>
+        <div style="padding:0 20px 20px">
+          <table style="border-collapse:collapse;width:100%;font-size:14px">
+            <thead><tr><th scope="col" style="text-align:left;font:700 12px Nunito;color:#5A4A3C;padding:8px 0;border-bottom:1.5px solid #3B2F25">鞋款</th><th scope="col" style="text-align:right;font:700 12px Nunito;color:#5A4A3C;border-bottom:1.5px solid #3B2F25">EU</th><th scope="col" style="text-align:right;font:700 12px Nunito;color:#5A4A3C;border-bottom:1.5px solid #3B2F25">US</th><th scope="col" style="text-align:right;font:700 12px Nunito;color:#5A4A3C;border-bottom:1.5px solid #3B2F25">UK</th><th scope="col" style="text-align:right;font:700 12px Nunito;color:#5A4A3C;border-bottom:1.5px solid #3B2F25">JP / cm</th></tr></thead>
+            <tbody>
+              <sc-for list="{{shoes}}" as="s" hint-placeholder-count="3"><tr><th scope="row" style="text-align:left;font-weight:400;padding:11px 0;border-bottom:1.5px dashed #EADCC6">{{s.t}}</th><td class="num" style="text-align:right;border-bottom:1.5px dashed #EADCC6;font-weight:700">{{s.eu}}</td><td class="num" style="text-align:right;border-bottom:1.5px dashed #EADCC6;font-weight:700">{{s.us}}</td><td class="num" style="text-align:right;border-bottom:1.5px dashed #EADCC6;font-weight:700">{{s.uk}}</td><td class="num" style="text-align:right;border-bottom:1.5px dashed #EADCC6;font-weight:700">{{s.jp}}</td></tr></sc-for>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details open>
+        <summary><span class="wash" aria-hidden="true" style="background:rgba(240,196,118,.55)"></span><span class="hd" style="font-size:19px;font-weight:700">版型偏好</span><span style="font-size:12px;color:#4A6245;position:relative">已填寫</span><svg class="ic" viewBox="0 0 24 24" style="margin-left:auto;position:relative" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></summary>
+        <div style="padding:0 20px 20px;display:flex;flex-direction:column;gap:16px">
+          <div class="fld"><span style="font-size:13px">常穿尺寸</span><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip" style="cursor:default">上衣 S–M</span><span class="chip" style="cursor:default">褲子 26 / 36</span><span class="chip" style="cursor:default">洋裝 S</span><button class="chip" type="button" style="color:#3E6270">＋ 新增</button></div></div>
+          <div class="fld"><span style="font-size:13px">喜歡的版型</span><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="chip on" type="button" aria-pressed="true">高腰</button><button class="chip on" type="button" aria-pressed="true">直筒</button><button class="chip on" type="button" aria-pressed="true">落肩</button><button class="chip on" type="button" aria-pressed="true">九分褲長</button><button class="chip" type="button" aria-pressed="false">合身</button><button class="chip" type="button" aria-pressed="false">A 字</button></div></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+            <div class="fld"><label for="em">想讓視覺更突出的地方</label><input id="em" value="肩線、腰線" style="height:48px;border:1.5px solid #E2D2B8;border-radius:10px;background:#FBF4E8;padding:0 12px;font:400 15px 'Chiron GoRound TC';color:#3B2F25"></div>
+            <div class="fld"><label for="bl">想調整比例的地方</label><input id="bl" value="讓腿部看起來更修長" style="height:48px;border:1.5px solid #E2D2B8;border-radius:10px;background:#FBF4E8;padding:0 12px;font:400 15px 'Chiron GoRound TC';color:#3B2F25"></div>
+          </div>
+          <div class="fld"><span style="font-size:13px">不喜歡的剪裁</span><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="chip" type="button" aria-pressed="true" style="background:#F4DDD6;border-color:#E6C5BB;color:#7E3F34">低腰 ✕</button><button class="chip" type="button" aria-pressed="true" style="background:#F4DDD6;border-color:#E6C5BB;color:#7E3F34">過緊的鉛筆裙 ✕</button><button class="chip" type="button" style="color:#3E6270">＋ 新增</button></div></div>
+        </div>
+      </details>
+
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 0 0;border-top:1.5px dashed #D9C7AC">
+        <span style="font-size:13px;color:#5A4A3C">改了 <span class="num" style="font-weight:700;color:#3B2F25">3</span> 項</span>
+        <button class="btn btn-s" type="button" style="margin-left:auto">取消</button>
+        <a class="btn btn-p" href="B-History.dc.html">儲存為 11/12 的紀錄</a>
+      </div>
+    </div>
+
+    <aside style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:22px">
+      <section style="position:relative;padding:20px;border-radius:16px;background:#DCE8EC;color:#24424D;display:flex;flex-direction:column;gap:10px;overflow:hidden">
+        <span aria-hidden="true" style="position:absolute;right:-20px;bottom:-24px;width:96px;height:96px;border-radius:22px;background:rgba(240,196,118,.4);mix-blend-mode:multiply;transform:rotate(12deg)"></span>
+        <span style="display:flex;align-items:center;gap:8px;position:relative"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3"></path></svg><span class="hd" style="font-size:18px;font-weight:700">只有你看得到</span></span>
+        <span style="font-size:13px;line-height:1.8;position:relative">這些資料只用在兩件事：比對衣物與選購商品的尺寸，以及讓搭配建議的比例更準。不會評價身形，也不會分享給任何人。</span>
+      </section>
+      <section style="padding:20px;border-radius:16px;background:#FFFCF6;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -16px rgba(59,47,37,.22)">
+        <span class="hd" style="font-size:18px;font-weight:700">AI 的使用方式</span>
+        <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;min-height:44px">預設參考體態資料<span style="width:46px;height:28px;border-radius:999px;background:#4A6245;position:relative;flex:none"><span style="position:absolute;right:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff"></span></span></label>
+        <span style="font-size:12px;line-height:1.7;color:#5A4A3C">每次詢問時仍可以單獨關閉。</span>
+      </section>
+      <section style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span class="hd" style="font-size:20px">量測紀錄</span><a href="B-History.dc.html" style="display:inline-flex;align-items:center;gap:4px;min-height:44px;font-size:13px;font-weight:500;color:#3E6270;text-decoration:none">查看全部 <span class="num">4</span> 筆<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M9 6l6 6-6 6"></path></svg></a></div>
+        <ol style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{history}}" as="h" hint-placeholder-count="3">
+            <li><a href="B-History.dc.html" style="padding:12px 14px;border-radius:12px;background:#FFFCF6;display:flex;flex-direction:column;gap:3px;border-left:4px solid {{h.c}};color:#3B2F25;text-decoration:none"><span style="display:flex;justify-content:space-between"><span class="num" style="font-weight:700">{{h.date}}</span><span style="font-size:12px;color:#5A4A3C">{{h.tag}}</span></span><span style="font-size:12px;color:#5A4A3C">{{h.note}}</span></a></li>
+          </sc-for>
+        </ol>
+        <span style="font-size:12px;line-height:1.7;color:#5A4A3C">可以逐次查看或並排對照；只列數字，不畫趨勢圖、不評價變化。</span>
+      </section>
+    </aside>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2160}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // prev：上次量到的日期與數值；ch：這次和上次不同（已修改）
+    const f = (id,k,v,u,prev,ch) => ({id,k,v,u,ch:!!ch,prev: prev || '還沒量過',
+      bs: v ? 'solid' : 'dashed', bc: ch ? '#E2B866' : '#E2D2B8', bg: ch ? '#FFF6E2' : '#FBF4E8'});
+    const c = (k,v,ch) => ({k,v, bs: v ? 'solid' : 'dashed', bc: ch ? '#E2B866' : '#E2D2B8', bg: ch ? '#FFF6E2' : '#FBF4E8'});
+    return {
+      prog: ['#B7CBB0','#B7CBB0','#B7CBB0','#B7CBB0','#E2D2B8'],
+      groups: [
+        {t:'基本', st:'已填寫', stColor:'#4A6245', wash:'rgba(240,196,118,.55)', f:[f('h','身高','162','cm','上次 162'), f('w','體重','52.0','kg','上次 52.5',true)]},
+        {t:'上半身', st:'已填寫', stColor:'#4A6245', wash:'rgba(150,186,198,.5)', f:[f('sh','肩寬','38','cm','上次 38'), f('ub','上胸圍','84','cm','上次 84'), f('lb','下胸圍','70','cm','上次 71',true), f('ar','手臂長','55','cm','上次 55')]},
+        {t:'下半身', st:'4 / 5', stColor:'#5A4A3C', wash:'rgba(167,192,158,.55)', f:[f('wa','腰圍','65','cm','上次 66',true), f('na','肚臍圍','73','cm','上次 73'), f('hi','臀圍','91','cm','上次 91'), f('le','腿長（內側）','74','cm','上次 74'), f('th','大腿圍','','cm','')]}
+      ],
+      feet: [
+        {t:'穿五指襪', c:'#F2CF8E', v:[c('腳長',''),c('腳寬',''),c('前掌圍',''),c('腳背圍','')]},
+        {t:'穿一般襪', c:'#A9C6CF', v:[c('腳長','23.5'),c('腳寬','9.1'),c('前掌圍','22.0'),c('腳背圍','22.8')]},
+        {t:'裸腳', c:'#E2B4A8', v:[c('腳長','23.3'),c('腳寬','9.0'),c('前掌圍','21.8'),c('腳背圍','22.4')]}
+      ],
+      shoes: [
+        {t:'運動鞋', eu:'37.5', us:'6.5', uk:'4.5', jp:'23.5'},
+        {t:'樂福鞋・皮鞋', eu:'37', us:'6', uk:'4', jp:'23.5'},
+        {t:'靴子', eu:'38', us:'7', uk:'5', jp:'24'}
+      ],
+      history: [
+        {date:'2026/10/02', tag:'最新', note:'體重有變・新記：肚臍圍、裸腳 3 項', c:'#B7CBB0'},
+        {date:'2026/04/18', tag:'', note:'肩寬、上胸圍、臀圍有變・新記：一般襪 4 項', c:'#A9C6CF'},
+        {date:'2025/11/05', tag:'', note:'第一次記錄', c:'#F2CF8E'}
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

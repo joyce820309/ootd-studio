@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>穿搭日記・列表（風格 B）</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:#5A4A3C}
+.lbl{display:inline-flex;align-items:center;height:34px;padding:0 14px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+.seg{display:inline-grid;grid-template-columns:1fr 1fr;padding:3px;border-radius:10px;background:#F3E7D4}
+.seg a{display:flex;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 18px;border-radius:8px;font-size:14px;font-weight:500;color:#5A4A3C;text-decoration:none}
+.seg a[aria-current="page"]{background:#FFFCF6;color:#3B2F25;font-weight:700;box-shadow:0 1px 2px rgba(59,47,37,.1)}
+.fchip{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.fchip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;font-size:11px;white-space:nowrap}
+.paper{position:relative;background:#FFFCF6;border-radius:16px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -16px rgba(59,47,37,.22)}
+.cell{position:relative;border-radius:8px;background:#FBF4E8;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:0}
+.dot{width:9px;height:9px;border-radius:3px}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:100%;min-height:1580px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
+      <a class="nav-a" href="B-Home.dc.html">首頁</a>
+      <a class="nav-a" href="B-Closet.dc.html">我的衣櫃</a>
+      <a class="nav-a" href="B-Outfit.dc.html">今日搭配</a>
+      <a class="nav-a" href="B-Diary.dc.html" aria-current="page" style="border-bottom-color:#F2CF8E;color:#3B2F25;font-weight:700">穿搭日記</a>
+      <a class="nav-a" href="B-Wishlist.dc.html">選購清單</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:4px;padding-bottom:10px">
+      <button class="ibtn" type="button" aria-label="通知"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"></path></svg></button>
+      <a href="B-Body.dc.html" aria-label="個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#3B2F25;color:#FBF4E8;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span></a>
+    </div>
+  </header>
+
+  <main style="max-width:1320px;margin:0 auto;padding:28px 48px 64px;display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-right:auto">
+        <span class="lbl" style="align-self:flex-start;background:rgba(150,186,198,.8);transform:rotate(-2deg)">穿搭手帳</span>
+        <h1 class="hd" style="margin:0;font-size:34px">穿搭日記</h1>
+        <p style="margin:0;font-size:14px;line-height:1.8;color:#5A4A3C">用場合、評分和穿起來的感受篩一篩，找出真正好穿的那幾套。</p>
+      </div>
+      <div class="seg" role="navigation" aria-label="檢視方式">
+        <a href="B-Diary.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg>月曆</a>
+        <a href="B-Diary-List.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"></path></svg>列表</a>
+      </div>
+      <a class="btn btn-p" href="B-Diary-New.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"></path></svg>記一筆</a>
+    </div>
+
+    <!-- 篩選 -->
+    <section aria-label="篩選" class="paper" style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+        <label style="flex:1 1 280px;display:flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:12px;border:1.5px solid #D9C7AC;background:#FBF4E8;color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14zM16 16l4 4"></path></svg><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">搜尋</span><input type="search" placeholder="搜尋穿搭名稱、備註或單品" style="flex:1;min-width:0;border:0;background:transparent;font:400 14px 'Chiron GoRound TC';color:#3B2F25;height:100%"></label>
+        <button class="fchip" type="button" aria-haspopup="listbox"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M12 7a2 2 0 1 1 2-2M12 7v2L3 16.5a1 1 0 0 0 .6 1.8h16.8a1 1 0 0 0 .6-1.8L12 9"></path></svg>包含單品：燕麥色羊毛針織衫<span aria-label="移除這個篩選" style="margin-left:2px;color:#8E4A3E">✕</span></button>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#5A4A3C;margin-left:auto">排序
+          <span style="display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 12px;border-radius:10px;border:1.5px solid #D9C7AC;background:#FFFCF6;color:#3B2F25">新到舊<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M6 9l6 6 6-6"></path></svg></span>
+        </label>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+        <span style="font-size:12px;color:#74624F;width:44px">場合</span>
+        <button class="fchip" type="button" aria-pressed="true">全部</button>
+        <sc-for list="{{occ}}" as="o" hint-placeholder-count="4"><button class="fchip" type="button" aria-pressed="false"><span class="dot" style="background:{{o.c}}"></span>{{o.t}}</button></sc-for>
+        <span aria-hidden="true" style="width:1.5px;height:24px;background:#EADCC6;margin:0 6px"></span>
+        <span style="font-size:12px;color:#74624F">評分</span>
+        <button class="fchip" type="button" aria-pressed="false">4 分以上</button>
+        <span style="font-size:12px;color:#74624F;margin-left:6px">穿起來</span>
+        <button class="fchip" type="button" aria-pressed="false">舒服</button>
+        <button class="fchip" type="button" aria-pressed="false">不太舒服</button>
+      </div>
+    </section>
+
+    <div role="status" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#5A4A3C">找到 <b class="num" style="color:#3B2F25">{{count}}</b> 筆含「燕麥色羊毛針織衫」的紀錄<button type="button" style="border:0;background:none;color:#3E6270;font:500 13px 'Chiron GoRound TC';text-decoration:underline;cursor:pointer;min-height:32px">清除篩選</button></div>
+
+    <sc-for list="{{months}}" as="m" hint-placeholder-count="2">
+      <section aria-label="{{m.t}}" style="display:flex;flex-direction:column;gap:14px">
+        <h2 style="margin:6px 0 0;display:flex;align-items:baseline;gap:10px"><span class="hd" style="font-size:22px">{{m.t}}</span><span class="num" style="font-size:12px;color:#74624F">{{m.n}} 筆</span></h2>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px">
+          <sc-for list="{{m.items}}" as="e" hint-placeholder-count="4">
+            <article class="paper" style="padding:12px;display:flex;flex-direction:column;gap:10px">
+              <a href="B-Diary.dc.html" aria-label="{{e.date}} {{e.name}}" style="display:block;padding:8px;border-radius:12px;background:{{e.wash}}">
+                <div style="display:grid;gap:4px;height:168px;grid-template-columns:1fr 1.15fr .7fr;grid-template-rows:1fr 1.05fr .7fr;grid-template-areas:'outer top bag' 'outer bottom bag' 'outer bottom shoes'">
+                  <sc-for list="{{e.board}}" as="b" hint-placeholder-count="4"><div class="cell" style="grid-area:{{b.area}}"><svg viewBox="0 0 100 100" style="height:84%;aspect-ratio:1/1;filter:drop-shadow(0 3px 4px rgba(59,47,37,.16))" aria-hidden="true"><path d="{{b.d}}" fill="{{b.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.9"></path></svg></div></sc-for>
+                </div>
+              </a>
+              <div style="display:flex;align-items:baseline;gap:8px"><h3 class="hd" style="margin:0;font-size:18px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{e.name}}</h3><span class="num" style="font-size:12px;color:#5A4A3C;white-space:nowrap">{{e.date}}（{{e.wd}}）</span></div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <span class="chip" style="background:{{e.ocbg}};color:#3B2F25"><span class="dot" style="background:{{e.oc}}"></span>{{e.occ}}</span>
+                <span class="chip" style="background:{{e.fbg}};color:{{e.ffg}}">{{e.feel}}</span>
+                <span role="img" aria-label="評分 {{e.r}} 分（滿分 5 分）" style="display:inline-flex;gap:2px;margin-left:auto"><sc-for list="{{e.stars}}" as="s" hint-placeholder-count="5"><span style="width:11px;height:11px;border-radius:3px;transform:rotate(-8deg);background:{{s}}"></span></sc-for></span>
+              </div>
+              <p style="margin:0;font-size:12px;line-height:1.65;color:#5A4A3C;min-height:40px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{e.note}}</p>
+              <a href="B-Outfit.dc.html" style="display:flex;align-items:center;justify-content:center;gap:6px;height:40px;border-radius:10px;border:1.5px solid #E2B866;background:#F6E7C6;color:#3B2F25;font-size:13px;font-weight:500;text-decoration:none"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4"></path></svg>再穿一次</a>
+            </article>
+          </sc-for>
+        </div>
+      </section>
+    </sc-for>
+
+    <!-- 篩選後沒有結果時 -->
+    <section aria-label="沒有結果時的樣子" style="margin-top:12px;padding:28px;border-radius:16px;border:1.5px dashed #D9C7AC;display:flex;align-items:center;gap:22px">
+      <span aria-hidden="true" style="position:relative;width:96px;height:80px;flex:none"><span style="position:absolute;left:0;top:10px;width:60px;height:60px;border-radius:14px;background:rgba(150,186,198,.5);mix-blend-mode:multiply;transform:rotate(-8deg)"></span><span style="position:absolute;left:30px;top:0;width:60px;height:60px;border-radius:14px;background:rgba(240,196,118,.55);mix-blend-mode:multiply;transform:rotate(6deg)"></span></span>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:11px;color:#74624F">狀態參考・篩選沒有結果</span>
+        <span class="hd" style="font-size:19px">沒有符合的紀錄</span>
+        <span style="font-size:13px;color:#5A4A3C">試著放寬條件，例如拿掉「4 分以上」，或換一個場合。</span>
+      </div>
+      <button type="button" class="btn" style="margin-left:auto;background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25">清除篩選</button>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1580}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const SH = {
+      tee: 'M30 18L42 14Q50 22 58 14L70 18L86 32L76 42L70 38V86H30V38L24 42L14 32Z',
+      knit: 'M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z',
+      pants: 'M32 10H68L72 90H56L50 36L44 90H28Z',
+      skirt: 'M36 14H64L80 86H20Z',
+      coat: 'M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z',
+      shoe: 'M14 62V46Q24 44 34 52Q48 62 70 62Q86 62 88 72V76H14Z',
+      boot: 'M30 14H52V56Q70 58 84 66Q90 70 88 80H30Z',
+      bag: 'M22 40H78L82 86H18Z'
+    };
+    const I = {
+      blazer: ['#3D3D3B', 'coat', 'outer'], camel: ['#B88A5A', 'coat', 'outer'], knit: ['#D9CBB3', 'knit', 'top'], tee: ['#F4F1EA', 'tee', 'top'],
+      wine: ['#6E2E34', 'knit', 'top'], jeans: ['#8FA3BC', 'pants', 'bottom'], slacks: ['#2E3A4F', 'pants', 'bottom'], skirt: ['#8C9A86', 'skirt', 'bottom'],
+      sneaker: ['#EDE7DA', 'shoe', 'shoes'], boots: ['#2A2826', 'boot', 'shoes'], loafer: ['#1F1F1E', 'shoe', 'shoes'], tote: ['#9A6B43', 'bag', 'bag'], bb: ['#2B2826', 'bag', 'bag']
+    };
+    const OCC = { '上班': ['#A9C6CF', '#DCE8EC', 'rgba(150,186,198,.3)'], '休閒': ['#B7CBB0', '#E6EEE2', 'rgba(167,192,158,.34)'], '聚餐': ['#E2B4A8', '#F4DDD6', 'rgba(222,166,152,.32)'], '出遊': ['#F2CF8E', '#F6E7C6', 'rgba(240,196,118,.34)'] };
+    const FEEL = { '舒服': ['#E6EEE2', '#2E3F2B'], '普通': ['#F3E7D4', '#5A4A3C'], '不太舒服': ['#F4DDD6', '#5E2E25'] };
+    // 已套用篩選「包含單品：燕麥色羊毛針織衫」
+    const E = [
+      { m: 11, date: '11/12', wd: '四', name: '雨天的季度簡報', occ: '上班', r: 4, feel: '舒服', note: '外套擋風剛好；德訓鞋踩水有點濕，下雨天改穿短靴比較好。', it: ['blazer', 'knit', 'jeans', 'sneaker', 'tote'] },
+      { m: 11, date: '11/05', wd: '四', name: '普通上班日', occ: '上班', r: 4, feel: '舒服', note: '針織衫配西裝褲很省事，樂福鞋鞋跟要送修了。', it: ['knit', 'slacks', 'loafer', 'tote'] },
+      { m: 11, date: '11/02', wd: '一', name: '看展', occ: '出遊', r: 5, feel: '舒服', note: '長裙配短靴的比例很好，大衣長度剛好蓋過裙子。', it: ['camel', 'knit', 'skirt', 'boots'] },
+      { m: 10, date: '10/28', wd: '三', name: '降溫第一天', occ: '上班', r: 3, feel: '不太舒服', note: '只穿針織衫太冷，下次要加外套。', it: ['knit', 'jeans', 'sneaker', 'bb'] },
+      { m: 10, date: '10/18', wd: '日', name: '咖啡廳讀書', occ: '休閒', r: 5, feel: '舒服', note: '', it: ['knit', 'skirt', 'sneaker', 'tote'] }
+    ];
+    const card = (e) => ({
+      date: e.date, wd: e.wd, name: e.name, occ: e.occ, r: e.r, feel: e.feel, note: e.note || '（沒有備註）',
+      oc: OCC[e.occ][0], ocbg: OCC[e.occ][1], wash: OCC[e.occ][2], fbg: FEEL[e.feel][0], ffg: FEEL[e.feel][1],
+      stars: [1, 2, 3, 4, 5].map(i => i <= e.r ? '#F2CF8E' : '#EADCC6'),
+      board: e.it.map(k => ({ area: I[k][2], hex: I[k][0], d: SH[I[k][1]] }))
+    });
+    const nov = E.filter(e => e.m === 11).map(card), oct = E.filter(e => e.m === 10).map(card);
+    return {
+      count: E.length,
+      occ: Object.keys(OCC).map(t => ({ t, c: OCC[t][0] })),
+      months: [{ t: '2026 年 11 月', n: nov.length, items: nov }, { t: '2026 年 10 月', n: oct.length, items: oct }]
+    };
+  }
+}
+</script>
+</body>
+</html>

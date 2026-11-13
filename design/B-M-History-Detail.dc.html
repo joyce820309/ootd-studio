@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機單次量測紀錄</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.chip{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:11px;white-space:nowrap}
+.card{background:#FFFCF6;border-radius:14px;padding:12px 14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 10px 20px -14px rgba(59,47,37,.25)}
+.r{display:flex;align-items:center;gap:8px;min-height:44px;border-top:1.5px dashed #EADCC6;font-size:14px}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:1140px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <header style="display:flex;align-items:center;gap:4px;padding:8px 8px 8px 4px;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-M-History.dc.html" aria-label="返回量測紀錄" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <div style="display:flex;flex-direction:column;min-width:0"><h1 class="hd" style="margin:0;font-size:19px">2026 年 11 月 12 日（四）</h1><span style="font-size:11px;color:#74624F">和上次（10/02）比，改了 {{chg}} 項</span></div>
+    <button type="button" aria-label="更多動作：編輯、刪除" style="margin-left:auto;width:44px;height:44px;border:0;border-radius:10px;background:none;color:#3B2F25;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></button>
+  </header>
+
+  <div style="flex:1;overflow:hidden;padding:12px 16px 110px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:#E6EEE2;color:#2E3F2B;font-size:12px;line-height:1.6"><b style="font-weight:500;flex:none">備註</b>早上起床後量，穿薄內衣</div>
+
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+      <section class="card" aria-label="{{g.g}}">
+        <h2 style="margin:0 0 4px;display:flex;align-items:center;gap:8px"><span aria-hidden="true" style="width:11px;height:11px;border-radius:4px;background:{{g.c}}"></span><span class="hd" style="font-size:17px">{{g.g}}</span></h2>
+        <sc-for list="{{g.rows}}" as="x" hint-placeholder-count="3">
+          <div class="r">
+            <span>{{x.k}}</span>
+            <span style="margin-left:auto;display:flex;align-items:baseline;gap:3px"><span class="num" style="font-size:16px;font-weight:{{x.fw}};color:{{x.vc}}">{{x.v}}</span><span class="num" style="font-size:11px;color:#74624F">{{x.u}}</span></span>
+            <span style="width:62px;display:flex;justify-content:flex-end"><span class="chip num" style="background:{{x.cbg}};color:{{x.cfg}}">{{x.d}}</span></span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-for>
+
+    <section class="card" aria-label="腳">
+      <h2 style="margin:0 0 8px;display:flex;align-items:center;gap:8px"><span aria-hidden="true" style="width:11px;height:11px;border-radius:4px;background:#E2B4A8"></span><span class="hd" style="font-size:17px">腳</span><span style="font-size:11px;color:#74624F">cm</span></h2>
+      <div role="tablist" aria-label="腳的狀態" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+        <sc-for list="{{feetTabs}}" as="t" hint-placeholder-count="3"><button type="button" role="tab" aria-selected="{{t.on}}" style="height:38px;border-radius:999px;border:1.5px solid {{t.bd}};background:{{t.bg}};color:{{t.fg}};font:500 13px 'Chiron GoRound TC'">{{t.t}}</button></sc-for>
+      </div>
+      <div role="tabpanel" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px">
+        <sc-for list="{{feet}}" as="x" hint-placeholder-count="4">
+          <div style="padding:8px 10px;border-radius:10px;background:{{x.bg}};display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#5A4A3C">{{x.k}}</span><span style="display:flex;align-items:baseline;gap:6px"><span class="num" style="font-size:17px;font-weight:700">{{x.v}}</span><span class="num" style="font-size:11px;color:{{x.dc}}">{{x.d}}</span></span></div>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+
+  <footer style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:#FBF4E8;border-top:1.5px dashed #D9C7AC;display:grid;grid-template-columns:1fr 2fr;gap:8px">
+    <button type="button" style="height:50px;border-radius:12px;border:1.5px solid #D9C7AC;background:#FFFCF6;color:#8E4A3E;font:500 14px 'Chiron GoRound TC'">刪除</button>
+    <a href="B-Body.dc.html" style="display:flex;align-items:center;justify-content:center;height:50px;border-radius:12px;background:#3B2F25;color:#FBF4E8;font:500 14px 'Chiron GoRound TC';text-decoration:none">編輯這筆紀錄</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1140}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const GROUPS = [
+      { g: '基本', c: '#F2CF8E', f: [['h', '身高', 'cm'], ['w', '體重', 'kg']] },
+      { g: '上半身', c: '#A9C6CF', f: [['sh', '肩寬', 'cm'], ['ub', '上胸圍', 'cm'], ['lb', '下胸圍', 'cm'], ['ar', '手臂長', 'cm']] },
+      { g: '下半身', c: '#B7CBB0', f: [['wa', '腰圍', 'cm'], ['na', '肚臍圍', 'cm'], ['hi', '臀圍', 'cm'], ['le', '腿長（內側）', 'cm'], ['th', '大腿圍', 'cm']] }
+    ];
+    const base = { h: '162', sh: '38', ub: '84', ar: '55', hi: '91', le: '74', soL: '23.5', soW: '9.1', soB: '22.0', soI: '22.8', baL: '23.3' };
+    const cur = Object.assign({}, base, { w: '52.0', lb: '70', wa: '65', na: '73', baW: '9.0', baB: '21.8', baI: '22.4' });
+    const prev = Object.assign({}, base, { w: '52.5', lb: '71', wa: '66', na: '73', baW: '9.0', baB: '21.8', baI: '22.4' });
+    const diff = (k) => {
+      const a = cur[k], b = prev[k];
+      if (a == null) return { s: 'none' };
+      if (b == null) return { s: 'new' };
+      const d = parseFloat(a) - parseFloat(b);
+      return Math.abs(d) < 0.001 ? { s: 'same' } : { s: 'chg', d: (d > 0 ? '+' : '−') + Math.abs(d).toFixed(1) };
+    };
+    const look = (x) => ({
+      d: x.s === 'chg' ? x.d : x.s === 'new' ? '第一次' : '—',
+      cbg: x.s === 'chg' ? '#F6E7C6' : x.s === 'new' ? '#DCE8EC' : 'transparent',
+      cfg: x.s === 'chg' ? '#5A3F12' : x.s === 'new' ? '#24424D' : '#74624F'
+    });
+    const ALL = GROUPS.flatMap(g => g.f.map(f => f[0])).concat(['t5', 'so', 'ba'].flatMap(c => ['L', 'W', 'B', 'I'].map(m => c + m)));
+    const FM = [['L', '腳長'], ['W', '腳寬'], ['B', '前掌圍'], ['I', '腳背圍']];
+    const tabs = [['t5', '五指襪'], ['so', '一般襪'], ['ba', '裸腳']];
+    const on = 'ba';
+    return {
+      chg: ALL.filter(k => diff(k).s === 'chg').length,
+      groups: GROUPS.map(g => ({ g: g.g, c: g.c, rows: g.f.map(([k, n, u]) => Object.assign({
+        k: n, v: cur[k] || '沒記', u: cur[k] ? u : '', fw: cur[k] ? 700 : 400, vc: cur[k] ? '#3B2F25' : '#74624F'
+      }, look(diff(k)))) })),
+      feetTabs: tabs.map(([c, t]) => ({ t, on: c === on ? 'true' : 'false', bd: c === on ? '#3B2F25' : '#E2D2B8', bg: c === on ? '#3B2F25' : '#FFFCF6', fg: c === on ? '#FBF4E8' : '#3B2F25' })),
+      feet: FM.map(([m, n]) => {
+        const x = diff(on + m);
+        return { k: n, v: cur[on + m] || '—', d: x.s === 'chg' ? x.d : x.s === 'new' ? '第一次' : '',
+          bg: x.s === 'chg' ? '#FFF6E2' : '#FBF4E8', dc: x.s === 'chg' ? '#5A3F12' : '#24424D' };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

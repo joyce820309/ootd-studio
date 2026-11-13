@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>風格 B 設計系統</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',serif}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.eb{font:700 11px Nunito,'Chiron GoRound TC',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#74624F}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;font:700 16px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tape{position:absolute;height:20px;mix-blend-mode:multiply;border-radius:2px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer}
+.tag{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:500}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.tile{background:#F3E7D4;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sec{display:grid;grid-template-columns:260px 1fr;gap:48px;padding-top:28px;border-top:1.5px dashed #D9C7AC}
+.sec-t{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.sec-t p{margin:0;font-size:13px;line-height:1.75;color:#5A4A3C}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+</style>
+</helmet>
+<div style="width:1440px;min-height:2500px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;padding:72px 96px 96px;display:flex;flex-direction:column;gap:64px">
+
+  <header style="position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:center;min-height:360px">
+    <div aria-hidden="true" style="position:absolute;right:40px;top:10px;width:420px;height:300px">
+      <span style="position:absolute;left:0;top:30px;width:240px;height:220px;border-radius:18px;background:rgba(240,196,118,.55);mix-blend-mode:multiply;transform:rotate(-4deg)"></span>
+      <span style="position:absolute;left:120px;top:0;width:220px;height:200px;border-radius:18px;background:rgba(150,186,198,.55);mix-blend-mode:multiply;transform:rotate(3deg)"></span>
+      <span style="position:absolute;left:170px;top:110px;width:230px;height:180px;border-radius:18px;background:rgba(222,166,152,.55);mix-blend-mode:multiply;transform:rotate(-2deg)"></span>
+      <span style="position:absolute;left:60px;top:170px;width:170px;height:120px;border-radius:18px;background:rgba(167,192,158,.6);mix-blend-mode:multiply;transform:rotate(5deg)"></span>
+      <svg viewBox="0 0 100 100" style="position:absolute;left:150px;top:50px;width:150px;height:170px;filter:drop-shadow(0 10px 12px rgba(59,47,37,.18))" role="img" aria-label="燕麥色針織衫"><path d="{{g.knit.d}}" fill="#F7F0E4" stroke="rgba(59,47,37,.25)" stroke-width="0.6"></path><path d="{{g.knit.d2}}" fill="none" stroke="rgba(59,47,37,.3)" stroke-width="0.8"></path></svg>
+    </div>
+    <div style="grid-column:span 7;display:flex;flex-direction:column;gap:18px;position:relative">
+      <span class="lbl" style="align-self:flex-start;background:#E2B4A8;transform:rotate(-2deg)">Style B</span>
+      <h1 style="margin:0;display:flex;flex-direction:column;gap:6px">
+        <span class="logo" style="font-size:84px;font-weight:600;letter-spacing:.02em;line-height:1">My Closet</span>
+        <span class="hd" style="font-size:34px;font-weight:700;line-height:1.3">OOTD 手帳感的私人造型工作室</span>
+      </h1>
+      <p style="margin:0;font-size:16px;line-height:1.9;color:#5A4A3C;max-width:600px">延續舊版 OOTD 的米杏紙色、粉彩與貼紙感，但收斂成一套規則：紙張是底、半透明色塊可以疊加、傾斜只留給標籤。衣物仍然是畫面裡最清楚的東西。</p>
+    </div>
+  </header>
+
+  <section class="sec">
+    <div class="sec-t"><span class="lbl" style="background:rgba(150,186,198,.75);transform:rotate(-1.5deg)">從 OOTD 到現在</span><p>保留情感，修掉零碎。</p></div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px">
+      <div class="paper" style="padding:24px;display:flex;flex-direction:column;gap:12px">
+        <span class="hd" style="font-size:20px;font-weight:700;color:#4A6245">保留</span>
+        <sc-for list="{{keep}}" as="k" hint-placeholder-count="5"><div style="display:flex;gap:10px;font-size:14px;line-height:1.7"><svg class="ic" viewBox="0 0 24 24" style="color:#4A6245;margin-top:2px" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>{{k}}</div></sc-for>
+      </div>
+      <div class="paper" style="padding:24px;display:flex;flex-direction:column;gap:12px">
+        <span class="hd" style="font-size:20px;font-weight:700;color:#8E4A3E">改進</span>
+        <sc-for list="{{fix}}" as="k" hint-placeholder-count="5"><div style="display:flex;gap:10px;font-size:14px;line-height:1.7"><svg class="ic" viewBox="0 0 24 24" style="color:#8E4A3E;margin-top:2px" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>{{k}}</div></sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-t"><span class="lbl" style="background:rgba(240,196,118,.8);transform:rotate(1.5deg)">色彩</span><p>每個品牌色有三種用法：實色（面積）、透明疊色（裝飾與分類）、深色（文字與圖示，皆通過 4.5:1）。</p></div>
+    <div style="display:flex;flex-direction:column;gap:32px">
+      <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px">
+        <sc-for list="{{base}}" as="c" hint-placeholder-count="6">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="height:80px;border-radius:12px;border:1px solid rgba(59,47,37,.1);background:{{c.hex}}"></div>
+            <span style="font-size:13px;font-weight:500">{{c.n}}</span>
+            <span class="num" style="font-size:12px;color:#5A4A3C">{{c.hex}}</span>
+            <span style="font-size:12px;color:#74624F">{{c.u}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px">
+        <sc-for list="{{brand}}" as="c" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="height:120px;border-radius:14px;background:{{c.solid}};position:relative;overflow:hidden">
+              <span style="position:absolute;right:-16px;bottom:-16px;width:90px;height:90px;border-radius:14px;background:{{c.wash}};mix-blend-mode:multiply;transform:rotate(8deg)"></span>
+              <span class="hd" style="position:absolute;left:14px;top:12px;font-size:20px;font-weight:700;color:{{c.deep}}">{{c.n}}</span>
+            </div>
+            <div class="num" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;font-size:11px;color:#5A4A3C">
+              <span>實色<br>{{c.solid}}</span><span>疊色<br>{{c.washT}}</span><span style="color:{{c.deep}};font-weight:700">文字<br>{{c.deep}}</span>
+            </div>
+            <span style="font-size:12px;color:#74624F;line-height:1.6">{{c.u}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div class="paper" style="padding:28px;display:flex;gap:40px;align-items:center;flex-wrap:wrap">
+        <div aria-hidden="true" style="position:relative;width:300px;height:180px;flex:none">
+          <span style="position:absolute;left:0;top:20px;width:140px;height:140px;border-radius:50%;background:rgba(240,196,118,.6);mix-blend-mode:multiply"></span>
+          <span style="position:absolute;left:80px;top:0;width:140px;height:140px;border-radius:50%;background:rgba(150,186,198,.6);mix-blend-mode:multiply"></span>
+          <span style="position:absolute;left:150px;top:40px;width:140px;height:140px;border-radius:50%;background:rgba(222,166,152,.6);mix-blend-mode:multiply"></span>
+          <span style="position:absolute;left:60px;top:80px;width:120px;height:100px;border-radius:50%;background:rgba(167,192,158,.65);mix-blend-mode:multiply"></span>
+        </div>
+        <div style="flex:1;min-width:260px;display:flex;flex-direction:column;gap:10px">
+          <span class="hd" style="font-size:22px;font-weight:700">透明疊色規則</span>
+          <span style="font-size:14px;line-height:1.85;color:#5A4A3C">疊色使用 multiply 混合、透明度 55–65%，像描圖紙與紙膠帶交疊。只用在：分類標籤、區塊底色、搭配畫布的背景紙、選取框。<b style="font-weight:500;color:#3B2F25">文字永遠放在實色或紙張上</b>，不放在疊色交界處。</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-t"><span class="lbl" style="background:rgba(167,192,158,.8);transform:rotate(-1deg)">字體</span><p>標題用霞鶩漫黑，麥克筆手寫感，只用在 17px 以上、不加粗；內文、按鈕與表單用晴熙圓體，溫和又好讀；數字用 Nunito 等寬對齊。</p></div>
+    <div style="display:flex;flex-direction:column">
+      <sc-for list="{{type}}" as="t" hint-placeholder-count="6">
+        <div style="display:grid;grid-template-columns:140px 1fr 260px;gap:24px;align-items:baseline;padding:16px 0;border-bottom:1px solid #EADCC6">
+          <span class="eb">{{t.k}}</span>
+          <span style="font-family:{{t.f}};font-size:{{t.s}};font-weight:{{t.w}};line-height:1.35">{{t.ex}}</span>
+          <span class="num" style="font-size:12px;color:#5A4A3C">{{t.spec}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-t"><span class="lbl" style="background:rgba(222,166,152,.75);transform:rotate(1deg)">形狀與紙張</span><p>圓角比風格 A 更柔和；陰影像紙張微微浮起；傾斜最多 ±2°，每個區域最多一個。</p></div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px">
+      <div class="paper" style="height:150px;padding:16px;display:flex;align-items:flex-end;font-size:13px;color:#5A4A3C">紙卡 · 圓角 14<br>陰影 0 12 24 / 22%</div>
+      <div style="height:150px;padding:16px;border-radius:20px;background:#F6E9D3;display:flex;align-items:flex-end;font-size:13px;color:#5A4A3C">區塊底 · 圓角 20<br>無陰影</div>
+      <div class="paper" style="height:150px;padding:16px;display:flex;align-items:flex-end;font-size:13px;color:#5A4A3C;position:relative;overflow:visible">
+        <span class="tape" style="left:50%;top:-8px;width:80px;margin-left:-40px;background:rgba(150,186,198,.7);transform:rotate(-3deg)"></span>
+        紙膠帶 · 僅用於<br>精選或釘選的穿搭
+      </div>
+      <div style="height:150px;display:flex;flex-direction:column;gap:10px;justify-content:flex-end">
+        <span class="lbl" style="align-self:flex-start;background:#E2B4A8;transform:rotate(-2deg)">更衣室</span>
+        <span style="font-size:13px;color:#5A4A3C">傾斜標籤 · 只用於區塊標題，-2° 到 +2°</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-t"><span class="lbl" style="background:rgba(240,196,118,.8);transform:rotate(-1.5deg)">元件</span><p>統一 44px 觸控高度、1.5px 邊框、10px 按鈕圓角。</p></div>
+    <div style="display:flex;flex-direction:column;gap:36px">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-p" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>儲存穿搭</button>
+        <button class="btn btn-o" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>新增衣物</button>
+        <button class="btn btn-s" type="button">請 AI 分析</button>
+        <button class="btn btn-g" type="button">取消</button>
+        <button class="btn btn-g" type="button" style="color:#8E4A3E">刪除</button>
+        <button class="btn btn-p" type="button" style="outline:2.5px solid #3E6270;outline-offset:2px">焦點狀態</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <span style="font-size:13px;font-weight:500">分類 Chip（疊色＋文字＋數量）</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="chip" type="button" aria-pressed="true" style="background:#3B2F25;color:#FBF4E8;border-color:#3B2F25">全部 <span class="num">91</span></button>
+            <button class="chip" type="button" aria-pressed="false"><span class="dot" style="width:10px;height:10px;background:#F2CF8E"></span>上衣 <span class="num" style="color:#74624F">24</span></button>
+            <button class="chip" type="button" aria-pressed="false"><span class="dot" style="width:10px;height:10px;background:#B7CBB0"></span>下身 <span class="num" style="color:#74624F">12</span></button>
+            <button class="chip" type="button" aria-pressed="false"><span class="dot" style="width:10px;height:10px;background:#A9C6CF"></span>外套 <span class="num" style="color:#74624F">8</span></button>
+            <button class="chip" type="button" aria-pressed="false"><span class="dot" style="width:10px;height:10px;background:#E2B4A8"></span>鞋子 <span class="num" style="color:#74624F">10</span></button>
+          </div>
+          <span style="font-size:13px;font-weight:500;margin-top:8px">狀態</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="tag" style="background:#DCE7D8;color:#3F5A3B"><span class="dot" style="background:#3F5A3B"></span>可穿</span>
+            <span class="tag" style="background:#DCE8EC;color:#335562"><span class="dot" style="background:#335562"></span>送洗中</span>
+            <span class="tag" style="background:#F4DDD6;color:#7E3F34"><span class="dot" style="background:#7E3F34"></span>維修中</span>
+            <span class="tag" style="background:#F6E7C6;color:#6E4F18"><span class="dot" style="background:#6E4F18"></span>借出</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label for="bn" style="font-size:13px;font-weight:500">穿搭名稱 <span style="color:#8E4A3E;font-weight:400;font-size:12px">必填</span></label>
+          <input id="bn" value="雨天的季度簡報" style="height:46px;border:1.5px solid #D9C7AC;border-radius:10px;background:#FFFCF6;padding:0 14px;font:400 15px 'Chiron GoRound TC';color:#3B2F25">
+          <span style="font-size:12px;color:#74624F">會顯示在穿搭日記</span>
+          <div role="status" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#3B2F25;color:#FBF4E8;border-radius:12px;font-size:13px;margin-top:12px"><span style="width:22px;height:22px;border-radius:50%;background:#B7CBB0;color:#2E3F2B;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg></span>已存進穿搭日記<a href="#d" style="margin-left:auto;color:#F2CF8E">查看</a></div>
+        </div>
+        <div style="display:flex;gap:14px">
+          <a href="B-Closet.dc.html" style="flex:1;display:flex;flex-direction:column;gap:8px;color:#3B2F25;text-decoration:none">
+            <div class="tile" style="aspect-ratio:4/5">
+              <svg viewBox="0 0 100 100" style="width:72%;height:72%;filter:drop-shadow(0 6px 8px rgba(59,47,37,.16))" role="img" aria-label="駝色羊毛大衣"><path d="{{g.coat.d}}" fill="#B88A5A" stroke="rgba(59,47,37,.22)" stroke-width="0.6"></path><path d="{{g.coat.d2}}" fill="none" stroke="rgba(59,47,37,.3)" stroke-width="0.8"></path></svg>
+              <span style="position:absolute;left:10px;top:10px;width:10px;height:10px;border-radius:50%;background:#A9C6CF;box-shadow:0 0 0 2px #FFFCF6" title="外套"></span>
+            </div>
+            <span style="font-size:14px;font-weight:500">駝色羊毛長大衣</span>
+            <span style="font-size:12px;color:#5A4A3C;margin-top:-4px">駝色 · Arket</span>
+          </a>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+            <div class="tile" style="aspect-ratio:4/5;background:#FFFCF6;outline:2px solid #3E6270;outline-offset:-2px;border-radius:12px">
+              <svg viewBox="0 0 100 100" style="width:72%;height:72%;filter:drop-shadow(0 6px 8px rgba(59,47,37,.16))" role="img" aria-label="燕麥色針織衫，已加入畫布"><path d="{{g.knit.d}}" fill="#D9CBB3" stroke="rgba(59,47,37,.22)" stroke-width="0.6"></path><path d="{{g.knit.d2}}" fill="none" stroke="rgba(59,47,37,.3)" stroke-width="0.8"></path></svg>
+              <span style="position:absolute;right:8px;top:8px;height:24px;padding:0 8px;border-radius:999px;background:#3E6270;color:#fff;font-size:11px;display:flex;align-items:center;gap:4px"><svg class="ic" viewBox="0 0 24 24" style="width:12px;height:12px" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>在畫布上</span>
+            </div>
+            <span style="font-size:12px;color:#5A4A3C">素材卡 · 已加入</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-size:13px;font-weight:500">畫布上的選取框與控制點</span>
+        <div style="height:220px;border-radius:20px;background:#F6E9D3;position:relative;overflow:hidden;background-image:radial-gradient(rgba(59,47,37,.12) 1px,transparent 1px);background-size:20px 20px">
+          <div style="position:absolute;left:120px;top:24px;width:150px;height:170px;transform:rotate(-6deg)">
+            <svg viewBox="0 0 100 100" style="width:100%;height:100%;filter:drop-shadow(0 8px 10px rgba(59,47,37,.2))" role="img" aria-label="選取中的大衣"><path d="{{g.coat.d}}" fill="#B88A5A" stroke="rgba(59,47,37,.22)" stroke-width="0.6"></path></svg>
+            <span aria-hidden="true" style="position:absolute;inset:-6px;border:1.5px dashed #3E6270;border-radius:6px"></span>
+            <span aria-hidden="true" style="position:absolute;left:-11px;top:-11px;width:12px;height:12px;border-radius:3px;background:#FFFCF6;border:1.5px solid #3E6270"></span>
+            <span aria-hidden="true" style="position:absolute;right:-11px;top:-11px;width:12px;height:12px;border-radius:3px;background:#FFFCF6;border:1.5px solid #3E6270"></span>
+            <span aria-hidden="true" style="position:absolute;left:-11px;bottom:-11px;width:12px;height:12px;border-radius:3px;background:#FFFCF6;border:1.5px solid #3E6270"></span>
+            <span aria-hidden="true" style="position:absolute;right:-11px;bottom:-11px;width:12px;height:12px;border-radius:3px;background:#FFFCF6;border:1.5px solid #3E6270"></span>
+            <span aria-hidden="true" style="position:absolute;left:50%;top:-38px;margin-left:-11px;width:22px;height:22px;border-radius:50%;background:#3E6270;color:#fff;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" style="width:13px;height:13px" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2 6M20 5v6h-6"></path></svg></span>
+          </div>
+          <div class="paper" style="position:absolute;left:330px;top:40px;padding:6px;display:flex;gap:2px;border-radius:12px">
+            <sc-for list="{{tools}}" as="t" hint-placeholder-count="6">
+              <button type="button" aria-label="{{t.l}}" title="{{t.l}}" style="width:40px;height:40px;border:0;border-radius:8px;background:transparent;color:#3B2F25;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="{{t.d}}"></path></svg></button>
+            </sc-for>
+          </div>
+          <span style="position:absolute;left:330px;top:110px;font-size:13px;line-height:1.7;color:#5A4A3C;max-width:420px">選取框用霧藍深色虛線；控制點 12px，觸控熱區 44px。浮動工具列：上移一層、下移一層、翻轉、複製、從畫布移除、查看單品。</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const G = {
+      knit:{d:'M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z',d2:'M30 80H70M44 13Q50 21 56 13'},
+      coat:{d:'M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z',d2:'M50 30V92M44 10L50 30L56 10'}
+    };
+    return {
+      g: G,
+      keep: ['米杏紙底與燕麥黃品牌色','霧藍、乾燥玫瑰、鼠尾草綠的粉彩分類','略微傾斜的紙張標籤（更衣室、我的衣櫥）','fabric 自由畫布搭配的核心玩法','親切、像私人手帳的語氣'],
+      fix: ['淺色字壓在粉彩上 → 文字一律用深色版本，對比 ≥ 4.5:1','每個區塊都斜 → 只有區塊標題可傾斜','右側分類貼紙 → 改成可篩選的 Chip，含數量','空白畫布與載入點 → 有引導的空狀態','固定寬度 → 三欄響應式，手機改觸控操作']
+      ,
+      base: [
+        {n:'紙底 Paper', hex:'#FBF4E8', u:'頁面背景'},
+        {n:'紙卡 Card', hex:'#FFFCF6', u:'卡片、輸入框'},
+        {n:'杏色 Apricot', hex:'#F6E9D3', u:'區塊底、畫布'},
+        {n:'素材底 Tile', hex:'#F3E7D4', u:'衣物圖片底'},
+        {n:'咖啡墨 Ink', hex:'#3B2F25', u:'主要文字 12.9:1'},
+        {n:'咖啡灰 Ink 2', hex:'#5A4A3C', u:'次要文字 8.1:1'}
+      ],
+      brand: [
+        {n:'燕麥黃', solid:'#F2CF8E', wash:'rgba(240,196,118,.6)', washT:'60%', deep:'#7C5A1E', u:'品牌色：導覽、主要強調、上衣分類'},
+        {n:'霧藍', solid:'#A9C6CF', wash:'rgba(150,186,198,.6)', washT:'60%', deep:'#3E6270', u:'選取、連結、焦點、外套分類'},
+        {n:'乾燥玫瑰', solid:'#E2B4A8', wash:'rgba(222,166,152,.6)', washT:'60%', deep:'#8E4A3E', u:'喜愛、提醒、危險操作、鞋子分類'},
+        {n:'鼠尾草綠', solid:'#B7CBB0', wash:'rgba(167,192,158,.65)', washT:'65%', deep:'#4A6245', u:'AI 建議、成功、可穿、下身分類'}
+      ],
+      type: [
+        {k:'Logo', f:"Fredoka,sans-serif", s:'40px', w:600, ex:'My Closet', spec:'Fredoka 600'},
+        {k:'Display', f:"'LXGW Marker Gothic',sans-serif", s:'40px', w:400, ex:'今天想穿什麼？', spec:'霞鶩漫黑 400 · 40/54'},
+        {k:'H2', f:"'LXGW Marker Gothic',sans-serif", s:'24px', w:400, ex:'搭配工作台', spec:'霞鶩漫黑 400 · 24/34'},
+        {k:'Title', f:"'Chiron GoRound TC',sans-serif", s:'16px', w:500, ex:'燕麥色羊毛圓領針織衫', spec:'晴熙圓體 500 · 16/24'},
+        {k:'Body', f:"'Chiron GoRound TC',sans-serif", s:'15px', w:400, ex:'短版外套拉高腰線，搭配直筒褲比例更俐落。', spec:'晴熙圓體 400 · 15/27'},
+        {k:'Numeric', f:"Nunito,sans-serif", s:'22px', w:700, ex:'162 cm · 52.5 kg · EU 37.5', spec:'Nunito 700 · tabular-nums'}
+      ],
+      tools: [
+        {l:'上移一層', d:'M12 19V5M5 12l7-7 7 7'},
+        {l:'下移一層', d:'M12 5v14M5 12l7 7 7-7'},
+        {l:'水平翻轉', d:'M12 3v18M8 7l-5 5 5 5M16 7l5 5-5 5'},
+        {l:'複製', d:'M8 8h12v12H8zM4 16V4h12'},
+        {l:'從畫布移除', d:'M6 6l12 12M18 6L6 18'},
+        {l:'查看單品', d:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'}
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

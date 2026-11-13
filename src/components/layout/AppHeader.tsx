@@ -6,6 +6,7 @@ const NAV = [
   { to: '/home', label: '首頁' },
   { to: '/closet', label: '我的衣櫃' },
   { to: '/outfit', label: '今日搭配' },
+  { to: '/studio', label: '搭配工作台' },
   { to: '/diary', label: '穿搭日記' },
   { to: '/wishlist', label: '選購清單' },
 ] as const

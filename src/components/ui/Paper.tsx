@@ -39,7 +39,7 @@ export function TiltLabel({
   const angle = Math.max(-2, Math.min(2, tilt))
   return (
     <Tag
-      className={`inline-flex h-[34px] items-center self-start rounded-tag px-3.5 font-hd text-[17px] font-bold text-ink shadow-sticker ${SOLID[accent]} ${className}`}
+      className={`inline-flex h-[34px] items-center self-start rounded-tag px-3.5 font-hd text-[17px] text-ink shadow-sticker ${SOLID[accent]} ${className}`}
       style={{ transform: `rotate(${angle}deg)` }}
     >
       {children}

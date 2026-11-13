@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>選擇單品</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.chip{display:inline-flex;align-items:center;gap:5px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;white-space:nowrap;flex:none}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:844px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden">
+  <div aria-hidden="true">
+    <div style="height:60px;background:#FBF4E8;border-bottom:1.5px dashed #D9C7AC"></div>
+    <div style="margin:12px;height:470px;border-radius:20px;background:#F6E9D3"></div>
+  </div>
+  <div aria-hidden="true" style="position:absolute;inset:0;background:rgba(59,47,37,.4)"></div>
+
+  <section role="dialog" aria-modal="true" aria-labelledby="sh-t" style="position:absolute;left:0;right:0;bottom:0;top:150px;background:#FFFCF6;border-radius:20px 20px 0 0;box-shadow:0 -14px 30px rgba(59,47,37,.16);display:flex;flex-direction:column">
+    <div style="display:flex;justify-content:center;padding-top:8px"><span style="width:40px;height:4px;border-radius:2px;background:#D9C7AC"></span></div>
+    <header style="display:flex;align-items:center;gap:8px;padding:4px 8px 8px 16px">
+      <h2 id="sh-t" class="hd" style="margin:0;font-size:21px;font-weight:700">選擇上衣</h2>
+      <span style="font-size:12px;color:#5A4A3C">單選・必選</span>
+      <a href="B-M-Outfit.dc.html" aria-label="關閉" style="margin-left:auto;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+    </header>
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
+      <div role="tablist" aria-label="素材來源" style="display:grid;grid-template-columns:1fr 1fr;padding:3px;background:#F3E7D4;border-radius:10px">
+        <button type="button" role="tab" aria-selected="true" style="height:40px;border:0;border-radius:8px;background:#FFFCF6;font:700 14px 'Chiron GoRound TC';color:#3B2F25;box-shadow:0 1px 2px rgba(59,47,37,.1)">我的衣櫃</button>
+        <button type="button" role="tab" aria-selected="false" style="height:40px;border:0;border-radius:8px;background:transparent;font:500 14px 'Chiron GoRound TC';color:#5A4A3C">選購清單 <span class="num">5</span></button>
+      </div>
+      <div style="display:flex;gap:6px;overflow:hidden;margin-right:-16px">
+        <span class="chip" style="background:#3B2F25;color:#FBF4E8;border-color:#3B2F25">全部</span>
+        <span class="chip"><span class="dot" style="background:#F2CF8E"></span>上衣</span>
+        <span class="chip"><span class="dot" style="background:#B7CBB0"></span>下身</span>
+        <span class="chip"><span class="dot" style="background:#A9C6CF"></span>外套</span>
+        <span class="chip"><span class="dot" style="background:#E2B4A8"></span>鞋包</span>
+      </div>
+    </div>
+    <div style="flex:1;overflow:hidden;padding:14px 16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px;align-content:start">
+      <sc-for list="{{items}}" as="x" hint-placeholder-count="9">
+        <button type="button" aria-pressed="{{x.on}}" style="display:flex;flex-direction:column;gap:6px;border:0;background:none;padding:0;text-align:left;font-family:inherit;color:#3B2F25;cursor:pointer">
+          <span style="position:relative;display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1/1;border-radius:12px;background:#F3E7D4;outline:{{x.ol}};outline-offset:-2px">
+            <svg viewBox="0 0 100 100" style="width:74%;height:74%;filter:drop-shadow(0 4px 6px rgba(59,47,37,.14))" aria-hidden="true"><path d="{{x.d}}" fill="{{x.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.7"></path><path d="{{x.d2}}" fill="none" stroke="rgba(59,47,37,.3)" stroke-width="{{x.w2}}"></path></svg>
+            <sc-if value="{{x.on}}" hint-placeholder-val="{{ false }}"><span style="position:absolute;right:6px;top:6px;width:24px;height:24px;border-radius:50%;background:#3E6270;color:#fff;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg></span></sc-if>
+            <sc-if value="{{x.added}}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:6px;bottom:6px;height:20px;padding:0 6px;border-radius:999px;background:rgba(255,252,246,.92);font-size:10px;color:#5A4A3C;display:flex;align-items:center">已在畫布</span></sc-if>
+          </span>
+          <span style="font-size:12px;font-weight:500;line-height:1.35">{{x.name}}</span>
+        </button>
+      </sc-for>
+    </div>
+    <footer style="padding:12px 16px 28px;border-top:1.5px dashed #D9C7AC;display:flex;align-items:center;gap:12px">
+      <span style="font-size:13px">已選：燕麥色針織衫</span>
+      <a href="B-M-Outfit.dc.html" style="margin-left:auto;flex:1;max-width:190px;display:flex;align-items:center;justify-content:center;height:52px;border-radius:12px;background:#3B2F25;color:#FBF4E8;font:500 15px 'Chiron GoRound TC';text-decoration:none">放進上衣格</a>
+    </footer>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const G = {
+      tee:['M30 18L42 14Q50 22 58 14L70 18L86 32L76 42L70 38V86H30V38L24 42L14 32Z','M42 14Q50 24 58 14',1],
+      knit:['M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z','M30 80H70M44 13Q50 21 56 13',1],
+      pants:['M32 10H68L72 90H56L50 36L44 90H28Z','M50 10V36M32 16H68',1],
+      skirt:['M36 14H64L80 86H20Z','M36 20H64M44 20L40 86M56 20L60 86',0.8],
+      coat:['M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z','M50 30V92M44 10L50 30L56 10',1],
+      shoe:['M14 62V46Q24 44 34 52Q48 62 70 62Q86 62 88 72V76H14Z','M14 70H88',1],
+      scarf:['M22 18H78V34H60L64 88H48L44 34H22Z','M48 80H64',1]
+    };
+    const it = (name,hex,s,state) => ({name,hex,d:G[s][0],d2:G[s][1],w2:G[s][2],on:state==='on',added:state==='added',ol:state==='on'?'2.5px solid #3E6270':'none'});
+    return {
+      items: [
+        it('燕麥色針織衫','#D9CBB3','knit','on'),
+        it('白色厚磅素 T','#F4F1EA','tee'),
+        it('酒紅羊毛毛衣','#6E2E34','knit'),
+        it('黑色無袖針織上衣','#232322','tee'),
+        it('灰色羊毛毛衣','#A8A6A0','knit'),
+        it('條紋長袖 T','#C9D3DC','tee'),
+        it('奶油色高領毛衣','#EFE6D2','knit'),
+        it('鼠尾草綠針織背心','#8C9A86','tee'),
+        it('駝色開襟衫','#B88A5A','knit')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

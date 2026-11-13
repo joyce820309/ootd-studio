@@ -1,7 +1,10 @@
-@import "@fontsource/noto-sans-tc/400.css";
-@import "@fontsource/noto-sans-tc/500.css";
-@import "@fontsource/noto-sans-tc/700.css";
-@import "@fontsource/lxgw-wenkai-tc/700.css";
+/* 內文：晴熙圓體（400 內文、500 按鈕與標籤、700 強調） */
+@import "@fontsource/chiron-goround-tc/400.css";
+@import "@fontsource/chiron-goround-tc/500.css";
+@import "@fontsource/chiron-goround-tc/700.css";
+/* 標題：霞鶩漫黑（只有 400，不可加粗） */
+@import "@fontsource/lxgw-marker-gothic/400.css";
+/* 數字與 Logo */
 @import "@fontsource/nunito/600.css";
 @import "@fontsource/nunito/700.css";
 @import "@fontsource/fredoka/600.css";

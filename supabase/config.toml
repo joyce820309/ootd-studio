@@ -1,0 +1,5 @@
+project_id = "ootd-studio"
+
+[functions.remove-background]
+# 瀏覽器 OPTIONS 預檢不會帶 Bearer JWT；登入驗證由函式內的 auth.getUser() 執行。
+verify_jwt = false

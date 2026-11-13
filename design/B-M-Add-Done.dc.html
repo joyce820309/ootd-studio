@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機新增衣物・確認</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.dest{position:relative;display:flex;gap:12px;padding:14px;border-radius:14px;background:#FFFCF6;overflow:hidden;text-align:left;font-family:inherit;color:#3B2F25;width:100%}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:844px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <header style="padding:8px 12px 10px 4px;border-bottom:1.5px dashed #D9C7AC;display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;align-items:center;gap:4px">
+      <a href="B-M-Add-Info.dc.html" aria-label="上一步" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+      <h1 class="hd" style="margin:0;font-size:20px">要放到哪裡？</h1>
+      <span style="margin-left:auto;font-size:12px;color:#5A4A3C">第 <b class="num">4</b> / 4 步</span>
+    </div>
+    <div aria-hidden="true" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding-left:16px"><span style="height:5px;border-radius:3px;background:#B7CBB0"></span><span style="height:5px;border-radius:3px;background:#B7CBB0"></span><span style="height:5px;border-radius:3px;background:#B7CBB0"></span><span style="height:5px;border-radius:3px;background:#3B2F25"></span></div>
+  </header>
+
+  <main style="flex:1;padding:18px 16px 120px;display:flex;flex-direction:column;gap:16px">
+    <div style="position:relative;display:flex;gap:14px;align-items:center;padding:12px;border-radius:16px;background:#FFFCF6;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -16px rgba(59,47,37,.3)">
+      <span aria-hidden="true" style="position:absolute;left:50%;top:-9px;width:70px;height:18px;margin-left:-35px;border-radius:2px;background:rgba(240,196,118,.75);mix-blend-mode:multiply;transform:rotate(-3deg)"></span>
+      <span style="width:96px;height:116px;border-radius:12px;background:#F3E7D4;display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 100 100" style="width:80%;height:80%;filter:drop-shadow(0 4px 6px rgba(59,47,37,.16))" role="img" aria-label="燕麥色羊毛圓領針織衫，去背圖"><path d="M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z" fill="#D9CBB3" stroke="rgba(59,47,37,.22)" stroke-width="0.6"></path></svg></span>
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+        <span style="font-size:15px;font-weight:500;line-height:1.4">燕麥色羊毛圓領針織衫</span>
+        <span style="font-size:12px;color:#5A4A3C">上衣／T 恤・COS・M</span>
+        <span style="display:flex;flex-wrap:wrap;gap:4px"><span style="height:22px;padding:0 8px;border-radius:999px;background:#F3E7D4;font-size:11px;display:flex;align-items:center">3 張照片</span><span style="height:22px;padding:0 8px;border-radius:999px;background:#E6EEE2;color:#2E3F2B;font-size:11px;display:flex;align-items:center">去背圖</span><span style="height:22px;padding:0 8px;border-radius:999px;background:#DCE8EC;color:#24424D;font-size:11px;display:flex;align-items:center">尺寸 4 / 4</span></span>
+      </div>
+    </div>
+
+    <div role="radiogroup" aria-label="儲存位置" style="display:flex;flex-direction:column;gap:10px">
+      <button type="button" role="radio" aria-checked="true" class="dest" style="border:2px solid #3B2F25">
+        <span aria-hidden="true" style="position:absolute;right:-14px;top:-14px;width:56px;height:56px;border-radius:14px;background:rgba(167,192,158,.5);mix-blend-mode:multiply;transform:rotate(12deg)"></span>
+        <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #3B2F25;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:11px;height:11px;border-radius:50%;background:#3B2F25"></span></span>
+        <span style="display:flex;flex-direction:column;gap:3px;position:relative"><span style="font-size:15px;font-weight:500">我的衣櫃（已購買）</span><span style="font-size:12px;color:#5A4A3C">可以馬上用在今日搭配</span></span>
+      </button>
+      <button type="button" role="radio" aria-checked="false" class="dest" style="border:1.5px dashed #C9A296">
+        <span aria-hidden="true" style="position:absolute;right:-14px;top:-14px;width:56px;height:56px;border-radius:14px;background:rgba(222,166,152,.45);mix-blend-mode:multiply;transform:rotate(12deg)"></span>
+        <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #D9C7AC;flex:none"></span>
+        <span style="display:flex;flex-direction:column;gap:3px;position:relative"><span style="font-size:15px;font-weight:500">選購清單（還在考慮）</span><span style="font-size:12px;color:#5A4A3C">網拍穿搭照和尺寸表一起留著，方便比較</span></span>
+      </button>
+    </div>
+
+    <label style="display:flex;align-items:center;gap:10px;font-size:14px;min-height:44px"><input type="checkbox" style="width:20px;height:20px;accent-color:#3B2F25">存好後繼續新增下一件</label>
+  </main>
+
+  <footer style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:#FBF4E8;border-top:1.5px dashed #D9C7AC">
+    <a href="B-Closet.dc.html" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:12px;background:#F2CF8E;border:1.5px solid #E2B866;color:#3B2F25;font:500 15px 'Chiron GoRound TC';text-decoration:none"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px"><path d="M5 12l5 5L20 7"></path></svg>放進衣櫃</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

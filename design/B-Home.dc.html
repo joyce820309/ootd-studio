@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>首頁（風格 B）</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',serif}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.eb{font:700 11px Nunito,'Chiron GoRound TC',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#74624F}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:700 16px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.tile{background:#F3E7D4;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+.nav-a:hover{border-bottom-color:#EADCC6;color:#3B2F25}
+.sh{display:flex;align-items:center;justify-content:space-between;gap:12px}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+</style>
+</helmet>
+<div style="width:100%;min-height:1100px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
+      <a class="nav-a" href="B-Home.dc.html" aria-current="page" style="border-bottom-color:#F2CF8E;color:#3B2F25;font-weight:700">首頁</a>
+      <a class="nav-a" href="B-Closet.dc.html">我的衣櫃</a>
+      <a class="nav-a" href="B-Outfit.dc.html">今日搭配</a>
+      <a class="nav-a" href="#diary">穿搭日記</a>
+      <a class="nav-a" href="B-Wishlist.dc.html">選購清單</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:4px;padding-bottom:10px">
+      <button class="ibtn" type="button" aria-label="通知" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"></path></svg></button>
+      <a href="B-Body.dc.html" aria-label="個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#FFFCF6;border:1.5px solid #3B2F25;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span></a>
+    </div>
+  </header>
+
+  <main style="max-width:1200px;margin:0 auto;padding:40px clamp(16px,4vw,48px) 64px;display:flex;flex-direction:column;gap:40px">
+
+    <section style="display:flex;flex-wrap:wrap;gap:32px;align-items:stretch">
+      <div style="flex:1 1 420px;display:flex;flex-direction:column;gap:18px;justify-content:center">
+        <span class="eb">11 月 11 日・星期三</span>
+        <h1 class="hd" style="margin:0;font-size:46px;font-weight:700;line-height:1.25">今天想穿什麼？</h1>
+        <div class="paper" style="display:flex;align-items:center;gap:8px;padding:6px 6px 6px 16px">
+          <label for="ask" style="position:absolute;left:-9999px">問穿搭</label>
+          <input id="ask" placeholder="例如：明天簡報，想正式但不要太嚴肅" style="flex:1;min-width:0;height:44px;border:0;background:transparent;font:400 15px 'Chiron GoRound TC';color:#3B2F25">
+          <a class="btn btn-p" href="B-Outfit.dc.html">幫我搭</a>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="chip" type="button">上班</button><button class="chip" type="button">約會</button><button class="chip" type="button">週末出遊</button><button class="chip" type="button">用選購清單的單品</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:#DCE8EC;color:#24424D;font-size:14px;line-height:1.6">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-1 9zM9 21l1-2M13 21l1-2"></path></svg>
+          <span><b class="num" style="font-size:16px">18°</b>　多雲・午後可能有雨，帶件可以脫的外套</span>
+        </div>
+      </div>
+
+      <a href="B-Outfit.dc.html" class="paper" style="flex:1 1 440px;position:relative;padding:20px;display:flex;flex-direction:column;gap:14px;text-decoration:none;color:#3B2F25">
+        <span aria-hidden="true" style="position:absolute;left:50%;top:-10px;margin-left:-44px;width:88px;height:22px;background:rgba(150,186,198,.7);mix-blend-mode:multiply;transform:rotate(-3deg);border-radius:2px"></span>
+        <div class="sh"><span class="hd" style="font-size:20px;font-weight:700">繼續上次的搭配</span><span style="font-size:12px;color:#5A4A3C">草稿・2 小時前</span></div>
+        <div style="position:relative;height:260px;border-radius:16px;background:#F6E9D3;background-image:radial-gradient(rgba(59,47,37,.12) 1px,transparent 1px);background-size:18px 18px;overflow:hidden">
+          <span aria-hidden="true" style="position:absolute;left:10%;top:12%;width:46%;height:70%;border-radius:18px;background:rgba(150,186,198,.32);mix-blend-mode:multiply;transform:rotate(-3deg)"></span>
+          <span aria-hidden="true" style="position:absolute;left:42%;top:26%;width:44%;height:66%;border-radius:18px;background:rgba(222,166,152,.3);mix-blend-mode:multiply;transform:rotate(4deg)"></span>
+          <sc-for list="{{draft}}" as="p" hint-placeholder-count="5">
+            <svg viewBox="0 0 100 100" style="position:absolute;left:{{p.l}}%;top:{{p.t}}%;width:{{p.w}}%;transform:rotate({{p.r}}deg);filter:drop-shadow(0 8px 10px rgba(59,47,37,.2))" role="img" aria-label="{{p.name}}"><path d="{{p.d}}" fill="{{p.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.6"></path><path d="{{p.d2}}" fill="none" stroke="rgba(59,47,37,.3)" stroke-width="{{p.w2}}"></path></svg>
+          </sc-for>
+        </div>
+        <div class="sh"><span class="hd" style="font-size:17px;font-weight:700">雨天的季度簡報</span><span class="btn btn-o" style="height:40px">繼續搭配</span></div>
+      </a>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:16px">
+      <div class="sh"><span class="lbl" style="background:rgba(240,196,118,.85);transform:rotate(-1.5deg)">最近新增</span><a href="B-Closet.dc.html" style="font-size:14px">看全部衣物</a></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px">
+        <sc-for list="{{recent}}" as="x" hint-placeholder-count="6">
+          <a href="B-Detail.dc.html" style="display:flex;flex-direction:column;gap:8px;color:#3B2F25;text-decoration:none">
+            <div class="tile" style="aspect-ratio:4/5"><svg viewBox="0 0 100 100" style="width:72%;height:72%;filter:drop-shadow(0 6px 8px rgba(59,47,37,.16))" role="img" aria-label="{{x.name}}"><path d="{{x.d}}" fill="{{x.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.6"></path><path d="{{x.d2}}" fill="none" stroke="rgba(59,47,37,.3)" stroke-width="{{x.w2}}"></path></svg><span style="position:absolute;left:10px;top:10px;width:10px;height:10px;border-radius:50%;background:{{x.cc}};box-shadow:0 0 0 2px #FFFCF6"></span></div>
+            <span style="font-size:14px;font-weight:500">{{x.name}}</span>
+            <span class="num" style="font-size:12px;color:#5A4A3C;margin-top:-4px">{{x.when}}</span>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+
+    <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+      <section style="flex:2 1 520px;display:flex;flex-direction:column;gap:16px">
+        <div class="sh"><span class="lbl" style="background:rgba(150,186,198,.8);transform:rotate(1.5deg)">穿搭日記</span><a href="#diary" style="font-size:14px">全部紀錄</a></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px">
+          <sc-for list="{{diary}}" as="o" hint-placeholder-count="3">
+            <article class="paper" style="padding:12px;display:flex;flex-direction:column;gap:10px">
+              <div style="position:relative;height:170px;border-radius:10px;background:{{o.bg}};overflow:hidden">
+                <sc-for list="{{o.parts}}" as="p" hint-placeholder-count="4">
+                  <svg viewBox="0 0 100 100" style="position:absolute;left:{{p.l}}%;top:{{p.t}}%;width:{{p.w}}%;transform:rotate({{p.r}}deg);filter:drop-shadow(0 6px 8px rgba(59,47,37,.18))" role="img" aria-label="{{p.name}}"><path d="{{p.d}}" fill="{{p.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.7"></path></svg>
+                </sc-for>
+              </div>
+              <div class="sh"><span class="hd" style="font-size:16px;font-weight:700">{{o.name}}</span><span class="num" style="font-size:12px;color:#5A4A3C">{{o.date}}</span></div>
+              <span style="font-size:12px;color:#5A4A3C;margin-top:-6px">{{o.note}}</span>
+            </article>
+          </sc-for>
+        </div>
+      </section>
+
+      <aside style="flex:1 1 300px;display:flex;flex-direction:column;gap:28px">
+        <section style="display:flex;flex-direction:column;gap:12px">
+          <div class="sh"><span class="lbl" style="background:rgba(222,166,152,.8);transform:rotate(-1deg)">還在考慮</span><a href="B-Compare.dc.html" style="font-size:14px">比較試搭台</a></div>
+          <sc-for list="{{wish}}" as="w" hint-placeholder-count="3">
+            <a href="B-Wishlist.dc.html" style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:14px;border:1.5px dashed #D9C7AC;background:#FFFCF6;color:#3B2F25;text-decoration:none">
+              <div class="tile" style="width:56px;height:64px;flex:none;border-radius:10px;background:#F4DDD6"><svg viewBox="0 0 100 100" style="width:82%;height:82%" role="img" aria-label="{{w.name}}"><path d="{{w.d}}" fill="{{w.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.8"></path></svg></div>
+              <div style="display:flex;flex-direction:column;gap:4px;min-width:0;flex:1"><span style="font-size:13px;font-weight:500">{{w.name}}</span><span style="font-size:12px;color:#5A4A3C">{{w.st}}・<span class="num">{{w.price}}</span></span></div>
+            </a>
+          </sc-for>
+        </section>
+        <section style="display:flex;flex-direction:column;gap:12px">
+          <div class="sh"><span class="hd" style="font-size:20px;font-weight:700">我的衣櫃</span><span class="num" style="font-size:13px;color:#5A4A3C">91 件</span></div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+            <sc-for list="{{cats}}" as="c" hint-placeholder-count="6">
+              <a href="B-Closet.dc.html" style="position:relative;display:flex;justify-content:space-between;align-items:center;min-height:52px;padding:0 14px;border-radius:12px;background:#FFFCF6;color:#3B2F25;text-decoration:none;overflow:hidden;font-size:14px">
+                <span aria-hidden="true" style="position:absolute;left:-10px;top:-10px;width:44px;height:44px;border-radius:12px;background:{{c.wash}};mix-blend-mode:multiply;transform:rotate(12deg)"></span>
+                <span style="position:relative;padding-left:12px">{{c.t}}</span><span class="num" style="font-size:18px;font-weight:700;position:relative">{{c.n}}</span>
+              </a>
+            </sc-for>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const G = {
+      tee:['M30 18L42 14Q50 22 58 14L70 18L86 32L76 42L70 38V86H30V38L24 42L14 32Z','M42 14Q50 24 58 14',1],
+      knit:['M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z','M30 80H70M44 13Q50 21 56 13',1],
+      pants:['M32 10H68L72 90H56L50 36L44 90H28Z','M50 10V36M32 16H68',1],
+      skirt:['M36 14H64L80 86H20Z','M36 20H64M44 20L40 86M56 20L60 86',0.8],
+      coat:['M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z','M50 30V92M44 10L50 30L56 10',1],
+      dress:['M40 12H60L62 34L78 88H22L38 34Z','M38 34H62',1],
+      shoe:['M14 62V46Q24 44 34 52Q48 62 70 62Q86 62 88 72V76H14Z','M14 70H88',1],
+      bag:['M22 40H78L82 86H18Z','M36 40Q36 18 50 18Q64 18 64 40',3],
+      scarf:['M22 18H78V34H60L64 88H48L44 34H22Z','M48 80H64',1]
+    };
+    const it = (name,hex,s,x) => Object.assign({name,hex,d:G[s][0],d2:G[s][1],w2:G[s][2]},x||{});
+    const pos = (o,l,t,w,r) => Object.assign({},o,{l,t,w,r});
+    const blazer = it('炭灰短版西裝外套','#3D3D3B','coat'), knit = it('燕麥色針織衫','#D9CBB3','knit'), jeans = it('淺藍直筒牛仔褲','#8FA3BC','pants'), tote = it('焦糖托特包','#9A6B43','bag'), sneaker = it('米白德訓鞋','#EDE7DA','shoe');
+    return {
+      draft: [pos(blazer,8,14,26,0), pos(knit,39,3,22,0), pos(jeans,39,37,22,0), pos(sneaker,41,70,18,0), pos(tote,72,40,20,0)],
+      recent: [
+        it('駝色羊毛長大衣','#B88A5A','coat',{when:'11/10',cc:'#A9C6CF'}),
+        it('灰色羊毛圍巾','#9A9893','scarf',{when:'11/08',cc:'#E2B4A8'}),
+        it('鼠尾草綠百褶裙','#8C9A86','skirt',{when:'11/02',cc:'#B7CBB0'}),
+        it('黑色針織洋裝','#232322','dress',{when:'10/27',cc:'#F2CF8E'}),
+        it('米白德訓鞋','#EDE7DA','shoe',{when:'10/20',cc:'#E2B4A8'}),
+        it('酒紅羊毛毛衣','#6E2E34','knit',{when:'10/12',cc:'#F2CF8E'})
+      ],
+      diary: [
+        {name:'週末咖啡廳', date:'11/09', note:'舒適・★★★★', bg:'#DCE8EC', parts:[pos(it('白色素 T','#F4F1EA','tee'),8,8,44,-4), pos(jeans,48,14,38,4), pos(sneaker,14,58,38,-6), pos(tote,56,56,34,6)]},
+        {name:'季度提案日', date:'11/06', note:'俐落有精神・★★★★★', bg:'#F6E9D3', parts:[pos(blazer,6,6,46,-5), pos(knit,46,8,40,3), pos(it('深藍西裝褲','#2E3A4F','pants'),30,48,36,0), pos(it('黑色樂福鞋','#1F1F1E','shoe'),58,64,34,-4)]},
+        {name:'朋友生日晚餐', date:'10/28', note:'被稱讚大衣顏色・★★★★★', bg:'#F4DDD6', parts:[pos(it('駝色大衣','#B88A5A','coat'),4,6,48,-4), pos(it('黑色洋裝','#232322','dress'),46,10,42,3), pos(tote,56,58,32,6)]}
+      ],
+      wish: [it('灰藍喀什米爾圍巾','#7F92A3','scarf',{st:'準備購買',price:'NT$2,890'}), it('海軍藍雙排扣西裝外套','#2E3A4F','coat',{st:'等待降價',price:'NT$5,990'}), it('奶油白羊毛寬褲','#EFE8DA','pants',{st:'考慮中',price:'NT$3,900'})],
+      cats: [
+        {t:'上衣',n:24,wash:'rgba(240,196,118,.6)'},{t:'下身',n:12,wash:'rgba(167,192,158,.65)'},
+        {t:'外套',n:8,wash:'rgba(150,186,198,.6)'},{t:'鞋子',n:10,wash:'rgba(222,166,152,.6)'},
+        {t:'配件',n:16,wash:'rgba(222,166,152,.6)'},{t:'洋裝',n:4,wash:'rgba(240,196,118,.6)'}
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>搭配工作台</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',serif}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.eb{font:700 11px Nunito,'Chiron GoRound TC',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#74624F}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:40px;height:40px;border:0;border-radius:8px;background:transparent;color:#3B2F25;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.ibtn:hover{background:#F3E7D4}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:700 15px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.chip{display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 12px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 12px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+.nav-a:hover{border-bottom-color:#EADCC6;color:#3B2F25}
+.mat{display:flex;flex-direction:column;gap:6px;padding:0;border:0;background:none;cursor:pointer;text-align:left;font-family:inherit;color:#3B2F25}
+.pv{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;min-height:44px;border-bottom:1px solid #EADCC6;font-size:13px}
+.step{width:32px;height:32px;border-radius:8px;border:1.5px solid #D9C7AC;background:#FFFCF6;color:#3B2F25;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+</style>
+</helmet>
+<div style="width:100%;min-height:1000px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column">
+
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
+      <a class="nav-a" href="B-Home.dc.html">首頁</a>
+      <a class="nav-a" href="B-Closet.dc.html">我的衣櫃</a>
+      <a class="nav-a" href="B-Studio.dc.html" aria-current="page" style="border-bottom-color:#F2CF8E;color:#3B2F25;font-weight:700">搭配工作台</a>
+      <a class="nav-a" href="#diary">穿搭日記</a>
+      <a class="nav-a" href="Wishlist.dc.html">選購清單</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:4px;padding-bottom:10px">
+      <button class="ibtn" type="button" aria-label="通知" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"></path></svg></button>
+      <a href="Body.dc.html" aria-label="個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#FFFCF6;border:1.5px solid #3B2F25;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span></a>
+    </div>
+  </header>
+
+  <div style="display:flex;align-items:center;gap:12px;padding:16px clamp(16px,3vw,32px);flex-wrap:wrap">
+    <span class="lbl" style="background:#E2B4A8;transform:rotate(-2deg)">搭配工作台</span>
+    <label for="ttl" style="position:absolute;left:-9999px">穿搭名稱</label>
+    <input id="ttl" class="hd" value="雨天的季度簡報" style="height:44px;min-width:220px;border:0;border-bottom:1.5px dashed #D9C7AC;background:transparent;font-size:22px;font-weight:700;color:#3B2F25;padding:0 4px">
+    <span style="font-size:12px;color:#5A4A3C">已自動儲存草稿</span>
+    <div style="margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+      <button class="ibtn" type="button" aria-label="復原"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3"></path></svg></button>
+      <button class="ibtn" type="button" aria-label="重做"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9a5 5 0 0 0 0 10h3"></path></svg></button>
+      <button class="btn btn-g" type="button">清空畫布</button>
+      <button class="btn btn-s" type="button">另存為圖片</button>
+      <button class="btn btn-p" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>儲存穿搭</button>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-wrap:wrap;gap:20px;padding:0 clamp(16px,3vw,32px) 32px;align-items:stretch">
+
+    <aside aria-label="衣物素材" class="paper" style="flex:1 1 260px;max-width:320px;padding:16px;display:flex;flex-direction:column;gap:14px">
+      <div role="tablist" aria-label="素材來源" style="display:grid;grid-template-columns:1fr 1fr;padding:3px;background:#F3E7D4;border-radius:10px">
+        <button type="button" role="tab" aria-selected="true" style="height:38px;border:0;border-radius:8px;background:#FFFCF6;font:700 13px 'Chiron GoRound TC';color:#3B2F25;box-shadow:0 1px 2px rgba(59,47,37,.1)">我的衣櫃</button>
+        <button type="button" role="tab" aria-selected="false" style="height:38px;border:0;border-radius:8px;background:transparent;font:500 13px 'Chiron GoRound TC';color:#5A4A3C">選購清單</button>
+      </div>
+      <label style="position:relative;display:block">
+        <span style="position:absolute;left:12px;top:12px;color:#74624F"><svg class="ic" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"></path></svg></span>
+        <input aria-label="搜尋素材" placeholder="搜尋衣物" style="width:100%;height:42px;border:1.5px solid #E2D2B8;border-radius:10px;background:#FBF4E8;padding:0 12px 0 38px;font:400 14px 'Chiron GoRound TC';color:#3B2F25">
+      </label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="chip" type="button" aria-pressed="true" style="background:#3B2F25;color:#FBF4E8;border-color:#3B2F25">全部</button>
+        <button class="chip" type="button" aria-pressed="false"><span class="dot" style="background:#F2CF8E"></span>上衣</button>
+        <button class="chip" type="button" aria-pressed="false"><span class="dot" style="background:#B7CBB0"></span>下身</button>
+        <button class="chip" type="button" aria-pressed="false"><span class="dot" style="background:#A9C6CF"></span>外套</button>
+        <button class="chip" type="button" aria-pressed="false"><span class="dot" style="background:#E2B4A8"></span>鞋包</button>
+      </div>
+      <span style="font-size:12px;color:#5A4A3C">點一下加入畫布，再點一次移除</span>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 10px">
+        <sc-for list="{{catalog}}" as="c" hint-placeholder-count="12">
+          <button class="mat" type="button" onClick="{{c.toggle}}" aria-pressed="{{c.pressed}}" disabled="{{c.away}}" style="opacity:{{c.op}}">
+            <span style="position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;border-radius:12px;background:{{c.bg}};outline:{{c.ol}};outline-offset:-2px;width:100%">
+              <svg viewBox="0 0 100 100" style="width:74%;height:74%;filter:drop-shadow(0 4px 6px rgba(59,47,37,.14))" aria-hidden="true"><path d="{{c.d}}" fill="{{c.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.7"></path><path d="{{c.d2}}" fill="none" stroke="rgba(59,47,37,.3)" stroke-width="{{c.w2}}"></path></svg>
+              <span style="position:absolute;left:8px;top:8px;width:9px;height:9px;border-radius:50%;background:{{c.catColor}};box-shadow:0 0 0 2px #FFFCF6"></span>
+              <sc-if value="{{c.on}}" hint-placeholder-val="{{ false }}"><span style="position:absolute;right:6px;top:6px;width:22px;height:22px;border-radius:50%;background:#3E6270;color:#fff;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" style="width:13px;height:13px" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg></span></sc-if>
+              <sc-if value="{{c.awayTag}}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:6px;bottom:6px;height:20px;padding:0 6px;border-radius:999px;background:#F4DDD6;color:#7E3F34;font-size:10px;display:flex;align-items:center">維修中</span></sc-if>
+            </span>
+            <span style="font-size:12px;line-height:1.35;font-weight:500">{{c.name}}</span>
+          </button>
+        </sc-for>
+      </div>
+    </aside>
+
+    <section aria-label="搭配畫布" style="flex:3 1 480px;min-width:0;display:flex;flex-direction:column;gap:10px">
+      <div style="position:relative;flex:1;min-height:640px;border-radius:20px;background:#F6E9D3;background-image:radial-gradient(rgba(59,47,37,.12) 1px,transparent 1px);background-size:22px 22px;overflow:hidden">
+        <span aria-hidden="true" style="position:absolute;left:8%;top:12%;width:46%;height:58%;border-radius:22px;background:rgba(150,186,198,.32);mix-blend-mode:multiply;transform:rotate(-3deg)"></span>
+        <span aria-hidden="true" style="position:absolute;left:40%;top:30%;width:44%;height:56%;border-radius:22px;background:rgba(222,166,152,.28);mix-blend-mode:multiply;transform:rotate(4deg)"></span>
+
+        <sc-for list="{{placed}}" as="p" hint-placeholder-count="5">
+          <button type="button" onClick="{{p.select}}" aria-label="{{p.label}}" aria-pressed="{{p.isSel}}" style="position:absolute;left:{{p.l}}%;top:{{p.t}}%;width:{{p.w}}%;aspect-ratio:1/1;transform:rotate({{p.r}}deg);z-index:{{p.z}};border:0;background:none;padding:0;cursor:grab">
+            <svg viewBox="0 0 100 100" style="width:100%;height:100%;filter:drop-shadow(0 10px 12px rgba(59,47,37,.2))" aria-hidden="true"><path d="{{p.d}}" fill="{{p.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.5"></path><path d="{{p.d2}}" fill="none" stroke="rgba(59,47,37,.3)" stroke-width="{{p.w2}}"></path></svg>
+            <sc-if value="{{p.wish}}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:2%;border:2px dashed #8E4A3E;border-radius:10px"></span><span style="position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);height:22px;padding:0 8px;border-radius:999px;background:#8E4A3E;color:#fff;font-size:11px;display:flex;align-items:center;white-space:nowrap">選購中・試穿</span></sc-if>
+            <sc-if value="{{p.isSel}}" hint-placeholder-val="{{ false }}">
+              <span style="position:absolute;inset:-4px;border:1.5px dashed #3E6270;border-radius:6px"></span>
+              <span style="position:absolute;left:-9px;top:-9px;width:12px;height:12px;border-radius:3px;background:#FFFCF6;border:1.5px solid #3E6270"></span>
+              <span style="position:absolute;right:-9px;top:-9px;width:12px;height:12px;border-radius:3px;background:#FFFCF6;border:1.5px solid #3E6270"></span>
+              <span style="position:absolute;left:-9px;bottom:-9px;width:12px;height:12px;border-radius:3px;background:#FFFCF6;border:1.5px solid #3E6270"></span>
+              <span style="position:absolute;right:-9px;bottom:-9px;width:12px;height:12px;border-radius:3px;background:#FFFCF6;border:1.5px solid #3E6270"></span>
+              <span style="position:absolute;left:50%;top:-34px;margin-left:-11px;width:22px;height:22px;border-radius:50%;background:#3E6270;color:#fff;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" style="width:13px;height:13px" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2 6M20 5v6h-6"></path></svg></span>
+            </sc-if>
+          </button>
+        </sc-for>
+
+        <sc-if value="{{hasSel}}" hint-placeholder-val="{{ true }}">
+          <div class="paper" role="toolbar" aria-label="選取中的單品" style="position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:50;padding:5px;display:flex;align-items:center;gap:2px;border-radius:12px">
+            <span style="font-size:12px;font-weight:500;padding:0 10px 0 8px;white-space:nowrap">{{selName}}</span>
+            <button class="ibtn" type="button" aria-label="上移一層" onClick="{{layerUp}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"></path></svg></button>
+            <button class="ibtn" type="button" aria-label="下移一層" onClick="{{layerDown}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"></path></svg></button>
+            <button class="ibtn" type="button" aria-label="向左旋轉 15 度" onClick="{{rotL}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a8 8 0 1 1 2 6M4 5v6h6"></path></svg></button>
+            <button class="ibtn" type="button" aria-label="向右旋轉 15 度" onClick="{{rotR}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2 6M20 5v6h-6"></path></svg></button>
+            <button class="ibtn" type="button" aria-label="從畫布移除" onClick="{{removeSel}}" style="color:#8E4A3E"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{empty}}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px">
+            <span class="hd" style="font-size:24px;font-weight:700">畫布是空的</span>
+            <span style="font-size:14px;color:#5A4A3C">從左邊點選衣物加入，或請 AI 先幫你排一套。</span>
+          </div>
+        </sc-if>
+
+        <div style="position:absolute;left:14px;bottom:14px;display:flex;gap:8px;z-index:50">
+          <span class="paper num" style="height:36px;padding:0 12px;display:flex;align-items:center;font-size:12px;border-radius:10px">100%</span>
+          <span class="paper" style="height:36px;padding:0 12px;display:flex;align-items:center;font-size:12px;border-radius:10px">{{count}} 件單品</span>
+        </div>
+        <div class="paper" style="position:absolute;right:14px;bottom:14px;z-index:50;display:flex;gap:2px;padding:4px;border-radius:12px" role="group" aria-label="背景紙">
+          <button type="button" aria-label="杏色點格紙" aria-pressed="true" style="width:32px;height:32px;border-radius:8px;border:2px solid #3B2F25;background:#F6E9D3;cursor:pointer"></button>
+          <button type="button" aria-label="霧藍紙" aria-pressed="false" style="width:32px;height:32px;border-radius:8px;border:1.5px solid #E2D2B8;background:#DCE8EC;cursor:pointer"></button>
+          <button type="button" aria-label="玫瑰紙" aria-pressed="false" style="width:32px;height:32px;border-radius:8px;border:1.5px solid #E2D2B8;background:#F4DDD6;cursor:pointer"></button>
+          <button type="button" aria-label="白紙" aria-pressed="false" style="width:32px;height:32px;border-radius:8px;border:1.5px solid #E2D2B8;background:#FFFCF6;cursor:pointer"></button>
+        </div>
+      </div>
+      <span style="font-size:12px;color:#5A4A3C;text-align:center">拖曳移動・角落縮放・上方圓鈕旋轉・Delete 移除・方向鍵微調</span>
+    </section>
+
+    <aside aria-label="屬性與 AI 建議" style="flex:1 1 300px;max-width:360px;display:flex;flex-direction:column;gap:16px">
+      <section class="paper" style="padding:18px;display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><h2 class="hd" style="margin:0;font-size:19px;font-weight:700">屬性</h2><span style="font-size:12px;color:#5A4A3C">{{selName}}</span></div>
+        <sc-if value="{{hasSel}}" hint-placeholder-val="{{ true }}">
+          <div class="pv"><span>縮放</span><span style="display:flex;align-items:center;gap:8px"><button class="step" type="button" aria-label="縮小" onClick="{{smaller}}">−</button><span class="num" style="width:44px;text-align:center;font-weight:700">{{selScale}}%</span><button class="step" type="button" aria-label="放大" onClick="{{bigger}}">＋</button></span></div>
+          <div class="pv"><span>旋轉</span><span style="display:flex;align-items:center;gap:8px"><button class="step" type="button" aria-label="向左旋轉" onClick="{{rotL}}">−</button><span class="num" style="width:44px;text-align:center;font-weight:700">{{selRot}}°</span><button class="step" type="button" aria-label="向右旋轉" onClick="{{rotR}}">＋</button></span></div>
+          <div class="pv" style="border-bottom:0"><span>圖層</span><span class="num" style="font-weight:700">{{selLayer}}</span></div>
+        </sc-if>
+        <span style="font-size:12px;font-weight:500;margin-top:6px">圖層順序（上 → 下）</span>
+        <ol style="list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:4px">
+          <sc-for list="{{layers}}" as="l" hint-placeholder-count="5">
+            <li><button type="button" onClick="{{l.select}}" aria-current="{{l.cur}}" style="width:100%;display:flex;align-items:center;gap:10px;min-height:44px;padding:4px 8px;border-radius:10px;border:1.5px solid {{l.bd}};background:{{l.bg}};cursor:pointer;font:400 13px 'Chiron GoRound TC';color:#3B2F25;text-align:left">
+              <span style="width:34px;height:34px;border-radius:8px;background:#F3E7D4;display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 100 100" style="width:80%;height:80%" aria-hidden="true"><path d="{{l.d}}" fill="{{l.hex}}"></path></svg></span>
+              <span style="flex:1">{{l.name}}</span>
+              <svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px;color:#74624F" aria-hidden="true"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"></path></svg>
+            </button></li>
+          </sc-for>
+        </ol>
+      </section>
+
+      <section style="position:relative;padding:18px;border-radius:14px;background:#E6EEE2;display:flex;flex-direction:column;gap:12px;overflow:hidden">
+        <span aria-hidden="true" style="position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:24px;background:rgba(240,196,118,.45);mix-blend-mode:multiply;transform:rotate(12deg)"></span>
+        <div style="display:flex;justify-content:space-between;align-items:center;position:relative"><h2 class="hd" style="margin:0;font-size:19px;font-weight:700;color:#2E3F2B">AI 搭配建議</h2><span class="eb" style="color:#4A6245">參考用</span></div>
+        <p style="margin:0;font-size:14px;line-height:1.8;color:#2E3F2B;position:relative">短版西裝外套拉高腰線，和直筒牛仔褲比例很好。燕麥針織讓炭灰外套不那麼銳利；午後有雨，德訓鞋可換成皮革短靴。</p>
+        <div style="display:flex;flex-direction:column;gap:8px;position:relative">
+          <button type="button" style="display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 10px 6px 6px;border-radius:12px;border:1.5px solid #C5D5BE;background:#FFFCF6;cursor:pointer;font:400 13px 'Chiron GoRound TC';color:#3B2F25;text-align:left">
+            <span style="width:40px;height:40px;border-radius:8px;background:#F3E7D4;display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 100 100" style="width:84%;height:84%" aria-hidden="true"><path d="M14 62V46Q24 44 34 52Q48 62 70 62Q86 62 88 72V76H14Z" fill="#2A2826"></path></svg></span>
+            <span style="flex:1;display:flex;flex-direction:column"><span style="font-weight:500">替換鞋子 → 黑色皮革短靴</span><span style="font-size:11px;color:#4A6245">雨天也不怕</span></span>
+            <svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><path d="M7 7h13M16 3l4 4-4 4M17 17H4M8 13l-4 4 4 4"></path></svg>
+          </button>
+          <button type="button" onClick="{{tryWish}}" style="display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 10px 6px 6px;border-radius:12px;border:1.5px dashed #C9A296;background:#FFFCF6;cursor:pointer;font:400 13px 'Chiron GoRound TC';color:#3B2F25;text-align:left">
+            <span style="width:40px;height:40px;border-radius:8px;background:#F4DDD6;display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 100 100" style="width:84%;height:84%" aria-hidden="true"><path d="M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z" fill="#2E3A4F"></path></svg></span>
+            <span style="flex:1;display:flex;flex-direction:column"><span style="font-weight:500">{{wishLabel}}</span><span style="font-size:11px;color:#8E4A3E">選購清單・NT$5,990</span></span>
+          </button>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;position:relative">
+          <button class="chip" type="button">更正式</button><button class="chip" type="button">更休閒</button><button class="chip" type="button">更保暖</button>
+        </div>
+        <span style="font-size:11px;line-height:1.6;color:#3F5A3B;position:relative">依據：畫布上的單品、身形資料、18°C 午後雨、上班場合</span>
+        <button class="btn btn-p" type="button" style="position:relative;background:#4A6245">重新分析這套</button>
+      </section>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.state = {
+      sel: 'blazer',
+      nextZ: 6,
+      items: {
+        knit:   { on: true,  l: 37, t: 6,  base: 27, s: 100, r: 0,  z: 1 },
+        blazer: { on: true,  l: 14, t: 9,  base: 31, s: 100, r: -6, z: 2 },
+        jeans:  { on: true,  l: 38, t: 38, base: 24, s: 100, r: 3,  z: 3 },
+        tote:   { on: true,  l: 66, t: 24, base: 22, s: 100, r: 6,  z: 4 },
+        sneaker:{ on: true,  l: 64, t: 66, base: 20, s: 100, r: -8, z: 5 }
+      }
+    };
+  }
+  renderVals() {
+    const G = {
+      tee:['M30 18L42 14Q50 22 58 14L70 18L86 32L76 42L70 38V86H30V38L24 42L14 32Z','M42 14Q50 24 58 14',1],
+      shirt:['M32 16L44 12L50 20L56 12L68 16L80 30L88 76L78 78L70 40V88H30V40L22 78L12 76L20 30Z','M50 20V88M44 12L50 22L56 12',1],
+      knit:['M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z','M30 80H70M44 13Q50 21 56 13',1],
+      pants:['M32 10H68L72 90H56L50 36L44 90H28Z','M50 10V36M32 16H68',1],
+      skirt:['M36 14H64L80 86H20Z','M36 20H64M44 20L40 86M56 20L60 86',0.8],
+      coat:['M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z','M50 30V92M44 10L50 30L56 10',1],
+      shoe:['M14 62V46Q24 44 34 52Q48 62 70 62Q86 62 88 72V76H14Z','M14 70H88',1],
+      bag:['M22 40H78L82 86H18Z','M36 40Q36 18 50 18Q64 18 64 40',3],
+      scarf:['M22 18H78V34H60L64 88H48L44 34H22Z','M48 80H64',1]
+    };
+    const CAT = { top:'#F2CF8E', bottom:'#B7CBB0', outer:'#A9C6CF', acc:'#E2B4A8' };
+    const DEF = [
+      ['blazer','炭灰短版西裝外套','#3D3D3B','coat','outer'],
+      ['camel','駝色羊毛長大衣','#B88A5A','coat','outer'],
+      ['knit','燕麥色針織衫','#D9CBB3','knit','top'],
+      ['tee','白色厚磅素 T','#F4F1EA','tee','top'],
+      ['shirt','白色牛津襯衫','#F4F1EA','shirt','top'],
+      ['jeans','淺藍直筒牛仔褲','#8FA3BC','pants','bottom'],
+      ['slacks','深藍打褶西裝褲','#2E3A4F','pants','bottom'],
+      ['skirt','鼠尾草綠百褶裙','#8C9A86','skirt','bottom'],
+      ['sneaker','米白德訓鞋','#EDE7DA','shoe','acc'],
+      ['loafer','黑色樂福鞋','#1F1F1E','shoe','acc','away'],
+      ['tote','焦糖皮革托特包','#9A6B43','bag','acc'],
+      ['scarf','灰色羊毛圍巾','#9A9893','scarf','acc'],
+      ['navy','海軍藍雙排扣西裝外套','#2E3A4F','coat','outer','wish']
+    ];
+    const meta = {};
+    DEF.forEach(([id,name,hex,s,cat,flag]) => { meta[id] = {id,name,hex,d:G[s][0],d2:G[s][1],w2:G[s][2],cat,away:flag==='away',wish:flag==='wish'}; });
+    const st = this.state;
+    const items = st.items;
+    const set = (id, patch) => this.setState({ items: Object.assign({}, items, { [id]: Object.assign({}, items[id], patch) }) });
+
+    const toggle = (id) => () => {
+      const cur = items[id];
+      if (cur && cur.on) {
+        this.setState({ items: Object.assign({}, items, { [id]: Object.assign({}, cur, { on: false }) }), sel: st.sel === id ? null : st.sel });
+      } else {
+        const base = Object.assign({ l: 40, t: 30, base: 26, s: 100, r: 0 }, cur || {}, { on: true, z: st.nextZ });
+        this.setState({ items: Object.assign({}, items, { [id]: base }), sel: id, nextZ: st.nextZ + 1 });
+      }
+    };
+
+    const placedIds = Object.keys(items).filter(id => items[id].on).sort((a,b) => items[a].z - items[b].z);
+    const placed = placedIds.map(id => {
+      const it = items[id], m = meta[id];
+      return Object.assign({}, m, {
+        l: it.l, t: it.t, w: Math.round(it.base * it.s / 100 * 10) / 10, r: it.r, z: it.z + 1,
+        isSel: st.sel === id, label: m.name + '，點選以調整',
+        select: () => this.setState({ sel: id })
+      });
+    });
+
+    const swapLayer = (dir) => () => {
+      const i = placedIds.indexOf(st.sel); const j = i + dir;
+      if (i < 0 || j < 0 || j >= placedIds.length) return;
+      const a = placedIds[i], b = placedIds[j];
+      this.setState({ items: Object.assign({}, items, { [a]: Object.assign({}, items[a], { z: items[b].z }), [b]: Object.assign({}, items[b], { z: items[a].z }) }) });
+    };
+
+    const sel = st.sel && items[st.sel] && items[st.sel].on ? st.sel : null;
+    const selIt = sel ? items[sel] : null;
+    const wishOn = items.navy && items.navy.on;
+
+    return {
+      catalog: DEF.map(([id]) => {
+        const m = meta[id]; const on = !!(items[id] && items[id].on);
+        return Object.assign({}, m, {
+          on, pressed: on ? 'true' : 'false', toggle: toggle(id), catColor: CAT[m.cat],
+          bg: m.wish ? '#F4DDD6' : '#F3E7D4', ol: on ? '2px solid #3E6270' : (m.wish ? '1.5px dashed #C9A296' : 'none'),
+          op: m.away ? 0.5 : 1, awayTag: m.away
+        });
+      }),
+      placed,
+      layers: placed.slice().reverse().map(p => ({ name: p.name, d: p.d, hex: p.hex, select: p.select, cur: p.isSel ? 'true' : 'false', bg: p.isSel ? '#DCE8EC' : '#FFFCF6', bd: p.isSel ? '#3E6270' : '#EADCC6' })),
+      count: placed.length,
+      empty: placed.length === 0,
+      hasSel: !!sel,
+      selName: sel ? meta[sel].name : '未選取',
+      selScale: selIt ? selIt.s : 0,
+      selRot: selIt ? selIt.r : 0,
+      selLayer: sel ? (placed.length - placedIds.indexOf(sel)) + ' / ' + placed.length : '—',
+      rotL: () => sel && set(sel, { r: selIt.r - 15 }),
+      rotR: () => sel && set(sel, { r: selIt.r + 15 }),
+      bigger: () => sel && set(sel, { s: Math.min(200, selIt.s + 10) }),
+      smaller: () => sel && set(sel, { s: Math.max(40, selIt.s - 10) }),
+      layerUp: swapLayer(1),
+      layerDown: swapLayer(-1),
+      removeSel: () => sel && this.setState({ items: Object.assign({}, items, { [sel]: Object.assign({}, selIt, { on: false }) }), sel: null }),
+      tryWish: toggle('navy'),
+      wishLabel: wishOn ? '移除試穿：海軍藍雙排扣西裝外套' : '試穿選購中的雙排扣西裝外套'
+    };
+  }
+}
+</script>
+</body>
+</html>

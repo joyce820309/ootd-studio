@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機新增衣物・去背</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:844px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <header style="padding:8px 12px 10px 4px;border-bottom:1.5px dashed #D9C7AC;display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;align-items:center;gap:4px">
+      <a href="B-M-Add.dc.html" aria-label="上一步" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+      <h1 class="hd" style="margin:0;font-size:20px">確認去背</h1>
+      <span style="margin-left:auto;font-size:12px;color:#5A4A3C">第 <b class="num">2</b> / 4 步</span>
+    </div>
+    <div aria-hidden="true" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding-left:16px"><span style="height:5px;border-radius:3px;background:#B7CBB0"></span><span style="height:5px;border-radius:3px;background:#3B2F25"></span><span style="height:5px;border-radius:3px;background:#EADCC6"></span><span style="height:5px;border-radius:3px;background:#EADCC6"></span></div>
+  </header>
+
+  <main style="flex:1;padding:16px 16px 120px;display:flex;flex-direction:column;gap:14px">
+    <div role="status" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#E6EEE2;color:#2E3F2B;font-size:13px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M5 12l5 5L20 7"></path></svg>去背完成，邊緣很乾淨。</div>
+    <div style="position:relative;aspect-ratio:1/1;border-radius:18px;background:#F3E7D4;display:flex;align-items:center;justify-content:center;outline:2.5px solid #4A6245;outline-offset:-2.5px;overflow:hidden">
+      <span aria-hidden="true" style="position:absolute;left:14%;top:12%;width:72%;height:76%;border-radius:24px;background:rgba(240,196,118,.3);mix-blend-mode:multiply;transform:rotate(-3deg)"></span>
+      <svg viewBox="0 0 100 100" style="position:relative;width:72%;height:72%;filter:drop-shadow(0 10px 12px rgba(59,47,37,.18))" role="img" aria-label="去背結果：燕麥色針織衫"><path d="M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z" fill="#D9CBB3" stroke="rgba(59,47,37,.22)" stroke-width="0.5"></path></svg>
+      <span style="position:absolute;left:10px;top:10px;height:26px;padding:0 10px;border-radius:999px;background:#4A6245;color:#fff;font-size:12px;display:flex;align-items:center">搭配板會用這張</span>
+      <div role="group" aria-label="切換檢視" style="position:absolute;right:10px;bottom:10px;display:inline-flex;padding:3px;background:rgba(255,252,246,.94);border-radius:10px">
+        <button type="button" aria-pressed="true" style="height:34px;padding:0 12px;border:0;border-radius:8px;background:#3B2F25;color:#FBF4E8;font:500 12px 'Chiron GoRound TC'">去背後</button>
+        <button type="button" aria-pressed="false" style="height:34px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:#3B2F25;font:500 12px 'Chiron GoRound TC'">原照片</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button type="button" style="height:46px;border-radius:12px;border:1.5px solid #D9C7AC;background:#FFFCF6;color:#3B2F25;font:500 13px 'Chiron GoRound TC'">重新去背</button>
+      <button type="button" style="height:46px;border-radius:12px;border:1.5px solid #D9C7AC;background:#FFFCF6;color:#3B2F25;font:500 13px 'Chiron GoRound TC'">換一張照片</button>
+    </div>
+    <a href="B-M-Add-Info.dc.html" style="align-self:center;min-height:44px;display:flex;align-items:center;font-size:13px;color:#3E6270">不去背了，直接用照片</a>
+  </main>
+
+  <footer style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:#FBF4E8;border-top:1.5px dashed #D9C7AC">
+    <a href="B-M-Add-Info.dc.html" style="display:flex;align-items:center;justify-content:center;gap:6px;height:52px;border-radius:12px;background:#3B2F25;color:#FBF4E8;font:500 15px 'Chiron GoRound TC';text-decoration:none">用這張，填資料<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M9 6l6 6-6 6"></path></svg></a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

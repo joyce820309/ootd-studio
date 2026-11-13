@@ -83,7 +83,7 @@ export function LoginPage() {
         <WashBlob accent="sage" className="top-[46%] left-[10%] h-[22%] w-[30%]" tilt={7} />
         <div className="relative flex max-w-[440px] flex-col gap-3 max-md:hidden">
           <TiltLabel accent="rose">歡迎回來</TiltLabel>
-          <p className="m-0 font-hd text-3xl leading-snug font-bold">
+          <p className="m-0 font-hd text-3xl leading-snug">
             你的衣櫃一直都在這裡，
             <br />
             慢慢來，今天也穿得開心。
@@ -103,7 +103,7 @@ export function LoginPage() {
               <span className="relative flex size-[52px] items-center justify-center rounded-[16px] bg-card" style={{ rotate: '-4deg' }}>
                 <Icon name="mail" size={26} />
               </span>
-              <h1 className="relative m-0 font-hd text-[28px] font-bold">去信箱看看吧</h1>
+              <h1 className="relative m-0 font-hd text-[28px]">去信箱看看吧</h1>
               <p className="relative m-0 text-sm leading-relaxed">
                 登入連結已寄到 <b className="font-medium">{email}</b>。沒收到的話，看一下垃圾郵件匣。
               </p>
@@ -114,7 +114,7 @@ export function LoginPage() {
           ) : (
             <div className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
-                <h1 className="m-0 font-hd text-[32px] font-bold">登入你的衣櫃</h1>
+                <h1 className="m-0 font-hd text-[32px]">登入你的衣櫃</h1>
                 <span className="text-sm text-ink-2">私人空間，僅限受邀帳號。</span>
               </div>
 

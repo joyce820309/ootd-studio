@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機量測紀錄</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seg{display:grid;grid-template-columns:1fr 1fr;padding:3px;border-radius:10px;background:#F3E7D4}
+.seg a{display:flex;align-items:center;justify-content:center;height:40px;border-radius:8px;font-size:14px;font-weight:500;color:#5A4A3C;text-decoration:none}
+.seg a[aria-current="page"]{background:#FFFCF6;color:#3B2F25;font-weight:700;box-shadow:0 1px 2px rgba(59,47,37,.1)}
+.chip{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:11px;white-space:nowrap}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:844px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <header style="display:flex;align-items:center;gap:4px;padding:8px 8px 8px 4px;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Body.dc.html" aria-label="返回個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <h1 class="hd" style="margin:0;font-size:20px">量測紀錄</h1>
+    <span class="num" style="margin-left:6px;font-size:12px;color:#74624F">4 筆</span>
+  </header>
+
+  <div style="padding:14px 16px 4px;display:flex;flex-direction:column;gap:12px">
+    <nav class="seg" aria-label="檢視方式">
+      <a href="B-M-History.dc.html" aria-current="page">依日期</a>
+      <a href="B-History-Table.dc.html">對照表</a>
+    </nav>
+    <p style="margin:0;font-size:12px;line-height:1.7;color:#5A4A3C">每次儲存尺寸都會留下一頁。只列數字，不畫趨勢圖、不評價變化。</p>
+  </div>
+
+  <ol style="list-style:none;margin:0;padding:8px 16px 120px;display:flex;flex-direction:column;gap:10px;position:relative">
+    <span aria-hidden="true" style="position:absolute;left:29px;top:30px;bottom:150px;border-left:1.5px dashed #D9C7AC"></span>
+    <sc-for list="{{list}}" as="r" hint-placeholder-count="4">
+      <li>
+        <a href="B-M-History-Detail.dc.html" style="position:relative;display:flex;flex-direction:column;gap:8px;padding:14px 14px 14px 40px;border-radius:14px;background:#FFFCF6;color:#3B2F25;text-decoration:none;box-shadow:0 1px 0 rgba(59,47,37,.05),0 10px 20px -14px rgba(59,47,37,.25)">
+          <span aria-hidden="true" style="position:absolute;left:7px;top:19px;width:14px;height:14px;border-radius:5px;background:{{r.dot}};transform:rotate({{r.rot}}deg);box-shadow:0 0 0 3px #FBF4E8"></span>
+          <span style="display:flex;align-items:center;gap:6px"><span class="num" style="font-size:17px;font-weight:700">{{r.date}}</span><span style="font-size:12px;color:#74624F">（{{r.wd}}）</span><sc-if value="{{r.latest}}" hint-placeholder-val="{{ false }}"><span class="chip" style="background:#E6EEE2;color:#2E3F2B">最新</span></sc-if><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="margin-left:auto;width:18px;height:18px;color:#74624F"><path d="M9 6l6 6-6 6"></path></svg></span>
+          <span style="font-size:12px;color:#5A4A3C">{{r.sum}}</span>
+          <span style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{r.tags}}" as="t" hint-placeholder-count="3"><span class="chip num" style="background:{{t.bg}};color:{{t.fg}}">{{t.t}}</span></sc-for>
+          </span>
+        </a>
+      </li>
+    </sc-for>
+  </ol>
+
+  <footer style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:#FBF4E8;border-top:1.5px dashed #D9C7AC">
+    <a href="B-Body.dc.html" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:12px;background:#3B2F25;color:#FBF4E8;font:500 15px 'Chiron GoRound TC';text-decoration:none"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px"><path d="M12 5v14M5 12h14"></path></svg>新增量測</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const NAME = { h: '身高', w: '體重', sh: '肩寬', ub: '上胸圍', lb: '下胸圍', ar: '手臂長', wa: '腰圍', na: '肚臍圍', hi: '臀圍', le: '腿長', th: '大腿圍' };
+    const FC = [['t5', '五指襪'], ['so', '一般襪'], ['ba', '裸腳']];
+    const FM = [['L', '腳長'], ['W', '腳寬'], ['B', '前掌圍'], ['I', '腳背圍']];
+    FC.forEach(([c, t]) => FM.forEach(([m, n]) => { NAME[c + m] = t + n; }));
+    const base = { h: '162', sh: '38', ub: '84', ar: '55', hi: '91', le: '74', soL: '23.5', soW: '9.1', soB: '22.0', soI: '22.8', baL: '23.3' };
+    const REC = [
+      { date: '2026/11/12', wd: '四', v: Object.assign({}, base, { w: '52.0', lb: '70', wa: '65', na: '73', baW: '9.0', baB: '21.8', baI: '22.4' }) },
+      { date: '2026/10/02', wd: '五', v: Object.assign({}, base, { w: '52.5', lb: '71', wa: '66', na: '73', baW: '9.0', baB: '21.8', baI: '22.4' }) },
+      { date: '2026/04/18', wd: '六', v: Object.assign({}, base, { w: '53.0', lb: '71', wa: '66' }) },
+      { date: '2025/11/05', wd: '三', v: { h: '162', w: '53.0', sh: '37.5', ub: '85', lb: '71', ar: '55', wa: '66', hi: '92', le: '74', baL: '23.3' } }
+    ];
+    const KEYS = Object.keys(NAME);
+    const DOT = ['#B7CBB0', '#A9C6CF', '#E2B4A8', '#F2CF8E'];
+    const list = REC.map((r, i) => {
+      const prev = REC[i + 1];
+      if (!prev) return { date: r.date, wd: r.wd, latest: false, dot: DOT[i], rot: -8, sum: '第一次記錄・記了 ' + Object.keys(r.v).length + ' 項', tags: [] };
+      const chg = KEYS.filter(k => r.v[k] != null && prev.v[k] != null && parseFloat(r.v[k]) !== parseFloat(prev.v[k]));
+      const nw = KEYS.filter(k => r.v[k] != null && prev.v[k] == null);
+      const tags = chg.slice(0, 4).map(k => {
+        const d = parseFloat(r.v[k]) - parseFloat(prev.v[k]);
+        return { t: NAME[k] + ' ' + (d > 0 ? '+' : '−') + Math.abs(d).toFixed(1), bg: '#F6E7C6', fg: '#5A3F12' };
+      });
+      if (nw.length) tags.push({ t: '新記 ' + nw.length + ' 項', bg: '#DCE8EC', fg: '#24424D' });
+      return { date: r.date, wd: r.wd, latest: i === 0, dot: DOT[i], rot: i % 2 ? 8 : -8,
+        sum: (chg.length ? '改了 ' + chg.length + ' 項' : '數字都沒變') + '・共記了 ' + Object.keys(r.v).length + ' 項', tags };
+    });
+    return { list };
+  }
+}
+</script>
+</body>
+</html>

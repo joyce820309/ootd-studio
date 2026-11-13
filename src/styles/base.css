@@ -8,6 +8,8 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    /* 霞鶩漫黑沒有粗體，禁止瀏覽器假加粗，標題才不會糊 */
+    font-synthesis-weight: none;
   }
   :focus-visible {
     outline: 2.5px solid var(--color-mist-deep);
@@ -18,6 +20,12 @@
   }
   button {
     font-family: inherit;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
   }
   @media (prefers-reduced-motion: reduce) {
     *,

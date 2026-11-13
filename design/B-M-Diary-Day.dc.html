@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機單日穿搭紀錄</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.chip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;white-space:nowrap}
+.dot{width:9px;height:9px;border-radius:3px}
+.cell{position:relative;border-radius:10px;background:#FBF4E8;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:0}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:1160px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <header style="display:flex;align-items:center;gap:4px;padding:8px 8px 8px 4px;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-M-Diary.dc.html" aria-label="返回穿搭日記" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <span class="hd" style="font-size:19px">11 月 12 日（四）</span>
+    <span class="chip" style="margin-left:auto;background:#DCE8EC;color:#24424D">雨 18°</span>
+    <button type="button" aria-label="更多：編輯、刪除" style="width:44px;height:44px;border:0;border-radius:10px;background:none;color:#3B2F25;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></button>
+  </header>
+
+  <div style="padding:16px 16px 120px;display:flex;flex-direction:column;gap:14px">
+    <div style="position:relative;padding:10px;border-radius:16px;background:#F6E9D3">
+      <span aria-hidden="true" style="position:absolute;left:50%;top:-8px;width:76px;height:18px;margin-left:-38px;border-radius:2px;background:rgba(150,186,198,.6);mix-blend-mode:multiply;transform:rotate(-3deg)"></span>
+      <div style="display:grid;gap:5px;height:300px;grid-template-columns:1fr 1.15fr .7fr;grid-template-rows:1fr 1.05fr .7fr;grid-template-areas:'outer top bag' 'outer bottom bag' 'outer bottom shoes'">
+        <sc-for list="{{board}}" as="b" hint-placeholder-count="5"><div class="cell" style="grid-area:{{b.area}}"><span aria-hidden="true" style="position:absolute;inset:10%;border-radius:8px;background:{{b.wash}};mix-blend-mode:multiply"></span><svg viewBox="0 0 100 100" style="position:relative;height:84%;aspect-ratio:1/1" role="img" aria-label="{{b.name}}"><path d="{{b.d}}" fill="{{b.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.8"></path></svg></div></sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <h1 class="hd" style="margin:0;font-size:24px">雨天的季度簡報</h1>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span class="chip" style="background:#DCE8EC;color:#24424D"><span class="dot" style="background:#A9C6CF"></span>上班・簡報</span>
+        <span class="chip" style="background:#E6EEE2;color:#2E3F2B">穿起來：舒服</span>
+        <span role="img" aria-label="評分 4 分（滿分 5 分）" style="display:inline-flex;gap:3px;margin-left:auto"><sc-for list="{{stars}}" as="s" hint-placeholder-count="5"><span style="width:14px;height:14px;border-radius:4px;transform:rotate(-8deg);background:{{s}}"></span></sc-for></span>
+      </div>
+      <p style="margin:0;padding:12px 14px;border-radius:12px;background:#FFFCF6;font-size:14px;line-height:1.75">外套擋風剛好；德訓鞋踩水有點濕，下雨天改穿短靴比較好。</p>
+    </div>
+
+    <section aria-labelledby="its" style="padding:4px 14px;border-radius:14px;background:#FFFCF6;box-shadow:0 1px 0 rgba(59,47,37,.05),0 10px 20px -14px rgba(59,47,37,.25)">
+      <h2 id="its" style="margin:0;padding:10px 0 6px;font-size:13px;font-weight:500;color:#5A4A3C">這天穿的 5 件</h2>
+      <sc-for list="{{items}}" as="x" hint-placeholder-count="5">
+        <a href="B-Detail.dc.html" style="display:flex;align-items:center;gap:10px;min-height:54px;border-top:1.5px dashed #EADCC6;color:#3B2F25;text-decoration:none;font-size:14px"><span style="width:38px;height:38px;border-radius:10px;background:#F3E7D4;display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 100 100" style="width:80%;height:80%" aria-hidden="true"><path d="{{x.d}}" fill="{{x.hex}}" stroke="rgba(59,47,37,.25)" stroke-width="1.2"></path></svg></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">{{x.name}}<span style="font-size:11px;color:{{x.sc}}">{{x.st}}</span></span><span class="num" style="font-size:12px;color:#5A4A3C">{{x.wc}} 次</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;color:#74624F"><path d="M9 6l6 6-6 6"></path></svg></a>
+      </sc-for>
+    </section>
+
+    <section aria-label="同一天的其他紀錄" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;border:1.5px dashed #D9C7AC">
+      <span style="font-size:13px;color:#5A4A3C">這天只有這一筆</span>
+      <a href="B-M-Diary-New.dc.html" style="margin-left:auto;display:flex;align-items:center;gap:4px;min-height:40px;font-size:13px;font-weight:500;color:#3E6270;text-decoration:none"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M12 5v14M5 12h14"></path></svg>同一天再記一筆</a>
+    </section>
+  </div>
+
+  <footer style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:#FBF4E8;border-top:1.5px dashed #D9C7AC;display:flex;flex-direction:column;gap:8px">
+    <div role="note" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:#F4DDD6;color:#5E2E25;font-size:12px">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M12 4l9 16H3zM12 10v4M12 17h.01"></path></svg>米白德訓鞋送洗中，再穿時鞋子那格會先空著，讓你換一雙。
+    </div>
+    <a href="B-M-Outfit.dc.html" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:12px;background:#F2CF8E;border:1.5px solid #E2B866;color:#3B2F25;font:500 15px 'Chiron GoRound TC';text-decoration:none"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4"></path></svg>再穿一次</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1160}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const SH = {
+      knit: 'M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z',
+      pants: 'M32 10H68L72 90H56L50 36L44 90H28Z',
+      coat: 'M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z',
+      shoe: 'M14 62V46Q24 44 34 52Q48 62 70 62Q86 62 88 72V76H14Z',
+      bag: 'M22 40H78L82 86H18Z'
+    };
+    const W = { outer: 'rgba(150,186,198,.35)', top: 'rgba(240,196,118,.4)', bottom: 'rgba(167,192,158,.42)', shoes: 'rgba(222,166,152,.38)', bag: 'rgba(222,166,152,.3)' };
+    const L = [
+      ['outer', '炭灰短版西裝外套', '#3D3D3B', 'coat', 11, '可以穿', '#4A6245'],
+      ['top', '燕麥色羊毛針織衫', '#D9CBB3', 'knit', 14, '可以穿', '#4A6245'],
+      ['bottom', '淺藍高腰直筒牛仔褲', '#8FA3BC', 'pants', 27, '可以穿', '#4A6245'],
+      ['shoes', '米白德訓鞋', '#EDE7DA', 'shoe', 25, '送洗中', '#8E4A3E'],
+      ['bag', '焦糖皮革托特包', '#9A6B43', 'bag', 19, '可以穿', '#4A6245']
+    ];
+    return {
+      board: L.map(x => ({ area: x[0], name: x[1], hex: x[2], d: SH[x[3]], wash: W[x[0]] })),
+      items: L.map(x => ({ name: x[1], hex: x[2], d: SH[x[3]], wc: x[4], st: x[5], sc: x[6] })),
+      stars: [1, 2, 3, 4, 5].map(i => i <= 4 ? '#F2CF8E' : '#EADCC6')
+    };
+  }
+}
+</script>
+</body>
+</html>

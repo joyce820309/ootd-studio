@@ -27,7 +27,7 @@ export function LandingPage() {
         <section className="mx-auto flex max-w-[1240px] flex-wrap items-center gap-14 px-[clamp(16px,4vw,56px)] py-[clamp(40px,7vw,72px)]">
           <div className="flex flex-[1_1_420px] flex-col gap-5">
             <span className="font-num text-xs font-bold tracking-[0.18em] text-ink-3 uppercase">Your private styling studio</span>
-            <h1 className="m-0 font-hd text-[clamp(38px,5vw,58px)] leading-tight font-bold">
+            <h1 className="m-0 font-hd text-[clamp(38px,5vw,58px)] leading-tight">
               把衣櫃
               <br />
               收進手帳裡。
@@ -78,14 +78,14 @@ export function LandingPage() {
           <div className="mx-auto flex max-w-[1240px] flex-col gap-9">
             <div className="flex flex-col items-start gap-3">
               <TiltLabel accent="oat">三件事</TiltLabel>
-              <h2 className="m-0 font-hd text-[clamp(28px,3.4vw,38px)] font-bold">整理、搭配、想清楚再買</h2>
+              <h2 className="m-0 font-hd text-[clamp(28px,3.4vw,38px)]">整理、搭配、想清楚再買</h2>
             </div>
             <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">
               {FEATURES.map((f) => (
                 <PaperCard key={f.n} className={`relative flex flex-col gap-3.5 overflow-hidden p-6 ${f.main ? 'outline-2 -outline-offset-2 outline-solid outline-ink' : ''}`}>
                   <WashBlob accent={f.accent} className="-top-8 -right-8 size-[130px]" tilt={14} />
                   <span className={`relative font-num text-sm font-bold ${f.deep}`}>{f.n}</span>
-                  <h3 className="relative m-0 font-hd text-2xl font-bold">{f.t}</h3>
+                  <h3 className="relative m-0 font-hd text-2xl">{f.t}</h3>
                   <p className="relative m-0 text-[15px] leading-loose text-ink-2">{f.d}</p>
                   {f.main && <span className="relative self-start rounded-full bg-rose-deep px-2.5 py-1 text-xs text-white">最常用</span>}
                 </PaperCard>
@@ -95,7 +95,7 @@ export function LandingPage() {
         </section>
 
         <section className="flex flex-col items-center gap-4 px-6 py-[72px] text-center">
-          <h2 className="m-0 font-hd text-[clamp(30px,3.6vw,40px)] font-bold">今天想穿什麼？</h2>
+          <h2 className="m-0 font-hd text-[clamp(30px,3.6vw,40px)]">今天想穿什麼？</h2>
           <ButtonLink to="/login" variant="primary" size="lg">
             登入我的衣櫃
           </ButtonLink>

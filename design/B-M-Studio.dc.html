@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機搭配工作台</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:52px;height:56px;border:0;background:none;font:500 11px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;border-radius:10px}
+.h{position:absolute;width:14px;height:14px;border-radius:4px;background:#FFFCF6;border:1.5px solid #3E6270}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:844px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <header style="display:flex;align-items:center;gap:4px;padding:8px 8px 8px 4px;background:#FBF4E8;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-M-Home.dc.html" aria-label="返回" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <div style="display:flex;flex-direction:column;min-width:0"><span class="hd" style="font-size:18px;font-weight:700">雨天的季度簡報</span><span style="font-size:11px;color:#74624F">草稿已自動儲存</span></div>
+    <button type="button" style="margin-left:auto;height:40px;padding:0 16px;border:0;border-radius:10px;background:#3B2F25;color:#FBF4E8;font:500 14px 'Chiron GoRound TC'">儲存</button>
+  </header>
+
+  <div style="position:relative;margin:12px 12px 0;height:470px;border-radius:20px;background:#F6E9D3;background-image:radial-gradient(rgba(59,47,37,.12) 1px,transparent 1px);background-size:18px 18px;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;left:6%;top:10%;width:52%;height:56%;border-radius:20px;background:rgba(150,186,198,.32);mix-blend-mode:multiply;transform:rotate(-3deg)"></span>
+    <span aria-hidden="true" style="position:absolute;left:40%;top:34%;width:52%;height:56%;border-radius:20px;background:rgba(222,166,152,.28);mix-blend-mode:multiply;transform:rotate(4deg)"></span>
+    <sc-for list="{{parts}}" as="p" hint-placeholder-count="5">
+      <svg viewBox="0 0 100 100" style="position:absolute;left:{{p.l}}%;top:{{p.t}}%;width:{{p.w}}%;transform:rotate({{p.r}}deg);filter:drop-shadow(0 8px 10px rgba(59,47,37,.2))" role="img" aria-label="{{p.name}}"><path d="{{p.d}}" fill="{{p.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.6"></path><path d="{{p.d2}}" fill="none" stroke="rgba(59,47,37,.3)" stroke-width="{{p.w2}}"></path></svg>
+    </sc-for>
+    <div aria-hidden="true" style="position:absolute;left:8%;top:12%;width:42%;aspect-ratio:1/1;transform:rotate(-6deg)">
+      <span style="position:absolute;inset:-4px;border:1.5px dashed #3E6270;border-radius:6px"></span>
+      <span class="h" style="left:-11px;top:-11px"></span><span class="h" style="right:-11px;top:-11px"></span><span class="h" style="left:-11px;bottom:-11px"></span><span class="h" style="right:-11px;bottom:-11px"></span>
+    </div>
+    <div style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:999px;background:rgba(59,47,37,.82);color:#FBF4E8;font-size:12px;white-space:nowrap">
+      <svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><path d="M9 11V6a1.5 1.5 0 0 1 3 0v4M12 10V5a1.5 1.5 0 0 1 3 0v5M15 10V7a1.5 1.5 0 0 1 3 0v6a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-3l-2-4a1.5 1.5 0 0 1 2.5-1.5L9 12"></path></svg>拖曳移動・雙指縮放與旋轉
+    </div>
+  </div>
+
+  <div role="toolbar" aria-label="炭灰短版西裝外套" style="margin:12px 12px 0;padding:6px;border-radius:14px;background:#FFFCF6;box-shadow:0 1px 0 rgba(59,47,37,.05),0 10px 20px -12px rgba(59,47,37,.25);display:flex;align-items:center;justify-content:space-between">
+    <span style="font-size:12px;font-weight:500;padding-left:8px;max-width:72px;line-height:1.3">炭灰短版<br>西裝外套</span>
+    <button class="tb" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>上移</button>
+    <button class="tb" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"></path></svg>下移</button>
+    <button class="tb" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h13M16 3l4 4-4 4M17 17H4M8 13l-4 4 4 4"></path></svg>替換</button>
+    <button class="tb" type="button" style="color:#8E4A3E"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>移除</button>
+  </div>
+
+  <footer style="position:absolute;left:0;right:0;bottom:0;padding:12px 12px 28px;background:#FBF4E8;border-top:1.5px dashed #D9C7AC;display:grid;grid-template-columns:3fr 2fr;gap:8px">
+    <a href="B-M-Sheet.dc.html" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:12px;background:#F2CF8E;border:1.5px solid #E2B866;color:#3B2F25;font:700 15px 'Chiron GoRound TC';text-decoration:none"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>加入單品</a>
+    <button type="button" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:12px;background:#4A6245;border:0;color:#fff;font:500 15px 'Chiron GoRound TC'"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4zM8 9.5h8M8 12.5h5"></path></svg>AI 分析</button>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const G = {
+      knit:['M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z','M30 80H70M44 13Q50 21 56 13',1],
+      pants:['M32 10H68L72 90H56L50 36L44 90H28Z','M50 10V36M32 16H68',1],
+      coat:['M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z','M50 30V92M44 10L50 30L56 10',1],
+      shoe:['M14 62V46Q24 44 34 52Q48 62 70 62Q86 62 88 72V76H14Z','M14 70H88',1],
+      bag:['M22 40H78L82 86H18Z','M36 40Q36 18 50 18Q64 18 64 40',3]
+    };
+    const it = (name,hex,s,l,t,w,r) => ({name,hex,d:G[s][0],d2:G[s][1],w2:G[s][2],l,t,w,r});
+    return {
+      parts: [
+        it('燕麥色針織衫','#D9CBB3','knit',38,6,40,2),
+        it('炭灰短版西裝外套','#3D3D3B','coat',8,12,42,-6),
+        it('淺藍直筒牛仔褲','#8FA3BC','pants',34,40,36,3),
+        it('焦糖托特包','#9A6B43','bag',66,28,30,6),
+        it('米白德訓鞋','#EDE7DA','shoe',58,68,32,-8)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

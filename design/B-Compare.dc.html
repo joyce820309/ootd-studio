@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>比較試搭台</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',serif}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.eb{font:700 11px Nunito,'Chiron GoRound TC',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#74624F}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.lbl{display:inline-flex;align-items:center;height:34px;padding:0 14px;font:700 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+.nav-a:hover{border-bottom-color:#EADCC6;color:#3B2F25}
+.sub{display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:8px;font:500 14px 'Chiron GoRound TC';text-decoration:none;color:#5A4A3C}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:38px;border-top:1.5px dashed #EADCC6;font-size:13px}
+.row span:first-child{color:#5A4A3C}
+.best{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:999px;background:#DCE7D8;color:#3F5A3B;font-size:11px;font-weight:500;margin-left:6px}
+.cell{position:relative;border-radius:12px;background:#FBF4E8;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:0}
+.src{display:inline-flex;align-items:center;height:30px;padding:0 10px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 12px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+</style>
+</helmet>
+<div style="width:100%;min-height:1200px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
+      <a class="nav-a" href="B-Home.dc.html">首頁</a>
+      <a class="nav-a" href="B-Closet.dc.html">我的衣櫃</a>
+      <a class="nav-a" href="B-Outfit.dc.html">今日搭配</a>
+      <a class="nav-a" href="#diary">穿搭日記</a>
+      <a class="nav-a" href="B-Compare.dc.html" aria-current="page" style="border-bottom-color:#F2CF8E;color:#3B2F25;font-weight:700">選購清單</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:4px;padding-bottom:10px">
+      <button class="ibtn" type="button" aria-label="通知" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"></path></svg></button>
+      <a href="B-Body.dc.html" aria-label="個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#FFFCF6;border:1.5px solid #3B2F25;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span></a>
+    </div>
+  </header>
+
+  <main style="max-width:1360px;margin:0 auto;padding:24px clamp(16px,3vw,40px) 56px;display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <nav aria-label="選購清單分頁" style="display:inline-flex;padding:3px;background:#F3E7D4;border-radius:10px">
+        <a class="sub" href="B-Wishlist.dc.html">清單</a>
+        <a class="sub" href="B-Compare.dc.html" aria-current="page" style="background:#FFFCF6;color:#3B2F25;font-weight:700;box-shadow:0 1px 2px rgba(59,47,37,.1)">比較試搭台</a>
+      </nav>
+      <span style="font-size:13px;color:#5A4A3C">把不同網站的類似商品放在一起比，再和衣櫃、其他想買的單品混搭看看</span>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:13px;font-weight:500;margin-right:4px">比較群組</span>
+      <button class="chip" type="button" aria-pressed="true" style="background:#3B2F25;color:#FBF4E8;border-color:#3B2F25">冬天想要一條寬褲 <span class="num" style="opacity:.75">3</span></button>
+      <button class="chip" type="button" aria-pressed="false">黑色短靴 <span class="num" style="color:#74624F">4</span></button>
+      <button class="chip" type="button" aria-pressed="false">海軍藍西裝外套 <span class="num" style="color:#74624F">2</span></button>
+      <button class="chip" type="button" style="border-style:dashed;color:#3E6270"><svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>新群組</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span class="lbl" style="background:#E2B4A8;transform:rotate(-2deg)">冬天想要一條寬褲</span>
+      <span style="font-size:13px;color:#5A4A3C">3 個候選・來自 3 個網站・預算 NT$3,500 以內</span>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+        <label style="position:relative;display:flex;align-items:center">
+          <span style="position:absolute;left:12px;color:#74624F"><svg class="ic" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path></svg></span>
+          <input aria-label="貼上商品網址加入候選" placeholder="貼上商品網址加入候選" style="width:280px;height:44px;border:1.5px solid #D9C7AC;border-radius:10px;background:#FFFCF6;padding:0 12px 0 38px;font:400 14px 'Chiron GoRound TC';color:#3B2F25">
+        </label>
+        <button class="btn btn-o" type="button">加入</button>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+
+      <section aria-label="候選商品比較" style="flex:1.5 1 640px;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px">
+          <sc-for list="{{cands}}" as="c" hint-placeholder-count="3">
+            <article style="position:relative;padding:14px;border-radius:16px;background:#FFFCF6;border:{{c.bd}};box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -16px rgba(59,47,37,.22);display:flex;flex-direction:column;gap:10px">
+              <sc-if value="{{c.on}}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;left:50%;top:-10px;margin-left:-38px;width:76px;height:20px;background:rgba(150,186,198,.75);mix-blend-mode:multiply;transform:rotate(-3deg);border-radius:2px"></span></sc-if>
+              <div style="position:relative;aspect-ratio:1/1;border-radius:12px;background:#F4DDD6;display:flex;align-items:center;justify-content:center;overflow:hidden">
+                <span aria-hidden="true" style="position:absolute;left:14%;top:12%;width:72%;height:76%;border-radius:20px;background:rgba(167,192,158,.38);mix-blend-mode:multiply;transform:rotate({{c.tilt}}deg)"></span>
+                <svg viewBox="0 0 100 100" style="position:relative;width:74%;height:74%;filter:drop-shadow(0 8px 10px rgba(59,47,37,.18))" role="img" aria-label="{{c.name}}"><path d="{{c.d}}" fill="{{c.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.6"></path><path d="{{c.d2}}" fill="none" stroke="rgba(59,47,37,.3)" stroke-width="1"></path></svg>
+                <span style="position:absolute;left:8px;top:8px;height:24px;padding:0 9px;border-radius:999px;background:#FFFCF6;font-size:11px;font-weight:500;display:flex;align-items:center;gap:5px"><svg class="ic" viewBox="0 0 24 24" style="width:12px;height:12px" aria-hidden="true"><path d="M4 7h16l-1 12H5zM9 7V5a3 3 0 0 1 6 0v2"></path></svg>{{c.shop}}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <span style="font-size:14px;font-weight:500;line-height:1.4">{{c.name}}</span>
+                <span class="num" style="font-size:20px;font-weight:700">{{c.price}}</span>
+              </div>
+              <div>
+                <div class="row"><span>含運總價</span><span class="num" style="font-weight:700">{{c.total}}<sc-if value="{{c.cheap}}" hint-placeholder-val="{{ false }}"><span class="best">最省</span></sc-if></span></div>
+                <div class="row"><span>材質</span><span>{{c.mat}}</span></div>
+                <div class="row"><span>你的尺寸</span><span style="color:{{c.sizeColor}};font-weight:500">{{c.size}}</span></div>
+                <div class="row"><span>退換</span><span>{{c.ret}}</span></div>
+                <div class="row"><span>衣櫃可搭</span><span class="num" style="font-weight:700">{{c.match}} 件<sc-if value="{{c.most}}" hint-placeholder-val="{{ false }}"><span class="best">最多</span></sc-if></span></div>
+                <div class="row"><span>與現有重複</span><span>{{c.dup}}</span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:auto">
+                <button class="btn {{c.btnCls}}" type="button" onClick="{{c.pick}}" aria-pressed="{{c.on}}" style="height:42px">{{c.btnText}}</button>
+                <div style="display:flex;justify-content:space-between">
+                  <a href="#shop" style="font-size:12px;min-height:32px;display:inline-flex;align-items:center">商品頁 ↗</a>
+                  <button type="button" style="border:0;background:none;font:400 12px 'Chiron GoRound TC';color:#5A4A3C;cursor:pointer;min-height:32px">淘汰</button>
+                </div>
+              </div>
+            </article>
+          </sc-for>
+        </div>
+
+        <div style="position:relative;padding:18px 20px;border-radius:16px;background:#E6EEE2;display:flex;flex-direction:column;gap:8px;overflow:hidden">
+          <span aria-hidden="true" style="position:absolute;right:-24px;top:-24px;width:96px;height:96px;border-radius:22px;background:rgba(240,196,118,.45);mix-blend-mode:multiply;transform:rotate(12deg)"></span>
+          <div style="display:flex;justify-content:space-between;align-items:center;position:relative"><span class="hd" style="font-size:19px;font-weight:700;color:#2E3F2B">如果只買一條</span><span class="eb" style="color:#4A6245">AI 參考</span></div>
+          <p style="margin:0;font-size:14px;line-height:1.8;color:#2E3F2B;position:relative">COS 的羊毛寬褲可搭件數最多，也最適合你偏好的高腰直筒；UNIQLO 最省，但材質偏薄，十二月可能不夠暖。選物店那件你的尺寸只剩 L，建議先問賣家實際腰圍。</p>
+          <span style="font-size:11px;color:#3F5A3B;position:relative">依據：三件商品頁資訊、你的腰圍與腿長、衣櫃 84 件可穿衣物</span>
+        </div>
+      </section>
+
+      <section aria-label="混搭試穿" style="flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div style="padding:18px;border-radius:18px;background:#FFFCF6;box-shadow:0 1px 0 rgba(59,47,37,.05),0 16px 30px -18px rgba(59,47,37,.25);display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><span class="hd" style="font-size:21px;font-weight:700">混搭試穿</span><span style="font-size:12px;color:#5A4A3C">虛線框＝還沒買</span></div>
+
+          <div style="display:grid;gap:8px;height:460px;grid-template-columns:1fr 1.25fr;grid-template-rows:1fr 1.1fr .65fr;grid-template-areas:'outer top' 'outer bottom' 'bag shoes'">
+            <sc-for list="{{board}}" as="b" hint-placeholder-count="5">
+              <div class="cell" style="grid-area:{{b.area}};outline:{{b.ol}};outline-offset:-2px">
+                <span aria-hidden="true" style="position:absolute;inset:10%;border-radius:14px;background:{{b.wash}};mix-blend-mode:multiply"></span>
+                <span style="position:absolute;left:8px;top:6px;font-size:11px;font-weight:500;color:#5A4A3C;z-index:1">{{b.label}}</span>
+                <sc-if value="{{b.has}}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 100 100" style="position:relative;height:80%;max-width:86%;aspect-ratio:1/1;filter:drop-shadow(0 6px 8px rgba(59,47,37,.18))" role="img" aria-label="{{b.name}}"><path d="{{b.d}}" fill="{{b.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.6"></path></svg></sc-if>
+                <sc-if value="{{b.empty}}" hint-placeholder-val="{{ false }}"><span style="position:relative;font-size:12px;color:#74624F">不搭配</span></sc-if>
+                <sc-if value="{{b.wish}}" hint-placeholder-val="{{ false }}"><span style="position:absolute;right:6px;bottom:6px;height:20px;padding:0 7px;border-radius:999px;background:#8E4A3E;color:#fff;font-size:10px;display:flex;align-items:center;z-index:1">想買</span></sc-if>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:12px;color:#5A4A3C;width:36px">外套</span>
+              <button class="src" type="button" aria-pressed="{{outerCloset}}" onClick="{{outerC}}" style="background:{{oc1}};color:{{oc1f}}">衣櫃：炭灰西裝外套</button>
+              <button class="src" type="button" aria-pressed="{{outerWish}}" onClick="{{outerW}}" style="border-style:dashed;background:{{oc2}};color:{{oc2f}}">想買：海軍藍外套</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:12px;color:#5A4A3C;width:36px">上衣</span>
+              <sc-for list="{{tops}}" as="t" hint-placeholder-count="3"><button class="src" type="button" aria-pressed="{{t.on}}" onClick="{{t.pick}}" style="background:{{t.bg}};color:{{t.fg}}">{{t.name}}</button></sc-for>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:12px;color:#5A4A3C;width:36px">下身</span><span style="font-size:12px;color:#3B2F25">左側選中的候選：<b style="font-weight:500">{{candName}}</b></span></div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:#F4DDD6;color:#5E2E25;flex-wrap:wrap">
+            <span style="font-size:14px">這套有 <b class="num">{{wishCount}}</b> 件還沒買</span>
+            <span class="num" style="margin-left:auto;font-size:18px;font-weight:700">合計 {{wishTotal}}</span>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-p" type="button" style="flex:1">存成「如果買了」穿搭</button>
+            <button class="btn btn-s" type="button">請 AI 評估</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { cand: 0, outer: 'wish', top: 'knit' }; }
+  renderVals() {
+    const P = 'M32 10H68L72 90H56L50 36L44 90H28Z';
+    const P2 = 'M50 10V36M32 16H68';
+    const G = {
+      knit:'M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z',
+      tee:'M30 18L42 14Q50 22 58 14L70 18L86 32L76 42L70 38V86H30V38L24 42L14 32Z',
+      coat:'M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z',
+      boot:'M30 14H52V56Q70 58 84 66Q90 70 88 80H30Z',
+      bag:'M22 40H78L82 86H18Z'
+    };
+    const st = this.state;
+    const CANDS = [
+      {name:'羊毛混紡高腰寬褲', shop:'COS 官網', hex:'#EFE8DA', price:'NT$3,900', total:'NT$3,900', totalN:3900, mat:'羊毛 60%', size:'36 有貨', sizeColor:'#3F5A3B', ret:'30 天', match:12, dup:'低', tilt:-3},
+      {name:'寬版九分打褶褲', shop:'UNIQLO 線上', hex:'#E6DCC8', price:'NT$990', total:'NT$1,050', totalN:1050, mat:'聚酯纖維', size:'M 有貨', sizeColor:'#3F5A3B', ret:'30 天', match:9, dup:'中・像深藍西裝褲', tilt:2},
+      {name:'奶油白羊毛直筒寬褲', shop:'選物店・蝦皮', hex:'#F2EADB', price:'NT$2,280', total:'NT$2,340', totalN:2340, mat:'羊毛 50%', size:'只剩 L', sizeColor:'#8E4A3E', ret:'7 天・需自付運費', match:10, dup:'低', tilt:4}
+    ];
+    const minTotal = Math.min.apply(null, CANDS.map(c => c.totalN));
+    const maxMatch = Math.max.apply(null, CANDS.map(c => c.match));
+    const cands = CANDS.map((c,i) => Object.assign({}, c, {
+      d: P, d2: P2, on: st.cand === i, cheap: c.totalN === minTotal, most: c.match === maxMatch,
+      bd: st.cand === i ? '2px solid #3B2F25' : '1.5px dashed #D9C7AC',
+      btnCls: st.cand === i ? 'btn-p' : 'btn-s', btnText: st.cand === i ? '試穿中' : '放上試穿',
+      pick: () => this.setState({ cand: i })
+    }));
+    const cur = CANDS[st.cand];
+    const TOPS = [['knit','燕麥針織衫','#D9CBB3','knit'],['wine','酒紅毛衣','#6E2E34','knit'],['tee','白色素 T','#F4F1EA','tee']];
+    const topDef = TOPS.find(t => t[0] === st.top);
+    const outerWish = st.outer === 'wish';
+    const W = { outer:'rgba(150,186,198,.35)', top:'rgba(240,196,118,.4)', bottom:'rgba(167,192,158,.42)', shoes:'rgba(222,166,152,.38)', bag:'rgba(222,166,152,.28)' };
+    const cell = (area,label,name,hex,d,wish) => ({area,label,name,hex,d,wish:!!wish,has:true,empty:false,wash:W[area],ol: wish ? '2px dashed #8E4A3E' : 'none'});
+    const board = [
+      outerWish ? cell('outer','外套','海軍藍雙排扣西裝外套（想買）','#2E3A4F',G.coat,true) : cell('outer','外套','炭灰短版西裝外套','#3D3D3B',G.coat),
+      cell('top','上衣',topDef[1],topDef[2],G[topDef[3]]),
+      cell('bottom','下身',cur.name + '（想買）',cur.hex,P,true),
+      cell('shoes','鞋子','黑色皮革短靴','#2A2826',G.boot),
+      cell('bag','包包','焦糖托特包','#9A6B43',G.bag)
+    ];
+    const total = cur.totalN + (outerWish ? 5990 : 0);
+    const on = (b) => b ? ['#3B2F25','#FBF4E8'] : ['#FFFCF6','#3B2F25'];
+    return {
+      cands, board, candName: cur.shop + '・' + cur.name,
+      outerCloset: !outerWish, outerWish,
+      oc1: on(!outerWish)[0], oc1f: on(!outerWish)[1], oc2: on(outerWish)[0], oc2f: on(outerWish)[1],
+      outerC: () => this.setState({ outer: 'closet' }), outerW: () => this.setState({ outer: 'wish' }),
+      tops: TOPS.map(t => ({ name: '衣櫃：' + t[1], on: st.top === t[0], bg: on(st.top === t[0])[0], fg: on(st.top === t[0])[1], pick: () => this.setState({ top: t[0] }) })),
+      wishCount: outerWish ? 2 : 1,
+      wishTotal: 'NT$' + total.toLocaleString('en-US')
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>新增衣物（風格 B）</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 20px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.paper{position:relative;background:#FFFCF6;border-radius:16px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-checked="true"],.chip[aria-pressed="true"]{background:#3B2F25;color:#FBF4E8;border-color:#3B2F25}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.f{display:flex;flex-direction:column;gap:8px;min-width:0}
+.l{font-size:13px;font-weight:500}
+.req{color:#8E4A3E;font-weight:400;font-size:12px;margin-left:6px}
+.opt{color:#74624F;font-weight:400;font-size:12px;margin-left:6px}
+.inp{height:46px;border:1.5px solid #D9C7AC;border-radius:10px;background:#FFFCF6;padding:0 14px;font:400 15px 'Chiron GoRound TC',sans-serif;color:#3B2F25;width:100%}
+.unit{display:flex;align-items:center;height:46px;border:1.5px solid #D9C7AC;border-radius:10px;background:#FFFCF6;padding:0 12px;gap:6px}
+.unit input{flex:1;min-width:0;border:0;background:transparent;font:700 16px Nunito,'Chiron GoRound TC',sans-serif;color:#3B2F25;text-align:right;height:100%}
+.unit span{font:600 12px Nunito;color:#5A4A3C}
+.sw{width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(59,47,37,.15);cursor:pointer;padding:0}
+.sec{padding:20px 22px;border-radius:16px;background:#FFFCF6;display:flex;flex-direction:column;gap:16px}
+.sec-t{display:flex;align-items:center;gap:10px}
+.tape{display:inline-flex;height:30px;align-items:center;padding:0 12px;border-radius:3px;font:400 16px 'LXGW Marker Gothic','Chiron GoRound TC';transform:rotate(-1.5deg);box-shadow:0 2px 4px rgba(59,47,37,.1)}
+.ph{position:relative;aspect-ratio:4/5;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.badge{position:absolute;height:24px;padding:0 9px;border-radius:999px;font-size:11px;display:flex;align-items:center;gap:4px}
+.mini-b{position:absolute;width:32px;height:32px;border:0;border-radius:50%;background:rgba(255,252,246,.94);color:#3B2F25;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.opt-card{position:relative;display:flex;gap:14px;padding:18px;border-radius:14px;background:#FFFCF6;cursor:pointer;overflow:hidden;text-align:left;font-family:inherit;color:#3B2F25}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+</style>
+</helmet>
+<div style="width:100%;min-height:1500px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column">
+
+  <header style="display:flex;align-items:center;gap:14px;padding:12px clamp(16px,3vw,32px);background:#FBF4E8;border-bottom:1.5px dashed #D9C7AC;flex-wrap:wrap">
+    <a href="B-Closet.dc.html" aria-label="關閉並保留草稿" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+    <div style="display:flex;flex-direction:column"><span class="hd" style="font-size:20px;display:inline-block;padding:0 10px;background:#F2CF8E;border-radius:3px;transform:rotate(-1.5deg);align-self:flex-start">新增衣物</span><span style="font-size:12px;color:#74624F;margin-top:4px">草稿會自動保存</span></div>
+    <ol style="list-style:none;margin:0 0 0 auto;padding:0;display:flex;gap:6px;flex-wrap:wrap">
+      <sc-for list="{{steps}}" as="s" hint-placeholder-count="4">
+        <li><button type="button" onClick="{{s.go}}" aria-current="{{s.cur}}" style="display:flex;align-items:center;gap:8px;height:40px;padding:0 14px 0 6px;border:0;border-radius:999px;background:{{s.bg}};color:{{s.fg}};font:{{s.w}} 13px 'Chiron GoRound TC';cursor:pointer;text-decoration:{{s.td}}">
+          <span class="num" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{s.dot}};color:{{s.dotFg}};font-weight:700">{{s.n}}</span>{{s.t}}</button></li>
+      </sc-for>
+    </ol>
+  </header>
+
+  <main style="flex:1;padding:32px clamp(16px,4vw,48px) 48px">
+    <div style="max-width:1120px;margin:0 auto">
+
+      <!-- ===== 1. 照片 ===== -->
+      <sc-if value="{{s1}}" hint-placeholder-val="{{ true }}">
+        <section style="display:flex;flex-direction:column;gap:24px">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <h1 class="hd" style="margin:0;font-size:32px">放上照片</h1>
+            <span style="font-size:14px;color:#5A4A3C">可以放好幾張：自己拍的平拍照、網拍的穿搭照、標籤或細節照都行。</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px">
+            <sc-for list="{{photos}}" as="p" hint-placeholder-count="3">
+              <figure style="margin:0;display:flex;flex-direction:column;gap:8px">
+                <div class="ph" style="background:{{p.bg}};outline:{{p.ol}};outline-offset:-2.5px">
+                  <svg viewBox="0 0 100 125" style="width:100%;height:100%" role="img" aria-label="{{p.alt}}"><g transform="{{p.tf}}"><path d="{{p.d}}" fill="#D9CBB3" stroke="rgba(59,47,37,.25)" stroke-width="0.6"></path></g><sc-if value="{{p.model}}" hint-placeholder-val="{{ false }}"><circle cx="50" cy="22" r="8" fill="#E3C6AA"></circle><path d="M40 70H60L62 116H52L50 86L48 116H38Z" fill="#8FA3BC"></path><path d="M30 120H44V124H30zM56 120H70V124H56z" fill="#EDE7DA"></path></sc-if><sc-if value="{{p.tag}}" hint-placeholder-val="{{ false }}"><rect x="34" y="40" width="32" height="40" rx="3" fill="#FFFCF6" stroke="rgba(59,47,37,.3)"></rect><text x="50" y="66" text-anchor="middle" font-family="Nunito" font-weight="700" font-size="16" fill="#3B2F25">M</text></sc-if></svg>
+                  <sc-if value="{{p.cover}}" hint-placeholder-val="{{ false }}"><span class="badge" style="left:8px;top:8px;background:#3B2F25;color:#FBF4E8">★ 封面</span></sc-if>
+                  <span class="badge" style="left:8px;bottom:8px;background:rgba(255,252,246,.94);color:#3B2F25">{{p.kind}}</span>
+                  <button type="button" class="mini-b" aria-label="移除這張照片" style="right:8px;top:8px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+                </div>
+                <figcaption style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5A4A3C"><sc-if value="{{p.cover}}" hint-placeholder-val="{{ false }}"><span>目前的封面</span></sc-if><sc-if value="{{p.notCover}}" hint-placeholder-val="{{ true }}"><button type="button" style="border:0;background:none;padding:0;min-height:32px;color:#3E6270;font:500 12px 'Chiron GoRound TC';cursor:pointer;text-decoration:underline">設為封面</button></sc-if><span aria-hidden="true" style="margin-left:auto;color:#74624F;letter-spacing:-2px">⋮⋮</span></figcaption>
+              </figure>
+            </sc-for>
+            <div style="grid-column:span 2;border:2px dashed #D9C7AC;border-radius:14px;background:#FFFCF6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center;aspect-ratio:auto">
+              <span style="width:52px;height:52px;border-radius:16px;background:#F2CF8E;display:flex;align-items:center;justify-content:center;transform:rotate(-4deg)"><svg class="ic" viewBox="0 0 24 24" style="width:26px;height:26px" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4"></path></svg></span>
+              <span style="font-size:15px;font-weight:500">拖放、貼上（Ctrl＋V）或選擇照片</span>
+              <span style="font-size:12px;color:#5A4A3C">JPG、PNG、HEIC・最多 8 張・可拖曳排序</span>
+              <div style="display:flex;gap:8px"><button class="btn btn-p" type="button" style="height:42px">拍照</button><button class="btn btn-s" type="button" style="height:42px">從裝置選擇</button></div>
+            </div>
+          </div>
+
+          <fieldset style="border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:12px">
+            <legend class="hd" style="font-size:22px;padding:0;margin-bottom:12px">搭配板要用哪種圖？</legend>
+            <div role="radiogroup" aria-label="搭配板用圖" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <button type="button" role="radio" aria-checked="{{cutOn}}" class="opt-card" onClick="{{pickCut}}" style="border:{{cutBd}}">
+                <span aria-hidden="true" style="position:absolute;right:-16px;top:-16px;width:76px;height:76px;border-radius:18px;background:rgba(240,196,118,.5);mix-blend-mode:multiply;transform:rotate(12deg)"></span>
+                <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid {{cutRing}};display:flex;align-items:center;justify-content:center;flex:none;margin-top:2px"><sc-if value="{{cutOn}}" hint-placeholder-val="{{ true }}"><span style="width:11px;height:11px;border-radius:50%;background:#3B2F25"></span></sc-if></span>
+                <span style="display:flex;flex-direction:column;gap:6px;position:relative">
+                  <span style="font-size:16px;font-weight:500">做一張去背圖<span style="margin-left:8px;font-size:11px;padding:2px 8px;border-radius:999px;background:#E6EEE2;color:#2E3F2B">推薦</span></span>
+                  <span style="font-size:13px;line-height:1.7;color:#5A4A3C">選一張平拍照自動去背。搭配板、比較試搭台會排得比較整齊，原本的照片都會留著。</span>
+                  <span style="font-size:12px;color:#3B2F25">要去背的照片：<b style="font-weight:500">第 1 張・平拍正面</b></span>
+                </span>
+              </button>
+              <button type="button" role="radio" aria-checked="{{origOn}}" class="opt-card" onClick="{{pickOrig}}" style="border:{{origBd}}">
+                <span aria-hidden="true" style="position:absolute;right:-16px;top:-16px;width:76px;height:76px;border-radius:18px;background:rgba(150,186,198,.5);mix-blend-mode:multiply;transform:rotate(12deg)"></span>
+                <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid {{origRing}};display:flex;align-items:center;justify-content:center;flex:none;margin-top:2px"><sc-if value="{{origOn}}" hint-placeholder-val="{{ false }}"><span style="width:11px;height:11px;border-radius:50%;background:#3B2F25"></span></sc-if></span>
+                <span style="display:flex;flex-direction:column;gap:6px;position:relative">
+                  <span style="font-size:16px;font-weight:500">先不用，直接用照片</span>
+                  <span style="font-size:13px;line-height:1.7;color:#5A4A3C">適合網拍穿搭照或懶得重拍時。搭配板會把封面照片裁成方形顯示；之後在詳細頁隨時可以補做去背。</span>
+                  <span style="font-size:12px;color:#3B2F25">會跳過「去背」步驟</span>
+                </span>
+              </button>
+            </div>
+          </fieldset>
+        </section>
+      </sc-if>
+
+      <!-- ===== 2. 去背 ===== -->
+      <sc-if value="{{s2}}" hint-placeholder-val="{{ false }}">
+        <section style="display:flex;flex-direction:column;gap:20px">
+          <h1 class="hd" style="margin:0;font-size:32px">確認去背結果</h1>
+          <div role="status" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;background:#E6EEE2;color:#2E3F2B;font-size:14px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>去背完成，邊緣很乾淨。<span class="num" style="margin-left:auto;font-size:12px">2.4 秒</span></div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px">
+            <figure style="margin:0;display:flex;flex-direction:column;gap:10px">
+              <div style="aspect-ratio:4/5;border-radius:16px;background:#B9AE9B;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 100 100" style="width:70%;height:70%;transform:rotate(-4deg)" role="img" aria-label="原始照片：放在木地板上的燕麥色針織衫"><path d="{{knit}}" fill="#D9CBB3"></path></svg></div>
+              <figcaption style="font-size:13px;color:#5A4A3C">第 1 張・平拍正面（原圖會保留）</figcaption>
+            </figure>
+            <figure style="margin:0;display:flex;flex-direction:column;gap:10px">
+              <div style="position:relative;aspect-ratio:4/5;border-radius:16px;background:#F3E7D4;display:flex;align-items:center;justify-content:center;outline:2.5px solid #4A6245;outline-offset:-2.5px;overflow:hidden">
+                <span aria-hidden="true" style="position:absolute;left:14%;top:12%;width:72%;height:76%;border-radius:24px;background:rgba(240,196,118,.3);mix-blend-mode:multiply;transform:rotate(-3deg)"></span>
+                <svg viewBox="0 0 100 100" style="position:relative;width:70%;height:70%;filter:drop-shadow(0 10px 12px rgba(59,47,37,.18))" role="img" aria-label="去背結果：燕麥色針織衫"><path d="{{knit}}" fill="#D9CBB3" stroke="rgba(59,47,37,.22)" stroke-width="0.5"></path></svg>
+                <span class="badge" style="left:12px;top:12px;height:26px;background:#4A6245;color:#fff;font-size:12px">搭配板會用這張</span>
+              </div>
+              <figcaption style="font-size:13px;color:#5A4A3C">去背結果・自動置中與統一比例</figcaption>
+            </figure>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-s" type="button">重新去背</button>
+            <button class="btn btn-s" type="button">換一張照片去背</button>
+            <button class="btn btn-g" type="button" onClick="{{pickOrigNext}}" style="text-decoration:underline">不去背了，直接用照片</button>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- ===== 3. 資料 ===== -->
+      <sc-if value="{{s3}}" hint-placeholder-val="{{ false }}">
+        <section style="display:grid;grid-template-columns:240px minmax(0,1fr);gap:32px;align-items:start">
+          <aside style="position:sticky;top:16px;display:flex;flex-direction:column;gap:10px">
+            <div class="paper" style="padding:12px">
+              <span aria-hidden="true" style="position:absolute;left:50%;top:-9px;margin-left:-34px;width:68px;height:20px;background:rgba(150,186,198,.7);mix-blend-mode:multiply;transform:rotate(-3deg);border-radius:2px"></span>
+              <div style="aspect-ratio:4/5;border-radius:10px;background:{{prevBg}};display:flex;align-items:center;justify-content:center;overflow:hidden"><svg viewBox="0 0 100 100" style="width:72%;height:72%;filter:drop-shadow(0 6px 8px rgba(59,47,37,.16));transform:rotate({{prevRot}}deg)" role="img" aria-label="封面預覽"><path d="{{knit}}" fill="#D9CBB3" stroke="rgba(59,47,37,.22)" stroke-width="0.5"></path></svg></div>
+              <span style="display:block;margin-top:8px;font-size:12px;color:#5A4A3C">{{prevCap}}</span>
+            </div>
+            <div style="display:flex;gap:6px"><sc-for list="{{thumbs}}" as="t" hint-placeholder-count="3"><span style="width:44px;height:54px;border-radius:8px;background:{{t}}"></span></sc-for></div>
+            <nav aria-label="跳到欄位" style="display:flex;flex-direction:column;margin-top:8px;font-size:13px">
+              <sc-for list="{{toc}}" as="t" hint-placeholder-count="5"><a href="#{{t.id}}" style="min-height:36px;display:flex;align-items:center;gap:8px;color:#3B2F25;text-decoration:none"><span style="width:8px;height:8px;border-radius:3px;background:{{t.c}}"></span>{{t.t}}<span style="margin-left:auto;font-size:11px;color:{{t.sc}}">{{t.st}}</span></a></sc-for>
+            </nav>
+          </aside>
+
+          <form style="display:flex;flex-direction:column;gap:18px">
+            <div style="display:flex;flex-direction:column;gap:6px"><h1 class="hd" style="margin:0;font-size:32px">衣物資料</h1><span style="font-size:13px;color:#5A4A3C">必填只有名稱和類型，其他想到再補。</span></div>
+
+            <!-- 基本 -->
+            <section id="basic" class="sec" aria-labelledby="basic-t">
+              <div class="sec-t"><span id="basic-t" class="tape" style="background:rgba(240,196,118,.8)">基本</span></div>
+              <div class="f"><label class="l" for="n">品名<span class="req">必填</span></label><input id="n" class="inp" value="燕麥色羊毛圓領針織衫"></div>
+              <div class="f"><span class="l" id="tp">類型<span class="req">必填</span><span class="opt">會決定下面要量哪些尺寸</span></span>
+                <div role="radiogroup" aria-labelledby="tp" style="display:flex;gap:8px;flex-wrap:wrap">
+                  <sc-for list="{{types}}" as="t" hint-placeholder-count="10"><button class="chip" type="button" role="radio" aria-checked="{{t.on}}" onClick="{{t.go}}"><span style="width:10px;height:10px;border-radius:3px;background:{{t.c}}"></span>{{t.t}}</button></sc-for>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+                <div class="f"><label class="l" for="br">品牌<span class="opt">選填</span></label><input id="br" class="inp" value="COS"></div>
+                <div class="f"><label class="l" for="ts">標籤尺寸<span class="opt">衣服上寫的</span></label><input id="ts" class="inp num" value="M"></div>
+                <div class="f"><span class="l">季節<span class="opt">可複選</span></span><div style="display:flex;gap:6px"><button class="chip" type="button" aria-pressed="false" style="padding:0 12px">春</button><button class="chip" type="button" aria-pressed="false" style="padding:0 12px">夏</button><button class="chip" type="button" aria-pressed="true" style="padding:0 12px">秋</button><button class="chip" type="button" aria-pressed="true" style="padding:0 12px">冬</button></div></div>
+              </div>
+            </section>
+
+            <!-- 平放尺寸 -->
+            <section id="size" class="sec" aria-labelledby="size-t">
+              <div class="sec-t"><span id="size-t" class="tape" style="background:rgba(150,186,198,.8)">平放尺寸</span><span style="font-size:12px;color:#5A4A3C">{{m.label}}・單位 cm・選填</span></div>
+              <div style="display:grid;grid-template-columns:260px minmax(0,1fr);gap:22px;align-items:start">
+                <figure style="margin:0;display:flex;flex-direction:column;gap:8px">
+                  <div role="img" aria-label="{{m.label}}的量法示意圖" style="position:relative;border-radius:14px;background:#F6E9D3;padding:10px">
+                    <div style="position:relative;aspect-ratio:1/1">
+                      <svg viewBox="-6 -6 112 112" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true"><path d="{{m.d}}" fill="#FFFCF6" stroke="#B9A88E" stroke-width="1"></path><path d="{{m.extra}}" fill="none" stroke="#B9A88E" stroke-width="1.2"></path></svg>
+                      <sc-for list="{{m.f}}" as="x" hint-placeholder-count="4">
+                        <svg viewBox="-6 -6 112 112" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true"><line x1="{{x.x1}}" y1="{{x.y1}}" x2="{{x.x2}}" y2="{{x.y2}}" stroke="#9A6B43" stroke-width="1.1"></line><circle cx="{{x.x1}}" cy="{{x.y1}}" r="1.3" fill="#9A6B43"></circle><circle cx="{{x.x2}}" cy="{{x.y2}}" r="1.3" fill="#9A6B43"></circle><circle cx="{{x.cx}}" cy="{{x.cy}}" r="4.4" fill="{{x.bg}}" stroke="#9A6B43" stroke-width="0.9"></circle><text x="{{x.cx}}" y="{{x.ty}}" text-anchor="middle" font-family="Nunito" font-weight="700" font-size="5.4" fill="{{x.fg}}">{{x.n}}</text></svg>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <figcaption style="font-size:12px;line-height:1.7;color:#5A4A3C">{{m.tip}}</figcaption>
+                </figure>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px">
+                    <sc-for list="{{m.f}}" as="x" hint-placeholder-count="4">
+                      <div class="f"><label class="l" for="m-{{x.n}}" style="display:flex;align-items:center;gap:6px"><span class="num" style="width:20px;height:20px;border-radius:50%;border:1.2px solid #9A6B43;color:#9A6B43;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center">{{x.n}}</span>{{x.k}}</label><div class="unit" style="background:{{x.ibg}}"><input id="m-{{x.n}}" value="{{x.v}}" placeholder="—" inputmode="decimal"><span>cm</span></div></div>
+                    </sc-for>
+                  </div>
+                  <sc-if value="{{m.fit}}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:#DCE8EC;color:#24424D;font-size:13px;line-height:1.7">
+                      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;margin-top:2px"><path d="M4 18L18 4l2 2L6 20zM8 14l2 2M11 11l2 2M14 8l2 2"></path></svg>
+                      <span>{{m.fit}}<br><a href="B-Body.dc.html" style="font-size:12px">對照的是個人資料裡最新的量測</a></span>
+                    </div>
+                  </sc-if>
+                  <p style="margin:0;font-size:12px;line-height:1.7;color:#74624F">平放在桌面量，不要拉扯布料；網拍的尺寸表通常也是平放量，可以直接照抄。誤差 1–2 cm 屬於正常。</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- 顏色 -->
+            <section id="color" class="sec" aria-labelledby="color-t">
+              <div class="sec-t"><span id="color-t" class="tape" style="background:rgba(222,166,152,.8)">顏色</span><span style="font-size:12px;color:#5A4A3C">選一個色系就好；要很準再用自訂色碼</span></div>
+              <div class="f"><span class="l">從照片取色<span class="opt">點一下就套用</span></span>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <sc-for list="{{picked}}" as="c" hint-placeholder-count="3"><button type="button" class="chip" aria-pressed="{{c.on}}" style="padding:0 14px 0 6px"><span style="width:28px;height:28px;border-radius:50%;background:{{c.hex}};border:1.5px solid rgba(59,47,37,.15)"></span>{{c.t}}<span class="num" style="font-size:11px;opacity:.7">{{c.hex}}</span></button></sc-for>
+                </div>
+              </div>
+              <div class="f"><span class="l" id="cg">色系<span class="req">建議填</span><span class="opt">用來篩選，例如「找所有藍色系」</span></span>
+                <div role="radiogroup" aria-labelledby="cg" style="display:flex;gap:10px;flex-wrap:wrap">
+                  <sc-for list="{{colors}}" as="c" hint-placeholder-count="16"><span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:44px"><button class="sw" type="button" role="radio" aria-checked="{{c.sel}}" aria-label="{{c.t}}" style="background:{{c.hex}};box-shadow:{{c.ring}}"></button><span style="font-size:11px;color:#5A4A3C">{{c.t}}</span></span></sc-for>
+                </div>
+              </div>
+              <details style="border-top:1.5px dashed #EADCC6;padding-top:12px" open>
+                <summary style="cursor:pointer;min-height:36px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;list-style:none">自訂色碼與第二色<span class="opt">選填</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;margin-left:auto"><path d="M6 15l6-6 6 6"></path></svg></summary>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px">
+                  <div class="f"><label class="l" for="hx">主色色碼</label><div class="unit" style="justify-content:flex-start"><span style="width:26px;height:26px;border-radius:7px;background:#D9CBB3;border:1.5px solid rgba(59,47,37,.15)"></span><input id="hx" value="#D9CBB3" style="text-align:left;font-weight:600"><button type="button" aria-label="開啟調色盤" style="width:36px;height:36px;border:0;border-radius:8px;background:#F3E7D4;color:#3B2F25;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M14 4l6 6-9 9H5v-6zM12 6l6 6"></path></svg></button></div></div>
+                  <div class="f"><span class="l">第二色<span class="opt">條紋、拼色時再加</span></span><button type="button" class="unit" style="justify-content:flex-start;border-style:dashed;color:#3E6270;font:500 13px 'Chiron GoRound TC';cursor:pointer">＋ 加第二色</button></div>
+                </div>
+              </details>
+            </section>
+
+            <!-- 材質 -->
+            <section id="mat" class="sec" aria-labelledby="mat-t">
+              <div class="sec-t"><span id="mat-t" class="tape" style="background:rgba(167,192,158,.85)">材質</span><span style="font-size:12px;color:#5A4A3C">可複選；有成分比例可以照標籤填</span></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <sc-for list="{{mats}}" as="x" hint-placeholder-count="10"><button class="chip" type="button" aria-pressed="{{x.on}}">{{x.t}}</button></sc-for>
+                <button class="chip" type="button" style="color:#3E6270;border-style:dashed">＋ 其他</button>
+              </div>
+              <div class="f"><label class="l" for="cmp">成分比例<span class="opt">選填</span></label><input id="cmp" class="inp" value="羊毛 70%・尼龍 30%"></div>
+            </section>
+
+            <!-- 購買 -->
+            <section id="buy" class="sec" aria-labelledby="buy-t">
+              <div class="sec-t"><span id="buy-t" class="tape" style="background:rgba(240,196,118,.6)">購買資訊</span><span style="font-size:12px;color:#5A4A3C">全部選填</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+                <div class="f"><label class="l" for="pr">價格</label><div class="unit"><span>NT$</span><input id="pr" value="3,490"></div></div>
+                <div class="f"><span class="l">購買日期</span><button type="button" aria-haspopup="dialog" class="unit" style="justify-content:flex-start;gap:10px;font:400 15px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg>2025 年 10 月 18 日（六）</button></div>
+                <div class="f"><label class="l" for="sh">購買通路</label><input id="sh" class="inp" value="COS 台北信義店"></div>
+              </div>
+              <div class="f"><label class="l" for="url">商品網址<span class="opt">網拍買的可以貼上，之後好回去看尺寸表</span></label><input id="url" class="inp" type="url" placeholder="https://"></div>
+            </section>
+
+            <!-- 備註 -->
+            <section id="note" class="sec" aria-labelledby="note-t">
+              <div class="sec-t"><span id="note-t" class="tape" style="background:rgba(150,186,198,.6)">備註</span></div>
+              <textarea aria-labelledby="note-t" rows="3" style="border:1.5px solid #D9C7AC;border-radius:12px;background:#FFFCF6;padding:12px 14px;font:400 15px/1.7 'Chiron GoRound TC';color:#3B2F25;resize:vertical">手洗或裝洗衣袋冷水洗。袖子稍長，反折一次剛好。</textarea>
+            </section>
+          </form>
+        </section>
+      </sc-if>
+
+      <!-- ===== 4. 確認 ===== -->
+      <sc-if value="{{s4}}" hint-placeholder-val="{{ false }}">
+        <section style="display:flex;flex-wrap:wrap;gap:44px;align-items:flex-start">
+          <div class="paper" style="flex:0 0 260px;padding:14px;display:flex;flex-direction:column;gap:10px">
+            <span aria-hidden="true" style="position:absolute;left:50%;top:-10px;margin-left:-40px;width:80px;height:22px;background:rgba(240,196,118,.75);mix-blend-mode:multiply;transform:rotate(-3deg);border-radius:2px"></span>
+            <div style="aspect-ratio:4/5;border-radius:10px;background:{{prevBg}};display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 100 100" style="width:72%;height:72%;filter:drop-shadow(0 6px 8px rgba(59,47,37,.16));transform:rotate({{prevRot}}deg)" role="img" aria-label="卡片預覽"><path d="{{knit}}" fill="#D9CBB3" stroke="rgba(59,47,37,.22)" stroke-width="0.5"></path></svg></div>
+            <span style="font-size:15px;font-weight:500">燕麥色羊毛圓領針織衫</span>
+            <span style="font-size:13px;color:#5A4A3C;margin-top:-6px">燕麥 · COS · M・3 張照片</span>
+          </div>
+          <div style="flex:1 1 400px;display:flex;flex-direction:column;gap:20px">
+            <h1 class="hd" style="margin:0;font-size:32px">要放到哪裡？</h1>
+            <div role="radiogroup" aria-label="儲存位置" style="display:flex;flex-direction:column;gap:12px">
+              <label style="position:relative;display:flex;gap:14px;padding:18px;border-radius:14px;border:2px solid #3B2F25;background:#FFFCF6;cursor:pointer;overflow:hidden">
+                <input type="radio" name="dest" checked style="width:20px;height:20px;accent-color:#3B2F25;margin:2px 0 0">
+                <span style="display:flex;flex-direction:column;gap:4px"><span style="font-size:15px;font-weight:500">我的衣櫃（已購買）</span><span style="font-size:13px;color:#5A4A3C">可以馬上用在今日搭配</span></span>
+              </label>
+              <label style="position:relative;display:flex;gap:14px;padding:18px;border-radius:14px;border:1.5px dashed #C9A296;background:#FFFCF6;cursor:pointer;overflow:hidden">
+                <input type="radio" name="dest" style="width:20px;height:20px;accent-color:#3B2F25;margin:2px 0 0">
+                <span style="display:flex;flex-direction:column;gap:4px"><span style="font-size:15px;font-weight:500">選購清單（還在考慮）</span><span style="font-size:13px;color:#5A4A3C">網拍的穿搭照和尺寸表一起留著，方便比較</span></span>
+              </label>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:12px;background:#FFFCF6;font-size:13px;color:#5A4A3C">
+              <span>搭配板用圖：<b style="font-weight:500;color:#3B2F25">{{destImg}}</b></span>
+              <span>平放尺寸：<b style="font-weight:500;color:#3B2F25">已填 4 / 4 項</b></span>
+            </div>
+            <label style="display:flex;align-items:center;gap:10px;font-size:14px;min-height:44px"><input type="checkbox" style="width:18px;height:18px;accent-color:#3B2F25">存好後繼續新增下一件</label>
+          </div>
+        </section>
+      </sc-if>
+    </div>
+  </main>
+
+  <footer style="position:sticky;bottom:0;display:flex;align-items:center;gap:12px;padding:14px clamp(16px,3vw,32px);background:#FFFCF6;border-top:1.5px dashed #D9C7AC">
+    <sc-if value="{{canBack}}" hint-placeholder-val="{{ false }}"><button class="btn btn-g" type="button" onClick="{{prev}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>上一步</button></sc-if>
+    <span style="margin-left:auto;font-size:13px;color:#5A4A3C">{{hint}}</span>
+    <sc-if value="{{notLast}}" hint-placeholder-val="{{ true }}"><button class="btn btn-p" type="button" onClick="{{next}}">{{nextLabel}}<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button></sc-if>
+    <sc-if value="{{s4}}" hint-placeholder-val="{{ false }}"><a class="btn btn-o" href="B-Closet.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>放進衣櫃</a></sc-if>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { step: 1, mode: 'cut', type: 'tee' }; }
+  renderVals() {
+    const { step, mode, type } = this.state;
+    const cut = mode === 'cut';
+    const set = (o) => () => this.setState(o);
+    const order = cut ? [1, 2, 3, 4] : [1, 3, 4];
+    const idx = order.indexOf(step);
+    const steps = ['照片', '去背', '資料', '確認'].map((t, i) => {
+      const n = i + 1, skip = !cut && n === 2, cur = n === step, done = order.indexOf(n) > -1 && order.indexOf(n) < idx;
+      return { n, t: skip ? '去背（略過）' : t, go: skip ? () => {} : set({ step: n }), cur: cur ? 'step' : 'false',
+        bg: cur ? '#F6E7C6' : 'transparent', w: cur ? 700 : 500, fg: skip ? '#74624F' : '#3B2F25', td: skip ? 'line-through' : 'none',
+        dot: cur ? '#3B2F25' : (done ? '#B7CBB0' : '#EDE4D6'), dotFg: cur ? '#FBF4E8' : '#3B2F25' };
+    });
+
+    const knit = 'M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z';
+    const photos = [
+      { kind: '平拍正面', alt: '平拍照：木地板上的燕麥色針織衫', bg: '#B9AE9B', d: knit, tf: 'translate(12 18) scale(.76) rotate(-4 50 50)', cover: true, ol: cut ? '2.5px solid #4A6245' : 'none' },
+      { kind: '網拍穿搭照', alt: '網拍模特兒穿著燕麥色針織衫的照片', bg: '#DCE8EC', d: knit, tf: 'translate(22 28) scale(.56)', model: true, ol: 'none' },
+      { kind: '標籤', alt: '尺寸標籤特寫：M', bg: '#EFE6D6', d: '', tf: '', tag: true, ol: 'none' }
+    ].map(p => Object.assign({ model: false, tag: false, cover: false }, p, { notCover: !p.cover }));
+
+    // ---- 平放尺寸：各類型的量法（座標在 0–100 的畫布上） ----
+    // L(名稱, 起點, 終點, 示範數值, 編號圓圈位置[選填，預設在線段中點])
+    const L = (k, x1, y1, x2, y2, v, lx, ly) => ({ k, x1, y1, x2, y2, v: v || '', lx, ly });
+    const M = {
+      tee: { label: '上衣／T 恤', d: 'M30 18L42 14Q50 22 58 14L70 18L86 32L76 42L70 38V86H30V38L24 42L14 32Z',
+        f: [L('肩寬', 30, 10, 70, 10, '52'), L('袖長', 73, 13, 90, 29, '20'), L('胸寬', 30, 50, 70, 50, '56'), L('衣長', 8, 18, 8, 86, '64')],
+        tip: '肩寬量兩邊肩線接縫；胸寬量腋下往下 1 cm 的寬度。', fit: '平放胸寬 56 × 2 = 112 cm，比你的上胸圍 84 cm 多 28 cm，屬於寬鬆落肩版型。' },
+      shirt: { label: '襯衫／外套', d: 'M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z',
+        f: [L('肩寬', 30, 5, 70, 5), L('袖長', 74, 9, 94, 80), L('胸寬', 28, 52, 72, 52), L('袖口', 79, 92, 91, 90), L('衣長', 2, 12, 2, 92)],
+        tip: '袖長從肩線接縫量到袖口；袖口量平放寬度。', fit: '' },
+      tank: { label: '背心／無袖上衣', d: 'M34 12H42Q50 24 58 12H66L70 34V88H30V34Z',
+        f: [L('肩寬', 34, 6, 66, 6), L('胸寬', 30, 46, 70, 46), L('衣長', 24, 12, 24, 88)], tip: '肩寬量兩邊肩帶外側。', fit: '' },
+      bra: { label: '內衣／小可愛', d: 'M22 42Q36 28 50 42Q64 28 78 42V66H22Z', extra: 'M30 37L33 12M70 37L67 12',
+        f: [L('胸寬', 22, 54, 78, 54), L('衣長', 86, 34, 86, 66)], tip: '衣長不含肩帶。', fit: '' },
+      skirt: { label: '裙子', d: 'M36 14H64L80 86H20Z',
+        f: [L('腰寬', 36, 8, 64, 8), L('臀寬', 31, 34, 69, 34), L('裙長', 88, 14, 88, 86), L('下擺寬', 20, 94, 80, 94)], tip: '鬆緊腰量不拉開的寬度。', fit: '' },
+      pants: { label: '褲子', d: 'M32 10H68L72 90H56L50 36L44 90H28Z',
+        f: [L('腰寬', 32, 4, 68, 4), L('褲檔', 50, 10, 50, 36, '', 50, 16), L('臀寬', 31, 24, 69, 24, '', 62, 24), L('大腿寬', 29, 44, 48, 44), L('褲長', 80, 10, 80, 90), L('褲口寬', 56, 96, 72, 96)],
+        tip: '褲檔量前檔：腰頭上緣到褲襠接縫。', fit: '' },
+      dress: { label: '洋裝', d: 'M38 10H44Q50 18 56 10H62L66 40L82 90H18L34 40Z',
+        f: [L('肩寬', 38, 4, 62, 4), L('胸寬', 35, 28, 65, 28), L('腰寬', 34, 42, 66, 42), L('全長', 10, 10, 10, 90), L('下擺寬', 18, 97, 82, 97)], tip: '全長從肩線最高點量到裙襬。', fit: '' },
+      shoe: { label: '鞋子', d: 'M14 62V46Q24 44 34 52Q48 62 70 62Q86 62 88 72V76H14Z',
+        f: [L('鞋內長', 14, 84, 88, 84), L('跟高', 94, 62, 94, 76)], tip: '鞋碼請填在「標籤尺寸」。', fit: '' },
+      bag: { label: '包包', d: 'M22 40H78L82 86H18Z', extra: 'M36 40Q36 18 50 18Q64 18 64 40',
+        f: [L('寬', 18, 94, 82, 94), L('高', 90, 40, 90, 86), L('側寬', 6, 40, 6, 86)], tip: '側寬是包底的厚度。', fit: '' }
+    };
+    const cur = M[type];
+    const mf = cur.f.map((x, i) => {
+      const cx = x.lx != null ? x.lx : (x.x1 + x.x2) / 2, cy = x.ly != null ? x.ly : (x.y1 + x.y2) / 2;
+      return Object.assign({}, x, { n: i + 1, cx, cy, ty: cy + 1.9,
+        bg: x.v ? '#9A6B43' : '#FFFCF6', fg: x.v ? '#FFFCF6' : '#9A6B43', ibg: x.v ? '#FFFCF6' : '#FBF4E8' });
+    });
+    const TYPES = [['tee', '上衣／T 恤', '#F2CF8E'], ['shirt', '襯衫／外套', '#A9C6CF'], ['tank', '背心', '#F2CF8E'], ['bra', '內衣／小可愛', '#E2B4A8'], ['skirt', '裙子', '#B7CBB0'], ['pants', '褲子', '#B7CBB0'], ['dress', '洋裝', '#E2B4A8'], ['shoe', '鞋子', '#E2B4A8'], ['bag', '包包', '#D9C7AC']];
+
+    const sel = '#D9CBB3';
+    const colors = [['白', '#F4F1EA'], ['米', '#EFE6D2'], ['燕麥', '#D9CBB3'], ['駝', '#B88A5A'], ['咖啡', '#5A4031'], ['灰', '#9A9893'], ['黑', '#232322'], ['海軍藍', '#2E3A4F'], ['藍', '#8FA3BC'], ['綠', '#8C9A86'], ['黃', '#E8C66A'], ['橘', '#D98A4E'], ['紅', '#A8423A'], ['酒紅', '#6E2E34'], ['粉', '#E7B9B4'], ['紫', '#8E7AA6'], ['多色', 'conic-gradient(#E7B9B4,#E8C66A,#8C9A86,#8FA3BC,#E7B9B4)'], ['其他', '#FFFCF6']]
+      .map(([t, hex]) => ({ t, hex, sel: hex === sel ? 'true' : 'false', ring: hex === sel ? '0 0 0 2px #FFFCF6, 0 0 0 4px #3B2F25' : 'none' }));
+    const hints = { 1: cut ? '下一步會自動去背' : '會跳過去背，直接填資料', 2: '去背失敗也能先儲存', 3: '必填 2 項已完成', 4: '之後可在詳細頁修改' };
+    const next = idx < order.length - 1 ? order[idx + 1] : step, prev = idx > 0 ? order[idx - 1] : step;
+    const toc = [['basic', '基本', '#F2CF8E', '完成'], ['size', '平放尺寸', '#A9C6CF', '4 / 4'], ['color', '顏色', '#E2B4A8', '完成'], ['mat', '材質', '#B7CBB0', '完成'], ['buy', '購買資訊', '#F2CF8E', '2 / 4'], ['note', '備註', '#A9C6CF', '完成']]
+      .map(([id, t, c, st]) => ({ id, t, c, st, sc: st === '完成' ? '#4A6245' : '#74624F' }));
+    return {
+      steps, photos, knit, colors,
+      s1: step === 1, s2: step === 2, s3: step === 3, s4: step === 4,
+      cutOn: cut ? 'true' : 'false', origOn: cut ? 'false' : 'true',
+      cutBd: cut ? '2px solid #3B2F25' : '1.5px solid #E2D2B8', origBd: cut ? '1.5px solid #E2D2B8' : '2px solid #3B2F25',
+      cutRing: cut ? '#3B2F25' : '#D9C7AC', origRing: cut ? '#D9C7AC' : '#3B2F25',
+      pickCut: set({ mode: 'cut' }), pickOrig: set({ mode: 'orig' }), pickOrigNext: set({ mode: 'orig', step: 3 }),
+      types: TYPES.map(([k, t, c]) => ({ t, c, on: k === type ? 'true' : 'false', go: set({ type: k }) })),
+      m: { label: cur.label, d: cur.d, extra: cur.extra || '', tip: cur.tip, fit: cur.fit, f: mf },
+      picked: [['燕麥', '#D9CBB3', true], ['奶油白', '#EFE6D2', false], ['淺卡其', '#C9B79C', false]].map(([t, hex, on]) => ({ t, hex, on: on ? 'true' : 'false' })),
+      mats: ['棉', '羊毛', '喀什米爾', '聚酯纖維', '尼龍', '麻', '絲', '嫘縈', '丹寧', '皮革'].map(t => ({ t, on: t === '羊毛' || t === '尼龍' ? 'true' : 'false' })),
+      prevBg: cut ? '#F3E7D4' : '#B9AE9B', prevRot: cut ? 0 : -4, prevCap: cut ? '封面：去背圖' : '封面：平拍正面（原照片）',
+      thumbs: ['#B9AE9B', '#DCE8EC', '#EFE6D6'], toc,
+      destImg: cut ? '去背圖' : '封面照片（裁成方形）',
+      canBack: idx > 0, notLast: step !== 4, hint: hints[step], nextLabel: step === 3 ? '確認' : '下一步',
+      next: set({ step: next }), prev: set({ step: prev })
+    };
+  }
+}
+</script>
+</body>
+</html>

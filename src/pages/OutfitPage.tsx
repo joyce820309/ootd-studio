@@ -1,33 +1,33 @@
-import { useCallback, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import { FreeCanvas } from '@/components/outfit/FreeCanvas'
 import { OutfitBoard, type BoardPiece } from '@/components/outfit/OutfitBoard'
 import { SlotPicker } from '@/components/outfit/SlotPicker'
-import { Button } from '@/components/ui/Button'
+import { Button, ButtonLink } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import { PaperCard, Tape, TiltLabel, WashBlob } from '@/components/ui/Paper'
+import { LoadingState, PageState } from '@/components/ui/PageState'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
 import { fetchClosetItems, saveOutfit, useAsync } from '@/lib/data'
+import { bringToFront, defaultLayout, pickLayout, shiftLayer } from '@/lib/freeLayout'
 import { EMPTY_PICKS, groupBySlot, missingRequired, suggestDefaultPicks, type Picks } from '@/lib/outfit'
-import { SLOTS } from '@/lib/slots'
-import type { ClosetItem, OutfitTemplate, Slot } from '@/types'
+import { todayISO } from '@/lib/date'
+import { storeTodayPicks, type RewearState } from '@/lib/diary'
+import { isWearable, SLOT_META, SLOTS } from '@/lib/slots'
+import type { ClosetItem, FreeLayout, OutfitTemplate, Placement, Slot } from '@/types'
 
-const today = () => new Date().toISOString().slice(0, 10)
 
 export function OutfitPage() {
   const { data: items, loading, error } = useAsync(fetchClosetItems)
 
   if (loading) {
     return (
-      <p role="status" className="p-10 text-center text-sm text-ink-2">
-        正在整理你的衣櫃…
-      </p>
+      <main className="mx-auto max-w-3xl px-5 py-10"><LoadingState label="正在整理你的衣櫃…" /></main>
     )
   }
   if (error || !items) {
     return (
-      <p role="alert" className="mx-auto mt-10 max-w-md rounded-tile border-[1.5px] border-rose bg-rose-soft p-4 text-sm text-rose-ink">
-        衣櫃資料讀取失敗，請重新整理再試一次。
-      </p>
+      <main className="mx-auto max-w-3xl px-5 py-10" role="alert"><PageState icon="alert" tone="rose" title="衣櫃暫時打不開" description="衣物資料讀取失敗，沒有任何搭配變更。確認連線後再重試。" action={<Button variant="secondary" onClick={() => window.location.reload()}>重新載入</Button>} /></main>
     )
   }
   return <OutfitEditor items={items} />
@@ -37,12 +37,47 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
   const grouped = useMemo(() => groupBySlot(items), [items])
   const byId = useMemo(() => new Map(items.map((i) => [i.id, i])), [items])
 
-  const [name, setName] = useState('今天的穿搭')
+  const location = useLocation()
+  // 從穿搭日記「再穿一次」帶過來：不能穿的單品先空著
+  const [rewear] = useState(() => {
+    const state = (location.state as Partial<RewearState> | null)?.rewear
+    if (!state) return null
+    const picks: Picks = { ...EMPTY_PICKS }
+    const skipped: string[] = []
+    for (const [slot, id] of Object.entries(state.picks) as [Slot, string][]) {
+      const item = byId.get(id)
+      if (item && isWearable(item.status)) picks[slot] = id
+      else skipped.push(item ? `${item.name}（${SLOT_META[slot].label}）` : `${SLOT_META[slot].label}那件已不在衣櫃`)
+    }
+    return { name: state.name, picks, skipped }
+  })
+  const [name, setName] = useState(rewear?.name ?? '今天的穿搭')
   const [template, setTemplate] = useState<OutfitTemplate>('full')
-  const [picks, setPicks] = useState<Picks>(() => suggestDefaultPicks(items))
+  const [picks, setPicks] = useState<Picks>(() => rewear?.picks ?? suggestDefaultPicks(items))
+  const [layout, setLayout] = useState<FreeLayout>(defaultLayout)
+  const [selected, setSelected] = useState<Slot | null>(null)
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState<ToastMessage | null>(null)
+  const [toast, setToast] = useState<ToastMessage | null>(() =>
+    rewear
+      ? rewear.skipped.length
+        ? { tone: 'error', text: `再穿一次：${rewear.skipped.join('、')}目前不能穿，那格先空著，換一件就好。` }
+        : { tone: 'success', text: '已帶回日記裡的這一套。' }
+      : null,
+  )
   const closeToast = useCallback(() => setToast(null), [])
+
+  // 記下今天排好的單品，穿搭日記「記一筆」可以直接帶入
+  useEffect(() => storeTodayPicks(picks), [picks])
+
+  const placeOne = useCallback((slot: Slot, p: Placement) => setLayout((l) => ({ ...l, [slot]: p })), [])
+
+  function pick(slot: Slot, id: string | null) {
+    const isNew = !picks[slot] && id
+    setPicks((p) => ({ ...p, [slot]: id }))
+    // 新放進畫布的單品放到最上層，才不會被蓋住
+    if (isNew) setLayout((l) => bringToFront(l, slot))
+    if (!id && selected === slot) setSelected(null)
+  }
 
   const pieces = useMemo(() => {
     const out: Partial<Record<Slot, BoardPiece>> = {}
@@ -68,7 +103,14 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
           .filter(([, id]) => id)
           .map(([slot, id]) => [slot, { kind: 'closet' as const, itemId: id! }]),
       )
-      const res = await saveOutfit({ name: name.trim() || '今天的穿搭', date: today(), template, picks: picksOut })
+      const pickedSlots = (Object.keys(picksOut) as Slot[])
+      const res = await saveOutfit({
+        name: name.trim() || '今天的穿搭',
+        date: todayISO(),
+        template,
+        picks: picksOut,
+        layout: template === 'free' ? pickLayout(layout, pickedSlots) : undefined,
+      })
       setToast({ tone: 'success', text: res.demo ? '示範模式：已模擬存進穿搭日記' : '已存進穿搭日記' })
     } catch {
       setToast({ tone: 'error', text: '沒有存成功，內容已保留。連線穩定後再試一次。' })
@@ -88,11 +130,18 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
           id="outfit-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="h-11 min-w-[200px] flex-1 border-0 border-b-[1.5px] border-dashed border-line-strong bg-transparent px-1 font-hd text-[22px] font-bold text-ink md:max-w-[360px] md:flex-none"
+          className="h-11 min-w-[200px] flex-1 border-0 border-b-[1.5px] border-dashed border-line-strong bg-transparent px-1 font-hd text-[22px] text-ink md:max-w-[360px] md:flex-none"
         />
         <span className="hidden text-xs text-ink-2 lg:inline">勾選單品，系統依部位自動排版</span>
         <div className="ml-auto flex gap-2">
-          <Button variant="ghost" onClick={() => setPicks(EMPTY_PICKS)}>
+          <ButtonLink to="/studio" variant="secondary" className="px-3 text-xs sm:px-[18px] sm:text-sm">工作台</ButtonLink>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setPicks(EMPTY_PICKS)
+              setSelected(null)
+            }}
+          >
             全部清空
           </Button>
           <Button variant="primary" onClick={handleSave} disabled={saving}>
@@ -110,7 +159,7 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
               meta={meta}
               items={grouped[meta.slot]}
               selectedId={picks[meta.slot]}
-              onSelect={(id) => setPicks((p) => ({ ...p, [meta.slot]: id }))}
+              onSelect={(id) => pick(meta.slot, id)}
             />
           ))}
         </PaperCard>
@@ -123,6 +172,7 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
                 [
                   ['full', '完整平鋪'],
                   ['column', '三件直列'],
+                  ['free', '自由擺放'],
                 ] as const
               ).map(([value, label]) => (
                 <button
@@ -136,16 +186,43 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
                 </button>
               ))}
             </div>
-            <span className="ml-auto text-xs text-ink-2">上衣在上、下身在中、鞋子在下</span>
+            {template === 'free' ? (
+              <Button
+                variant="ghost"
+                className="ml-auto h-9 px-3 text-[13px]"
+                onClick={() => {
+                  setLayout(defaultLayout())
+                  setSelected(null)
+                }}
+              >
+                <Icon name="reset" size={16} />
+                重新排列
+              </Button>
+            ) : (
+              <span className="ml-auto text-xs text-ink-2">上衣在上、下身在中、鞋子在下</span>
+            )}
           </div>
 
           <PaperCard className="relative flex flex-col gap-3.5 p-5">
             <Tape accent="mist" />
             <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <span className="font-hd text-[22px] font-bold">{name || '今天的穿搭'}</span>
-              <span className="font-num text-[13px] text-ink-2 tabular">{today().replaceAll('-', '/')}</span>
+              <span className="font-hd text-[22px]">{name || '今天的穿搭'}</span>
+              <span className="font-num text-[13px] text-ink-2 tabular">{todayISO().replaceAll('-', '/')}</span>
             </div>
-            <OutfitBoard template={template} pieces={pieces} className="h-[clamp(380px,48vw,560px)]" />
+            {template === 'free' ? (
+              <FreeCanvas
+                pieces={pieces}
+                layout={layout}
+                selected={selected}
+                onSelect={setSelected}
+                onPlace={placeOne}
+                onLayer={(slot, dir) => setLayout((l) => shiftLayer(l, slot, Object.keys(pieces) as Slot[], dir))}
+                onRemove={(slot) => pick(slot, null)}
+                className="h-[clamp(440px,52vw,600px)]"
+              />
+            ) : (
+              <OutfitBoard template={template} pieces={pieces} className="h-[clamp(380px,48vw,560px)]" />
+            )}
             {template === 'column' && extras.length > 0 && (
               <p className="m-0 text-xs text-ink-2">另外搭配：{extras.join('、')}</p>
             )}
@@ -161,7 +238,7 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
           <div className="relative flex flex-wrap items-start gap-3.5 overflow-hidden rounded-card bg-sage-soft px-4.5 py-4">
             <WashBlob accent="oat" className="-top-6 -right-6 size-[90px]" tilt={12} />
             <div className="relative flex flex-[1_1_280px] flex-col gap-1.5">
-              <span className="font-hd text-[17px] font-bold text-sage-ink">搭配檢查</span>
+              <span className="font-hd text-[17px] text-sage-ink">搭配檢查</span>
               <span role="status" className="text-[13px] leading-relaxed text-sage-ink">
                 {missing.length
                   ? `還缺：${missing.join('、')}。選好必選部位就能儲存。`

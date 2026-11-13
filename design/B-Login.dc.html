@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>登入</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',serif}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:50px;padding:0 20px;border-radius:12px;font:500 15px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap;width:100%}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.f{display:flex;flex-direction:column;gap:6px}
+.f label{font-size:13px;font-weight:500}
+.inp{height:50px;border:1.5px solid #D9C7AC;border-radius:12px;background:#FBF4E8;padding:0 14px;font:400 15px 'Chiron GoRound TC',sans-serif;color:#3B2F25;width:100%}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.wash{position:absolute;border-radius:28px;mix-blend-mode:multiply}
+.lk{border:0;background:none;padding:0;font:400 13px 'Chiron GoRound TC';color:#3E6270;text-decoration:underline;cursor:pointer;min-height:32px}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+</style>
+</helmet>
+<div style="width:100%;min-height:900px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-wrap:wrap">
+
+  <aside aria-hidden="true" style="flex:1 1 480px;min-height:420px;position:relative;background:#F6E9D3;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:48px">
+    <span class="wash" style="left:8%;top:10%;width:44%;height:40%;background:rgba(240,196,118,.55);transform:rotate(-6deg)"></span>
+    <span class="wash" style="left:40%;top:4%;width:46%;height:36%;background:rgba(150,186,198,.5);transform:rotate(5deg)"></span>
+    <span class="wash" style="left:28%;top:34%;width:52%;height:34%;background:rgba(222,166,152,.45);transform:rotate(-3deg)"></span>
+    <span class="wash" style="left:10%;top:46%;width:30%;height:22%;background:rgba(167,192,158,.6);transform:rotate(7deg)"></span>
+    <svg viewBox="0 0 100 100" style="position:absolute;left:18%;top:12%;width:30%;filter:drop-shadow(0 12px 14px rgba(59,47,37,.2));transform:rotate(-6deg)"><path d="M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z" fill="#B88A5A" stroke="rgba(59,47,37,.22)" stroke-width="0.5"></path></svg>
+    <svg viewBox="0 0 100 100" style="position:absolute;left:46%;top:10%;width:26%;filter:drop-shadow(0 12px 14px rgba(59,47,37,.2));transform:rotate(4deg)"><path d="M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z" fill="#F4F1EA" stroke="rgba(59,47,37,.22)" stroke-width="0.5"></path></svg>
+    <svg viewBox="0 0 100 100" style="position:absolute;left:48%;top:36%;width:22%;filter:drop-shadow(0 12px 14px rgba(59,47,37,.2));transform:rotate(-2deg)"><path d="M36 14H64L80 86H20Z" fill="#8C9A86" stroke="rgba(59,47,37,.22)" stroke-width="0.5"></path></svg>
+    <div style="position:relative;display:flex;flex-direction:column;gap:12px;max-width:440px">
+      <span class="hd" style="align-self:flex-start;display:inline-flex;height:34px;align-items:center;padding:0 14px;background:#E2B4A8;border-radius:3px;font-size:16px;font-weight:700;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.12)">歡迎回來</span>
+      <p class="hd" style="margin:0;font-size:30px;font-weight:700;line-height:1.45">你的衣櫃一直都在這裡，<br>慢慢來，今天也穿得開心。</p>
+    </div>
+  </aside>
+
+  <main style="flex:1 1 440px;display:flex;align-items:center;justify-content:center;padding:48px clamp(16px,4vw,56px)">
+    <div style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:24px">
+      <a href="B-Landing.dc.html" class="logo" style="align-self:flex-start;font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</a>
+
+      <sc-if value="{{notSent}}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <h1 class="hd" style="margin:0;font-size:32px;font-weight:700">登入你的衣櫃</h1>
+            <span style="font-size:14px;color:#5A4A3C">私人空間，僅限受邀帳號。</span>
+          </div>
+
+          <button class="btn btn-s" type="button">
+            <svg viewBox="0 0 24 24" style="width:20px;height:20px" aria-hidden="true"><path d="M21.6 12.2c0-.7-.1-1.3-.2-1.9H12v3.6h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.2z" fill="#4285F4"></path><path d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22z" fill="#34A853"></path><path d="M6.4 14c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.4H3.1A10 10 0 0 0 2 12c0 1.6.4 3.1 1.1 4.6z" fill="#FBBC05"></path><path d="M12 6c1.5 0 2.8.5 3.8 1.5l2.8-2.8A10 10 0 0 0 3.1 7.4L6.4 10C7.2 7.7 9.4 6 12 6z" fill="#EA4335"></path></svg>
+            使用 Google 帳號登入
+          </button>
+
+          <div style="display:flex;align-items:center;gap:12px;font-size:12px;color:#5A4A3C"><span style="flex:1;border-top:1.5px dashed #D9C7AC"></span>或用 Email<span style="flex:1;border-top:1.5px dashed #D9C7AC"></span></div>
+
+          <div role="group" aria-label="登入方式" style="display:grid;grid-template-columns:1fr 1fr;padding:3px;background:#F3E7D4;border-radius:12px">
+            <button type="button" aria-pressed="{{isPw}}" onClick="{{toPw}}" style="height:42px;border:0;border-radius:10px;background:{{pwBg}};box-shadow:{{pwSh}};font:500 14px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer">密碼</button>
+            <button type="button" aria-pressed="{{isMagic}}" onClick="{{toMagic}}" style="height:42px;border:0;border-radius:10px;background:{{mgBg}};box-shadow:{{mgSh}};font:500 14px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer">登入連結（免密碼）</button>
+          </div>
+
+          <form style="display:flex;flex-direction:column;gap:16px">
+            <div class="f"><label for="em">Email</label><input id="em" class="inp" type="email" value="joyce@example.com" autocomplete="email"></div>
+            <sc-if value="{{isPw}}" hint-placeholder-val="{{ true }}">
+              <div class="f">
+                <div style="display:flex;justify-content:space-between;align-items:baseline"><label for="pw">密碼</label><a href="#forgot" style="font-size:13px">忘記密碼？</a></div>
+                <div style="position:relative"><input id="pw" class="inp" type="password" value="••••••••••" autocomplete="current-password" style="padding-right:52px"><button type="button" aria-label="顯示密碼" style="position:absolute;right:4px;top:3px;width:44px;height:44px;border:0;background:none;color:#5A4A3C;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg></button></div>
+              </div>
+              <label style="display:flex;align-items:center;gap:10px;font-size:14px;min-height:44px"><input type="checkbox" checked style="width:18px;height:18px;accent-color:#3B2F25">在這台裝置保持登入</label>
+              <a class="btn btn-p" href="B-Home.dc.html">登入</a>
+            </sc-if>
+            <sc-if value="{{isMagic}}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:13px;line-height:1.7;color:#5A4A3C">我們會寄一封信到這個信箱，點信裡的連結就能登入，不用記密碼。</span>
+              <button class="btn btn-p" type="button" onClick="{{send}}">寄送登入連結</button>
+            </sc-if>
+          </form>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{sent}}" hint-placeholder-val="{{ false }}">
+        <div role="status" style="position:relative;display:flex;flex-direction:column;gap:14px;padding:28px;border-radius:18px;background:#E6EEE2;color:#2E3F2B;overflow:hidden">
+          <span class="wash" aria-hidden="true" style="right:-30px;top:-30px;width:120px;height:120px;background:rgba(240,196,118,.45);transform:rotate(12deg)"></span>
+          <span style="position:relative;width:52px;height:52px;border-radius:16px;background:#FFFCF6;display:flex;align-items:center;justify-content:center;transform:rotate(-4deg)"><svg class="ic" viewBox="0 0 24 24" style="width:26px;height:26px" aria-hidden="true"><path d="M3 6h18v12H3zM3 7l9 6 9-6"></path></svg></span>
+          <h1 class="hd" style="position:relative;margin:0;font-size:28px;font-weight:700">去信箱看看吧</h1>
+          <p style="position:relative;margin:0;font-size:14px;line-height:1.8">登入連結已寄到 <b style="font-weight:500">joyce@example.com</b>，15 分鐘內有效。沒收到的話，看一下垃圾郵件匣。</p>
+          <div style="position:relative;display:flex;gap:16px;flex-wrap:wrap"><button class="lk" type="button" style="color:#2E3F2B">重新寄送（<span class="num">0:42</span>）</button><button class="lk" type="button" onClick="{{back}}" style="color:#2E3F2B">換一個 Email</button></div>
+        </div>
+      </sc-if>
+
+      <span style="font-size:12px;line-height:1.7;color:#5A4A3C">這是私人衣櫃，不開放註冊。登入即表示你同意本服務的<a href="#privacy">隱私說明</a>。</span>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { mode: 'pw' }; }
+  renderVals() {
+    const m = this.state.mode;
+    const isPw = m === 'pw', isMagic = m === 'magic', sent = m === 'sent';
+    const on = '#FFFCF6', sh = '0 1px 2px rgba(59,47,37,.1)';
+    return {
+      isPw, isMagic, sent, notSent: !sent,
+      pwBg: isPw ? on : 'transparent', pwSh: isPw ? sh : 'none',
+      mgBg: isMagic ? on : 'transparent', mgSh: isMagic ? sh : 'none',
+      toPw: () => this.setState({ mode: 'pw' }),
+      toMagic: () => this.setState({ mode: 'magic' }),
+      send: () => this.setState({ mode: 'sent' }),
+      back: () => this.setState({ mode: 'magic' })
+    };
+  }
+}
+</script>
+</body>
+</html>

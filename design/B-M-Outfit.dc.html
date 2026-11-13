@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機今日搭配</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.cell{position:relative;border-radius:12px;background:#FBF4E8;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:0}
+.slot{display:flex;align-items:center;gap:12px;min-height:56px;padding:6px 8px 6px 6px;border-radius:12px;background:#FFFCF6;text-decoration:none;color:#3B2F25}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:844px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <header style="display:flex;align-items:center;gap:4px;padding:8px 8px 8px 4px;background:#FBF4E8;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-M-Home.dc.html" aria-label="返回" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <div style="display:flex;flex-direction:column"><span class="hd" style="font-size:18px;font-weight:700">今日搭配</span><span style="font-size:11px;color:#74624F">雨天的季度簡報</span></div>
+    <button type="button" style="margin-left:auto;height:40px;padding:0 16px;border:0;border-radius:10px;background:#3B2F25;color:#FBF4E8;font:500 14px 'Chiron GoRound TC'">儲存</button>
+  </header>
+
+  <div style="margin:12px 12px 0;padding:10px;border-radius:16px;background:#FFFCF6;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -16px rgba(59,47,37,.25);position:relative">
+    <span aria-hidden="true" style="position:absolute;left:50%;top:-9px;margin-left:-34px;width:68px;height:18px;background:rgba(150,186,198,.7);mix-blend-mode:multiply;transform:rotate(-3deg);border-radius:2px"></span>
+    <div style="display:grid;gap:6px;height:330px;grid-template-columns:1fr 1.3fr .8fr;grid-template-rows:1fr 1fr .7fr;grid-template-areas:'outer top acc' 'outer bottom bag' '. shoes bag'">
+      <sc-for list="{{cells}}" as="c" hint-placeholder-count="6">
+        <div class="cell" style="grid-area:{{c.area}}">
+          <span aria-hidden="true" style="position:absolute;inset:10%;border-radius:12px;background:{{c.wash}};mix-blend-mode:multiply"></span>
+          <sc-if value="{{c.has}}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 100 100" style="position:relative;height:84%;max-width:86%;aspect-ratio:1/1;filter:drop-shadow(0 5px 6px rgba(59,47,37,.18))" role="img" aria-label="{{c.name}}"><path d="{{c.d}}" fill="{{c.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.7"></path></svg></sc-if>
+          <sc-if value="{{c.empty}}" hint-placeholder-val="{{ false }}"><span style="position:relative;font-size:11px;color:#74624F">＋{{c.label}}</span></sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:6px;padding:12px 12px 0">
+    <button type="button" aria-pressed="true" style="height:34px;padding:0 12px;border-radius:999px;border:0;background:#3B2F25;color:#FBF4E8;font:500 12px 'Chiron GoRound TC'">完整平鋪</button>
+    <button type="button" aria-pressed="false" style="height:34px;padding:0 12px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;color:#3B2F25;font:500 12px 'Chiron GoRound TC'">三件直列</button>
+    <span style="margin-left:auto;font-size:11px;color:#5A4A3C;align-self:center">點一列更換</span>
+  </div>
+
+  <div style="flex:1;overflow:hidden;padding:10px 12px 110px;display:flex;flex-direction:column;gap:6px">
+    <sc-for list="{{slots}}" as="s" hint-placeholder-count="6">
+      <a class="slot" href="B-M-Sheet.dc.html">
+        <span style="width:44px;height:44px;border-radius:10px;background:#F3E7D4;display:flex;align-items:center;justify-content:center;flex:none;position:relative"><span style="position:absolute;left:-3px;top:-3px;width:10px;height:10px;border-radius:50%;background:{{s.solid}};box-shadow:0 0 0 2px #FFFCF6"></span><sc-if value="{{s.has}}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 100 100" style="width:80%;height:80%" aria-hidden="true"><path d="{{s.d}}" fill="{{s.hex}}"></path></svg></sc-if></span>
+        <span style="display:flex;flex-direction:column;min-width:0;flex:1"><span style="font-size:11px;color:#5A4A3C">{{s.t}}・{{s.req}}</span><span style="font-size:14px;font-weight:500">{{s.name}}</span></span>
+        <svg class="ic" viewBox="0 0 24 24" style="width:18px;height:18px;color:#74624F" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+      </a>
+    </sc-for>
+  </div>
+
+  <footer style="position:absolute;left:0;right:0;bottom:0;padding:12px 12px 28px;background:#FBF4E8;border-top:1.5px dashed #D9C7AC;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <a href="B-M-Compare.dc.html" style="display:flex;align-items:center;justify-content:center;height:50px;border-radius:12px;border:1.5px dashed #C9A296;background:#FFFCF6;color:#3B2F25;font:500 14px 'Chiron GoRound TC';text-decoration:none">混入想買的</a>
+    <button type="button" style="height:50px;border-radius:12px;border:0;background:#4A6245;color:#fff;font:500 14px 'Chiron GoRound TC'">AI 看看這套</button>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const G = {
+      knit:'M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z',
+      pants:'M32 10H68L72 90H56L50 36L44 90H28Z',
+      coat:'M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z',
+      boot:'M30 14H52V56Q70 58 84 66Q90 70 88 80H30Z',
+      bag:'M22 40H78L82 86H18Z'
+    };
+    const W = { outer:['rgba(150,186,198,.35)','#A9C6CF'], top:['rgba(240,196,118,.4)','#F2CF8E'], acc:['rgba(240,196,118,.28)','#F2CF8E'], bottom:['rgba(167,192,158,.42)','#B7CBB0'], bag:['rgba(222,166,152,.28)','#E2B4A8'], shoes:['rgba(222,166,152,.38)','#E2B4A8'] };
+    const D = {
+      outer:{t:'外套',req:'選填',name:'炭灰短版西裝外套',hex:'#3D3D3B',d:G.coat},
+      top:{t:'上衣',req:'必選',name:'燕麥色針織衫',hex:'#D9CBB3',d:G.knit},
+      bottom:{t:'下身',req:'必選',name:'淺藍直筒牛仔褲',hex:'#8FA3BC',d:G.pants},
+      shoes:{t:'鞋子',req:'必選',name:'黑色皮革短靴',hex:'#2A2826',d:G.boot},
+      bag:{t:'包包',req:'選填',name:'焦糖皮革托特包',hex:'#9A6B43',d:G.bag},
+      acc:{t:'配件',req:'選填',name:'未選擇',hex:'',d:''}
+    };
+    const cells = ['outer','top','acc','bottom','bag','shoes'].map(k => Object.assign({area:k,label:D[k].t,wash:W[k][0],has:!!D[k].d,empty:!D[k].d}, D[k]));
+    const slots = ['top','bottom','shoes','outer','bag','acc'].map(k => Object.assign({solid:W[k][1],has:!!D[k].d}, D[k]));
+    return { cells, slots };
+  }
+}
+</script>
+</body>
+</html>

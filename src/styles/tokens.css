@@ -66,11 +66,16 @@
   --color-status-stored-bg: #EDE4D6;
   --color-status-stored-fg: #5A4A3C;
 
-  /* 字體 */
-  --font-sans: "Noto Sans TC", system-ui, sans-serif;
-  --font-hd: "LXGW WenKai TC", "Noto Sans TC", serif;
-  --font-num: "Nunito", "Noto Sans TC", sans-serif;
-  --font-logo: "Fredoka", "Noto Sans TC", sans-serif;
+  /*
+   * 字體
+   * sans：內文、按鈕、表單、衣物名稱（晴熙圓體 400 / 500 / 700，最小 12px）
+   * hd：大標、區塊標題、傾斜貼紙標籤、穿搭名稱（霞鶩漫黑，只有 400、不加粗、17px 以上）
+   * num：價格、尺寸、日期；logo：品牌字
+   */
+  --font-sans: "Chiron GoRound TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-hd: "LXGW Marker Gothic", "Chiron GoRound TC", sans-serif;
+  --font-num: "Nunito", "Chiron GoRound TC", sans-serif;
+  --font-logo: "Fredoka", "Chiron GoRound TC", sans-serif;
 
   /* 圓角 */
   --radius-tag: 3px;

@@ -7,14 +7,17 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "commit": "node scripts/commit.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/chiron-goround-tc": "^5.3.1",
     "@fontsource/fredoka": "^5.3.0",
-    "@fontsource/lxgw-wenkai-tc": "^5.3.1",
-    "@fontsource/noto-sans-tc": "^5.3.1",
+    "@fontsource/lxgw-marker-gothic": "^5.3.1",
     "@fontsource/nunito": "^5.3.0",
     "@supabase/supabase-js": "^2.119.0",
+    "heic2any": "^0.0.4",
+    "html-to-image": "^1.11.13",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.5"

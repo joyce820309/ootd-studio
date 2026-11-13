@@ -18,6 +18,14 @@ const PATHS = {
   alert: 'M12 4l9 16H3zM12 10v4M12 17h.01',
   chat: 'M4 5h16v11H9l-5 4zM8 9.5h8M8 12.5h5',
   eye: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+  minus: 'M5 12h14',
+  layerUp: 'M12 19V5M5 12l7-7 7 7',
+  layerDown: 'M12 5v14M5 12l7 7 7-7',
+  rotateLeft: 'M4 11a8 8 0 1 1 2 6M4 5v6h6',
+  rotateRight: 'M20 11a8 8 0 1 0-2 6M20 5v6h-6',
+  reset: 'M3 12a9 9 0 1 0 3-6.7M3 4v5h5',
+  calendar: 'M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4',
+  more: 'M5 12h.01M12 12h.01M19 12h.01',
 } as const
 
 export type IconName = keyof typeof PATHS

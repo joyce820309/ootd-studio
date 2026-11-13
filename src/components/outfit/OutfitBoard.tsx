@@ -12,18 +12,23 @@ export interface BoardPiece {
   isWish?: boolean
 }
 
+/** 固定板型（自由擺放由 FreeCanvas 負責） */
+export type FixedTemplate = Exclude<OutfitTemplate, 'free'>
+
 interface Props {
-  template: OutfitTemplate
+  template: FixedTemplate
   pieces: Partial<Record<Slot, BoardPiece>>
   className?: string
   compact?: boolean
+  /** 選填部位沒放單品時的文字；未指定時顯示「尚未選擇…」 */
+  emptyOptionalLabel?: string
 }
 
 /**
  * 固定板型：上衣在上、下身在中、鞋子在下；外套在左，配件與包包在右。
  * 「三件直列」只排上衣、下身、鞋子。
  */
-const LAYOUT: Record<OutfitTemplate, { style: CSSProperties; extra: string; slots: Slot[] }> = {
+const LAYOUT: Record<FixedTemplate, { style: CSSProperties; extra: string; slots: Slot[] }> = {
   full: {
     style: {
       gridTemplateAreas: '"outer top acc" "outer bottom bag" ". shoes bag"',
@@ -46,7 +51,7 @@ const LAYOUT: Record<OutfitTemplate, { style: CSSProperties; extra: string; slot
 
 const TILT: Record<Slot, number> = { outer: -3, top: 2, bottom: -2, shoes: 3, bag: 2, acc: -2 }
 
-export function OutfitBoard({ template, pieces, className = '', compact = false }: Props) {
+export function OutfitBoard({ template, pieces, className = '', compact = false, emptyOptionalLabel }: Props) {
   const layout = LAYOUT[template]
   return (
     <div className={`grid gap-2.5 ${layout.extra} ${className}`} style={layout.style}>
@@ -77,7 +82,7 @@ export function OutfitBoard({ template, pieces, className = '', compact = false 
               />
             ) : (
               <span className="relative flex h-[78%] w-[84%] items-center justify-center rounded-tile border-[1.5px] border-dashed border-line-strong text-xs text-ink-3">
-                尚未選擇{meta.label}
+                {!meta.required && emptyOptionalLabel ? emptyOptionalLabel : `尚未選擇${meta.label}`}
               </span>
             )}
             {piece?.isWish && (

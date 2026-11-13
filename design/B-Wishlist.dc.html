@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>選購清單（風格 B）</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',serif}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.eb{font:700 11px Nunito,'Chiron GoRound TC',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#74624F}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.lbl{display:inline-flex;align-items:center;height:34px;padding:0 14px;font:700 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+.nav-a:hover{border-bottom-color:#EADCC6;color:#3B2F25}
+.tab{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.tab.on{background:#3B2F25;color:#FBF4E8;border-color:#3B2F25}
+.cell{position:relative;border-radius:10px;background:#FBF4E8;display:flex;align-items:center;justify-content:center;overflow:hidden}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+</style>
+</helmet>
+<div style="width:100%;min-height:1100px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
+      <a class="nav-a" href="B-Home.dc.html">首頁</a>
+      <a class="nav-a" href="B-Closet.dc.html">我的衣櫃</a>
+      <a class="nav-a" href="B-Outfit.dc.html">今日搭配</a>
+      <a class="nav-a" href="#diary">穿搭日記</a>
+      <a class="nav-a" href="B-Wishlist.dc.html" aria-current="page" style="border-bottom-color:#F2CF8E;color:#3B2F25;font-weight:700">選購清單</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:4px;padding-bottom:10px">
+      <button class="ibtn" type="button" aria-label="通知" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"></path></svg></button>
+      <a href="B-Body.dc.html" aria-label="個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#FFFCF6;border:1.5px solid #3B2F25;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span></a>
+    </div>
+  </header>
+
+  <main style="max-width:1320px;margin:0 auto;padding:28px clamp(16px,3vw,40px) 56px;display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span class="lbl" style="background:#E2B4A8;transform:rotate(-2deg)">選購清單</span>
+      <nav aria-label="選購清單分頁" style="display:inline-flex;padding:3px;background:#F3E7D4;border-radius:10px">
+        <a href="B-Wishlist.dc.html" aria-current="page" style="display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:8px;background:#FFFCF6;color:#3B2F25;font:700 14px 'Chiron GoRound TC';text-decoration:none;box-shadow:0 1px 2px rgba(59,47,37,.1)">清單</a>
+        <a href="B-Compare.dc.html" style="display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:8px;color:#5A4A3C;font:500 14px 'Chiron GoRound TC';text-decoration:none">比較試搭台</a>
+      </nav>
+      <span class="num" style="font-size:14px;color:#5A4A3C">進行中 4 件・預估合計 NT$18,060</span>
+      <button class="btn btn-o" type="button" style="margin-left:auto"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path></svg>貼上商品網址</button>
+    </div>
+    <div role="tablist" aria-label="狀態" style="display:flex;gap:8px;flex-wrap:wrap">
+      <sc-for list="{{tabs}}" as="t" hint-placeholder-count="6"><button class="tab {{t.cls}}" type="button" role="tab" aria-selected="{{t.sel}}">{{t.t}}<span class="num" style="opacity:.75">{{t.n}}</span></button></sc-for>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+      <section aria-label="商品列表" style="flex:1 1 400px;max-width:500px;display:flex;flex-direction:column;gap:12px">
+        <sc-for list="{{wish}}" as="w" hint-placeholder-count="5">
+          <a href="B-Wishlist.dc.html" aria-current="{{w.cur}}" style="display:flex;gap:14px;padding:12px;border-radius:14px;border:{{w.bd}};background:#FFFCF6;color:#3B2F25;text-decoration:none;opacity:{{w.op}};position:relative;overflow:hidden">
+            <span aria-hidden="true" style="position:absolute;right:-18px;bottom:-18px;width:64px;height:64px;border-radius:16px;background:{{w.wash}};mix-blend-mode:multiply;transform:rotate(12deg)"></span>
+            <span style="width:88px;aspect-ratio:4/5;flex:none;border-radius:10px;background:#F4DDD6;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 100 100" style="width:78%;height:78%;filter:drop-shadow(0 4px 6px rgba(59,47,37,.14))" role="img" aria-label="{{w.name}}"><path d="{{w.d}}" fill="{{w.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.8"></path></svg></span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;justify-content:center;position:relative">
+              <span style="display:flex;justify-content:space-between;gap:10px"><span style="font-size:15px;font-weight:500">{{w.name}}</span><span class="num" style="font-size:15px;font-weight:700">{{w.price}}</span></span>
+              <span style="font-size:12px;color:#5A4A3C">{{w.brand}} · {{w.size}} · 優先 {{w.pri}}</span>
+              <span style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag" style="background:{{w.bg}};color:{{w.fg}}"><span class="dot" style="background:{{w.fg}}"></span>{{w.st}}</span>
+              <sc-if value="{{w.dup}}" hint-placeholder-val="{{ false }}"><span class="tag" style="background:#F4DDD6;color:#7E3F34">與現有單品相似</span></sc-if></span>
+            </span>
+          </a>
+        </sc-for>
+      </section>
+
+      <section aria-label="商品詳細" style="flex:1.4 1 520px;min-width:0;padding:22px;border-radius:18px;background:#FFFCF6;box-shadow:0 1px 0 rgba(59,47,37,.05),0 16px 30px -18px rgba(59,47,37,.25);display:flex;flex-direction:column;gap:22px;position:relative">
+        <span aria-hidden="true" style="position:absolute;left:40px;top:-10px;width:84px;height:22px;background:rgba(222,166,152,.7);mix-blend-mode:multiply;transform:rotate(-4deg);border-radius:2px"></span>
+        <div style="display:flex;flex-wrap:wrap;gap:22px">
+          <div style="flex:0 0 200px;aspect-ratio:4/5;border-radius:14px;background:#F4DDD6;border:1.5px dashed #C9A296;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 100 100" style="width:74%;height:74%;filter:drop-shadow(0 8px 10px rgba(59,47,37,.18))" role="img" aria-label="海軍藍雙排扣西裝外套"><path d="{{navy.d}}" fill="#2E3A4F" stroke="rgba(59,47,37,.22)" stroke-width="0.6"></path><path d="M44 46h.01M56 46h.01M44 58h.01M56 58h.01" stroke="#C9B98F" stroke-width="3" stroke-linecap="round"></path></svg></div>
+          <div style="flex:1 1 240px;display:flex;flex-direction:column;gap:10px">
+            <span class="tag" style="align-self:flex-start;background:#DCE8EC;color:#335562"><span class="dot" style="background:#335562"></span>等待降價</span>
+            <h1 class="hd" style="margin:0;font-size:28px;font-weight:700;line-height:1.3">海軍藍雙排扣西裝外套</h1>
+            <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span class="num" style="font-size:26px;font-weight:700">NT$5,990</span><span class="num" style="font-size:13px;color:#5A4A3C">目標 NT$4,500・差 NT$1,490</span></div>
+            <span style="font-size:13px;color:#5A4A3C">Massimo Dutti・預計尺寸 S（肩寬 39 cm）・加入於 10/24</span>
+            <a href="#product" style="font-size:13px;display:inline-flex;align-items:center;gap:4px;min-height:32px">前往商品頁<svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"></path></svg></a>
+            <p class="hd" style="margin:4px 0 0;padding:10px 14px;border-radius:10px;background:#FBF4E8;font-size:15px;line-height:1.7">「衣櫃缺一件比炭灰更正式、但不黑的外套，冬天開會可以穿。」</p>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+          <div style="padding:14px;border-radius:12px;background:#E6EEE2"><span class="num" style="display:block;font-size:28px;font-weight:700;color:#2E3F2B">11</span><span style="font-size:12px;color:#2E3F2B">件現有衣物能搭</span></div>
+          <div style="padding:14px;border-radius:12px;background:#DCE8EC;display:flex;flex-direction:column;gap:6px"><span style="font-size:17px;font-weight:700;color:#24424D">重複度低</span><span aria-hidden="true" style="display:flex;gap:3px"><span style="flex:1;height:6px;border-radius:2px;background:#3E6270"></span><span style="flex:1;height:6px;border-radius:2px;background:#B7CDD4"></span><span style="flex:1;height:6px;border-radius:2px;background:#B7CDD4"></span></span><span style="font-size:12px;color:#24424D">最接近：炭灰短版西裝外套</span></div>
+          <div style="padding:14px;border-radius:12px;background:#F6E7C6"><span class="num" style="display:block;font-size:28px;font-weight:700;color:#5A3F12">3</span><span style="font-size:12px;color:#5A3F12">套新穿搭可能</span></div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="hd" style="font-size:19px;font-weight:700">如果買了，可以這樣穿</span><span style="font-size:12px;color:#5A4A3C">AI 建議・參考用</span></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px">
+            <sc-for list="{{looks}}" as="l" hint-placeholder-count="2">
+              <div style="padding:12px;border-radius:14px;border:1.5px solid #EADCC6;display:flex;flex-direction:column;gap:10px">
+                <div style="display:grid;gap:6px;height:220px;grid-template-columns:1fr 1.2fr;grid-template-rows:1fr 1fr .7fr;grid-template-areas:'outer top' 'outer bottom' '. shoes'">
+                  <sc-for list="{{l.cells}}" as="c" hint-placeholder-count="4">
+                    <div class="cell" style="grid-area:{{c.area}};outline:{{c.ol}};outline-offset:-2px"><span aria-hidden="true" style="position:absolute;inset:12%;border-radius:12px;background:{{c.wash}};mix-blend-mode:multiply"></span><svg viewBox="0 0 100 100" style="position:relative;height:82%;aspect-ratio:1/1" role="img" aria-label="{{c.name}}"><path d="{{c.d}}" fill="{{c.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.7"></path></svg></div>
+                  </sc-for>
+                </div>
+                <span style="font-size:13px;font-weight:500">{{l.t}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:16px;border-top:1.5px dashed #D9C7AC">
+          <button class="btn btn-p" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>移至已購買</button>
+          <a class="btn btn-s" href="B-Compare.dc.html">到比較試搭台混搭</a>
+          <button class="btn btn-g" type="button" style="margin-left:auto;font-weight:400;font-size:13px">放棄購買</button>
+        </div>
+        <span style="font-size:12px;color:#5A4A3C;margin-top:-14px">移至已購買時，名稱、圖片、品牌與尺寸都會帶過去，只需補購買日期與實付價格。</span>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const G = {
+      knit:'M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z',
+      shirt:'M32 16L44 12L50 20L56 12L68 16L80 30L88 76L78 78L70 40V88H30V40L22 78L12 76L20 30Z',
+      pants:'M32 10H68L72 90H56L50 36L44 90H28Z',
+      coat:'M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z',
+      shoe:'M14 62V46Q24 44 34 52Q48 62 70 62Q86 62 88 72V76H14Z',
+      boot:'M30 14H52V56Q70 58 84 66Q90 70 88 80H30Z',
+      scarf:'M22 18H78V34H60L64 88H48L44 34H22Z'
+    };
+    const WS = {'考慮中':['#EDE4D6','#5A4A3C'],'等待降價':['#DCE8EC','#335562'],'準備購買':['#DCE7D8','#3F5A3B'],'已放棄':['#EDE4D6','#5A4A3C']};
+    const w = (name,hex,s,brand,size,price,st,pri,x) => Object.assign({name,hex,d:G[s],brand,size,price,st,pri,bg:WS[st][0],fg:WS[st][1],dup:false,cur:'false',op:1,bd:'1.5px dashed #D9C7AC',wash:'rgba(222,166,152,.35)'},x||{});
+    const c = (area,name,hex,s,x) => Object.assign({area,name,hex,d:G[s],ol:'none',wash:{outer:'rgba(150,186,198,.35)',top:'rgba(240,196,118,.4)',bottom:'rgba(167,192,158,.42)',shoes:'rgba(222,166,152,.38)'}[area]},x||{});
+    const navyCell = c('outer','海軍藍雙排扣西裝外套（選購中）','#2E3A4F','coat',{ol:'2px dashed #8E4A3E'});
+    const tabs = [['全部',5],['考慮中',2],['等待降價',1],['準備購買',1],['已購買',3],['已放棄',1]].map(([t,n],i)=>({t,n,cls:i===0?'on':'',sel:i===0?'true':'false'}));
+    return {
+      tabs,
+      navy: { d: G.coat },
+      wish: [
+        w('海軍藍雙排扣西裝外套','#2E3A4F','coat','Massimo Dutti','S','NT$5,990','等待降價','高',{cur:'true',bd:'2px solid #3B2F25',wash:'rgba(150,186,198,.45)'}),
+        w('灰藍喀什米爾圍巾','#7F92A3','scarf','Arket','F','NT$2,890','準備購買','高',{wash:'rgba(167,192,158,.45)'}),
+        w('奶油白羊毛混紡寬褲','#EFE8DA','pants','COS','36','NT$3,900','考慮中','中'),
+        w('黑色流蘇樂福鞋','#22201E','shoe','G.H. Bass','EU 37.5','NT$5,480','考慮中','低',{dup:true}),
+        w('卡其短版風衣','#B7A07A','coat','UNIQLO','M','NT$2,990','已放棄','—',{op:0.55})
+      ],
+      looks: [
+        {t:'開會日・正式', cells:[navyCell, c('top','白色牛津襯衫','#F4F1EA','shirt'), c('bottom','深藍西裝褲','#2E3A4F','pants'), c('shoes','黑色皮革短靴','#2A2826','boot')]},
+        {t:'週末・休閒正式', cells:[navyCell, c('top','燕麥針織衫','#D9CBB3','knit'), c('bottom','淺藍牛仔褲','#8FA3BC','pants'), c('shoes','米白德訓鞋','#EDE7DA','shoe')]}
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

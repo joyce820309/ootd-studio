@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>狀態設計（風格 B）</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 14px;border-radius:10px;font:500 13px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.lbl{display:inline-flex;align-items:center;height:34px;padding:0 14px;font:700 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.st{display:flex;flex-direction:column;gap:10px}
+.st-h{display:flex;align-items:baseline;gap:8px;font-size:14px;font-weight:700}
+.st-h b{font:700 12px Nunito;color:#74624F}
+.fr{position:relative;height:300px;padding:22px;border-radius:16px;background:#FFFCF6;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -16px rgba(59,47,37,.22);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;overflow:hidden}
+.t1{margin:0;font-family:'LXGW Marker Gothic','Chiron GoRound TC',serif;font-size:19px;font-weight:700}
+.t2{margin:0;font-size:13px;line-height:1.7;color:#5A4A3C;max-width:270px}
+.blob{position:absolute;border-radius:22px;mix-blend-mode:multiply}
+.badge{position:relative;width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center}
+.sk{background:#F3E7D4;border-radius:8px}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+</style>
+</helmet>
+<div style="width:1440px;min-height:1700px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;padding:64px 96px;display:flex;flex-direction:column;gap:36px">
+  <header style="display:flex;flex-direction:column;gap:12px;max-width:820px">
+    <span class="lbl" style="align-self:flex-start;background:rgba(150,186,198,.8);transform:rotate(-1.5deg)">狀態設計</span>
+    <h1 class="hd" style="margin:0;font-size:36px;font-weight:700">空狀態・載入・錯誤</h1>
+    <p style="margin:0;font-size:15px;line-height:1.8;color:#5A4A3C">每個狀態都說清楚「現在怎麼了」和「下一步可以做什麼」。語氣像寫給自己的手帳筆記：親切、不責怪，失敗時一律保留草稿。</p>
+  </header>
+
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px 22px">
+
+    <div class="st"><div class="st-h"><b>01</b>首次使用・空衣櫃</div>
+      <div class="fr">
+        <span class="blob" aria-hidden="true" style="left:30px;top:30px;width:120px;height:90px;background:rgba(240,196,118,.4);transform:rotate(-8deg)"></span>
+        <span class="blob" aria-hidden="true" style="right:30px;bottom:40px;width:110px;height:80px;background:rgba(150,186,198,.35);transform:rotate(6deg)"></span>
+        <div class="badge" style="background:#F2CF8E;transform:rotate(-4deg)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7a2 2 0 1 1 2-2M12 7v2L3 16.5a1 1 0 0 0 .6 1.8h16.8a1 1 0 0 0 .6-1.8L12 9"></path></svg></div>
+        <p class="t1" style="position:relative">衣櫃還是空的</p>
+        <p class="t2" style="position:relative">先放進第一件衣物吧，從最常穿的那件開始。</p>
+        <a class="btn btn-p" href="B-Add.dc.html" style="position:relative">加入第一件衣物</a>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>02</b>圖片上傳中</div>
+      <div class="fr" style="align-items:stretch;justify-content:flex-start;text-align:left">
+        <span style="font-size:14px;font-weight:500">上傳 3 張照片</span>
+        <sc-for list="{{uploads}}" as="u" hint-placeholder-count="3">
+          <div style="display:flex;gap:10px;align-items:center"><span class="sk" style="width:40px;height:48px;flex:none;opacity:{{u.op}}"></span><div style="flex:1;display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;display:flex;justify-content:space-between;color:{{u.fg}}">{{u.n}}<span class="num">{{u.s}}</span></span><span role="progressbar" aria-valuenow="{{u.v}}" aria-valuemin="0" aria-valuemax="100" aria-label="{{u.n}} 上傳進度" style="height:5px;border-radius:3px;background:#EADCC6;display:block"><span style="display:block;width:{{u.v}}%;height:100%;border-radius:3px;background:{{u.c}}"></span></span></div></div>
+        </sc-for>
+        <span style="font-size:12px;color:#5A4A3C;margin-top:auto">可以關閉此頁，上傳會在背景繼續。</span>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>03</b>去背處理中</div>
+      <div class="fr">
+        <div aria-hidden="true" style="position:relative;width:120px;height:140px;border-radius:12px;background:#B9AE9B;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:12%;width:76%;height:76%"><path d="M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z" fill="#6E2E34"></path></svg><span style="position:absolute;left:0;right:0;top:0;height:45%;background:rgba(251,244,232,.65);border-bottom:2px dashed #FFFCF6"></span></div>
+        <p class="t1" style="font-size:17px">正在幫你剪下衣服</p>
+        <div role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" aria-label="去背進度" style="width:180px;height:6px;border-radius:3px;background:#EADCC6"><div style="width:45%;height:100%;border-radius:3px;background:#4A6245"></div></div>
+        <button class="btn btn-g" type="button" style="text-decoration:underline;color:#3E6270;font-weight:400">先填資料，不用等</button>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>04</b>去背失敗</div>
+      <div class="fr">
+        <div class="badge" style="background:#F4DDD6;color:#7E3F34;transform:rotate(3deg)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M3 3l18 18"></path></svg></div>
+        <p class="t1">這張沒剪好</p>
+        <p class="t2">衣服和背景顏色太接近時常會這樣。可以重試、直接用原圖，或晚點再處理。</p>
+        <div style="display:flex;gap:8px"><button class="btn btn-s" type="button">重新去背</button><button class="btn btn-p" type="button">使用原圖</button></div>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>05</b>網路斷線</div>
+      <div class="fr" style="padding:0;justify-content:flex-start">
+        <div role="status" style="width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;background:#3B2F25;color:#FBF4E8;font-size:13px;text-align:left"><svg class="ic" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><path d="M3 3l18 18M8.5 16.5a5 5 0 0 1 7 0M5 12.5a10 10 0 0 1 5-2.6M19 12.5a10 10 0 0 0-2.3-1.6M12 20h.01"></path></svg>目前離線・仍可瀏覽與編輯</div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:18px">
+          <p class="t2">新增與修改先存在這台裝置，恢復連線後自動同步。</p>
+          <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:999px;background:#F6E7C6;color:#6E4F18;font-size:12px">2 筆變更等待同步</span>
+          <span style="font-size:12px;color:#5A4A3C">去背、網址解析與 AI 需要連線</span>
+        </div>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>06</b>儲存成功</div>
+      <div class="fr" style="justify-content:flex-end;background:#F6E9D3">
+        <div aria-hidden="true" style="position:absolute;top:22px;left:22px;right:22px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px"><span class="sk" style="aspect-ratio:4/5;background:#FFFCF6"></span><span class="sk" style="aspect-ratio:4/5;background:#FFFCF6"></span><span class="sk" style="aspect-ratio:4/5;background:#FFFCF6"></span></div>
+        <div role="status" style="position:relative;width:100%;display:flex;align-items:center;gap:10px;padding:12px 14px;background:#3B2F25;color:#FBF4E8;border-radius:12px;font-size:13px;text-align:left"><span style="width:22px;height:22px;border-radius:50%;background:#B7CBB0;color:#2E3F2B;display:flex;align-items:center;justify-content:center;flex:none"><svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg></span>已存進穿搭日記<a href="#d" style="margin-left:auto;color:#F2CF8E">查看</a></div>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>07</b>儲存失敗</div>
+      <div class="fr" style="justify-content:flex-end;background:#F6E9D3">
+        <div role="alert" style="width:100%;display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:12px;background:#F4DDD6;border:1.5px solid #E6C5BB;color:#5E2E25;text-align:left">
+          <span style="font-size:14px;font-weight:700">沒有存成功</span>
+          <span style="font-size:12px;line-height:1.6">內容已保留成草稿，不會不見。連線穩定後再試一次。</span>
+          <div style="display:flex;gap:8px"><button class="btn btn-p" type="button" style="height:36px">重試</button><button class="btn btn-g" type="button" style="height:36px;color:#5E2E25">看草稿</button></div>
+        </div>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>08</b>沒有搜尋結果</div>
+      <div class="fr">
+        <div class="badge" style="background:#DCE8EC;color:#335562"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"></path></svg></div>
+        <p class="t1">找不到「麂皮短裙」</p>
+        <p class="t2">試試更短的關鍵字，或搜尋顏色、品牌。</p>
+        <div style="display:flex;gap:6px"><button class="btn btn-s" type="button" style="border-radius:999px;height:34px">麂皮</button><button class="btn btn-s" type="button" style="border-radius:999px;height:34px">短裙</button></div>
+        <a href="B-Compare.dc.html" style="font-size:12px">在網路上找？加到比較試搭台</a>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>09</b>篩選後沒有衣物</div>
+      <div class="fr">
+        <div class="badge" style="background:#E6EEE2;color:#3F5A3B"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg></div>
+        <p class="t1">這個組合沒有衣物</p>
+        <p class="t2">「夏季 × 外套 × 酒紅」目前 0 件，拿掉一個條件看看：</p>
+        <div style="display:flex;gap:6px"><button class="btn btn-s" type="button" style="border-radius:999px;height:32px;font-weight:400">夏季 ✕</button><button class="btn btn-s" type="button" style="border-radius:999px;height:32px;font-weight:400">酒紅 ✕</button></div>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>10</b>AI 正在思考</div>
+      <div class="fr" style="align-items:stretch;justify-content:flex-start;text-align:left;background:#E6EEE2" aria-busy="true">
+        <span role="status" style="font-size:13px;color:#2E3F2B;display:flex;align-items:center;gap:8px"><span aria-hidden="true" style="display:flex;gap:3px"><span style="width:6px;height:6px;border-radius:50%;background:#4A6245"></span><span style="width:6px;height:6px;border-radius:50%;background:#4A6245;opacity:.6"></span><span style="width:6px;height:6px;border-radius:50%;background:#4A6245;opacity:.3"></span></span>正在比對 84 件可穿衣物…</span>
+        <span class="sk" style="height:16px;width:60%;background:#FFFCF6"></span>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px"><span class="sk" style="aspect-ratio:1/1;background:#FFFCF6"></span><span class="sk" style="aspect-ratio:1/1;background:#FFFCF6"></span><span class="sk" style="aspect-ratio:1/1;background:#FFFCF6"></span><span class="sk" style="aspect-ratio:1/1;background:#FFFCF6"></span></div>
+        <span class="sk" style="height:10px;background:#FFFCF6"></span><span class="sk" style="height:10px;width:80%;background:#FFFCF6"></span>
+        <button class="btn btn-s" type="button" style="align-self:flex-start;margin-top:auto">停止</button>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>11</b>AI 搭不出來</div>
+      <div class="fr">
+        <div class="badge" style="background:#E6EEE2;color:#3F5A3B"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4zM9 9l6 4M15 9l-6 4"></path></svg></div>
+        <p class="t1">這次沒搭出合適的</p>
+        <p class="t2">「正式 × 25°C」下，可穿的外套和鞋子不夠。放寬一個條件，或也考慮選購清單？</p>
+        <div style="display:flex;gap:8px"><button class="btn btn-s" type="button">放寬條件</button><button class="btn btn-p" type="button">包含想買的</button></div>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>12</b>圖片載入失敗</div>
+      <div class="fr" style="flex-direction:row;gap:14px;align-items:flex-start">
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;text-align:left">
+          <div style="aspect-ratio:4/5;border-radius:12px;background:#F3E7D4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" style="width:28px;height:28px" aria-hidden="true"><path d="M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M3 3l18 18"></path></svg><button class="btn btn-s" type="button" style="height:34px;font-size:12px">重新載入</button></div>
+          <span style="font-size:13px;font-weight:500">深咖啡麂皮夾克</span>
+        </div>
+        <p class="t2" style="flex:1;text-align:left;align-self:center">卡片尺寸與文字保留，版面不跳動；替代文字用衣物名稱。</p>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>13</b>危險操作確認</div>
+      <div class="fr" style="background:rgba(59,47,37,.42)">
+        <div role="alertdialog" aria-modal="true" aria-labelledby="dt" aria-describedby="dd" style="width:100%;padding:20px;border-radius:14px;background:#FFFCF6;display:flex;flex-direction:column;gap:10px;text-align:left">
+          <p id="dt" class="t1" style="font-size:18px">永久刪除這件衣物？</p>
+          <p id="dd" class="t2" style="max-width:none">「灰色連帽衛衣」和 40 次穿著紀錄會一起刪除，無法復原。只是不穿了的話，封存會保留回憶。</p>
+          <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn btn-g" type="button">取消</button><button class="btn btn-s" type="button">改為封存</button><button class="btn" type="button" style="background:#8E4A3E;color:#fff">刪除</button></div>
+        </div>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>14</b>尚未填寫體態資料</div>
+      <div class="fr" style="align-items:stretch;text-align:left">
+        <div style="position:relative;display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:14px;background:#DCE8EC;color:#24424D;overflow:hidden">
+          <span class="blob" aria-hidden="true" style="right:-20px;top:-20px;width:80px;height:80px;background:rgba(240,196,118,.45);transform:rotate(12deg)"></span>
+          <span style="position:relative;font-size:15px;font-weight:700">想讓尺寸建議更貼近你嗎？</span>
+          <span style="position:relative;font-size:13px;line-height:1.7">只要身高和常穿尺寸兩項，就能比對合不合身。其他都可以不填。</span>
+          <div style="position:relative;display:flex;gap:8px"><a class="btn btn-p" href="B-Body.dc.html">填兩項就好</a><button class="btn btn-g" type="button" style="color:#24424D">這次先不用</button></div>
+        </div>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>15</b>商品網址讀不到</div>
+      <div class="fr">
+        <div class="badge" style="background:#F4DDD6;color:#7E3F34;transform:rotate(-3deg)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1M4 4l16 16"></path></svg></div>
+        <p class="t1">讀不到這個商品頁</p>
+        <p class="t2">有些網站不開放讀取。可以貼上商品截圖，或手動填名稱和價格。</p>
+        <div style="display:flex;gap:8px"><button class="btn btn-s" type="button">貼上截圖</button><button class="btn btn-p" type="button">手動填寫</button></div>
+      </div></div>
+
+    <div class="st"><div class="st-h"><b>16</b>搭配還缺必選部位</div>
+      <div class="fr" style="align-items:stretch">
+        <div style="display:grid;gap:6px;height:150px;grid-template-columns:1fr 1.2fr;grid-template-rows:1fr 1fr .7fr;grid-template-areas:'outer top' 'outer bottom' '. shoes'">
+          <span style="grid-area:outer;border-radius:10px;background:rgba(150,186,198,.3)"></span>
+          <span style="grid-area:top;border-radius:10px;background:rgba(240,196,118,.4);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 100 100" style="height:80%" aria-hidden="true"><path d="M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z" fill="#D9CBB3"></path></svg></span>
+          <span style="grid-area:bottom;border-radius:10px;border:2px dashed #8E4A3E;display:flex;align-items:center;justify-content:center;font-size:12px;color:#7E3F34">缺下身</span>
+          <span style="grid-area:shoes;border-radius:10px;border:2px dashed #8E4A3E;display:flex;align-items:center;justify-content:center;font-size:12px;color:#7E3F34">缺鞋子</span>
+        </div>
+        <p class="t2" style="max-width:none">選好下身和鞋子就能儲存，外套與配件可以略過。</p>
+        <a class="btn btn-o" href="B-Outfit.dc.html" style="align-self:center">去選下身</a>
+      </div></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      uploads: [
+        {n:'IMG_2048.HEIC', s:'完成', v:100, c:'#4A6245', fg:'#3B2F25', op:1},
+        {n:'IMG_2049.HEIC', s:'48%', v:48, c:'#3B2F25', fg:'#3B2F25', op:1},
+        {n:'IMG_2050.HEIC', s:'等待中', v:0, c:'#3B2F25', fg:'#5A4A3C', op:0.5}
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

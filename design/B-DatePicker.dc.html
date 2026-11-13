@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>日期選擇器（風格 B）</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.lbl{display:inline-flex;align-items:center;height:34px;padding:0 14px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.st{display:flex;flex-direction:column;gap:10px;min-width:0}
+.st-h{display:flex;align-items:baseline;gap:8px;font-size:14px;font-weight:700}
+.st-h b{font:700 12px Nunito;color:#74624F}
+.cap{margin:0;font-size:12px;line-height:1.7;color:#5A4A3C}
+.fr{position:relative;height:600px;padding:22px 24px;border-radius:16px;background:#FBF4E8;border:1.5px dashed #D9C7AC;display:flex;flex-direction:column;gap:6px}
+.flabel{font-size:13px;font-weight:500;color:#3B2F25}
+.flabel i{font-style:normal;color:#8E4A3E;margin-left:4px}
+.fld{display:flex;align-items:center;gap:10px;height:50px;padding:0 14px;border-radius:12px;border:1.5px solid #D9C7AC;background:#FFFCF6;font-size:15px;color:#3B2F25}
+.fld .ph{color:#74624F}
+.fld .ic:last-child{margin-left:auto;width:18px;height:18px;color:#74624F}
+.hint{font-size:12px;color:#5A4A3C}
+.pop{position:relative;width:328px;margin-top:8px;padding:16px 12px 12px;border-radius:14px;background:#FFFCF6;box-shadow:0 14px 30px -10px rgba(59,47,37,.45)}
+.tape{position:absolute;left:50%;top:-10px;width:84px;height:22px;margin-left:-42px;border-radius:2px;background:rgba(150,186,198,.55);mix-blend-mode:multiply;transform:rotate(-3deg)}
+.hdr{display:flex;align-items:center;gap:4px}
+.nav{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#5A4A3C}
+.ttl{margin:0 auto;height:44px;padding:0 12px;border-radius:10px;display:flex;align-items:center;gap:6px}
+.ttl .hd{font-size:20px;line-height:1;color:#3B2F25}
+.ttl .num{font-size:19px;font-weight:700}
+.ttl .ic{width:16px;height:16px;color:#74624F}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));row-gap:4px;margin-top:8px}
+.wk{height:32px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500}
+.cell{display:flex;justify-content:center}
+.foot{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1.5px dashed #D9C7AC}
+.bt{display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:10px;border:1.5px solid #D9C7AC;background:#FFFCF6;font-size:14px;font-weight:500;color:#3B2F25}
+.clr{display:inline-flex;align-items:center;height:40px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:500;color:#8E4A3E}
+.sel-note{margin-left:auto;font-size:12px;color:#74624F}
+.mgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.mo{height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:2px;font-size:15px}
+.note{position:absolute;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:#3B2F25;color:#FBF4E8;font-size:11px;white-space:nowrap}
+.spec{padding:20px 22px;border-radius:16px;background:#FFFCF6;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -16px rgba(59,47,37,.22);display:flex;flex-direction:column;gap:10px}
+.spec-r{display:grid;grid-template-columns:76px 1fr;gap:10px;font-size:12px;line-height:1.6}
+.spec-r span:first-child{color:#74624F}
+kbd{display:inline-flex;align-items:center;height:20px;padding:0 6px;border-radius:5px;border:1.5px solid #D9C7AC;border-bottom-width:2.5px;background:#FBF4E8;font:600 11px Nunito,'Chiron GoRound TC',sans-serif;color:#3B2F25}
+</style>
+</helmet>
+<div style="width:1440px;min-height:1740px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;padding:64px 96px;display:flex;flex-direction:column;gap:36px">
+  <header style="display:flex;flex-direction:column;gap:12px;max-width:860px">
+    <span class="lbl" style="align-self:flex-start;background:rgba(150,186,198,.8);transform:rotate(-1.5deg)">元件</span>
+    <h1 class="hd" style="margin:0;font-size:36px">日期選擇器 DatePicker</h1>
+    <p style="margin:0;font-size:15px;line-height:1.8;color:#5A4A3C">取代瀏覽器原生的日期欄位，讓量測日期、購買日期、穿搭日記都長得像手帳的一頁。選中的那天是一張燕麥色小貼紙；今天用霧藍虛線圈起來。桌面在欄位下方展開紙卡，手機從底部滑出。</p>
+  </header>
+
+  <div style="display:grid;grid-template-columns:398px 398px 390px;gap:28px 31px;align-items:start">
+
+    <!-- 01 桌面展開 -->
+    <div class="st">
+      <div class="st-h"><b>01</b>桌面・展開日曆</div>
+      <div class="fr">
+        <span class="flabel">量測日期<i>*</i></span>
+        <div class="fld" style="border-color:#3E6270">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg>
+          <span>2026 年 11 月 8 日（日）</span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg>
+        </div>
+        <div class="pop" role="dialog" aria-label="選擇量測日期">
+          <span class="tape" aria-hidden="true"></span>
+          <div class="hdr">
+            <span class="nav"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></span>
+            <span class="ttl"><span class="hd"><span class="num">2026</span> 年 <span class="num">11</span> 月</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></span>
+            <span class="nav"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></span>
+          </div>
+          <div class="grid">
+            <sc-for list="{{wk}}" as="w" hint-placeholder-count="7"><span class="wk" style="color:{{w.c}}">{{w.t}}</span></sc-for>
+            <sc-for list="{{g1}}" as="c" hint-placeholder-count="42"><span class="cell"><span style="display:flex;{{c.s}}">{{c.d}}</span></span></sc-for>
+          </div>
+          <div class="foot"><span class="bt">今天</span><span class="sel-note">已選 11/8</span></div>
+        </div>
+      </div>
+      <p class="cap">點欄位或按 <kbd>↓</kbd> 開啟。16 外圍的深藍框是鍵盤焦點。點「2026 年 11 月」切換成選月份；點外面或按 <kbd>Esc</kbd> 關閉，焦點回到欄位。</p>
+    </div>
+
+    <!-- 02 選月份 -->
+    <div class="st">
+      <div class="st-h"><b>02</b>桌面・選月份</div>
+      <div class="fr">
+        <span class="flabel">量測日期<i>*</i></span>
+        <div class="fld" style="border-color:#3E6270">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg>
+          <span>2026 年 11 月 8 日（日）</span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg>
+        </div>
+        <div class="pop" role="dialog" aria-label="選擇量測日期">
+          <span class="tape" aria-hidden="true"></span>
+          <div class="hdr">
+            <span class="nav" aria-label="上一年"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></span>
+            <span class="ttl"><span class="hd"><span class="num">2026</span> 年</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></span>
+            <span class="nav" aria-label="下一年"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></span>
+          </div>
+          <div class="mgrid">
+            <sc-for list="{{months}}" as="m" hint-placeholder-count="12"><span class="mo" style="{{m.s}}"><span class="num">{{m.m}}</span> 月</span></sc-for>
+          </div>
+          <div class="foot"><span class="bt">今天</span><span class="sel-note">已選 11/8</span></div>
+        </div>
+      </div>
+      <p class="cap">左右箭頭改成換「年」。選好月份就回到日曆。這個欄位設了「不能選未來」，所以 12 月變淡、不能點。</p>
+    </div>
+
+    <!-- 04 手機 Bottom Sheet（跨兩列） -->
+    <div class="st" style="grid-row:span 2">
+      <div class="st-h"><b>04</b>手機・Bottom Sheet</div>
+      <div style="position:relative;width:390px;height:844px;border-radius:28px;overflow:hidden;background:#FBF4E8;box-shadow:0 0 0 1.5px #D9C7AC,0 20px 40px -20px rgba(59,47,37,.35)">
+        <div aria-hidden="true" style="padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1.5px dashed #D9C7AC">
+          <svg class="ic" viewBox="0 0 24 24" style="width:22px;height:22px"><path d="M15 6l-6 6 6 6"></path></svg>
+          <span class="hd" style="font-size:18px">新增衣物</span>
+        </div>
+        <div aria-hidden="true" style="padding:20px 16px;display:flex;flex-direction:column;gap:6px">
+          <span class="flabel">購買日期</span>
+          <div class="fld" style="border-color:#3E6270"><svg class="ic" viewBox="0 0 24 24" style="color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg><span>2026 年 11 月 6 日（五）</span><svg class="ic" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"></path></svg></div>
+        </div>
+        <div aria-hidden="true" style="position:absolute;inset:0;background:rgba(59,47,37,.42)"></div>
+        <section role="dialog" aria-modal="true" aria-label="選擇購買日期" style="position:absolute;left:0;right:0;bottom:0;padding:8px 16px 24px;border-radius:20px 20px 0 0;background:#FFFCF6;box-shadow:0 -14px 30px rgba(59,47,37,.16)">
+          <div aria-hidden="true" style="display:flex;justify-content:center;padding-bottom:4px"><span style="width:40px;height:4px;border-radius:2px;background:#D9C7AC"></span></div>
+          <div style="display:flex;align-items:center;padding-bottom:4px">
+            <h2 class="hd" style="margin:0;font-size:20px">購買日期</h2>
+            <span class="nav" aria-label="關閉" style="margin-left:auto;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" style="width:22px;height:22px" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></span>
+          </div>
+          <div class="hdr">
+            <span class="nav"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></span>
+            <span class="ttl"><span class="hd"><span class="num">2026</span> 年 <span class="num">11</span> 月</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></span>
+            <span class="nav"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></span>
+          </div>
+          <div class="grid">
+            <sc-for list="{{wk}}" as="w" hint-placeholder-count="7"><span class="wk" style="color:{{w.c}}">{{w.t}}</span></sc-for>
+            <sc-for list="{{g4}}" as="c" hint-placeholder-count="42"><span class="cell"><span style="display:flex;{{c.s}}">{{c.d}}</span></span></sc-for>
+          </div>
+          <div class="foot"><span class="bt">今天</span><span class="clr">清除</span><span class="sel-note">已選 11/6</span></div>
+        </section>
+      </div>
+      <p class="cap">寬度小於 640px 時改用 bottom sheet：日期格放大到 44px，方便單手點；背景鎖住不捲動。點遮罩、✕ 或選好日期就關閉。可清除的欄位會多一個「清除」。</p>
+
+      <div class="spec">
+        <span class="hd" style="font-size:18px">規格</span>
+        <div class="spec-r"><span>值</span><span><code class="num">'YYYY-MM-DD'</code> 字串或 null，直接存進 Supabase 的 date 欄位</span></div>
+        <div class="spec-r"><span>選中</span><span>燕麥 #F2CF8E 貼紙、邊框 #E2B866、傾斜 −3°、字重 700</span></div>
+        <div class="spec-r"><span>今天</span><span>霧藍 #3E6270 1.5px 虛線框</span></div>
+        <div class="spec-r"><span>週末標題</span><span>玫瑰 #8E4A3E；其他星期 #74624F</span></div>
+        <div class="spec-r"><span>不可選</span><span>超出 min / max 時 35% 透明、點了沒反應，但鍵盤仍可經過</span></div>
+        <div class="spec-r"><span>尺寸</span><span>桌面日期格 40px、手機 44px；紙卡寬 328px</span></div>
+        <div class="spec-r"><span>鍵盤</span><span><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> 移動　<kbd>PgUp</kbd> <kbd>PgDn</kbd> 換月（加 <kbd>Shift</kbd> 換年）　<kbd>Home</kbd> <kbd>End</kbd> 週首尾　<kbd>Enter</kbd> 選取　<kbd>Esc</kbd> 關閉</span></div>
+        <div class="spec-r"><span>程式</span><span><code class="num">src/components/ui/DatePicker.tsx</code></span></div>
+      </div>
+    </div>
+
+    <!-- 03 日期限制 -->
+    <div class="st">
+      <div class="st-h"><b>03</b>有日期限制（min / max）</div>
+      <div class="fr">
+        <span class="flabel">量測日期<i>*</i></span>
+        <div class="fld" style="border-color:#3E6270">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg>
+          <span>2026 年 11 月 10 日（二）</span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg>
+        </div>
+        <div class="pop" role="dialog" aria-label="選擇量測日期">
+          <span class="tape" aria-hidden="true"></span>
+          <div class="hdr">
+            <span class="nav"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></span>
+            <span class="ttl"><span class="hd"><span class="num">2026</span> 年 <span class="num">11</span> 月</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></span>
+            <span class="nav"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></span>
+          </div>
+          <div class="grid">
+            <sc-for list="{{wk}}" as="w" hint-placeholder-count="7"><span class="wk" style="color:{{w.c}}">{{w.t}}</span></sc-for>
+            <sc-for list="{{g3}}" as="c" hint-placeholder-count="42"><span class="cell"><span style="display:flex;{{c.s}}">{{c.d}}</span></span></sc-for>
+          </div>
+          <div class="foot"><span class="bt">今天</span><span class="sel-note">已選 11/10</span></div>
+        </div>
+      </div>
+      <p class="cap">例：<code class="num">min</code> = 上次量測 11/3、<code class="num">max</code> = 今天。範圍外的日期變淡、不能選；打開時若原本的值超出範圍，會自動跳到最近的可選日期。</p>
+    </div>
+
+    <!-- 欄位狀態 -->
+    <div class="st">
+      <div class="st-h"><b>＋</b>欄位本身的狀態</div>
+      <div class="fr" style="gap:14px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span class="flabel">購買日期<span style="font-weight:400;color:#74624F;margin-left:6px">未填</span></span>
+          <div class="fld"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg><span class="ph">選擇日期</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span class="flabel">購買日期<span style="font-weight:400;color:#74624F;margin-left:6px">已填</span></span>
+          <div class="fld"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg><span>2026 年 11 月 6 日（五）</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span class="flabel">購買日期<span style="font-weight:400;color:#74624F;margin-left:6px">展開中・鍵盤焦點</span></span>
+          <div class="fld" style="border-color:#3E6270;outline:2.5px solid #3E6270;outline-offset:2px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg><span>2026 年 11 月 6 日（五）</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span class="flabel">量測日期<i>*</i><span style="font-weight:400;color:#74624F;margin-left:6px">錯誤</span></span>
+          <div class="fld" style="border-color:#8E4A3E"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg><span class="ph">選擇日期</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></div>
+          <span class="hint" style="color:#8E4A3E">請選擇量測日期</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;opacity:.5">
+          <span class="flabel">購買日期<span style="font-weight:400;color:#74624F;margin-left:6px">停用</span></span>
+          <div class="fld"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg><span class="ph">選擇日期</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></div>
+        </div>
+      </div>
+      <p class="cap">欄位和其他輸入框同高 50px。顯示完整日期與星期，避免 11/6、6/11 看錯。有錯誤時邊框與說明改用玫瑰色，提示文字取代原本的說明。</p>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1740}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const wk = ['日', '一', '二', '三', '四', '五', '六'].map((t, i) => ({ t, c: i === 0 || i === 6 ? '#8E4A3E' : '#74624F' }));
+    const D = (m, d) => new Date(2026, m, d);
+    const same = (a, b) => !!a && !!b && a.getTime() === b.getTime();
+    const T = D(10, 12);
+    const grid = (o) => {
+      const first = D(10, 1);
+      const size = o.size || 40;
+      const cells = [];
+      for (let i = 0; i < 42; i++) {
+        const d = new Date(2026, 10, 1 - first.getDay() + i);
+        const inMonth = d.getMonth() === 10;
+        const out = (o.min && d < o.min) || (o.max && d > o.max);
+        let s = 'width:' + size + 'px;height:' + size + 'px;align-items:center;justify-content:center;border-radius:8px;border:1.5px solid transparent;font:15px Nunito,sans-serif;color:' + (inMonth ? '#3B2F25' : 'rgba(116,98,79,.7)') + ';';
+        if (same(d, o.sel)) s += 'background:#F2CF8E;border-color:#E2B866;font-weight:700;color:#3B2F25;box-shadow:0 2px 4px rgba(59,47,37,.14);transform:rotate(-3deg);';
+        else if (same(d, T)) s += 'border:1.5px dashed #3E6270;color:#24424D;font-weight:700;';
+        if (same(d, o.focus)) s += 'outline:2.5px solid #3E6270;outline-offset:2px;';
+        if (out) s += 'opacity:.35;';
+        cells.push({ d: d.getDate(), s });
+      }
+      return cells;
+    };
+    const months = Array.from({ length: 12 }, (_, m) => {
+      let s = 'border:1.5px solid #EADCC6;background:#FFFCF6;color:#3B2F25;';
+      if (m === 10) s = 'border:1.5px solid #E2B866;background:#F2CF8E;color:#3B2F25;font-weight:700;box-shadow:0 2px 4px rgba(59,47,37,.14);';
+      if (m === 11) s += 'opacity:.35;';
+      return { m: m + 1, s };
+    });
+    return {
+      wk,
+      months,
+      g1: grid({ sel: D(10, 8), focus: D(10, 16) }),
+      g3: grid({ sel: D(10, 10), min: D(10, 3), max: T }),
+      g4: grid({ sel: D(10, 6), size: 44 })
+    };
+  }
+}
+</script>
+</body>
+</html>

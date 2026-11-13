@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>量測紀錄・對照表（風格 B）</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.lbl{display:inline-flex;align-items:center;height:34px;padding:0 14px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+.seg{display:inline-grid;grid-template-columns:1fr 1fr;padding:3px;border-radius:10px;background:#F3E7D4}
+.seg a{display:flex;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 18px;border-radius:8px;font-size:14px;font-weight:500;color:#5A4A3C;text-decoration:none}
+.seg a[aria-current="page"]{background:#FFFCF6;color:#3B2F25;font-weight:700;box-shadow:0 1px 2px rgba(59,47,37,.1)}
+.chip{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:11px;white-space:nowrap}
+.tw{position:relative;background:#FFFCF6;border-radius:16px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -16px rgba(59,47,37,.22);overflow:auto}
+.tr{display:grid;grid-template-columns:200px repeat(4,minmax(130px,1fr));min-height:56px;border-bottom:1.5px dashed #EADCC6}
+.tr.th{border-bottom:1.5px solid #3B2F25}
+.td{display:flex;align-items:center;justify-content:flex-end;padding:0 16px}
+.stick{position:sticky;left:0;z-index:1;padding:0 16px;background:#FFFCF6;box-shadow:inset -1.5px 0 0 #EADCC6}
+.grp{display:flex}
+.v{display:inline-flex;flex-direction:column;align-items:flex-end;gap:2px;padding:4px 8px;border-radius:8px}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:100%;min-height:2080px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
+      <a class="nav-a" href="B-Home.dc.html">首頁</a>
+      <a class="nav-a" href="B-Closet.dc.html">我的衣櫃</a>
+      <a class="nav-a" href="B-Outfit.dc.html">今日搭配</a>
+      <a class="nav-a" href="#diary">穿搭日記</a>
+      <a class="nav-a" href="B-Wishlist.dc.html">選購清單</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:4px;padding-bottom:10px">
+      <button class="ibtn" type="button" aria-label="通知" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"></path></svg></button>
+      <a href="B-Body.dc.html" aria-label="個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#3B2F25;color:#FBF4E8;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span></a>
+    </div>
+  </header>
+
+  <main style="max-width:1200px;margin:0 auto;padding:28px clamp(16px,4vw,48px) 64px;display:flex;flex-direction:column;gap:22px">
+    <nav aria-label="麵包屑" style="font-size:13px;color:#5A4A3C;display:flex;align-items:center;gap:6px"><a href="B-Body.dc.html" style="color:#3E6270">個人資料</a><span aria-hidden="true">›</span><span aria-current="page">量測紀錄</span></nav>
+
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-right:auto">
+        <span class="lbl" style="align-self:flex-start;background:#A9C6CF;transform:rotate(-2deg)">尺寸筆記本</span>
+        <h1 class="hd" style="margin:0;font-size:34px">量測紀錄</h1>
+        <p style="margin:0;font-size:14px;line-height:1.8;color:#5A4A3C">所有日期並排，一眼看出哪幾項改過。點日期可以打開那一次的完整紀錄。</p>
+      </div>
+      <div class="seg" role="navigation" aria-label="檢視方式">
+        <a href="B-History.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"></path></svg>依日期</a>
+        <a href="B-History-Table.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M4 5h16v14H4zM4 10h16M10 5v14"></path></svg>對照表</a>
+      </div>
+      <a class="btn btn-p" href="B-Body.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"></path></svg>新增量測</a>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-size:12px;color:#5A4A3C">
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:16px;border-radius:5px;background:#F6E7C6"></span>和前一次不同（下方小字是差多少）</span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:16px;border-radius:5px;background:#DCE8EC"></span>這一次第一次記</span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="color:#74624F">—</span>當時沒記</span>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:6px">只看有改過的項目<span aria-hidden="true" style="width:40px;height:24px;border-radius:999px;background:#D9C7AC;position:relative"><span style="position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff"></span></span></span>
+    </div>
+
+    <div class="tw" role="region" aria-label="量測對照表，可左右捲動" tabindex="0">
+      <div role="table" aria-label="各次量測數值對照，單位公分（體重為公斤）" style="min-width:760px">
+        <div role="row" class="tr th">
+          <span role="columnheader" class="stick" style="font-size:12px;font-weight:500;color:#74624F;align-self:end;padding-bottom:12px">項目</span>
+          <sc-for list="{{cols}}" as="c" hint-placeholder-count="4">
+            <span role="columnheader" class="td" style="align-items:flex-end"><a href="B-History.dc.html" style="display:inline-flex;flex-direction:column;align-items:flex-end;gap:3px;color:#3B2F25;text-decoration:none;padding:16px 0 12px"><span style="display:flex;align-items:center;gap:6px"><sc-if value="{{c.latest}}" hint-placeholder-val="{{ false }}"><span class="chip" style="background:#E6EEE2;color:#2E3F2B">最新</span></sc-if><span class="num" style="font-size:16px;font-weight:700">{{c.date}}</span></span><span style="font-size:11px;color:#74624F">{{c.sum}}</span></a></span>
+          </sc-for>
+        </div>
+        <sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+          <div role="row" class="grp"><span role="rowheader" class="stick" style="box-shadow:none;display:inline-flex;align-items:center;gap:8px;padding:16px 16px 4px"><span aria-hidden="true" style="width:12px;height:12px;border-radius:4px;background:{{g.c}}"></span><span class="hd" style="font-size:18px">{{g.g}}</span></span></div>
+          <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="4">
+            <div role="row" class="tr">
+              <span role="rowheader" class="stick" style="font-size:14px;display:flex;align-items:center;gap:4px">{{r.k}}<span style="font-size:11px;color:#74624F">{{r.u}}</span></span>
+              <sc-for list="{{r.cells}}" as="x" hint-placeholder-count="4">
+                <span role="cell" class="td"><span class="v" style="background:{{x.bg}}"><span class="num" style="font-size:16px;font-weight:{{x.fw}};color:{{x.fg}}">{{x.v}}</span><sc-if value="{{x.d}}" hint-placeholder-val="{{ false }}"><span class="num" style="font-size:11px;color:{{x.dc}}">{{x.d}}</span></sc-if></span></span>
+              </sc-for>
+            </div>
+          </sc-for>
+        </sc-for>
+      </div>
+    </div>
+    <p style="margin:0;font-size:12px;color:#5A4A3C">日期多於畫面寬度時可以左右捲動，「項目」欄會固定在左邊。</p>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2080}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const GROUPS = [
+      { g: '基本', c: '#F2CF8E', f: [['h', '身高', 'cm'], ['w', '體重', 'kg']] },
+      { g: '上半身', c: '#A9C6CF', f: [['sh', '肩寬', 'cm'], ['ub', '上胸圍', 'cm'], ['lb', '下胸圍', 'cm'], ['ar', '手臂長', 'cm']] },
+      { g: '下半身', c: '#B7CBB0', f: [['wa', '腰圍', 'cm'], ['na', '肚臍圍', 'cm'], ['hi', '臀圍', 'cm'], ['le', '腿長（內側）', 'cm'], ['th', '大腿圍', 'cm']] }
+    ];
+    const FC = [['t5', '穿五指襪', '#F2CF8E'], ['so', '穿一般襪', '#A9C6CF'], ['ba', '裸腳', '#E2B4A8']];
+    const FM = [['L', '腳長'], ['W', '腳寬'], ['B', '前掌圍'], ['I', '腳背圍']];
+    const base = { h: '162', sh: '38', ub: '84', ar: '55', hi: '91', le: '74', soL: '23.5', soW: '9.1', soB: '22.0', soI: '22.8', baL: '23.3' };
+    const REC = [
+      { id: 'r1', date: '2026/11/12', v: Object.assign({}, base, { w: '52.0', lb: '70', wa: '65', na: '73', baW: '9.0', baB: '21.8', baI: '22.4' }) },
+      { id: 'r2', date: '2026/10/02', v: Object.assign({}, base, { w: '52.5', lb: '71', wa: '66', na: '73', baW: '9.0', baB: '21.8', baI: '22.4' }) },
+      { id: 'r3', date: '2026/04/18', v: Object.assign({}, base, { w: '53.0', lb: '71', wa: '66' }) },
+      { id: 'r4', date: '2025/11/05', v: { h: '162', w: '53.0', sh: '37.5', ub: '85', lb: '71', ar: '55', wa: '66', hi: '92', le: '74', baL: '23.3' } }
+    ];
+    const KEYS = GROUPS.flatMap(g => g.f.map(f => f[0])).concat(FC.flatMap(c => FM.map(m => c[0] + m[0])));
+    const diff = (i, k) => {
+      const cur = REC[i].v[k], prev = REC[i + 1] ? REC[i + 1].v[k] : undefined;
+      if (cur == null) return { s: 'none', cur };
+      if (i === REC.length - 1) return { s: 'first', cur };
+      if (prev == null) return { s: 'new', cur };
+      const d = parseFloat(cur) - parseFloat(prev);
+      if (Math.abs(d) < 0.001) return { s: 'same', cur };
+      return { s: 'chg', cur, d: (d > 0 ? '+' : '−') + Math.abs(d).toFixed(1) };
+    };
+    const cell = (i, k) => {
+      const x = diff(i, k);
+      return {
+        v: x.cur || '—', d: x.s === 'chg' ? x.d : x.s === 'new' ? '第一次' : '',
+        bg: x.s === 'chg' ? '#F6E7C6' : x.s === 'new' ? '#DCE8EC' : 'transparent',
+        dc: x.s === 'chg' ? '#5A3F12' : '#24424D',
+        fg: x.s === 'none' ? '#74624F' : '#3B2F25', fw: x.s === 'none' ? 400 : 700
+      };
+    };
+    const summary = (i) => {
+      if (i === REC.length - 1) return '第一次記錄';
+      const ds = KEYS.map(k => diff(i, k));
+      const chg = ds.filter(x => x.s === 'chg').length, nw = ds.filter(x => x.s === 'new').length;
+      return (chg ? '改了 ' + chg + ' 項' : '沒有變') + (nw ? '・新記 ' + nw : '');
+    };
+    const row = (k, name, u) => ({ k: name, u, cells: REC.map((_, i) => cell(i, k)) });
+    return {
+      cols: REC.map((r, i) => ({ date: r.date, sum: summary(i), latest: i === 0 })),
+      groups: GROUPS.map(g => ({ g: g.g, c: g.c, rows: g.f.map(([k, n, u]) => row(k, n, u)) })).concat(
+        FC.map(([c, t, col]) => ({ g: '腳・' + t, c: col, rows: FM.map(([m, n]) => row(c + m, n, 'cm')) }))
+      )
+    };
+  }
+}
+</script>
+</body>
+</html>

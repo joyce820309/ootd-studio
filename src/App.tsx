@@ -3,15 +3,22 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { AuthProvider, RequireAuth } from '@/lib/auth'
 import { ClosetPage } from '@/pages/ClosetPage'
 import { HomePage } from '@/pages/HomePage'
+import { ItemDetailPage } from '@/pages/ItemDetailPage'
 import { LandingPage } from '@/pages/LandingPage'
 import { LoginPage } from '@/pages/LoginPage'
+import { MeasurementHistoryPage } from '@/pages/MeasurementHistoryPage'
 import { OutfitPage } from '@/pages/OutfitPage'
-import { AddItemPage, ComparePage, DiaryPage, ItemDetailPage, ProfilePage, WishlistPage } from '@/pages/stubs'
+import { ProfilePage } from '@/pages/ProfilePage'
+import { StudioPage } from '@/pages/StudioPage'
+import { AddItemPage } from '@/pages/AddItemPage'
+import { DiaryPage } from '@/pages/DiaryPage'
+import { ComparePage } from '@/pages/ComparePage'
+import { WishlistPage } from '@/pages/WishlistPage'
 
 function NotFound() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-3 p-6 text-center">
-      <h1 className="m-0 font-hd text-3xl font-bold">這一頁不在衣櫃裡</h1>
+      <h1 className="m-0 font-hd text-3xl">這一頁不在衣櫃裡</h1>
       <Link to="/home">回首頁</Link>
     </main>
   )
@@ -32,10 +39,16 @@ const router = createBrowserRouter([
       { path: '/closet/new', element: <AddItemPage /> },
       { path: '/closet/:id', element: <ItemDetailPage /> },
       { path: '/outfit', element: <OutfitPage /> },
+      { path: '/studio', element: <StudioPage /> },
       { path: '/diary', element: <DiaryPage /> },
+      { path: '/diary/new', element: <DiaryPage /> },
+      { path: '/diary/:id', element: <DiaryPage /> },
+      { path: '/diary/:id/edit', element: <DiaryPage /> },
       { path: '/wishlist', element: <WishlistPage /> },
       { path: '/wishlist/compare', element: <ComparePage /> },
       { path: '/me', element: <ProfilePage /> },
+      { path: '/me/measurements', element: <MeasurementHistoryPage /> },
+      { path: '/me/measurements/:id', element: <MeasurementHistoryPage /> },
     ],
   },
   { path: '*', element: <NotFound /> },

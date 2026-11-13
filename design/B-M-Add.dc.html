@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機新增衣物・照片</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ph{position:relative;aspect-ratio:4/5;border-radius:12px;overflow:hidden}
+.badge{position:absolute;height:22px;padding:0 8px;border-radius:999px;font-size:10px;display:flex;align-items:center}
+.opt{position:relative;display:flex;gap:12px;padding:14px;border-radius:14px;background:#FFFCF6;text-align:left;font-family:inherit;color:#3B2F25;overflow:hidden;width:100%}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:844px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <header style="padding:8px 12px 10px 4px;border-bottom:1.5px dashed #D9C7AC;display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;align-items:center;gap:4px">
+      <a href="B-Closet.dc.html" aria-label="關閉並保留草稿" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+      <h1 class="hd" style="margin:0;font-size:20px">新增衣物</h1>
+      <span style="margin-left:auto;font-size:12px;color:#5A4A3C">第 <b class="num">1</b> / 4 步・照片</span>
+    </div>
+    <div aria-hidden="true" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding-left:16px"><span style="height:5px;border-radius:3px;background:#3B2F25"></span><span style="height:5px;border-radius:3px;background:#EADCC6"></span><span style="height:5px;border-radius:3px;background:#EADCC6"></span><span style="height:5px;border-radius:3px;background:#EADCC6"></span></div>
+  </header>
+
+  <main style="flex:1;padding:16px 16px 110px;display:flex;flex-direction:column;gap:14px">
+    <p style="margin:0;font-size:13px;line-height:1.7;color:#5A4A3C">可以放好幾張：自己拍的平拍照、網拍穿搭照、標籤都行。長按可以拖曳排序。</p>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+      <sc-for list="{{photos}}" as="p" hint-placeholder-count="3">
+        <div class="ph" role="img" aria-label="{{p.alt}}" style="background:{{p.bg}};outline:{{p.ol}};outline-offset:-2px">
+          <svg viewBox="0 0 100 125" style="width:100%;height:100%" aria-hidden="true"><g transform="{{p.tf}}"><path d="{{p.d}}" fill="#D9CBB3" stroke="rgba(59,47,37,.25)" stroke-width="0.6"></path></g><sc-if value="{{p.model}}" hint-placeholder-val="{{ false }}"><circle cx="50" cy="22" r="8" fill="#E3C6AA"></circle><path d="M40 70H60L62 116H52L50 86L48 116H38Z" fill="#8FA3BC"></path></sc-if><sc-if value="{{p.tag}}" hint-placeholder-val="{{ false }}"><rect x="34" y="40" width="32" height="40" rx="3" fill="#FFFCF6" stroke="rgba(59,47,37,.3)"></rect><text x="50" y="66" text-anchor="middle" font-family="Nunito" font-weight="700" font-size="16" fill="#3B2F25">M</text></sc-if></svg>
+          <sc-if value="{{p.cover}}" hint-placeholder-val="{{ false }}"><span class="badge" style="left:6px;top:6px;background:#3B2F25;color:#FBF4E8">★ 封面</span></sc-if>
+          <span class="badge" style="left:6px;bottom:6px;background:rgba(255,252,246,.94)">{{p.kind}}</span>
+          <button type="button" aria-label="這張照片的選項：設為封面、移除" style="position:absolute;right:4px;top:4px;width:32px;height:32px;border:0;border-radius:50%;background:rgba(255,252,246,.94);color:#3B2F25;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></button>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button type="button" style="display:flex;align-items:center;justify-content:center;gap:8px;height:48px;border-radius:12px;border:0;background:#3B2F25;color:#FBF4E8;font:500 14px 'Chiron GoRound TC'"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px"><path d="M4 8h3l2-3h6l2 3h3v11H4zM12 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg>拍照</button>
+      <button type="button" style="display:flex;align-items:center;justify-content:center;gap:8px;height:48px;border-radius:12px;border:1.5px solid #D9C7AC;background:#FFFCF6;color:#3B2F25;font:500 14px 'Chiron GoRound TC'"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px"><path d="M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4"></path></svg>從相簿選</button>
+    </div>
+
+    <fieldset style="border:0;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:8px">
+      <legend class="hd" style="font-size:19px;padding:0;margin-bottom:8px">搭配板要用哪種圖？</legend>
+      <button type="button" role="radio" aria-checked="true" class="opt" style="border:2px solid #3B2F25">
+        <span aria-hidden="true" style="position:absolute;right:-14px;top:-14px;width:56px;height:56px;border-radius:14px;background:rgba(240,196,118,.5);mix-blend-mode:multiply;transform:rotate(12deg)"></span>
+        <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #3B2F25;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><span style="width:11px;height:11px;border-radius:50%;background:#3B2F25"></span></span>
+        <span style="display:flex;flex-direction:column;gap:4px;position:relative"><span style="font-size:15px;font-weight:500">做一張去背圖<span style="margin-left:6px;font-size:10px;padding:2px 7px;border-radius:999px;background:#E6EEE2;color:#2E3F2B">推薦</span></span><span style="font-size:12px;line-height:1.6;color:#5A4A3C">用第 1 張平拍照自動去背，搭配板比較整齊。原照片都會留著。</span></span>
+      </button>
+      <button type="button" role="radio" aria-checked="false" class="opt" style="border:1.5px solid #E2D2B8">
+        <span aria-hidden="true" style="position:absolute;right:-14px;top:-14px;width:56px;height:56px;border-radius:14px;background:rgba(150,186,198,.5);mix-blend-mode:multiply;transform:rotate(12deg)"></span>
+        <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #D9C7AC;flex:none;margin-top:1px"></span>
+        <span style="display:flex;flex-direction:column;gap:4px;position:relative"><span style="font-size:15px;font-weight:500">先不用，直接用照片</span><span style="font-size:12px;line-height:1.6;color:#5A4A3C">跳過去背；搭配板用封面裁成方形。之後隨時可以補。</span></span>
+      </button>
+    </fieldset>
+  </main>
+
+  <footer style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:#FBF4E8;border-top:1.5px dashed #D9C7AC;display:flex;align-items:center;gap:10px">
+    <span style="font-size:12px;color:#5A4A3C">下一步會自動去背</span>
+    <a href="B-M-Add-Cutout.dc.html" style="margin-left:auto;display:flex;align-items:center;justify-content:center;gap:6px;height:52px;padding:0 24px;border-radius:12px;background:#3B2F25;color:#FBF4E8;font:500 15px 'Chiron GoRound TC';text-decoration:none">下一步<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M9 6l6 6-6 6"></path></svg></a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const knit = 'M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z';
+    return {
+      photos: [
+        { kind: '平拍正面', alt: '平拍照：木地板上的燕麥色針織衫，封面', bg: '#B9AE9B', d: knit, tf: 'translate(12 18) scale(.76) rotate(-4 50 50)', cover: true, ol: '2.5px solid #4A6245' },
+        { kind: '網拍穿搭照', alt: '網拍模特兒穿著燕麥色針織衫', bg: '#DCE8EC', d: knit, tf: 'translate(22 28) scale(.56)', model: true, ol: 'none' },
+        { kind: '標籤', alt: '尺寸標籤特寫：M', bg: '#EFE6D6', d: '', tf: '', tag: true, ol: 'none' }
+      ].map(p => Object.assign({ model: false, tag: false, cover: false }, p))
+    };
+  }
+}
+</script>
+</body>
+</html>

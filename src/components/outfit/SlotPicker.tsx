@@ -20,7 +20,7 @@ export function SlotPicker({ meta, items, selectedId, onSelect }: Props) {
     <fieldset className="m-0 flex min-w-0 flex-col gap-2.5 border-0 border-b-[1.5px] border-dashed border-line px-0 py-3.5 last:border-b-0">
       <div className="flex items-center gap-2.5">
         <span aria-hidden="true" className="size-3 rounded-[4px]" style={{ background: meta.solid }} />
-        <legend id={groupId} className="float-left p-0 font-hd text-lg font-bold">
+        <legend id={groupId} className="float-left p-0 font-hd text-lg">
           {meta.label}
         </legend>
         <span className={`text-xs ${meta.required ? 'text-rose-deep' : 'text-ink-3'}`}>{meta.required ? '必選' : '選填'}</span>
