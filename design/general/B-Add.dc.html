@@ -231,12 +231,27 @@ a{color:#3E6270}
 
             <!-- 材質 -->
             <section id="mat" class="sec" aria-labelledby="mat-t">
-              <div class="sec-t"><span id="mat-t" class="tape" style="background:rgba(167,192,158,.85)">材質</span><span style="font-size:12px;color:#5A4A3C">可複選；有成分比例可以照標籤填</span></div>
+              <div class="sec-t"><span id="mat-t" class="tape" style="background:rgba(167,192,158,.85)">材質</span><span style="font-size:12px;color:#5A4A3C">點選材質，再照標籤填比例；比例可以不填</span><a href="B-Materials.dc.html" style="margin-left:auto;font-size:12px;font-weight:500">管理材質</a></div>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <sc-for list="{{mats}}" as="x" hint-placeholder-count="10"><button class="chip" type="button" aria-pressed="{{x.on}}">{{x.t}}</button></sc-for>
-                <button class="chip" type="button" style="color:#3E6270;border-style:dashed">＋ 其他</button>
+                <sc-for list="{{mats}}" as="x" hint-placeholder-count="11"><button class="chip" type="button" aria-pressed="{{x.on}}">{{x.t}}</button></sc-for>
+                <button class="chip" type="button" style="color:#3E6270;border-style:dashed">＋ 其他材質</button>
               </div>
-              <div class="f"><label class="l" for="cmp">成分比例<span class="opt">選填</span></label><input id="cmp" class="inp" value="羊毛 70%・尼龍 30%"></div>
+              <div role="group" aria-labelledby="cmp-t" style="display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:14px;background:#FBF4E8">
+                <div style="display:flex;align-items:center;gap:8px"><span id="cmp-t" class="l">成分比例</span><span class="opt" style="margin-left:0">依標籤順序，比例高的在前</span></div>
+                <sc-for list="{{comp}}" as="c" hint-placeholder-count="3">
+                  <div style="display:grid;grid-template-columns:24px 160px 130px 40px;justify-content:start;align-items:center;gap:10px">
+                    <span aria-hidden="true" style="color:#74624F;letter-spacing:-2px;font-weight:700;cursor:grab">⋮⋮</span>
+                    <label for="pc-{{c.i}}" style="display:flex;align-items:center;gap:8px;font-size:15px"><span style="width:10px;height:10px;border-radius:3px;background:{{c.c}}"></span>{{c.t}}</label>
+                    <div class="unit" style="height:44px;background:#FFFCF6"><input id="pc-{{c.i}}" value="{{c.v}}" inputmode="decimal" aria-describedby="cmp-sum"><span style="font-size:14px">%</span></div>
+                    <button type="button" aria-label="移除{{c.t}}" style="width:40px;height:40px;border:0;border-radius:10px;background:transparent;color:#5A4A3C;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+                  </div>
+                </sc-for>
+                <div style="display:flex;align-items:center;gap:12px;padding-top:8px;border-top:1.5px dashed #EADCC6">
+                  <div aria-hidden="true" style="flex:1;display:flex;height:10px;border-radius:5px;overflow:hidden;background:#EADCC6"><sc-for list="{{comp}}" as="c" hint-placeholder-count="3"><span style="width:{{c.v}}%;background:{{c.c}}"></span></sc-for></div>
+                  <span id="cmp-sum" role="status" class="num" style="font-size:13px;font-weight:700;color:#4A6245;white-space:nowrap">合計 100% ✓</span>
+                </div>
+                <span style="font-size:11px;color:#74624F">合計不是 100% 時會提醒（例如「還差 5%」），但仍然可以儲存。</span>
+              </div>
             </section>
 
             <!-- 購買 -->
@@ -245,7 +260,7 @@ a{color:#3E6270}
               <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
                 <div class="f"><label class="l" for="pr">價格</label><div class="unit"><span>NT$</span><input id="pr" value="3,490"></div></div>
                 <div class="f"><span class="l">購買日期</span><button type="button" aria-haspopup="dialog" class="unit" style="justify-content:flex-start;gap:10px;font:400 15px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg>2025 年 10 月 18 日（六）</button></div>
-                <div class="f"><label class="l" for="sh">購買通路</label><input id="sh" class="inp" value="COS 台北信義店"></div>
+                <div class="f"><label class="l" for="sh" style="display:flex;align-items:center">購買通路<a href="B-Shops.dc.html" style="margin-left:auto;font-size:11px;font-weight:500">管理</a></label><div style="position:relative"><input id="sh" class="inp" role="combobox" aria-expanded="false" aria-autocomplete="list" value="COS 台北信義店" style="padding-right:76px"><span aria-hidden="true" style="position:absolute;right:42px;top:50%;margin-top:-8px;color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"></path></svg></span><span aria-hidden="true" style="position:absolute;right:12px;top:50%;margin-top:-9px;color:#74624F"><svg class="ic" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M6 9l6 6 6-6"></path></svg></span></div></div>
               </div>
               <div class="f"><label class="l" for="url">商品網址<span class="opt">網拍買的可以貼上，之後好回去看尺寸表</span></label><input id="url" class="inp" type="url" placeholder="https://"></div>
             </section>
@@ -373,7 +388,8 @@ class Component extends DCLogic {
       types: TYPES.map(([k, t, c]) => ({ t, c, on: k === type ? 'true' : 'false', go: set({ type: k }) })),
       m: { label: cur.label, d: cur.d, extra: cur.extra || '', tip: cur.tip, fit: cur.fit, f: mf },
       picked: [['燕麥', '#D9CBB3', true], ['奶油白', '#EFE6D2', false], ['淺卡其', '#C9B79C', false]].map(([t, hex, on]) => ({ t, hex, on: on ? 'true' : 'false' })),
-      mats: ['棉', '羊毛', '喀什米爾', '聚酯纖維', '尼龍', '麻', '絲', '嫘縈', '丹寧', '皮革'].map(t => ({ t, on: t === '羊毛' || t === '尼龍' ? 'true' : 'false' })),
+      mats: ['棉', '羊毛', '喀什米爾', '聚酯纖維', '彈性纖維', '尼龍', '麻', '絲', '嫘縈', '丹寧', '皮革'].map(t => ({ t, on: ['棉', '聚酯纖維', '彈性纖維'].indexOf(t) >= 0 ? 'true' : 'false' })),
+      comp: [['棉', '75', '#E8DCC4'], ['聚酯纖維', '20', '#A9C6CF'], ['彈性纖維', '5', '#E2B4A8']].map(([t, v, c], i) => ({ t, v, c, i })),
       prevBg: cut ? '#F3E7D4' : '#B9AE9B', prevRot: cut ? 0 : -4, prevCap: cut ? '封面：去背圖' : '封面：平拍正面（原照片）',
       thumbs: ['#B9AE9B', '#DCE8EC', '#EFE6D6'], toc,
       destImg: cut ? '去背圖' : '封面照片（裁成方形）',

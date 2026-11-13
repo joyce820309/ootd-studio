@@ -4,9 +4,11 @@ import { ItemImage } from '@/components/closet/ItemImage'
 import { DiaryEntryDialog } from '@/components/diary/DiaryEntryDialog'
 import { FeelChip, MiniCollage, OccasionChip, RatingMarks } from '@/components/diary/DiaryParts'
 import { OutfitBoard } from '@/components/outfit/OutfitBoard'
+import { StudioBackgroundSurface } from '@/components/outfit/StudioBackgroundSurface'
 import { DestructiveActionDialog } from '@/components/ui/B10States'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
+import { MarkdownNote } from '@/components/ui/MarkdownNote'
 import { Select } from '@/components/ui/Select'
 import { LoadingState, PageState } from '@/components/ui/PageState'
 import { TiltLabel } from '@/components/ui/Paper'
@@ -474,9 +476,9 @@ function EntryDetail({ entry, ctx }: { entry: DiaryEntry; ctx: Ctx }) {
   const blocked = unavailablePieces(entry, ctx.closet)
   return (
     <>
-      <div className="rounded-card bg-apricot p-2.5">
+      <StudioBackgroundSurface theme={entry.bgTheme} mode={entry.bgBlobMode} custom={entry.bgCustom} className="rounded-card p-2.5">
         <OutfitBoard template="full" pieces={entryPieces(entry, ctx.closetById)} compact className="h-[236px]" />
-      </div>
+      </StudioBackgroundSurface>
       <div className="flex flex-col gap-2">
         <h2 className="m-0 font-hd text-[21px]">{entry.name}</h2>
         <div className="flex flex-wrap items-center gap-2">
@@ -484,7 +486,7 @@ function EntryDetail({ entry, ctx }: { entry: DiaryEntry; ctx: Ctx }) {
           <FeelChip feel={entry.feel} prefix />
           <span className="ml-auto"><RatingMarks value={entry.rating} /></span>
         </div>
-        {entry.note && <p className="m-0 rounded-btn bg-paper px-3 py-2.5 text-[13px] leading-[1.75] text-ink">{entry.note}</p>}
+        {entry.note && <MarkdownNote value={entry.note} className="rounded-btn bg-paper px-3 py-2.5 text-[13px] leading-[1.75] text-ink" />}
         {entry.photoUrl && <img src={entry.photoUrl} alt={`${entry.name}的鏡子自拍`} className="max-h-60 w-full rounded-tile object-cover" />}
       </div>
       <ItemList items={items} />
@@ -536,7 +538,7 @@ function MobileDayCard({ entry, ctx }: { entry: DiaryEntry; ctx: Ctx }) {
           <FeelChip feel={entry.feel} />
           <span className="ml-auto"><RatingMarks value={entry.rating} size={10} /></span>
         </div>
-        {entry.note && <p className="m-0 line-clamp-2 text-xs leading-[1.55] text-ink-2">{entry.note}</p>}
+        {entry.note && <MarkdownNote value={entry.note} className="line-clamp-2 text-xs leading-[1.55] text-ink-2" />}
         <div className="mt-auto flex gap-1.5">
           <Button variant="oat" className="h-11 flex-1 px-2 text-[13px]" onClick={() => ctx.onRewear(entry)}><Icon name="reset" size={16} />再穿一次</Button>
           <ButtonLink to={`/diary/${entry.id}`} variant="secondary" className="h-11 px-3 text-[13px]">查看</ButtonLink>
@@ -574,10 +576,10 @@ function MobileDay({ entry, ctx }: { entry: DiaryEntry; ctx: Ctx }) {
         </div>
       </header>
       <div className="flex flex-col gap-3.5 px-4 pt-4 pb-44">
-        <div className="relative rounded-[16px] bg-apricot p-2.5">
+        <StudioBackgroundSurface theme={entry.bgTheme} mode={entry.bgBlobMode} custom={entry.bgCustom} className="rounded-[16px] p-2.5">
           <span aria-hidden="true" className="absolute -top-2 left-1/2 z-[1] -ml-[38px] h-[18px] w-[76px] rounded-[2px] bg-mist-wash mix-blend-multiply" style={{ rotate: '-3deg' }} />
           <OutfitBoard template="full" pieces={entryPieces(entry, ctx.closetById)} compact className="h-[300px]" />
-        </div>
+        </StudioBackgroundSurface>
         <div className="flex flex-col gap-2">
           <h1 className="m-0 font-hd text-2xl">{entry.name}</h1>
           <div className="flex flex-wrap items-center gap-1.5">
@@ -585,7 +587,7 @@ function MobileDay({ entry, ctx }: { entry: DiaryEntry; ctx: Ctx }) {
             <FeelChip feel={entry.feel} prefix />
             <span className="ml-auto"><RatingMarks value={entry.rating} /></span>
           </div>
-          {entry.note && <p className="m-0 rounded-tile bg-card px-3.5 py-3 text-sm leading-[1.75]">{entry.note}</p>}
+          {entry.note && <MarkdownNote value={entry.note} className="rounded-tile bg-card px-3.5 py-3 text-sm leading-[1.75]" />}
           {entry.photoUrl && <img src={entry.photoUrl} alt={`${entry.name}的鏡子自拍`} className="w-full rounded-tile object-cover" />}
         </div>
         <section className="rounded-card bg-card px-3.5 py-1 shadow-paper">
@@ -775,7 +777,9 @@ function ListCard({ entry, ctx }: { entry: DiaryEntry; ctx: Ctx }) {
   return (
     <article className="flex flex-col gap-2.5 rounded-[16px] bg-card p-3 shadow-paper">
       <Link to={`/diary/${entry.id}?month=${monthKey(entry.date)}&date=${entry.date}`} aria-label={`${shortDate(entry.date)} ${entry.name}`} className={`block rounded-tile p-2 ${tone.wash}`}>
-        <OutfitBoard template="full" pieces={entryPieces(entry, ctx.closetById)} compact className="h-[168px]" />
+        <StudioBackgroundSurface theme={entry.bgTheme} mode={entry.bgBlobMode} custom={entry.bgCustom} className="rounded-tile p-2">
+          <OutfitBoard template="full" pieces={entryPieces(entry, ctx.closetById)} compact className="h-[168px]" />
+        </StudioBackgroundSurface>
       </Link>
       <div className="flex items-baseline gap-2">
         <h3 className="m-0 min-w-0 flex-1 truncate font-hd text-lg">{entry.name}</h3>
@@ -786,7 +790,7 @@ function ListCard({ entry, ctx }: { entry: DiaryEntry; ctx: Ctx }) {
         <FeelChip feel={entry.feel} />
         <span className="ml-auto"><RatingMarks value={entry.rating} size={11} /></span>
       </div>
-      <p className="m-0 line-clamp-2 min-h-10 text-xs leading-[1.65] text-ink-2">{entry.note || '沒有備註'}</p>
+      <MarkdownNote value={entry.note || '沒有備註'} className="line-clamp-2 min-h-10 text-xs leading-[1.65] text-ink-2" />
       <Button variant="oat" className="h-11 bg-oat-soft text-[13px] md:h-10" onClick={() => ctx.onRewear(entry)}><Icon name="reset" size={16} />再穿一次</Button>
     </article>
   )

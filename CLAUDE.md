@@ -51,16 +51,19 @@ src/
     diary.ts             日記場合／天氣／感受文字、月曆格、月統計、今日搭配↔日記（再穿一次、今天排好的單品）
     wishlist.ts          選購狀態文字、價格格式、網址推測店家、衣櫃可搭件數／重複度估算
     brands.ts            品牌：相似品牌偵測（可能重複）、排序、日期格式
+    materials.ts         材質預設與名稱正規化、選取及成分百分比處理
+    studioBackground.ts  搭配工作台背景主題、色塊透明度、自訂色與推薦主題
   data/sample.ts         示範資料（繁中）
   components/
     ui/                  Button、Chip/StatusTag、Icon、Select、Combobox、DatePicker、Paper（PaperCard、TiltLabel、Tape、WashBlob、LogoSticker）、Toast
     layout/              AppHeader、MobileTabBar、AppLayout、PageStub、ProfileNav（`/me` 底下共用外框 ProfileLayout：xl 以上左側子導覽，以下用 ProfileBreadcrumb 麵包屑）
     closet/              GarmentArt（示範剪影）、ItemImage、ItemTile
     outfit/              OutfitBoard（固定板型）、SlotPicker、FreeCanvas（自由擺放）
+                         StudioCanvas、StudioBackgroundPicker、StudioBackgroundSurface（搭配工作台背景）
     diary/               DiaryParts（評分、場合／感受標籤、月曆小拼貼）、DiaryEntryDialog（記一筆／編輯）
     wishlist/            WishlistTabs、WishlistForm（新增／編輯）、BoughtDialog（移至已購買）、CompareGroupDialog
-  pages/                 Landing、Login、Home、Closet、AddItem、ItemDetail、Outfit、Studio、Wishlist、Compare、Diary、Profile、MeasurementHistory、Brands
-supabase/migrations/     0001_init.sql … 0011_brands.sql（依序執行）
+  pages/                 Landing、Login、Home、Closet、AddItem、ItemDetail、Outfit、Studio、Wishlist、Compare、Diary、Profile、MeasurementHistory、Brands、ManagedLists
+supabase/migrations/     0001_init.sql … 0013_outfit_background_themes.sql（依序執行）
 ```
 
 ## 路由與進度
@@ -83,6 +86,8 @@ supabase/migrations/     0001_init.sql … 0011_brands.sql（依序執行）
 | `/me/measurements` | 量測紀錄・依日期／對照表（`?view=table`） | 完成 → B-History、B-History-Table、B-M-History |
 | `/me/measurements/:id` | 單次紀錄（手機獨立頁；桌面在列表右側） | 完成 → B-M-History-Detail |
 | `/me/brands` | 品牌管理（新增／改名／合併／刪除＋10 秒復原、可能重複提示；`/me` 頁首有入口） | 完成 → B-Brands、B-M-Brands-* |
+| `/me/shops` | 購買通路管理（新增／改名／合併／刪除，含網路／實體類型與網址） | 完成 → B-Shops、B-M-Shops |
+| `/me/materials` | 材質管理（新增／改名／合併／刪除／隱藏、別名與排序） | 完成 → B-Materials、B-M-Materials |
 
 新頁面一律拆成獨立檔案 `src/pages/XxxPage.tsx`，並對照設計稿同名畫面（含手機版 B-M-*）；尚未實作的頁面可用 `components/layout/PageStub` 暫代。
 
@@ -164,6 +169,16 @@ supabase/migrations/     0001_init.sql … 0011_brands.sql（依序執行）
 - 示範資料與畫面文字使用自然的台灣繁體中文。
 - 建立提交請使用 `npm run commit -- "繁體中文摘要"`；腳本會遞增版號、更新 `src/lib/version.ts` 與 `CHANGELOG.md`、執行 build/lint，並在使用者確認後建立含版號的 commit。版號格式為 `YYYYMMDD-N`，同日流水號加 1、每日從 1 開始。腳本不會 push；每次 `git push` 前確認提交已包含版號與紀錄。
 
+### 搭配工作台背景主題（design/B-Studio.dc.html、B-M-Studio.dc.html、B-M-Studio-Bg.dc.html）
+- 主題：plain 素紙(新穿搭預設、無色塊) / oat 燕麥 / lemon 檸檬薄荷 / rose 玫瑰 / mist 霧藍 / journal 手帳 / custom 自訂
+- 主題的背景色與色塊 rgba 值，照 design/B-Studio.dc.html 裡 renderVals() 的 TH 陣列
+- 自訂：兩個 hex 取自 18 色系（排除多色/其他），可輸入 HEX；轉成 rgba 時依亮度決定透明度：<0.4→.16、<0.65→.26、其他→.4
+- 色塊模式 blobMode：on / soft(25%) / off；on 狀態下選取單品編輯時自動降到 25%（transition .2s），取消選取恢復
+- 推薦主題（★）依畫布上單品顏色計算，只做標示，不自動切換；素紙與自訂不參與推薦
+- 主題跟著穿搭一起存（outfits.bg_theme、bg_blob_mode、bg_custom jsonb，migration 0013）；匯出圖片與日記紀錄顯示沿用同一個背景
+- 桌面顯示主題列與色塊模式；手機從畫布右上角「背景」開啟底部主題面板
+- 不做：拖曳色塊位置、依季節自動切換
+
 ### 設計稿對照表（`design/`）
 
 | 編號 | 畫面 | 設計檔 | 尺寸 | 對應路由／程式 |
@@ -189,6 +204,9 @@ supabase/migrations/     0001_init.sql … 0011_brands.sql（依序執行）
 | B12.2 | 穿搭日記・記一筆 | `B-Diary-New.dc.html` | 1440 | `/diary/new`（對話框） |
 | B13 | 元件：可輸入的下拉選單（品牌） | `B-Combobox.dc.html` | 1440 | `components/ui/Combobox` |
 | B14 | 品牌管理 | `B-Brands.dc.html` | 1440 | `/me/brands` |
+| B15 | 購買通路管理 | `B-Shops.dc.html` | 1440 | `/me/shops` |
+| B16 | 材質管理 | `B-Materials.dc.html` | 1440 | `/me/materials` |
+
 | BM0 | 手機 Landing | `B-M-Landing.dc.html` | 390 | `/` |
 | BM0.1 | 手機登入 | `B-M-Login.dc.html` | 390 | `/login` |
 | BM1 | 手機首頁 | `B-M-Home.dc.html` | 390 | `/home` |
@@ -210,6 +228,8 @@ supabase/migrations/     0001_init.sql … 0011_brands.sql（依序執行）
 | BM10.1 | 品牌動作・改名 | `B-M-Brands-Actions.dc.html` | 390 | `/me/brands`（底部面板） |
 | BM10.2 | 合併品牌 | `B-M-Brands-Merge.dc.html` | 390 | `/me/brands`（底部面板） |
 | BM10.3 | 刪除品牌・復原 | `B-M-Brands-Delete.dc.html` | 390 | `/me/brands`（底部面板） |
-
+| BM11 | 手機個人資料・清單管理入口 | `B-M-Lists.dc.html` | 390 | `/me` |
+| BM12 | 手機購買通路管理 | `B-M-Shops.dc.html` | 390 | `/me/shops` |
+| BM13 | 手機材質管理 | `B-M-Materials.dc.html` | 390 | `/me/materials` |
 
 沒有手機版設計稿的頁面（衣櫃、衣物詳細、新增衣物、選購清單、個人資料），比照 BM 開頭的版面規則自行延伸：單欄排列、底部固定主要按鈕、選擇類操作改用 bottom sheet。

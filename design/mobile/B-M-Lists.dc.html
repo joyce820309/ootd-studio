@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機清單管理入口</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.row{display:flex;align-items:center;gap:12px;min-height:64px;padding:0 8px 0 14px;border-top:1.5px dashed #EADCC6;color:#3B2F25;text-decoration:none}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:844px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <header style="display:flex;align-items:center;gap:4px;padding:8px 8px 8px 16px;border-bottom:1.5px dashed #D9C7AC">
+    <h1 class="hd" style="margin:0;font-size:22px">個人資料</h1>
+    <span style="margin-left:auto;width:36px;height:36px;border-radius:50%;background:#3B2F25;color:#FBF4E8;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span>
+  </header>
+  <main style="padding:16px 12px 120px;display:flex;flex-direction:column;gap:16px">
+    <section aria-labelledby="g1" style="border-radius:14px;background:#FFFCF6;padding:4px 0">
+      <h2 id="g1" style="margin:0;padding:10px 14px 6px;font-size:12px;font-weight:500;color:#74624F">體態</h2>
+      <a class="row" href="B-Body.dc.html" style="border-top:0"><span style="width:10px;height:10px;border-radius:3px;background:#A9C6CF"></span><span style="flex:1">體態與尺寸</span><span style="font-size:12px;color:#74624F">11/12 更新</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#74624F"><path d="M9 6l6 6-6 6"></path></svg></a>
+      <a class="row" href="B-M-History.dc.html"><span style="width:10px;height:10px;border-radius:3px;background:#B7CBB0"></span><span style="flex:1">量測紀錄</span><span class="num" style="font-size:12px;color:#74624F">4 筆</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#74624F"><path d="M9 6l6 6-6 6"></path></svg></a>
+    </section>
+    <section aria-labelledby="g2" style="border-radius:14px;background:#FFFCF6;padding:4px 0">
+      <h2 id="g2" style="margin:0;padding:10px 14px 6px;font-size:12px;font-weight:500;color:#74624F">清單管理</h2>
+      <sc-for list="{{lists}}" as="l" hint-placeholder-count="3">
+        <a class="row" href="{{l.href}}" style="border-top-color:{{l.bt}}">
+          <span style="width:10px;height:10px;border-radius:3px;background:{{l.c}}"></span>
+          <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span>{{l.t}}</span><span style="font-size:11px;color:#74624F">{{l.path}}</span></span>
+          <sc-if value="{{l.dup}}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;padding:2px 8px;border-radius:999px;background:#F6E7C6;color:#5A3F12">{{l.dup}}</span></sc-if>
+          <span class="num" style="font-size:13px;color:#5A4A3C">{{l.n}}</span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#74624F"><path d="M9 6l6 6-6 6"></path></svg>
+        </a>
+      </sc-for>
+      <p style="margin:6px 14px 10px;font-size:11px;line-height:1.6;color:#74624F">三種清單都用同一套管理方式：搜尋、改名、合併、刪除（見 BM10）。</p>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      lists: [
+        { t: '品牌', path: '/me/brands', n: 14, dup: '2 組可能重複', c: '#F2CF8E', href: 'B-M-Brands.dc.html', bt: 'transparent' },
+        { t: '購買通路', path: '/me/shops', n: 11, dup: '1 組可能重複', c: '#A9C6CF', href: 'B-M-Shops.dc.html', bt: '#EADCC6' },
+        { t: '材質', path: '/me/materials', n: 16, dup: '2 組可能重複', c: '#B7CBB0', href: 'B-M-Materials.dc.html', bt: '#EADCC6' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

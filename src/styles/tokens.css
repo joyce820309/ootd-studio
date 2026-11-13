@@ -15,6 +15,23 @@
   --color-paper: #FBF4E8;
   --color-card: #FFFCF6;
   --color-apricot: #F6E9D3;
+  /* 搭配工作台背景主題 */
+  --color-studio-paper-plain: #FFFCF6;
+  --color-studio-paper-oat: #F7EEDD;
+  --color-studio-paper-lemon: #FAF7EA;
+  --color-studio-paper-rose: #FBF1EC;
+  --color-studio-paper-mist: #F2F4F1;
+  --color-studio-paper-journal: #F6E9D3;
+  --color-studio-blob-oat-a: rgb(217 203 179 / 0.55);
+  --color-studio-blob-oat-b: rgb(184 138 90 / 0.24);
+  --color-studio-blob-lemon-a: rgb(232 198 106 / 0.32);
+  --color-studio-blob-lemon-b: rgb(167 192 158 / 0.36);
+  --color-studio-blob-rose-a: rgb(231 185 180 / 0.42);
+  --color-studio-blob-rose-b: rgb(242 207 142 / 0.26);
+  --color-studio-blob-mist-a: rgb(150 186 198 / 0.34);
+  --color-studio-blob-mist-b: rgb(143 163 188 / 0.24);
+  --color-studio-blob-journal-a: rgb(150 186 198 / 0.32);
+  --color-studio-blob-journal-b: rgb(222 166 152 / 0.28);
   --color-tile: #F3E7D4;
   --color-line: #EADCC6;
   --color-line-strong: #D9C7AC;

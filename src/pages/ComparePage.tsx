@@ -29,7 +29,7 @@ import {
   updateCompareGroup,
 } from '@/lib/data'
 import { todayISO } from '@/lib/date'
-import { isWearable, REQUIRED_SLOTS, SLOT_META, SLOTS } from '@/lib/slots'
+import { isWearable, REQUIRED_SLOTS, SLOT_META, SLOTS, STATUS_LABEL } from '@/lib/slots'
 import { colorsGoTogether, formatNT, OVERLAP_LABEL, totalPrice, WISH_STATUS, wishInsights, type WishInsights } from '@/lib/wishlist'
 import type { ClosetItem, CompareGroup, CompareGroupInput, OutfitPick, Slot, WishlistInput, WishlistItem } from '@/types'
 
@@ -200,16 +200,16 @@ export function ComparePage() {
   const closetById = useMemo(() => new Map(closet.map((c) => [c.id, c])), [closet])
   const wishById = useMemo(() => new Map(wishes.map((w) => [w.id, w])), [wishes])
 
-  // 預設搭配：每個部位挑配色合得來、穿最多次的可穿衣物（配件不預設）。
+  // 預設搭配：每個部位挑配色合得來、穿最多次的衣物，在家可穿的優先（配件不預設）。
   const defaults = useMemo(() => {
     const out: Partial<Record<Slot, BoardPick | null>> = {}
     for (const { slot } of SLOTS) {
       if (slot === 'acc') continue
       const options = closet
-        .filter((c) => c.slot === slot && isWearable(c.status))
+        .filter((c) => c.slot === slot)
         .sort((a, b) => {
           const fit = (c: ClosetItem) => (tryItem && colorsGoTogether(c.colorHex, tryItem.colorHex) ? 1 : 0)
-          return fit(b) - fit(a) || (b.wearCount ?? 0) - (a.wearCount ?? 0)
+          return Number(isWearable(b.status)) - Number(isWearable(a.status)) || fit(b) - fit(a) || (b.wearCount ?? 0) - (a.wearCount ?? 0)
         })
       out[slot] = options[0] ? { kind: 'closet', id: options[0].id } : null
     }
@@ -748,7 +748,7 @@ function MixSources({
             </div>
           )
         }
-        const closetOptions = closet.filter((c) => c.slot === meta.slot && isWearable(c.status))
+        const closetOptions = closet.filter((c) => c.slot === meta.slot)
         const wishOptions = wishes.filter((w) => w.slot === meta.slot && w.compareGroupId !== groupId)
         const current = picks[meta.slot]
         const labelId = `mix-${meta.slot}`
@@ -761,7 +761,7 @@ function MixSources({
               )}
               {closetOptions.map((c) => (
                 <SourceChip key={c.id} selected={current?.kind === 'closet' && current.id === c.id} onClick={() => onPick(meta.slot, { kind: 'closet', id: c.id })}>
-                  衣櫃：{c.name}
+                  衣櫃：{c.name}{isWearable(c.status) ? '' : `（${STATUS_LABEL[c.status]}）`}
                 </SourceChip>
               ))}
               {wishOptions.map((w) => (
@@ -769,7 +769,7 @@ function MixSources({
                   想買：{w.name}
                 </SourceChip>
               ))}
-              {closetOptions.length === 0 && wishOptions.length === 0 && meta.required && <span className="text-xs text-rose-deep">衣櫃裡沒有可穿的{meta.label}</span>}
+              {closetOptions.length === 0 && wishOptions.length === 0 && meta.required && <span className="text-xs text-rose-deep">衣櫃裡還沒有{meta.label}</span>}
             </div>
           </div>
         )

@@ -16,6 +16,7 @@ import { BrandsPage } from '@/pages/BrandsPage'
 import { DiaryPage } from '@/pages/DiaryPage'
 import { ComparePage } from '@/pages/ComparePage'
 import { WishlistPage } from '@/pages/WishlistPage'
+import { MaterialsPage, ShopsPage } from '@/pages/ManagedListsPage'
 
 function NotFound() {
   return (
@@ -56,6 +57,8 @@ const router = createBrowserRouter([
           { path: '/me/measurements', element: <MeasurementHistoryPage /> },
           { path: '/me/measurements/:id', element: <MeasurementHistoryPage /> },
           { path: '/me/brands', element: <BrandsPage /> },
+          { path: '/me/shops', element: <ShopsPage /> },
+          { path: '/me/materials', element: <MaterialsPage /> },
         ],
       },
     ],

@@ -2,7 +2,9 @@ import { useRef, type PointerEvent, type RefObject } from 'react'
 import { ItemImage } from '@/components/closet/ItemImage'
 import { Icon } from '@/components/ui/Icon'
 import { Button } from '@/components/ui/Button'
-import type { ClosetItem, Placement, WishlistItem } from '@/types'
+import { StudioBackgroundPicker } from '@/components/outfit/StudioBackgroundPicker'
+import { getStudioBackground } from '@/lib/studioBackground'
+import type { ClosetItem, Placement, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, WishlistItem } from '@/types'
 
 export interface StudioPiece {
   key: string
@@ -20,8 +22,13 @@ interface Props {
   onReplace: () => void
   onExport: () => void
   onLayer: (key: string, direction: 1 | -1) => void
-  paper: 'apricot' | 'mist' | 'rose' | 'card'
-  onPaperChange: (paper: Props['paper']) => void
+  backgroundTheme: StudioBackgroundTheme
+  backgroundMode: StudioBackgroundMode
+  backgroundCustom: StudioBackgroundCustom
+  recommendedTheme: StudioBackgroundTheme | null
+  onBackgroundThemeChange: (theme: StudioBackgroundTheme) => void
+  onBackgroundModeChange: (mode: StudioBackgroundMode) => void
+  onBackgroundCustomChange: (custom: StudioBackgroundCustom) => void
   canvasRef: RefObject<HTMLDivElement | null>
   onInteractionEnd: () => void
   className?: string
@@ -47,13 +54,6 @@ interface PinchState {
   midpointY: number
 }
 
-const PAPERS = [
-  { id: 'apricot', label: '杏色點格紙', color: 'bg-apricot bg-dot-grid' },
-  { id: 'mist', label: '霧藍紙', color: 'bg-mist-soft' },
-  { id: 'rose', label: '玫瑰紙', color: 'bg-rose-soft' },
-  { id: 'card', label: '白紙', color: 'bg-card' },
-] as const
-
 const clampPlacement = (placement: Placement): Placement => ({
   x: Math.max(4, Math.min(96, placement.x)),
   y: Math.max(4, Math.min(96, placement.y)),
@@ -71,8 +71,13 @@ export function StudioCanvas({
   onReplace,
   onExport,
   onLayer,
-  paper,
-  onPaperChange,
+  backgroundTheme,
+  backgroundMode,
+  backgroundCustom,
+  recommendedTheme,
+  onBackgroundThemeChange,
+  onBackgroundModeChange,
+  onBackgroundCustomChange,
   canvasRef,
   onInteractionEnd,
   className = '',
@@ -164,9 +169,21 @@ export function StudioCanvas({
 
   const selectedPiece = pieces.find((piece) => piece.key === selectedKey) ?? null
   const ordered = [...pieces].sort((a, b) => a.placement.z - b.placement.z)
+  const background = getStudioBackground(backgroundTheme, backgroundCustom)
+  const autoSoft = backgroundMode === 'on' && Boolean(selectedPiece)
+  const blobOpacity = !background.blobA || backgroundMode === 'off' ? 0 : backgroundMode === 'soft' || autoSoft ? 0.25 : 1
 
   return (
     <div className={`flex min-h-0 flex-col gap-2 ${className}`}>
+      <StudioBackgroundPicker
+        theme={backgroundTheme}
+        mode={backgroundMode}
+        custom={backgroundCustom}
+        recommendedTheme={recommendedTheme}
+        onThemeChange={onBackgroundThemeChange}
+        onModeChange={onBackgroundModeChange}
+        onCustomChange={onBackgroundCustomChange}
+      />
       <div className="flex min-h-12 items-center rounded-tile bg-paper px-1">
         {selectedPiece ? (
           <div role="toolbar" aria-label={`調整：${selectedPiece.item.name}`} className="flex w-full items-center gap-0.5 overflow-x-auto">
@@ -192,10 +209,11 @@ export function StudioCanvas({
         onPointerUp={end}
         onPointerCancel={end}
         onPointerDown={() => onSelect(null)}
-        className={`relative min-h-[440px] flex-1 touch-none select-none overflow-hidden rounded-block sm:min-h-[520px] lg:min-h-[640px] ${PAPERS.find((option) => option.id === paper)?.color ?? PAPERS[0].color}`}
+        className="relative min-h-[440px] flex-1 touch-none select-none overflow-hidden rounded-block bg-dot-grid sm:min-h-[520px] lg:min-h-[640px]"
+        style={{ backgroundColor: background.background }}
       >
-        <span aria-hidden="true" className="pointer-events-none absolute left-[8%] top-[12%] h-[58%] w-[46%] rounded-block bg-mist-wash mix-blend-multiply" style={{ rotate: '-3deg' }} />
-        <span aria-hidden="true" className="pointer-events-none absolute left-[40%] top-[30%] h-[56%] w-[44%] rounded-block bg-rose-wash mix-blend-multiply" style={{ rotate: '4deg' }} />
+        <span aria-hidden="true" className="pointer-events-none absolute left-[8%] top-[12%] h-[58%] w-[46%] rounded-block mix-blend-multiply transition-opacity duration-200" style={{ backgroundColor: background.blobA ?? 'transparent', opacity: blobOpacity, rotate: '-3deg' }} />
+        <span aria-hidden="true" className="pointer-events-none absolute left-[40%] top-[30%] h-[56%] w-[44%] rounded-block mix-blend-multiply transition-opacity duration-200" style={{ backgroundColor: background.blobB ?? 'transparent', opacity: blobOpacity, rotate: '4deg' }} />
 
         {ordered.map((piece) => {
           const isSelected = piece.key === selectedKey
@@ -255,13 +273,10 @@ export function StudioCanvas({
         <div className="absolute bottom-3 left-3 z-50 flex gap-2">
           <span className="flex h-9 items-center rounded-btn bg-card px-3 font-num text-xs shadow-paper">100%</span>
           <span className="flex h-9 items-center rounded-btn bg-card px-3 text-xs shadow-paper">{pieces.length} 件單品</span>
-        </div>
-        <div role="group" aria-label="背景紙" className="absolute bottom-3 right-3 z-50 flex gap-1 rounded-btn bg-card p-1 shadow-paper">
-          {PAPERS.map((option) => (
-            <button key={option.id} type="button" aria-label={option.label} aria-pressed={paper === option.id} onClick={() => onPaperChange(option.id)} className={`size-9 rounded-sm border-2 ${paper === option.id ? 'border-ink' : 'border-line-strong'} ${option.id === 'apricot' ? 'bg-apricot' : option.id === 'mist' ? 'bg-mist-soft' : option.id === 'rose' ? 'bg-rose-soft' : 'bg-card'}`} />
-          ))}
+          {autoSoft && <span className="hidden h-9 items-center gap-1.5 rounded-btn bg-card px-3 text-xs text-ink-2 shadow-paper sm:inline-flex"><span aria-hidden="true" className="size-2.5 rounded-sm" style={{ backgroundColor: background.previewA, opacity: 0.6 }} />編輯中・色塊暫時變淡</span>}
         </div>
       </div>
+      <p className="m-0 hidden text-center text-[11px] leading-5 text-ink-2 sm:block">背景主題會跟著穿搭設定一起儲存；匯出圖片會沿用同一背景。</p>
       <p className="m-0 hidden text-center text-xs text-ink-2 sm:block">拖曳移動・角落縮放・上方圓鈕旋轉・Delete 移除・方向鍵微調</p>
       <p className="m-0 text-center text-xs text-ink-2 sm:hidden">拖曳移動・雙指調整位置・方向鍵或工具列微調</p>
       <Button variant="secondary" className="self-center sm:hidden" onClick={onExport}><Icon name="outfit" size={17} />另存畫布圖片</Button>

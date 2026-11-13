@@ -5,6 +5,7 @@ import { DestructiveActionDialog } from '@/components/ui/B10States'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Chip } from '@/components/ui/Chip'
 import { Icon } from '@/components/ui/Icon'
+import { MarkdownNote } from '@/components/ui/MarkdownNote'
 import { LoadingState, PageState } from '@/components/ui/PageState'
 import { TiltLabel } from '@/components/ui/Paper'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
@@ -338,7 +339,7 @@ function WishDetail({
   const activeItem = isActiveWish(item)
   const added = formatAddedDate(item.createdAt)
   const priceGap = item.targetPrice !== undefined ? item.price - item.targetPrice : null
-  const facts = [item.brand ?? item.shop, item.size ? `預計尺寸 ${item.size}${item.sizeNote ? `（${item.sizeNote}）` : ''}` : item.sizeNote, added ? `加入於 ${added}` : null].filter(Boolean).join('・')
+  const facts = [item.brand ?? item.shop, item.size ? `預計尺寸 ${item.size}` : null, added ? `加入於 ${added}` : null].filter(Boolean).join('・')
   const extra = [
     item.shipping !== undefined ? ['運費', item.shipping === 0 ? '免運' : formatNT(item.shipping)] : null,
     item.brand && item.shop !== item.brand ? ['店家', item.shop] : null,
@@ -386,7 +387,8 @@ function WishDetail({
                 <svg viewBox="0 0 24 24" aria-hidden="true" className="size-3.5 fill-none stroke-current" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M9 7h8v8" /></svg>
               </a>
             )}
-            {item.reason && <p className="m-0 mt-1 rounded-btn bg-paper px-3.5 py-2.5 font-hd text-[17px] leading-[1.7]">「{item.reason}」</p>}
+            {item.sizeNote && <div className="rounded-btn bg-mist-soft px-3.5 py-2.5 text-sm leading-[1.7] text-ink"><span className="mb-1 block text-xs font-medium text-ink-2">尺寸備註</span><MarkdownNote value={item.sizeNote} /></div>}
+            {item.reason && <div className="mt-1 rounded-btn bg-paper px-3.5 py-2.5 text-sm leading-[1.7] text-ink"><MarkdownNote value={item.reason} /></div>}
             {extra.length > 0 && (
               <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[13px]">
                 {extra.map(([k, v]) => (

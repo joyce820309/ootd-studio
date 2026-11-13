@@ -6,6 +6,8 @@ const LINKS = [
   { to: '/me', label: '體態與尺寸', end: true },
   { to: '/me/measurements', label: '量測紀錄', end: false },
   { to: '/me/brands', label: '品牌', end: false },
+  { to: '/me/shops', label: '購買通路', end: false },
+  { to: '/me/materials', label: '材質', end: false },
 ]
 
 /** 個人資料子導覽（大螢幕左欄）；目前頁面以燕麥色左側線標示 */
@@ -23,11 +25,6 @@ export function ProfileSideNav({ counts = {}, className = '' }: { counts?: Parti
           {link.label}
           {counts[link.to] !== undefined && <span className="ml-auto font-num text-xs font-normal text-ink-3 tabular">{counts[link.to]}</span>}
         </NavLink>
-      ))}
-      {['購買通路', '材質・場合標籤'].map((label) => (
-        <span key={label} aria-disabled="true" className="flex min-h-11 items-center gap-2 px-3 text-sm text-ink-3">
-          {label}<span className="ml-auto text-[11px]">之後</span>
-        </span>
       ))}
     </nav>
   )

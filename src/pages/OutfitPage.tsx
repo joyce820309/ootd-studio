@@ -13,7 +13,7 @@ import { bringToFront, defaultLayout, pickLayout, shiftLayer } from '@/lib/freeL
 import { EMPTY_PICKS, groupBySlot, missingRequired, suggestDefaultPicks, type Picks } from '@/lib/outfit'
 import { todayISO } from '@/lib/date'
 import { storeTodayPicks, type RewearState } from '@/lib/diary'
-import { isWearable, SLOT_META, SLOTS } from '@/lib/slots'
+import { SLOT_META, SLOTS } from '@/lib/slots'
 import type { ClosetItem, FreeLayout, OutfitTemplate, Placement, Slot } from '@/types'
 
 
@@ -38,7 +38,7 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
   const byId = useMemo(() => new Map(items.map((i) => [i.id, i])), [items])
 
   const location = useLocation()
-  // 從穿搭日記「再穿一次」帶過來：不能穿的單品先空著
+  // 從穿搭日記「再穿一次」帶過來：不論衣物狀態都帶回，只有已不在衣櫃的先空著
   const [rewear] = useState(() => {
     const state = (location.state as Partial<RewearState> | null)?.rewear
     if (!state) return null
@@ -46,8 +46,8 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
     const skipped: string[] = []
     for (const [slot, id] of Object.entries(state.picks) as [Slot, string][]) {
       const item = byId.get(id)
-      if (item && isWearable(item.status)) picks[slot] = id
-      else skipped.push(item ? `${item.name}（${SLOT_META[slot].label}）` : `${SLOT_META[slot].label}那件已不在衣櫃`)
+      if (item) picks[slot] = id
+      else skipped.push(SLOT_META[slot].label)
     }
     return { name: state.name, picks, skipped }
   })
@@ -60,7 +60,7 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
   const [toast, setToast] = useState<ToastMessage | null>(() =>
     rewear
       ? rewear.skipped.length
-        ? { tone: 'error', text: `再穿一次：${rewear.skipped.join('、')}目前不能穿，那格先空著，換一件就好。` }
+        ? { tone: 'error', text: `再穿一次：${rewear.skipped.join('、')}那件已不在衣櫃，那格先空著，換一件就好。` }
         : { tone: 'success', text: '已帶回日記裡的這一套。' }
       : null,
   )

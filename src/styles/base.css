@@ -43,6 +43,26 @@
   background-size: 20px 20px;
 }
 
+/* 手機搭配工作台背景選擇器：原生 modal dialog 與底部面板。 */
+.studio-background-picker__sheet {
+  position: fixed;
+  inset: auto 0 0;
+  max-width: none;
+  margin: 0 auto;
+  border: 0;
+  color: var(--color-ink);
+}
+
+.studio-background-picker__sheet:modal {
+  overscroll-behavior: contain;
+}
+
+.studio-background-picker__sheet::backdrop {
+  overflow: hidden;
+  background: rgb(59 47 37 / 0.42);
+  overscroll-behavior: contain;
+}
+
 /* 等寬數字：價格、尺寸、日期 */
 @utility tabular {
   font-variant-numeric: tabular-nums;

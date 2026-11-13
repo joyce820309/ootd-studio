@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ProfileBreadcrumb } from '@/components/layout/ProfileNav'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
+import { MarkdownNote } from '@/components/ui/MarkdownNote'
 import { LoadingState, PageState } from '@/components/ui/PageState'
 import { TiltLabel, WashBlob } from '@/components/ui/Paper'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
@@ -233,7 +234,7 @@ function MeasurementDetail({ record, previous, onDelete, hideActions = false, hi
         <div className="mr-auto min-w-0"><h2 id="measurement-detail-title" className="m-0 font-hd text-2xl text-ink sm:text-[28px]">{formatDate(record.measuredOn)}</h2><p className="mb-0 mt-1 text-[13px] text-ink-2">{previous ? `和上次（${previousDate}）比，改了 ${changedCount} 項` : '第一次記錄'}・共記了 {countRecorded(record)} 項</p></div>
         {!hideActions && <><ButtonLink to={`/me?edit=${encodeURIComponent(record.id)}`} variant="secondary" className="h-10 px-3 text-xs"><Icon name="reset" size={16} />編輯</ButtonLink><Button variant="ghost" className="h-10 px-2 text-xs text-rose-deep" onClick={() => setConfirmDelete(true)}><Icon name="x" size={16} />刪除</Button></>}
       </header>}
-      {record.note && <div className="relative mt-5 flex gap-2 rounded-tile bg-sage-soft px-3.5 py-3 text-[13px] leading-5 text-sage-ink"><Icon name="diary" size={17} className="mt-0.5" /><span><b className="font-medium">備註</b>　{record.note}</span></div>}
+      {record.note && <div className="relative mt-5 flex gap-2 rounded-tile bg-sage-soft px-3.5 py-3 text-[13px] leading-5 text-sage-ink"><Icon name="diary" size={17} className="mt-0.5" /><div className="min-w-0 flex-1"><b className="font-medium">備註</b><MarkdownNote value={record.note} className="mt-1" /></div></div>}
       <div className="relative mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-ink-2"><span className="flex items-center gap-1.5"><DiffBadge kind="changed" delta={-0.5} compact />和上次不同</span><span className="flex items-center gap-1.5"><DiffBadge kind="new" delta={null} compact />上次沒有這項</span><span>— 沒有變</span></div>
       <div className="relative mt-5 space-y-5">
         {GROUPS.map((group) => <MetricGroup key={group.label} group={group} record={record} previous={previous} previousDate={previousDate} />)}

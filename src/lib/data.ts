@@ -1,8 +1,9 @@
 import { todayISO } from './date'
 import { useEffect, useState } from 'react'
 import { SAMPLE_BODY_MEASUREMENTS, SAMPLE_CATEGORIES, SAMPLE_COMPARE_GROUPS, SAMPLE_DIARY, SAMPLE_ITEMS, SAMPLE_PROFILE, SAMPLE_WISHLIST } from '@/data/sample'
-import type { AddItemDestination, BodyMeasurement, BodyMeasurementInput, BrandChange, BrandSummary, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, GarmentShape, ItemStatus, NewGarmentInput, Outfit, ProfilePreferences, Slot, StudioCanvasItem, WishlistInput, WishlistItem, WishStatus } from '@/types'
+import type { AddItemDestination, BodyMeasurement, BodyMeasurementInput, BrandChange, BrandSummary, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, CutoutRegion, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, GarmentShape, ItemStatus, ManagedEntryChange, ManagedListSummary, NewGarmentInput, Outfit, ProfilePreferences, ShopKind, Slot, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, StudioCanvasItem, WishlistInput, WishlistItem, WishStatus } from '@/types'
 import { toUploadableImage } from '@/lib/image'
+import { MATERIAL_DEFAULTS, materialNames } from '@/lib/materials'
 import { supabase } from './supabase'
 
 const CUTOUT_BUCKET = 'closet-images'
@@ -16,6 +17,8 @@ let demoWishlistItems: WishlistItem[] = [...SAMPLE_WISHLIST]
 let demoCompareGroups: CompareGroup[] = SAMPLE_COMPARE_GROUPS.map((group) => ({ ...group }))
 let demoCompareClosetItems: { groupId: string; itemId: string }[] = []
 const demoGarmentDraftFiles = new Map<string, File[]>()
+const demoManagedShops = new Map<string, { kind: ShopKind; url?: string }>()
+const demoManagedMaterials = new Map<string, { aliases: string[]; sortOrder: number; isDefault: boolean; isHidden: boolean }>(MATERIAL_DEFAULTS.map((material) => [material.name, { aliases: [...material.aliases], sortOrder: material.sortOrder, isDefault: true, isHidden: false }]))
 
 function cloneProfile(profile: ProfilePreferences): ProfilePreferences {
   return {
@@ -105,6 +108,7 @@ interface ItemRow {
   fit?: string | null
   material?: string | null
   material_composition?: string | null
+  material_percentages?: Record<string, number> | null
   seasons?: string[] | null
   occasions?: string[] | null
   purchase_date?: string | null
@@ -148,6 +152,7 @@ function itemFromRow(row: ItemRow, urls: Record<string, string>, photos?: Closet
     fit: row.fit ?? undefined,
     material: row.material ?? undefined,
     materialComposition: row.material_composition ?? undefined,
+    materialPercentages: row.material_percentages ?? undefined,
     seasons: row.seasons ?? [],
     occasions: row.occasions ?? [],
     purchaseDate: row.purchase_date ?? undefined,
@@ -178,7 +183,7 @@ export async function fetchClosetItems(): Promise<ClosetItem[]> {
   if (!supabase) return demoClosetItems.filter((item) => item.status !== 'retired').map((item) => ({ ...item }))
   const { data, error } = await supabase
     .from('items')
-    .select('id,name,category_id,color_name,color_hex,brand,size,neckline_size,fit,material,material_composition,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(name,slot)')
+    .select('id,name,category_id,color_name,color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(name,slot)')
     .neq('status', 'retired')
     .eq('is_draft', false)
     .order('created_at', { ascending: false })
@@ -214,7 +219,7 @@ export async function fetchClosetItemDetail(id: string): Promise<ClosetItem | nu
     return { ...item, categoryId: category?.id ?? item.categoryId, categoryName: category?.name ?? item.categoryId, categorySlot: category ? category.slot : item.categorySlot ?? item.slot, seasons: item.seasons ?? [], flatMeasurements: item.flatMeasurements ?? {}, photos: [...(demoClosetPhotos.get(id) ?? [])] }
   }
   const { data, error } = await supabase.from('items')
-    .select('id,name,category_id,color_name,color_hex,second_color_hex,brand,size,neckline_size,fit,material,material_composition,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(id,name,slot,sort),item_photos(id,storage_path,sort_order,is_cover)')
+    .select('id,name,category_id,color_name,color_hex,second_color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(id,name,slot,sort),item_photos(id,storage_path,sort_order,is_cover)')
     .eq('id', id)
     .eq('is_draft', false)
     .maybeSingle()
@@ -241,7 +246,7 @@ function closetItemPayload(input: Partial<ClosetItem> & { categoryId?: string })
   const fields: [keyof ClosetItem, string][] = [
     ['name', 'name'], ['categoryId', 'category_id'], ['colorName', 'color_name'], ['colorHex', 'color_hex'],
     ['secondColorHex', 'second_color_hex'], ['brand', 'brand'], ['size', 'size'], ['necklineSize', 'neckline_size'], ['fit', 'fit'],
-    ['material', 'material'], ['materialComposition', 'material_composition'], ['seasons', 'seasons'],
+    ['material', 'material'], ['materialComposition', 'material_composition'], ['materialPercentages', 'material_percentages'], ['seasons', 'seasons'],
     ['occasions', 'occasions'], ['purchaseDate', 'purchase_date'], ['purchasePrice', 'purchase_price'],
     ['store', 'store'], ['productUrl', 'product_url'], ['note', 'note'], ['flatMeasurements', 'flat_measurements'],
   ]
@@ -400,7 +405,7 @@ export async function deleteClosetItem(id: string): Promise<{ demo: boolean; cle
 }
 
 const ACTIVE_WISH_STATUSES: WishStatus[] = ['considering', 'waiting', 'ready']
-const WISHLIST_COLUMNS = 'id,name,slot,color_hex,color_name,shop,price,shipping,target_price,url,size,size_note,neckline_size,brand,material,return_policy,reason,priority,status,compare_group_id,image_cutout_path,image_original_path,bought_item_id,created_at'
+const WISHLIST_COLUMNS = 'id,name,slot,color_hex,color_name,shop,price,shipping,target_price,url,size,size_note,neckline_size,brand,material,material_composition,material_percentages,return_policy,reason,priority,status,compare_group_id,image_cutout_path,image_original_path,bought_item_id,created_at'
 
 interface WishlistRow {
   id: string
@@ -418,6 +423,8 @@ interface WishlistRow {
   neckline_size: number | null
   brand: string | null
   material: string | null
+  material_composition: string | null
+  material_percentages: Record<string, number> | null
   return_policy: string | null
   reason: string | null
   priority: number | null
@@ -450,6 +457,8 @@ async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
       necklineSize: r.neckline_size ?? undefined,
       brand: r.brand ?? undefined,
       material: r.material ?? undefined,
+      materialComposition: r.material_composition ?? undefined,
+      materialPercentages: r.material_percentages ?? undefined,
       returnPolicy: r.return_policy ?? undefined,
       reason: r.reason ?? undefined,
       priority: r.priority === 1 || r.priority === 2 || r.priority === 3 ? r.priority : undefined,
@@ -506,6 +515,8 @@ function wishlistPayload(input: WishlistInput) {
     priority: input.priority,
     reason: blankToNull(input.reason),
     material: blankToNull(input.material),
+    material_composition: blankToNull(input.materialComposition),
+    material_percentages: input.materialPercentages ?? {},
     return_policy: blankToNull(input.returnPolicy),
     status: input.status,
     ...(input.compareGroupId !== undefined ? { compare_group_id: input.compareGroupId } : {}),
@@ -533,6 +544,8 @@ function demoWishFromInput(id: string, input: WishlistInput, base?: WishlistItem
     priority: input.priority ?? undefined,
     reason: optional(input.reason),
     material: optional(input.material),
+    materialComposition: optional(input.materialComposition),
+    materialPercentages: input.materialPercentages ? { ...input.materialPercentages } : undefined,
     returnPolicy: optional(input.returnPolicy),
     status: input.status,
     compareGroupId: input.compareGroupId === undefined ? base?.compareGroupId : (input.compareGroupId ?? undefined),
@@ -615,7 +628,7 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
   const client = supabase
   const { data, error } = await client
     .from('wishlist_items')
-    .select('id,name,slot,category_id,color_hex,color_name,second_color_hex,brand,size,size_note,neckline_size,seasons,material,material_composition,flat_measurements,shop,url,reason,status,image_original_path,image_cutout_path')
+    .select('id,name,slot,category_id,color_hex,color_name,second_color_hex,brand,size,size_note,neckline_size,seasons,material,material_composition,material_percentages,flat_measurements,shop,url,reason,status,image_original_path,image_cutout_path')
     .eq('id', id)
     .single()
   if (error) throw error
@@ -657,6 +670,7 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
       seasons: data.seasons ?? [],
       material: data.material,
       material_composition: data.material_composition,
+      material_percentages: data.material_percentages ?? {},
       flat_measurements: data.flat_measurements ?? {},
       purchase_date: purchase.purchaseDate,
       purchase_price: purchase.paidPrice,
@@ -855,6 +869,7 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         seasons: [...input.seasons],
         material: input.material || undefined,
         materialComposition: input.materialComposition || undefined,
+        materialPercentages: input.materialPercentages ? { ...input.materialPercentages } : undefined,
         purchaseDate: input.purchaseDate || undefined,
         purchasePrice: input.purchasePrice ?? undefined,
         store: input.store || undefined,
@@ -871,9 +886,13 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         slot: category.slot!,
         colorHex: input.colorHex,
         shop: input.store || '尚未決定',
+        brand: input.brand || undefined,
         price: input.purchasePrice ?? 0,
         url: input.productUrl || undefined,
         sizeNote: input.size || undefined,
+        material: input.material || undefined,
+        materialComposition: input.materialComposition || undefined,
+        materialPercentages: input.materialPercentages ? { ...input.materialPercentages } : undefined,
         status: 'considering',
         cutoutUrl: imageUrl,
         shape,
@@ -904,6 +923,7 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
     seasons: input.seasons,
     material: input.material?.trim() || null,
     material_composition: input.materialComposition?.trim() || null,
+    material_percentages: input.materialPercentages ?? {},
     purchase_date: input.purchaseDate || null,
     purchase_price: input.purchasePrice ?? null,
     store: input.store?.trim() || null,
@@ -931,6 +951,9 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         size: input.size?.trim() || null,
         neckline_size: input.necklineSize ?? null,
         seasons: input.seasons,
+        material: input.material?.trim() || null,
+        material_composition: input.materialComposition?.trim() || null,
+        material_percentages: input.materialPercentages ?? {},
         shop: input.store?.trim() || '尚未決定',
         price: input.purchasePrice ?? 0,
         url: input.productUrl?.trim() || null,
@@ -1034,6 +1057,7 @@ export async function updateGarmentDraft(id: string, input: NewGarmentInput): Pr
     seasons: input.seasons,
     material: input.material?.trim() || null,
     material_composition: input.materialComposition?.trim() || null,
+    material_percentages: input.materialPercentages ?? {},
     purchase_date: input.purchaseDate || null,
     purchase_price: input.purchasePrice ?? null,
     store: input.store?.trim() || null,
@@ -1082,6 +1106,7 @@ export async function finalizeGarmentDraft(id: string, input: NewGarmentInput): 
     neckline_size: input.necklineSize ?? null,
     material: input.material?.trim() || null,
     material_composition: input.materialComposition?.trim() || null,
+    material_percentages: input.materialPercentages ?? {},
     flat_measurements: Object.fromEntries(Object.entries(input.flatMeasurements).filter(([, value]) => value !== null)),
     reason: input.note?.trim() || null,
     status: 'considering',
@@ -1153,7 +1178,7 @@ export async function saveOutfit(outfit: Outfit): Promise<{ demo: boolean; id?: 
     if (hypothetical) return { demo: true }
     // 示範模式：今日搭配存檔也會出現在穿搭日記
     const id = `demo-outfit-${Date.now()}`
-    demoDiary = [{ id, name: outfit.name, date: outfit.date, template: outfit.template, picks: { ...outfit.picks }, occasions: outfit.occasion ? [outfit.occasion] : [], rating: null, feel: null, weather: null, temperatureC: null, note: outfit.note ?? '', createdAt: new Date().toISOString() }, ...demoDiary]
+    demoDiary = [{ id, name: outfit.name, date: outfit.date, template: outfit.template, picks: { ...outfit.picks }, occasions: outfit.occasion ? [outfit.occasion] : [], rating: null, feel: null, weather: null, temperatureC: null, note: outfit.note ?? '', bgTheme: outfit.bgTheme ?? 'plain', bgBlobMode: outfit.bgBlobMode ?? 'on', bgCustom: outfit.bgCustom ?? { a: '#E7B9B4', b: '#8C9A86' }, createdAt: new Date().toISOString() }, ...demoDiary]
     demoAdjustWear(Object.values(outfit.picks).flatMap((pick) => (pick?.kind === 'closet' ? [pick.itemId] : [])), 1, outfit.date)
     return { demo: true, id }
   }
@@ -1166,6 +1191,9 @@ export async function saveOutfit(outfit: Outfit): Promise<{ demo: boolean; id?: 
       layout: outfit.template === 'free' ? (outfit.layout ?? null) : null,
       occasion: outfit.occasion ?? null,
       note: outfit.note ?? null,
+      bg_theme: outfit.bgTheme ?? 'plain',
+      bg_blob_mode: outfit.bgBlobMode ?? 'on',
+      bg_custom: outfit.bgCustom ?? { a: '#E7B9B4', b: '#8C9A86' },
       is_hypothetical: outfit.isHypothetical ?? Object.values(outfit.picks).some((pick) => pick?.kind === 'wish'),
     })
     .select('id')
@@ -1311,7 +1339,7 @@ export async function deleteBodyMeasurement(id: string): Promise<{ demo: boolean
 }
 
 /** 儲存進階搭配工作台的任意多件單品與畫布位置。 */
-export async function saveStudioOutfit(input: { id?: string; name: string; items: StudioCanvasItem[] }): Promise<{ id: string; demo: boolean }> {
+export async function saveStudioOutfit(input: { id?: string; name: string; items: StudioCanvasItem[]; bgTheme: StudioBackgroundTheme; bgBlobMode: StudioBackgroundMode; bgCustom: StudioBackgroundCustom }): Promise<{ id: string; demo: boolean }> {
   if (!supabase) return { id: input.id ?? `demo-studio-${Date.now()}`, demo: true }
 
   const isHypothetical = input.items.some((item) => item.source === 'wishlist')
@@ -1321,6 +1349,9 @@ export async function saveStudioOutfit(input: { id?: string; name: string; items
       name: input.name.trim() || '未命名搭配',
       template: 'free',
       is_hypothetical: isHypothetical,
+      bg_theme: input.bgTheme,
+      bg_blob_mode: input.bgBlobMode,
+      bg_custom: input.bgCustom,
     }).eq('id', outfitId).select('id').maybeSingle()
     if (error) throw error
     if (!data) outfitId = undefined
@@ -1331,6 +1362,9 @@ export async function saveStudioOutfit(input: { id?: string; name: string; items
       name: input.name.trim() || '未命名搭配',
       template: 'free',
       is_hypothetical: isHypothetical,
+      bg_theme: input.bgTheme,
+      bg_blob_mode: input.bgBlobMode,
+      bg_custom: input.bgCustom,
     }).select('id').single()
     if (error) throw error
     outfitId = data.id
@@ -1357,8 +1391,8 @@ export async function saveStudioOutfit(input: { id?: string; name: string; items
   return { id: outfitId, demo: false }
 }
 
-/** 使用登入者 JWT 呼叫去背 Edge Function；供新增衣物流程上傳原圖後使用。 */
-export async function removeItemBackground(target: ({ itemId: string } | { wishlistItemId: string }) & { photoIndex?: number }): Promise<{ itemId: string; cutoutPath: string; status: 'done' }> {
+/** 使用登入者 JWT 呼叫去背 Edge Function；region 為框選範圍（百分比），不給則用整張照片。 */
+export async function removeItemBackground(target: ({ itemId: string } | { wishlistItemId: string }) & { photoIndex?: number; region?: CutoutRegion | null }): Promise<{ itemId: string; cutoutPath: string; status: 'done' }> {
   if (!supabase) throw new Error('自動去背需要連接 Supabase；示範模式不會上傳照片。')
   const { data, error } = await supabase.functions.invoke('remove-background', { body: target })
   if (error) throw error
@@ -1386,12 +1420,15 @@ interface DiaryRow {
   weather: DiaryWeather | null
   temperature_c: number | null
   note: string | null
+  bg_theme: StudioBackgroundTheme | null
+  bg_blob_mode: StudioBackgroundMode | null
+  bg_custom: StudioBackgroundCustom | null
   photo_path: string | null
   created_at: string
   outfit_items: { slot: Slot; item_id: string | null; wishlist_item_id: string | null }[] | null
 }
 
-const DIARY_COLUMNS = 'id,name,worn_on,template,occasion,occasions,rating,feel,comfortable,weather,temperature_c,note,photo_path,created_at,outfit_items(slot,item_id,wishlist_item_id)'
+const DIARY_COLUMNS = 'id,name,worn_on,template,occasion,occasions,rating,feel,comfortable,weather,temperature_c,note,bg_theme,bg_blob_mode,bg_custom,photo_path,created_at,outfit_items(slot,item_id,wishlist_item_id)'
 
 function cloneDiary(entry: DiaryEntry): DiaryEntry {
   return { ...entry, picks: { ...entry.picks }, occasions: [...entry.occasions] }
@@ -1432,6 +1469,9 @@ export async function fetchDiaryEntries(): Promise<DiaryEntry[]> {
       weather: r.weather,
       temperatureC: r.temperature_c,
       note: r.note ?? '',
+      bgTheme: r.bg_theme ?? 'plain',
+      bgBlobMode: r.bg_blob_mode ?? 'on',
+      bgCustom: r.bg_custom ?? { a: '#E7B9B4', b: '#8C9A86' },
       photoUrl: r.photo_path ? urls[r.photo_path] : undefined,
       createdAt: r.created_at,
     }
@@ -1741,4 +1781,254 @@ export async function markBrandsDistinct(groupKey: string): Promise<{ demo: bool
   const { error } = await supabase.from('brand_distinct_groups').upsert({ group_key: groupKey }, { onConflict: 'owner_id,group_key', ignoreDuplicates: true })
   if (error) throw error
   return { demo: false }
+}
+
+export type ManagedListKind = 'shops' | 'materials'
+export interface ManagedListFields {
+  name: string
+  kind?: ShopKind
+  url?: string
+  aliases?: string[]
+  sortOrder?: number
+  isHidden?: boolean
+}
+
+function replaceDelimitedValue(value: string | undefined, from: string, to: string | null) {
+  const values = materialNames(value).map((part) => part === from ? to : part).filter((part): part is string => !!part)
+  return [...new Set(values)].join('、')
+}
+
+function selectedMaterialNames(value?: string | null) {
+  return materialNames(value ?? undefined).filter((name) => !/%/.test(name))
+}
+
+function summarizeManagedList(
+  kind: ManagedListKind,
+  metadata: Map<string, Partial<ManagedListSummary>>,
+  closet: { value?: string | null; percentages?: Record<string, number> | null; date?: string | null }[],
+  wishes: { value?: string | null; percentages?: Record<string, number> | null; date?: string | null }[],
+): ManagedListSummary[] {
+  const result = new Map<string, ManagedListSummary>()
+  const ensure = (name: string) => {
+    let entry = result.get(name)
+    if (!entry) {
+      entry = { name, closetCount: 0, wishCount: 0, lastUsed: null, ...metadata.get(name) }
+      result.set(name, entry)
+    }
+    return entry
+  }
+  for (const name of metadata.keys()) ensure(name)
+  for (const row of closet) {
+    const names = kind === 'shops' ? [row.value?.trim()].filter((name): name is string => !!name) : [...new Set([...selectedMaterialNames(row.value), ...Object.keys(row.percentages ?? {})])]
+    for (const name of names) {
+      const entry = ensure(name)
+      entry.closetCount += 1
+      entry.lastUsed = laterDate(entry.lastUsed, row.date?.slice(0, 10))
+    }
+  }
+  for (const row of wishes) {
+    const names = kind === 'shops' ? [row.value?.trim()].filter((name): name is string => !!name && name !== '尚未決定') : [...new Set([...selectedMaterialNames(row.value), ...Object.keys(row.percentages ?? {})])]
+    for (const name of names) {
+      const entry = ensure(name)
+      entry.wishCount += 1
+      entry.lastUsed = laterDate(entry.lastUsed, row.date?.slice(0, 10))
+    }
+  }
+  return [...result.values()]
+}
+
+/** 讀取購買通路或材質管理清單及使用統計。 */
+export async function fetchManagedList(kind: ManagedListKind, includeHidden = false): Promise<{ entries: ManagedListSummary[]; distinctGroups: string[] }> {
+  if (!supabase) {
+    const metadata = kind === 'shops' ? demoManagedShops : demoManagedMaterials
+    if (kind === 'materials') {
+      for (const item of [...demoClosetItems, ...demoWishlistItems]) for (const name of selectedMaterialNames(item.material)) {
+        if (!demoManagedMaterials.has(name)) demoManagedMaterials.set(name, { aliases: [], sortOrder: 500, isDefault: false, isHidden: false })
+      }
+    }
+    const meta = new Map<string, Partial<ManagedListSummary>>([...metadata].map(([name, value]) => [name, { ...value }]))
+    const entries = summarizeManagedList(kind, meta,
+      demoClosetItems.map((item) => ({ value: kind === 'shops' ? item.store : item.material, percentages: item.materialPercentages, date: item.purchaseDate })),
+      demoWishlistItems.map((item) => ({ value: kind === 'shops' ? item.shop : item.material, percentages: item.materialPercentages, date: item.createdAt })),
+    ).filter((entry) => includeHidden || !entry.isHidden)
+    return { entries, distinctGroups: [] }
+  }
+
+  if (kind === 'materials') {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError) throw authError
+    if (user) {
+      const seeds = MATERIAL_DEFAULTS.map((material) => ({ owner_id: user.id, name: material.name, aliases: [...material.aliases], sort_order: material.sortOrder, is_default: true }))
+      const { error } = await supabase.from('materials').upsert(seeds, { onConflict: 'owner_id,name', ignoreDuplicates: true })
+      if (error) throw error
+    }
+  }
+
+  const [metadataResult, itemsResult, wishesResult, groupsResult] = await Promise.all([
+    kind === 'shops' ? supabase.from('shops').select('name,kind,url') : supabase.from('materials').select('name,aliases,sort_order,is_default,is_hidden'),
+    supabase.from('items').select('store,material,material_percentages,created_at,purchase_date').eq('is_draft', false),
+    supabase.from('wishlist_items').select('shop,material,material_percentages,created_at'),
+    kind === 'shops' ? supabase.from('shop_distinct_groups').select('group_key') : supabase.from('material_distinct_groups').select('group_key'),
+  ])
+  for (const result of [metadataResult, itemsResult, wishesResult, groupsResult]) if (result.error) throw result.error
+  const metadataRows = (metadataResult.data ?? []) as unknown as Record<string, unknown>[]
+  const itemRows = (itemsResult.data ?? []) as unknown as Record<string, unknown>[]
+  const wishRows = (wishesResult.data ?? []) as unknown as Record<string, unknown>[]
+  const metadata = new Map<string, Partial<ManagedListSummary>>(metadataRows.map((row) => [String(row.name), kind === 'shops'
+    ? { kind: row.kind as ShopKind, url: row.url == null ? undefined : String(row.url) }
+    : { aliases: row.aliases as string[] ?? [], sortOrder: Number(row.sort_order ?? 100), isDefault: Boolean(row.is_default), isHidden: Boolean(row.is_hidden) }]))
+  const entries = summarizeManagedList(kind, metadata,
+    itemRows.map((row) => ({ value: kind === 'shops' ? row.store as string | null : row.material as string | null, percentages: row.material_percentages as Record<string, number> | null, date: (row.purchase_date ?? row.created_at) as string | null })),
+    wishRows.map((row) => ({ value: kind === 'shops' ? row.shop as string | null : row.material as string | null, percentages: row.material_percentages as Record<string, number> | null, date: row.created_at as string | null })),
+  ).filter((entry) => includeHidden || !entry.isHidden)
+  return { entries, distinctGroups: (groupsResult.data ?? []).map((row) => row.group_key as string) }
+}
+
+/** 新增自訂通路或材質；系統預設材質由 fetchManagedList 確保建立。 */
+export async function createManagedEntry(kind: ManagedListKind, fields: ManagedListFields): Promise<void> {
+  const name = fields.name.trim()
+  if (!name) throw new Error(`請輸入${kind === 'shops' ? '通路' : '材質'}名稱。`)
+  if (!supabase) {
+    if (kind === 'shops') demoManagedShops.set(name, { kind: fields.kind ?? 'other', url: fields.url?.trim() || undefined })
+    else demoManagedMaterials.set(name, { aliases: fields.aliases ?? [], sortOrder: fields.sortOrder ?? 500, isDefault: false, isHidden: false })
+    return
+  }
+  const { error } = kind === 'shops'
+    ? await supabase.from('shops').upsert({ name, kind: fields.kind ?? 'other', url: fields.url?.trim() || null }, { onConflict: 'owner_id,name', ignoreDuplicates: true })
+    : await supabase.from('materials').upsert({ name, aliases: fields.aliases ?? [], sort_order: fields.sortOrder ?? 500, is_default: false, is_hidden: false }, { onConflict: 'owner_id,name', ignoreDuplicates: true })
+  if (error) throw error
+}
+
+/** 改名會同步更新衣物與選購清單；同名目標改由合併流程處理。 */
+export async function updateManagedEntry(kind: ManagedListKind, oldName: string, fields: ManagedListFields): Promise<void> {
+  const name = fields.name.trim()
+  if (!name) throw new Error('名稱不能空白。')
+  if (name !== oldName) await replaceManagedEntries(kind, [oldName], name)
+  if (!supabase) {
+    if (kind === 'shops') {
+      const old = demoManagedShops.get(oldName) ?? { kind: 'other' as const }
+      demoManagedShops.delete(oldName)
+      demoManagedShops.set(name, { kind: fields.kind ?? old.kind, url: fields.url?.trim() || undefined })
+      demoClosetItems = demoClosetItems.map((item) => item.store === oldName ? { ...item, store: name } : item)
+      demoWishlistItems = demoWishlistItems.map((item) => item.shop === oldName ? { ...item, shop: name } : item)
+    } else {
+      const old = demoManagedMaterials.get(oldName) ?? { aliases: [], sortOrder: 500, isDefault: false, isHidden: false }
+      demoManagedMaterials.delete(oldName)
+      demoManagedMaterials.set(name, { ...old, aliases: fields.aliases ?? old.aliases, sortOrder: fields.sortOrder ?? old.sortOrder, isHidden: fields.isHidden ?? old.isHidden })
+    }
+    return
+  }
+  const { error } = kind === 'shops'
+    ? await supabase.from('shops').update({ kind: fields.kind ?? 'other', url: fields.url?.trim() || null }).eq('name', name)
+    : await supabase.from('materials').update({ aliases: fields.aliases ?? [], sort_order: fields.sortOrder ?? 100, is_hidden: fields.isHidden ?? false }).eq('name', name)
+  if (error) throw error
+}
+
+/** 合併或刪除名稱；刪除材質會從商品中移除，預設材質則只能隱藏。 */
+export async function replaceManagedEntries(kind: ManagedListKind, names: string[], target: string | null): Promise<ManagedEntryChange[]> {
+  const to = target?.trim() || null
+  const from = [...new Set(names)].filter((name) => name !== to)
+  if (!from.length) return []
+  if (!supabase) {
+    const changes: ManagedEntryChange[] = []
+    if (kind === 'shops') {
+      for (const name of from) {
+        const itemRows = demoClosetItems.filter((item) => item.store === name)
+        const wishRows = demoWishlistItems.filter((item) => item.shop === name)
+        const metadata = demoManagedShops.get(name)
+        changes.push({ name, itemIds: itemRows.map((item) => item.id), wishIds: wishRows.map((item) => item.id), itemValues: Object.fromEntries(itemRows.map((item) => [item.id, { value: item.store ?? null }])), wishValues: Object.fromEntries(wishRows.map((item) => [item.id, { value: item.shop }])), entry: metadata })
+        demoClosetItems = demoClosetItems.map((item) => item.store === name ? { ...item, store: to ?? undefined } : item)
+        demoWishlistItems = demoWishlistItems.map((item) => item.shop === name ? { ...item, shop: to ?? '尚未決定' } : item)
+        demoManagedShops.delete(name)
+      }
+      if (to && !demoManagedShops.has(to)) demoManagedShops.set(to, { kind: 'other' })
+    } else {
+      for (const name of from) {
+        const itemRows = demoClosetItems.filter((item) => selectedMaterialNames(item.material).includes(name) || name in (item.materialPercentages ?? {}))
+        const wishRows = demoWishlistItems.filter((item) => selectedMaterialNames(item.material).includes(name) || name in (item.materialPercentages ?? {}))
+        const metadata = demoManagedMaterials.get(name)
+        changes.push({ name, itemIds: itemRows.map((item) => item.id), wishIds: wishRows.map((item) => item.id), itemValues: Object.fromEntries(itemRows.map((item) => [item.id, { value: item.material ?? null, percentages: item.materialPercentages }])), wishValues: Object.fromEntries(wishRows.map((item) => [item.id, { value: item.material ?? null, percentages: item.materialPercentages }])), entry: metadata })
+        demoClosetItems = demoClosetItems.map((item) => {
+          const percentages = { ...(item.materialPercentages ?? {}) }
+          const oldPercentage = percentages[name]
+          delete percentages[name]
+          if (to && oldPercentage !== undefined) percentages[to] = Math.min(100, (percentages[to] ?? 0) + oldPercentage)
+          const nextMaterial = to && oldPercentage !== undefined && !selectedMaterialNames(item.material).includes(name)
+            ? replaceDelimitedValue(item.material, name, null)
+            : replaceDelimitedValue(item.material, name, to)
+          return nextMaterial !== item.material || oldPercentage !== undefined ? { ...item, material: nextMaterial || undefined, materialPercentages: percentages } : item
+        })
+        demoWishlistItems = demoWishlistItems.map((item) => {
+          const percentages = { ...(item.materialPercentages ?? {}) }
+          const oldPercentage = percentages[name]
+          delete percentages[name]
+          if (to && oldPercentage !== undefined) percentages[to] = Math.min(100, (percentages[to] ?? 0) + oldPercentage)
+          const nextMaterial = to && oldPercentage !== undefined && !selectedMaterialNames(item.material).includes(name)
+            ? replaceDelimitedValue(item.material, name, null)
+            : replaceDelimitedValue(item.material, name, to)
+          return nextMaterial !== item.material || oldPercentage !== undefined ? { ...item, material: nextMaterial || undefined, materialPercentages: percentages } : item
+        })
+        if (demoManagedMaterials.get(name)?.isDefault) demoManagedMaterials.set(name, { ...demoManagedMaterials.get(name)!, isHidden: true })
+        else demoManagedMaterials.delete(name)
+      }
+      if (to && !demoManagedMaterials.has(to)) demoManagedMaterials.set(to, { aliases: [], sortOrder: 500, isDefault: false, isHidden: false })
+    }
+    return changes
+  }
+  const changes: ManagedEntryChange[] = []
+  for (const name of from) {
+    const { data, error } = await supabase.rpc(kind === 'shops' ? 'replace_shops' : 'replace_materials', { p_from: [name], p_to: to })
+    if (error) throw error
+    const result = (data ?? {}) as { items?: string[]; wishes?: string[]; item_values?: Record<string, Record<string, { material?: string | null; percentages?: Record<string, number>; store?: string | null }>>; wish_values?: Record<string, Record<string, { material?: string | null; percentages?: Record<string, number>; shop?: string | null }>>; entry?: Record<string, unknown> }
+    const itemValues = result.item_values?.[name] ?? {}
+    const wishValues = result.wish_values?.[name] ?? {}
+    changes.push({
+      name,
+      itemIds: result.items ?? [],
+      wishIds: result.wishes ?? [],
+      itemValues: Object.fromEntries(Object.entries(itemValues).map(([id, value]) => [id, { value: kind === 'shops' ? value.store ?? null : value.material ?? null, percentages: value.percentages }])),
+      wishValues: Object.fromEntries(Object.entries(wishValues).map(([id, value]) => [id, { value: kind === 'shops' ? value.shop ?? null : value.material ?? null, percentages: value.percentages }])),
+      entry: kind === 'shops'
+        ? { kind: result.entry?.kind as ShopKind | undefined, url: result.entry?.url as string | undefined }
+        : { aliases: result.entry?.aliases as string[] | undefined, sortOrder: result.entry?.sort_order as number | undefined, isDefault: result.entry?.is_default as boolean | undefined, isHidden: result.entry?.is_hidden as boolean | undefined },
+    })
+  }
+  return changes
+}
+
+/** 復原通路或材質的改名、合併及刪除。 */
+export async function restoreManagedEntries(kind: ManagedListKind, changes: ManagedEntryChange[]): Promise<void> {
+  if (!supabase) {
+    for (const change of changes) {
+      if (kind === 'shops') {
+        for (const [id, snapshot] of Object.entries(change.itemValues ?? {})) demoClosetItems = demoClosetItems.map((item) => item.id === id ? { ...item, store: snapshot.value ?? undefined } : item)
+        for (const [id, snapshot] of Object.entries(change.wishValues ?? {})) demoWishlistItems = demoWishlistItems.map((item) => item.id === id ? { ...item, shop: snapshot.value ?? '尚未決定' } : item)
+        demoManagedShops.set(change.name, { kind: change.entry?.kind ?? 'other', url: change.entry?.url })
+      } else {
+        for (const [id, snapshot] of Object.entries(change.itemValues ?? {})) demoClosetItems = demoClosetItems.map((item) => item.id === id ? { ...item, material: snapshot.value ?? undefined, materialPercentages: snapshot.percentages } : item)
+        for (const [id, snapshot] of Object.entries(change.wishValues ?? {})) demoWishlistItems = demoWishlistItems.map((item) => item.id === id ? { ...item, material: snapshot.value ?? undefined, materialPercentages: snapshot.percentages } : item)
+        demoManagedMaterials.set(change.name, { aliases: change.entry?.aliases ?? [], sortOrder: change.entry?.sortOrder ?? 100, isDefault: change.entry?.isDefault ?? false, isHidden: change.entry?.isHidden ?? false })
+      }
+    }
+    return
+  }
+  for (const change of changes) {
+    const { error } = await supabase.rpc(kind === 'shops' ? 'restore_shop' : 'restore_material', {
+      p_name: change.name,
+      p_items: change.itemValues ?? {},
+      p_wishes: change.wishValues ?? {},
+      p_entry: kind === 'shops'
+        ? { kind: change.entry?.kind ?? 'other', url: change.entry?.url ?? null }
+        : { aliases: change.entry?.aliases ?? [], sort_order: change.entry?.sortOrder ?? 100, is_default: change.entry?.isDefault ?? false, is_hidden: change.entry?.isHidden ?? false },
+    })
+    if (error) throw error
+  }
+}
+
+/** 記住被標為「不是同一個」的候選名稱，避免重複提醒。 */
+export async function markManagedEntriesDistinct(kind: ManagedListKind, groupKey: string): Promise<void> {
+  if (!supabase) return
+  const table = kind === 'shops' ? 'shop_distinct_groups' : 'material_distinct_groups'
+  const { error } = await supabase.from(table).upsert({ group_key: groupKey }, { onConflict: 'owner_id,group_key', ignoreDuplicates: true })
+  if (error) throw error
 }

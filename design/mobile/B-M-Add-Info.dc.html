@@ -32,7 +32,7 @@ body{margin:0;background:#FBF4E8}
 :focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
 </style>
 </helmet>
-<div style="width:390px;height:2580px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+<div style="width:390px;height:2840px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
   <header style="padding:8px 12px 10px 4px;border-bottom:1.5px dashed #D9C7AC;display:flex;flex-direction:column;gap:6px;background:#FBF4E8">
     <div style="display:flex;align-items:center;gap:4px">
       <a href="B-M-Add-Cutout.dc.html" aria-label="上一步" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
@@ -57,7 +57,7 @@ body{margin:0;background:#FBF4E8}
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="f"><label class="l" for="br">品牌</label><input id="br" class="inp" value="COS"></div>
+        <div class="f"><label class="l" for="br">品牌</label><button id="br" type="button" aria-haspopup="dialog" class="inp" style="display:flex;align-items:center;text-align:left">COS<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="margin-left:auto;width:18px;height:18px;color:#74624F"><path d="M6 9l6 6 6-6"></path></svg></button></div>
         <div class="f"><label class="l" for="ts">標籤尺寸</label><input id="ts" class="inp num" value="M"></div>
       </div>
       <div class="f"><span class="l">季節<small>可複選</small></span><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px"><button class="chip" type="button" aria-pressed="false" style="justify-content:center">春</button><button class="chip" type="button" aria-pressed="false" style="justify-content:center">夏</button><button class="chip" type="button" aria-pressed="true" style="justify-content:center">秋</button><button class="chip" type="button" aria-pressed="true" style="justify-content:center">冬</button></div></div>
@@ -104,14 +104,28 @@ body{margin:0;background:#FBF4E8}
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         <sc-for list="{{mats}}" as="x" hint-placeholder-count="8"><button class="chip" type="button" aria-pressed="{{x.on}}">{{x.t}}</button></sc-for>
       </div>
-      <div class="f"><label class="l" for="cmp">成分比例<small>選填</small></label><input id="cmp" class="inp" value="羊毛 70%・尼龍 30%"></div>
+      <div role="group" aria-labelledby="mcmp" style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:#FBF4E8">
+        <span id="mcmp" class="l">成分比例<small>照標籤填，可不填</small></span>
+        <sc-for list="{{comp}}" as="c" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:8px">
+            <label for="mpc-{{c.i}}" style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;font-size:15px"><span style="width:10px;height:10px;border-radius:3px;background:{{c.c}}"></span>{{c.t}}</label>
+            <div class="unit" style="width:112px;height:46px;background:#FFFCF6"><input id="mpc-{{c.i}}" value="{{c.v}}" inputmode="decimal"><span style="font-size:14px">%</span></div>
+            <button type="button" aria-label="移除{{c.t}}" style="width:40px;height:44px;border:0;background:none;color:#5A4A3C;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+          </div>
+        </sc-for>
+        <div style="display:flex;align-items:center;gap:10px;padding-top:8px;border-top:1.5px dashed #EADCC6">
+          <div aria-hidden="true" style="flex:1;display:flex;height:8px;border-radius:4px;overflow:hidden;background:#EADCC6"><sc-for list="{{comp}}" as="c" hint-placeholder-count="3"><span style="width:{{c.v}}%;background:{{c.c}}"></span></sc-for></div>
+          <span role="status" class="num" style="font-size:12px;font-weight:700;color:#4A6245">合計 100% ✓</span>
+        </div>
+      </div>
+      <a href="B-M-Materials.dc.html" style="align-self:flex-start;min-height:36px;display:flex;align-items:center;font-size:12px;color:#3E6270">管理材質</a>
     </section>
 
     <section class="sec" aria-labelledby="by-t">
       <span id="by-t" class="tape" style="background:rgba(240,196,118,.6)">購買資訊</span>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="f"><label class="l" for="pr">價格</label><div class="unit"><span>NT$</span><input id="pr" value="3,490"></div></div>
-        <div class="f"><label class="l" for="sh">購買通路</label><input id="sh" class="inp" value="COS 信義店"></div>
+        <div class="f"><label class="l" for="sh">購買通路</label><button id="sh" type="button" aria-haspopup="dialog" class="inp" style="display:flex;align-items:center;text-align:left;gap:4px;padding-right:10px"><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">COS 信義店</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#74624F"><path d="M6 9l6 6 6-6"></path></svg></button></div>
       </div>
       <div class="f"><span class="l">購買日期</span><button type="button" aria-haspopup="dialog" class="unit" style="gap:10px;font:400 15px 'Chiron GoRound TC';color:#3B2F25;text-align:left"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg>2025 年 10 月 18 日（六）<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="margin-left:auto;width:16px;height:16px;color:#74624F"><path d="M6 9l6 6 6-6"></path></svg></button></div>
       <div class="f"><label class="l" for="url">商品網址<small>網拍買的可以貼上</small></label><input id="url" class="inp" type="url" placeholder="https://"></div>
@@ -129,7 +143,7 @@ body{margin:0;background:#FBF4E8}
   </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2580}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2840}}'>
 class Component extends DCLogic {
   renderVals() {
     const sel = '#D9CBB3';
@@ -139,7 +153,8 @@ class Component extends DCLogic {
       picked: [['燕麥', '#D9CBB3', true], ['奶油白', '#EFE6D2'], ['淺卡其', '#C9B79C']].map(([t, hex, on]) => ({ t, hex, on: on ? 'true' : 'false' })),
       colors: [['白', '#F4F1EA'], ['米', '#EFE6D2'], ['燕麥', '#D9CBB3'], ['駝', '#B88A5A'], ['咖啡', '#5A4031'], ['灰', '#9A9893'], ['黑', '#232322'], ['海軍藍', '#2E3A4F'], ['藍', '#8FA3BC'], ['綠', '#8C9A86'], ['黃', '#E8C66A'], ['橘', '#D98A4E'], ['紅', '#A8423A'], ['酒紅', '#6E2E34'], ['粉', '#E7B9B4'], ['紫', '#8E7AA6'], ['多色', 'conic-gradient(#E7B9B4,#E8C66A,#8C9A86,#8FA3BC,#E7B9B4)'], ['其他', '#FFFCF6']]
         .map(([t, hex]) => ({ t, hex, sel: hex === sel ? 'true' : 'false', ring: hex === sel ? '0 0 0 2px #FFFCF6, 0 0 0 4px #3B2F25' : 'none' })),
-      mats: ['棉', '羊毛', '喀什米爾', '聚酯纖維', '尼龍', '麻', '丹寧', '皮革', '＋ 其他'].map(t => ({ t, on: t === '羊毛' || t === '尼龍' ? 'true' : 'false' }))
+      mats: ['棉', '羊毛', '喀什米爾', '聚酯纖維', '彈性纖維', '尼龍', '麻', '丹寧', '皮革', '＋ 其他'].map(t => ({ t, on: ['棉', '聚酯纖維', '彈性纖維'].indexOf(t) >= 0 ? 'true' : 'false' })),
+      comp: [['棉', '75', '#E8DCC4'], ['聚酯纖維', '20', '#A9C6CF'], ['彈性纖維', '5', '#E2B4A8']].map(([t, v, c], i) => ({ t, v, c, i }))
     };
   }
 }

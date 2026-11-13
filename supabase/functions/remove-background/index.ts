@@ -31,6 +31,19 @@ function isItemPhotoPath(path: string, userId: string, itemId: string) {
     && /^[a-z0-9-]+\.(jpe?g|png|webp)$/i.test(segments[3])
 }
 
+/** 把百分比範圍 { x, y, w, h } 轉成 remove.bg 的 roi 字串「x1% y1% x2% y2%」；不合法回傳 null */
+function parseRegion(value: unknown): string | null {
+  if (!value || typeof value !== 'object') return null
+  const { x, y, w, h } = value as Record<string, unknown>
+  const nums = [x, y, w, h]
+  if (!nums.every((n) => typeof n === 'number' && Number.isFinite(n))) return null
+  const [left, top, width, height] = nums as number[]
+  if (left < 0 || top < 0 || width < 5 || height < 5 || left + width > 100.01 || top + height > 100.01) return null
+  const right = Math.min(100, left + width)
+  const bottom = Math.min(100, top + height)
+  return `${left.toFixed(2)}% ${top.toFixed(2)}% ${right.toFixed(2)}% ${bottom.toFixed(2)}%`
+}
+
 Deno.serve(async (request: Request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (request.method !== 'POST') return response(405, { error: '只接受 POST 請求。' })
@@ -41,8 +54,9 @@ Deno.serve(async (request: Request) => {
   let itemId: string
   let destination: 'closet' | 'wishlist'
   let photoIndex: number | undefined
+  let roi: string | undefined
   try {
-    const body = await request.json() as { itemId?: unknown; wishlistItemId?: unknown; photoIndex?: unknown }
+    const body = await request.json() as { itemId?: unknown; wishlistItemId?: unknown; photoIndex?: unknown; region?: unknown }
     const closetId = typeof body.itemId === 'string' ? body.itemId : null
     const wishlistId = typeof body.wishlistItemId === 'string' ? body.wishlistItemId : null
     if (Boolean(closetId) === Boolean(wishlistId)) return response(400, { error: '請提供一個衣物或選購項目識別碼。' })
@@ -55,6 +69,11 @@ Deno.serve(async (request: Request) => {
         return response(400, { error: '去背照片索引不正確。' })
       }
       photoIndex = body.photoIndex as number
+    }
+    if (body.region !== undefined && body.region !== null) {
+      const parsed = parseRegion(body.region)
+      if (!parsed) return response(400, { error: '框選範圍不正確，請重新框選。' })
+      roi = parsed
     }
     itemId = id
     destination = closetId ? 'closet' : 'wishlist'
@@ -137,6 +156,8 @@ Deno.serve(async (request: Request) => {
     form.append('image_file', original, 'original-image')
     form.append('size', 'auto')
     form.append('format', 'png')
+    // 框選範圍：框外一律視為背景（remove.bg 不另外收費）
+    if (roi) form.append('roi', roi)
 
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), 60_000)

@@ -9,14 +9,15 @@ import { Toast, type ToastMessage } from '@/components/ui/Toast'
 import { StudioCanvas, type StudioPiece } from '@/components/outfit/StudioCanvas'
 import { isWearable, SLOT_META } from '@/lib/slots'
 import { fetchClosetItems, fetchWishlist, saveStudioOutfit } from '@/lib/data'
-import type { ClosetItem, Placement, Slot, StudioCanvasItem, WishlistItem } from '@/types'
+import { recommendStudioTheme, STUDIO_BACKGROUND_CUSTOM_DEFAULT } from '@/lib/studioBackground'
+import type { ClosetItem, Placement, Slot, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, StudioCanvasItem, WishlistItem } from '@/types'
 
 const DRAFT_KEY = 'ootd-studio-canvas-draft-v1'
-const PAPER_IDS = ['apricot', 'mist', 'rose', 'card'] as const
-type Paper = (typeof PAPER_IDS)[number]
+const BACKGROUND_THEMES: StudioBackgroundTheme[] = ['plain', 'oat', 'lemon', 'rose', 'mist', 'journal', 'custom']
+const BACKGROUND_MODES: StudioBackgroundMode[] = ['on', 'soft', 'off']
 type Source = 'closet' | 'wishlist'
 type Filter = 'all' | 'top' | 'bottom' | 'outer' | 'shoes'
-type StudioDraft = { id?: string; name: string; paper: Paper; pieces: StudioCanvasItem[] }
+type StudioDraft = { id?: string; name: string; backgroundTheme: StudioBackgroundTheme; backgroundMode: StudioBackgroundMode; backgroundCustom: StudioBackgroundCustom; pieces: StudioCanvasItem[] }
 type CatalogRecord =
   | { source: 'closet'; item: ClosetItem; slot: Slot }
   | { source: 'wishlist'; item: WishlistItem; slot: Slot }
@@ -31,7 +32,7 @@ const FILTERS: { id: Filter; label: string; slots?: Slot[]; dot?: string }[] = [
 const STATUS: Record<ClosetItem['status'], string> = { ok: '可穿', not_arrived: '未到貨', cleaning: '送洗中', repair: '維修中', lent: '借出', stored: '收納中', retired: '已淘汰' }
 
 function defaultDraft(): StudioDraft {
-  return { name: '今天想穿什麼？', paper: 'apricot', pieces: [] }
+  return { name: '今天想穿什麼？', backgroundTheme: 'plain', backgroundMode: 'on', backgroundCustom: { ...STUDIO_BACKGROUND_CUSTOM_DEFAULT }, pieces: [] }
 }
 
 function readDraft(): StudioDraft {
@@ -39,10 +40,17 @@ function readDraft(): StudioDraft {
   try {
     const parsed = JSON.parse(localStorage.getItem(DRAFT_KEY) ?? 'null') as Partial<StudioDraft> | null
     if (!parsed || !Array.isArray(parsed.pieces)) return defaultDraft()
+    const legacyPaperThemes: Record<string, StudioBackgroundTheme> = { apricot: 'journal', mist: 'mist', rose: 'rose', card: 'plain' }
+    const requestedTheme = parsed.backgroundTheme ?? legacyPaperThemes[(parsed as { paper?: string }).paper ?? '']
+    const backgroundCustom = parsed.backgroundCustom && /^#[\da-f]{6}$/i.test(parsed.backgroundCustom.a) && /^#[\da-f]{6}$/i.test(parsed.backgroundCustom.b)
+      ? parsed.backgroundCustom
+      : { ...STUDIO_BACKGROUND_CUSTOM_DEFAULT }
     return {
       ...(typeof parsed.id === 'string' ? { id: parsed.id } : {}),
       name: typeof parsed.name === 'string' ? parsed.name : '未命名搭配',
-      paper: PAPER_IDS.includes(parsed.paper as Paper) ? parsed.paper as Paper : 'apricot',
+      backgroundTheme: BACKGROUND_THEMES.includes(requestedTheme as StudioBackgroundTheme) ? requestedTheme as StudioBackgroundTheme : 'plain',
+      backgroundMode: BACKGROUND_MODES.includes(parsed.backgroundMode as StudioBackgroundMode) ? parsed.backgroundMode as StudioBackgroundMode : 'on',
+      backgroundCustom,
       pieces: parsed.pieces.filter((piece): piece is StudioCanvasItem => Boolean(piece && typeof piece.key === 'string' && (piece.source === 'closet' || piece.source === 'wishlist') && typeof piece.itemId === 'string' && piece.placement)),
     }
   } catch {
@@ -133,6 +141,7 @@ export function StudioPage() {
     return match ? [{ key: entry.key, source: entry.source, item: match.item, placement: entry.placement }] : []
   }), [draft.pieces, selectedCatalog])
   const selectedPiece = pieces.find((piece) => piece.key === selectedKey) ?? null
+  const recommendedTheme = useMemo(() => recommendStudioTheme(pieces.map((piece) => piece.item)), [pieces])
   const displayedCatalog = catalog.filter((entry) => {
     if (entry.source !== source) return false
     const filterOption = FILTERS.find((option) => option.id === filter)
@@ -191,7 +200,6 @@ export function StudioPage() {
   }
 
   function toggleCatalogEntry(entry: CatalogRecord) {
-    if (entry.source === 'closet' && !isWearable(entry.item.status)) return
     const key = entryKey(entry.source, entry.item.id)
     const current = draftRef.current
     if (replaceKey) {
@@ -243,9 +251,10 @@ export function StudioPage() {
     if (saving) return
     setSaving(true)
     try {
-      const result = await saveStudioOutfit({ id: draftRef.current.id, name: draftRef.current.name, items: draftRef.current.pieces })
+      const current = draftRef.current
+      const result = await saveStudioOutfit({ id: current.id, name: current.name, items: current.pieces, bgTheme: current.backgroundTheme, bgBlobMode: current.backgroundMode, bgCustom: current.backgroundCustom })
       updateDraft({ id: result.id })
-      setToast({ tone: 'success', text: result.demo ? '搭配已保存在這部裝置的示範草稿中。' : '搭配已儲存到穿搭日記。' })
+      setToast({ tone: 'success', text: result.demo ? '搭配與背景設定已保存在這部裝置的示範草稿中。' : '搭配與背景設定已儲存。' })
     } catch (cause) {
       setToast({ tone: 'error', text: cause instanceof Error ? cause.message : '儲存失敗，草稿仍保留。請稍後重試。' })
     } finally {
@@ -320,16 +329,16 @@ export function StudioPage() {
             {displayedCatalog.map((entry) => {
               const key = entryKey(entry.source, entry.item.id)
               const onCanvas = draft.pieces.some((piece) => piece.key === key)
-              const unavailable = entry.source === 'closet' && !isWearable(entry.item.status)
+              const statusNote = entry.source === 'closet' && !isWearable(entry.item.status)
               const meta = SLOT_META[entry.slot]
               const wish = entry.source === 'wishlist' ? entry.item as WishlistItem : null
               return (
-                <button key={key} type="button" aria-pressed={onCanvas} disabled={unavailable} onClick={() => toggleCatalogEntry(entry)} className={`group flex min-w-0 flex-col gap-1.5 text-left disabled:cursor-not-allowed disabled:opacity-55 ${onCanvas ? 'text-mist-deep' : 'text-ink'}`}>
+                <button key={key} type="button" aria-pressed={onCanvas} onClick={() => toggleCatalogEntry(entry)} className={`group flex min-w-0 flex-col gap-1.5 text-left ${onCanvas ? 'text-mist-deep' : 'text-ink'}`}>
                   <span className={`relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-tile bg-tile p-2 ${onCanvas ? 'ring-2 ring-inset ring-mist-deep' : ''}`}>
                     <ItemImage name={entry.item.name} cutoutUrl={entry.item.cutoutUrl} shape={entry.item.shape} colorHex={entry.item.colorHex} className="size-[78%]" />
                     <span className={`absolute left-2 top-2 size-2.5 rounded-full ${meta.slot === 'outer' ? 'bg-mist' : meta.slot === 'top' ? 'bg-oat' : meta.slot === 'bottom' ? 'bg-sage' : 'bg-rose'}`} />
                     {onCanvas && <span className="absolute right-2 top-2 flex size-5 items-center justify-center rounded-full bg-mist-deep text-white"><Icon name="check" size={13} /></span>}
-                    {unavailable && <span className="absolute bottom-1.5 left-1.5 rounded-full bg-rose-soft px-1.5 py-0.5 text-[10px] text-rose-ink">{STATUS[entry.item.status]}</span>}
+                    {statusNote && <span className="absolute bottom-1.5 left-1.5 rounded-full bg-oat-soft px-1.5 py-0.5 text-[10px] text-oat-ink">{STATUS[entry.item.status]}</span>}
                     {wish && <span className="absolute bottom-1.5 left-1.5 rounded-full bg-rose-deep px-1.5 py-0.5 text-[10px] text-white">選購中・NT${amount(wish).toLocaleString()}</span>}
                   </span>
                   <span className="line-clamp-2 min-h-8 text-xs leading-4">{entry.item.name}</span>
@@ -373,8 +382,13 @@ export function StudioPage() {
             onReplace={() => openMaterials(true)}
             onExport={() => void exportImage()}
             onLayer={moveLayer}
-            paper={draft.paper}
-            onPaperChange={(paper) => pushHistory({ ...draftRef.current, paper })}
+            backgroundTheme={draft.backgroundTheme}
+            backgroundMode={draft.backgroundMode}
+            backgroundCustom={draft.backgroundCustom}
+            recommendedTheme={recommendedTheme}
+            onBackgroundThemeChange={(backgroundTheme) => pushHistory({ ...draftRef.current, backgroundTheme })}
+            onBackgroundModeChange={(backgroundMode) => pushHistory({ ...draftRef.current, backgroundMode })}
+            onBackgroundCustomChange={(backgroundCustom) => updateDraft({ backgroundCustom })}
             canvasRef={canvasRef}
             className="min-h-[520px] lg:min-h-[640px]"
           />

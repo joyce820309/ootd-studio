@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機畫布背景主題</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:844px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <header style="display:flex;align-items:center;gap:4px;padding:8px 8px 8px 4px;background:#FBF4E8;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-M-Studio.dc.html" aria-label="返回" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <div style="display:flex;flex-direction:column;min-width:0"><span class="hd" style="font-size:18px">雨天的季度簡報</span><span style="font-size:11px;color:#74624F">草稿已自動儲存</span></div>
+    <button type="button" style="margin-left:auto;height:40px;padding:0 16px;border:0;border-radius:10px;background:#3B2F25;color:#FBF4E8;font:500 14px 'Chiron GoRound TC'">儲存</button>
+  </header>
+
+  <div style="position:relative;margin:12px 12px 0;height:{{cvH}}px;border-radius:20px;background:{{cvBg}};background-image:radial-gradient(rgba(59,47,37,.12) 1px,transparent 1px);background-size:18px 18px;overflow:hidden;transition:background-color .2s">
+    <span aria-hidden="true" style="position:absolute;left:6%;top:10%;width:52%;height:56%;border-radius:20px;background:{{blobA}};mix-blend-mode:multiply;transform:rotate(-3deg);opacity:{{blobOp}};transition:opacity .2s"></span>
+    <span aria-hidden="true" style="position:absolute;left:40%;top:34%;width:52%;height:56%;border-radius:20px;background:{{blobB}};mix-blend-mode:multiply;transform:rotate(4deg);opacity:{{blobOp}};transition:opacity .2s"></span>
+    <sc-for list="{{parts}}" as="p" hint-placeholder-count="5">
+      <svg viewBox="0 0 100 100" style="position:absolute;left:{{p.l}}%;top:{{p.t}}%;width:{{p.w}}%;transform:rotate({{p.r}}deg);filter:drop-shadow(0 8px 10px rgba(59,47,37,.2))" role="img" aria-label="{{p.name}}"><path d="{{p.d}}" fill="{{p.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.6"></path><path d="{{p.d2}}" fill="none" stroke="rgba(59,47,37,.3)" stroke-width="{{p.w2}}"></path></svg>
+    </sc-for>
+  </div>
+
+  <section role="dialog" aria-label="背景主題" style="position:absolute;left:0;right:0;bottom:0;z-index:10;background:#FFFCF6;border-radius:22px 22px 0 0;box-shadow:0 -12px 30px -14px rgba(59,47,37,.35);padding:8px 16px 28px;display:flex;flex-direction:column;gap:12px">
+    <span aria-hidden="true" style="align-self:center;width:40px;height:4px;border-radius:2px;background:#D9C7AC"></span>
+
+    <sc-if value="{{isList}}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;align-items:center"><h2 class="hd" style="margin:0;font-size:19px">背景主題</h2><button type="button" style="margin-left:auto;height:40px;padding:0 6px;border:0;background:none;color:#3E6270;font:500 15px 'Chiron GoRound TC'">完成</button></div>
+      <span style="font-size:12px;line-height:1.5;color:#5A4A3C;margin-top:-6px">★ 依這套的燕麥、焦糖、炭灰推薦「燕麥」</span>
+      <div role="radiogroup" aria-label="主題" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px 8px">
+        <sc-for list="{{themes}}" as="t" hint-placeholder-count="7">
+          <button type="button" role="radio" aria-checked="{{t.pressed}}" aria-label="{{t.aria}}" onClick="{{t.pick}}" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:0;border:0;background:none;font:{{t.fw}} 12px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer">
+            <span aria-hidden="true" style="position:relative;width:100%;height:54px;border-radius:12px;background:{{t.bg}};box-shadow:{{t.ring}};overflow:hidden">
+              <span style="position:absolute;left:12%;top:14%;width:48%;height:58%;border-radius:6px;background:{{t.ma}};transform:rotate(-5deg)"></span>
+              <span style="position:absolute;left:40%;top:32%;width:48%;height:58%;border-radius:6px;background:{{t.mb}};mix-blend-mode:multiply;transform:rotate(5deg)"></span>
+              <sc-if value="{{t.isAdd}}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;color:#5A4A3C">＋</span></sc-if>
+            </span>
+            <span>{{t.name}}</span>
+            <sc-if value="{{t.rec}}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;right:-4px;top:-6px;width:20px;height:20px;border-radius:50%;background:#F2CF8E;font-size:11px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #FFFCF6">★</span></sc-if>
+          </button>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;opacity:{{segOp}}">
+        <span style="font-size:13px;font-weight:500">色塊</span>
+        <div role="group" aria-label="色塊" style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);padding:3px;border-radius:10px;background:#F3E7D4">
+          <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+            <button type="button" onClick="{{m.pick}}" aria-pressed="{{m.pressed}}" disabled="{{m.dis}}" style="height:38px;border:0;border-radius:8px;background:{{m.bg}};font:{{m.fw}} 13px 'Chiron GoRound TC';color:#3B2F25;box-shadow:{{m.sh}}">{{m.name}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <span style="font-size:11px;line-height:1.6;color:#74624F">拖曳或選取單品時，色塊會自動變淡。主題跟著這套穿搭一起存，存成圖片、寫日記都用同一個背景。</span>
+    </sc-if>
+
+    <sc-if value="{{isCustom}}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:2px"><button type="button" aria-label="返回主題" onClick="{{toList}}" style="width:40px;height:40px;margin-left:-10px;border:0;background:none;color:#3B2F25;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button><h2 class="hd" style="margin:0;font-size:19px">自訂背景</h2><button type="button" onClick="{{toList}}" style="margin-left:auto;height:40px;padding:0 6px;border:0;background:none;color:#3E6270;font:500 15px 'Chiron GoRound TC'">套用</button></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <sc-for list="{{slots}}" as="s" hint-placeholder-count="2">
+          <button type="button" onClick="{{s.pick}}" aria-pressed="{{s.pressed}}" style="display:flex;align-items:center;gap:8px;height:52px;padding:0 10px;border-radius:12px;border:{{s.bd}};background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25">
+            <span style="width:30px;height:30px;border-radius:7px;background:{{s.hex}};box-shadow:inset 0 0 0 1px rgba(59,47,37,.15)"></span>
+            <span style="display:flex;flex-direction:column;align-items:flex-start;gap:1px"><span>{{s.name}}</span><span class="num" style="font-size:11px;color:#74624F">{{s.hex}}</span></span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px">
+        <sc-for list="{{fams}}" as="f" hint-placeholder-count="16">
+          <button type="button" onClick="{{f.pick}}" aria-label="{{f.name}}" aria-pressed="{{f.pressed}}" style="aspect-ratio:1/1;border-radius:9px;background:{{f.hex}};border:0;box-shadow:{{f.sh}};padding:0"></button>
+        </sc-for>
+      </div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5A4A3C">HEX<span style="font-size:11px;color:#74624F">選填</span>
+        <input aria-label="HEX 色碼" value="{{curHex}}" class="num" style="margin-left:auto;width:132px;height:44px;border:1.5px solid #E2D2B8;border-radius:10px;background:#FBF4E8;padding:0 12px;font-size:14px;color:#3B2F25">
+      </label>
+      <span style="font-size:11px;line-height:1.6;color:#74624F">色塊一律半透明，深色會自動調淡，不會蓋過衣服。</span>
+    </sc-if>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.state = { theme: 'oat', blobMode: 'on', view: 'list', slot: 'a', custom: { a: '#E7B9B4', b: '#8C9A86' } };
+  }
+  renderVals() {
+    const st = this.state;
+    const G = {
+      knit:['M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z','M30 80H70M44 13Q50 21 56 13',1],
+      pants:['M32 10H68L72 90H56L50 36L44 90H28Z','M50 10V36M32 16H68',1],
+      coat:['M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z','M50 30V92M44 10L50 30L56 10',1],
+      shoe:['M14 62V46Q24 44 34 52Q48 62 70 62Q86 62 88 72V76H14Z','M14 70H88',1],
+      bag:['M22 40H78L82 86H18Z','M36 40Q36 18 50 18Q64 18 64 40',3]
+    };
+    const it = (name,hex,s,l,t,w,r) => ({name,hex,d:G[s][0],d2:G[s][1],w2:G[s][2],l,t,w,r});
+    const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+    const lum = (hex) => { const n = parseInt(hex.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
+    const soft = (hex) => rgba(hex, lum(hex) < 0.4 ? 0.16 : lum(hex) < 0.65 ? 0.26 : 0.4);
+    const TH = [
+      { id: 'plain',   name: '素紙',     bg: '#FFFCF6', a: null, b: null, ma: 'transparent', mb: 'transparent' },
+      { id: 'oat',     name: '燕麥',     bg: '#F7EEDD', a: 'rgba(217,203,179,.55)', b: 'rgba(184,138,90,.24)', ma: '#D9CBB3', mb: '#D2B48F', rec: true },
+      { id: 'lemon',   name: '檸檬薄荷', bg: '#FAF7EA', a: 'rgba(232,198,106,.32)', b: 'rgba(167,192,158,.36)', ma: '#EDD38E', mb: '#B7CBB0' },
+      { id: 'rose',    name: '玫瑰',     bg: '#FBF1EC', a: 'rgba(231,185,180,.42)', b: 'rgba(242,207,142,.26)', ma: '#E7B9B4', mb: '#F2CF8E' },
+      { id: 'mist',    name: '霧藍',     bg: '#F2F4F1', a: 'rgba(150,186,198,.34)', b: 'rgba(143,163,188,.24)', ma: '#A9C6CF', mb: '#B9C4D4' },
+      { id: 'journal', name: '手帳',     bg: '#F6E9D3', a: 'rgba(150,186,198,.32)', b: 'rgba(222,166,152,.28)', ma: '#A9C6CF', mb: '#E2B4A8' },
+      { id: 'custom',  name: '自訂',     bg: '#FFFCF6', a: soft(st.custom.a), b: soft(st.custom.b), ma: st.custom.a, mb: st.custom.b }
+    ];
+    const cur = TH.find(t => t.id === st.theme) || TH[0];
+    const hasBlobs = !!cur.a;
+    const blobOp = !hasBlobs || st.blobMode === 'off' ? 0 : st.blobMode === 'soft' ? 0.25 : 1;
+    const FAM = [['白','#F4F1EA'],['米','#EFE6D2'],['燕麥','#D9CBB3'],['駝','#B88A5A'],['咖啡','#5A4031'],['灰','#9A9893'],['黑','#232322'],['海軍藍','#2E3A4F'],['藍','#8FA3BC'],['綠','#8C9A86'],['黃','#E8C66A'],['橘','#D98A4E'],['紅','#A8423A'],['酒紅','#6E2E34'],['粉','#E7B9B4'],['紫','#8E7AA6']];
+    const customUsed = st.theme === 'custom';
+    return {
+      cvH: st.view === 'custom' ? 330 : 380,
+      parts: [
+        it('燕麥色針織衫','#D9CBB3','knit',38,4,40,2),
+        it('炭灰短版西裝外套','#3D3D3B','coat',8,10,42,-6),
+        it('淺藍直筒牛仔褲','#8FA3BC','pants',34,38,36,3),
+        it('焦糖托特包','#9A6B43','bag',66,26,30,6),
+        it('米白德訓鞋','#EDE7DA','shoe',58,64,32,-8)
+      ],
+      cvBg: cur.bg, blobA: cur.a || 'transparent', blobB: cur.b || 'transparent', blobOp,
+      isList: st.view === 'list', isCustom: st.view === 'custom',
+      toList: () => this.setState({ view: 'list' }),
+      themes: TH.map(t => {
+        const on = st.theme === t.id; const add = t.id === 'custom' && !customUsed;
+        return {
+          name: t.name, bg: add ? '#FBF4E8' : t.bg, ma: add ? 'transparent' : t.ma, mb: add ? 'transparent' : t.mb,
+          isAdd: add, rec: !!t.rec, aria: t.name + (t.rec ? '（推薦）' : ''),
+          pressed: on ? 'true' : 'false', fw: on ? 700 : 500,
+          ring: on ? '0 0 0 2px #FFFCF6,0 0 0 4px #3B2F25' : (add ? 'inset 0 0 0 1.5px #D9C7AC' : 'inset 0 0 0 1px rgba(59,47,37,.14)'),
+          pick: () => this.setState(t.id === 'custom' ? { theme: 'custom', view: 'custom' } : { theme: t.id })
+        };
+      }),
+      modes: [['on','開'],['soft','淡'],['off','關']].map(([id, name]) => ({
+        name, pressed: st.blobMode === id ? 'true' : 'false', dis: !hasBlobs,
+        bg: st.blobMode === id ? '#FFFCF6' : 'transparent', fw: st.blobMode === id ? 700 : 500,
+        sh: st.blobMode === id ? '0 1px 2px rgba(59,47,37,.1)' : 'none',
+        pick: () => this.setState({ blobMode: id })
+      })),
+      segOp: hasBlobs ? 1 : 0.45,
+      slots: [['a','色塊 1'],['b','色塊 2']].map(([k, name]) => ({
+        name, hex: st.custom[k], pressed: st.slot === k ? 'true' : 'false',
+        bd: st.slot === k ? '2px solid #3B2F25' : '1.5px solid #E2D2B8',
+        pick: () => this.setState({ slot: k })
+      })),
+      fams: FAM.map(([name, hex]) => ({
+        name, hex, pressed: st.custom[st.slot] === hex ? 'true' : 'false',
+        sh: st.custom[st.slot] === hex ? '0 0 0 2px #FFFCF6,0 0 0 4px #3B2F25' : 'inset 0 0 0 1px rgba(59,47,37,.15)',
+        pick: () => this.setState({ custom: Object.assign({}, st.custom, { [st.slot]: hex }), theme: 'custom' })
+      })),
+      curHex: st.custom[st.slot]
+    };
+  }
+}
+</script>
+</body>
+</html>

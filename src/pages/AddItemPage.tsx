@@ -1,27 +1,31 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent, type ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { Button } from '@/components/ui/Button'
 import { Chip } from '@/components/ui/Chip'
 import { Combobox } from '@/components/ui/Combobox'
 import { Icon } from '@/components/ui/Icon'
+import { MarkdownNoteField } from '@/components/ui/MarkdownNote'
 import { ImageUploadProgressState, CutoutFailureState, CutoutProcessingState } from '@/components/ui/B10States'
+import { CutoutRegionDialog } from '@/components/closet/CutoutRegionDialog'
 import { PaperCard, Tape, TiltLabel, WashBlob } from '@/components/ui/Paper'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
-import { fetchCategories, fetchClosetBrands, createGarmentDraft, updateGarmentDraft, finalizeGarmentDraft, discardGarmentDraft, removeItemBackground, getGarmentPhotoUrl } from '@/lib/data'
+import { fetchCategories, fetchClosetBrands, fetchManagedList, createManagedEntry, createGarmentDraft, updateGarmentDraft, finalizeGarmentDraft, discardGarmentDraft, removeItemBackground, getGarmentPhotoUrl } from '@/lib/data'
+import { materialNames, parsePercentages } from '@/lib/materials'
 import { toUploadableImage } from '@/lib/image'
-import type { AddItemDestination, Category, NewGarmentInput } from '@/types'
+import type { AddItemDestination, Category, CutoutRegion, ManagedListSummary, NewGarmentInput } from '@/types'
 
 type Step = 1 | 2 | 3 | 4
 type CutoutState = 'idle' | 'processing' | 'done' | 'failed' | 'demo'
 type Photo = { id: string; file: File; url: string }
 type MeasureField = { key: string; label: string }
 
-type FormState = Omit<NewGarmentInput, 'flatMeasurements' | 'seasons' | 'destination' | 'useCutout' | 'purchaseDate' | 'necklineSize'> & {
+type FormState = Omit<NewGarmentInput, 'flatMeasurements' | 'seasons' | 'destination' | 'useCutout' | 'purchaseDate' | 'necklineSize' | 'materialPercentages'> & {
   seasons: string[]
   flatMeasurements: Record<string, string>
   purchaseDate: string | null
   necklineSize: string
+  materialPercentages: Record<string, string>
 }
 
 const MAX_PHOTOS = 8
@@ -35,7 +39,6 @@ const COLORS = [
   { name: '紅', hex: '#A8423A' }, { name: '酒紅', hex: '#6E2E34' }, { name: '粉', hex: '#E7B9B4' },
   { name: '紫', hex: '#8E7AA6' }, { name: '多色', hex: '#8C9A86' }, { name: '其他', hex: '#D9C7AC' },
 ]
-const MATERIALS = ['棉', '羊毛', '喀什米爾', '聚酯纖維', '尼龍', '麻', '丹寧', '皮革']
 const INPUT_CLASS = 'h-12 w-full rounded-btn border-[1.5px] border-line bg-card px-3 text-sm text-ink outline-none focus:border-mist-deep'
 const SIZING: Record<string, MeasureField[]> = {
   top: [{ key: 'shoulder', label: '肩寬' }, { key: 'sleeve', label: '袖長' }, { key: 'chest', label: '胸寬' }, { key: 'length', label: '衣長' }],
@@ -47,7 +50,7 @@ const SIZING: Record<string, MeasureField[]> = {
 }
 const BASE_FORM: FormState = {
   name: '', categoryId: '', colorName: '燕麥', colorHex: '#D9CBB3', secondColorHex: '', brand: '', size: '',
-  seasons: [], necklineSize: '', material: '', materialComposition: '', purchasePrice: null, purchaseDate: null, store: '', productUrl: '', note: '', flatMeasurements: {},
+  seasons: [], necklineSize: '', material: '', materialComposition: '', materialPercentages: {}, purchasePrice: null, purchaseDate: null, store: '', productUrl: '', note: '', flatMeasurements: {},
 }
 
 function slotSizing(category: Category | undefined): MeasureField[] {
@@ -84,8 +87,16 @@ export function AddItemPage() {
   const navigate = useNavigate()
   const [categories, setCategories] = useState<Category[]>([])
   const [brandSuggestions, setBrandSuggestions] = useState<string[]>([])
+  const [shopSuggestions, setShopSuggestions] = useState<string[]>([])
+  const [materials, setMaterials] = useState<ManagedListSummary[]>([])
+  const [customMaterialName, setCustomMaterialName] = useState('')
+  const [showCustomMaterial, setShowCustomMaterial] = useState(false)
+  const [addingMaterial, setAddingMaterial] = useState(false)
   const [photos, setPhotos] = useState<Photo[]>([])
   const [cutoutPhotoId, setCutoutPhotoId] = useState<string | null>(null)
+  // 框選範圍跟著照片走：換了去背來源照片就回到整張
+  const [cutoutRegion, setCutoutRegion] = useState<{ photoId: string; region: CutoutRegion } | null>(null)
+  const [regionDialog, setRegionDialog] = useState<'select' | 'retry' | null>(null)
   const [form, setForm] = useState<FormState>(BASE_FORM)
   const [step, setStep] = useState<Step>(1)
   const [destination, setDestination] = useState<AddItemDestination>('closet')
@@ -109,19 +120,25 @@ export function AddItemPage() {
 
   const selectedCategory = categories.find((category) => category.id === form.categoryId)
   const measurements = useMemo(() => slotSizing(selectedCategory), [selectedCategory])
+  const selectedMaterials = useMemo(() => materialNames(form.material), [form.material])
+  const materialPercentageValues = useMemo(() => parsePercentages(form.materialPercentages), [form.materialPercentages])
+  const materialPercentageTotal = Object.values(materialPercentageValues).reduce((sum, value) => sum + value, 0)
   const cutoutPhoto = photos.find((photo) => photo.id === cutoutPhotoId) ?? photos[0]
   const cutoutPhotoIndex = cutoutPhoto ? photos.indexOf(cutoutPhoto) : 0
   const supportedCutout = !!cutoutPhoto && isCutoutSupported(cutoutPhoto.file)
+  const activeRegion = cutoutPhoto && cutoutRegion?.photoId === cutoutPhoto.id ? cutoutRegion.region : null
   const displayStep = step
   const visualSteps = useCutout ? STEP_LABELS : ['照片', '去背（略過）', '資料', '確認']
   const photosRef = useRef<Photo[]>([])
 
   useEffect(() => {
     let alive = true
-    Promise.all([fetchCategories(), fetchClosetBrands().catch(() => [])]).then(([items, brands]) => {
+    Promise.all([fetchCategories(), fetchClosetBrands().catch(() => []), fetchManagedList('shops'), fetchManagedList('materials')]).then(([items, brands, shops, materialList]) => {
       if (!alive) return
       setCategories(items)
       setBrandSuggestions(brands)
+      setShopSuggestions(shops.entries.map((entry) => entry.name))
+      setMaterials(materialList.entries.filter((entry) => !entry.isHidden))
       setForm((current) => ({ ...current, categoryId: current.categoryId || items[0]?.id || '' }))
     }).catch((cause: Error) => alive && setError(cause.message || '衣物分類載入失敗。'))
       .finally(() => alive && setLoadingCategories(false))
@@ -224,7 +241,7 @@ export function AddItemPage() {
         setError('這張照片格式目前無法自動去背；請回上一步改選 JPG、PNG 或 WebP，或直接使用原圖。')
         return
       }
-      await processCutout(result.id, cutoutPhotoIndex)
+      await processCutout(result.id, cutoutPhotoIndex, activeRegion)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : '照片上傳失敗，請重試。')
     } finally {
@@ -232,12 +249,12 @@ export function AddItemPage() {
     }
   }
 
-  async function processCutout(id = draftIdRef.current, photoIndex = cutoutPhotoIndex) {
+  async function processCutout(id = draftIdRef.current, photoIndex = cutoutPhotoIndex, region = activeRegion) {
     if (!id || draftDemo) return
     setCutoutState('processing')
     setError(null)
     try {
-      const result = await removeItemBackground({ itemId: id, photoIndex })
+      const result = await removeItemBackground({ itemId: id, photoIndex, region })
       const url = await getGarmentPhotoUrl(result.cutoutPath)
       setCutoutUrl(url)
       setCutoutState('done')
@@ -265,6 +282,15 @@ export function AddItemPage() {
       setError('價格不能小於 0。')
       return
     }
+    const invalidPercentage = Object.entries(form.materialPercentages).some(([material, value]) => {
+      if (!selectedMaterials.includes(material) || !value.trim()) return false
+      const percent = Number(value)
+      return !Number.isFinite(percent) || percent < 0 || percent > 100
+    })
+    if (invalidPercentage) {
+      setError('材質比例請填 0 到 100 之間的數字。')
+      return
+    }
     setError(null)
     if (draftId && !draftDemo) {
       setUploading(true)
@@ -285,6 +311,7 @@ export function AddItemPage() {
     return {
       ...form,
       necklineSize: selectedCategory?.slot === 'top' ? fieldNumber(form.necklineSize) : null,
+      materialPercentages: parsePercentages(form.materialPercentages),
       destination,
       closetStatus,
       useCutout,
@@ -327,6 +354,7 @@ export function AddItemPage() {
     photosRef.current.forEach((photo) => URL.revokeObjectURL(photo.url))
     setPhotos([])
     setCutoutPhotoId(null)
+    setCutoutRegion(null)
     setForm(initialForm(categories))
     setDestination('closet')
     setClosetStatus('ok')
@@ -361,8 +389,43 @@ export function AddItemPage() {
   }
 
   function toggleMaterial(material: string) {
-    const values = form.material ? form.material.split('、') : []
-    updateForm('material', values.includes(material) ? values.filter((value) => value !== material).join('、') : [...values, material].join('、'))
+    const values = materialNames(form.material)
+    const next = values.includes(material) ? values.filter((value) => value !== material) : [...values, material]
+    updateForm('material', next.join('、'))
+    if (!next.includes(material)) {
+      const percentages = { ...form.materialPercentages }
+      delete percentages[material]
+      updateForm('materialPercentages', percentages)
+    }
+  }
+
+  function updateMaterialPercentage(name: string, value: string) {
+    updateForm('materialPercentages', { ...form.materialPercentages, [name]: value })
+  }
+
+  async function addCustomMaterial() {
+    const name = customMaterialName.trim()
+    if (!name) return setError('請輸入材質名稱。')
+    const existing = materials.find((entry) => entry.name.normalize('NFKC').toLocaleLowerCase() === name.normalize('NFKC').toLocaleLowerCase())
+    if (existing) {
+      if (!selectedMaterials.includes(existing.name)) toggleMaterial(existing.name)
+      setCustomMaterialName('')
+      setShowCustomMaterial(false)
+      return
+    }
+    setAddingMaterial(true)
+    try {
+      await createManagedEntry('materials', { name, sortOrder: materials.length * 10 + 500 })
+      setMaterials((current) => [...current, { name, aliases: [], sortOrder: current.length * 10 + 500, isDefault: false, isHidden: false, closetCount: 0, wishCount: 0, lastUsed: null }])
+      toggleMaterial(name)
+      setCustomMaterialName('')
+      setShowCustomMaterial(false)
+      setError(null)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : '新增材質失敗。')
+    } finally {
+      setAddingMaterial(false)
+    }
   }
 
   function goBack() {
@@ -458,6 +521,10 @@ export function AddItemPage() {
               <ChoiceCard selected={useCutout} accent="oat" title="做一張去背圖" badge="推薦" onClick={() => setUseCutout(true)} description="選第 1 張平拍照自動去背。搭配板會更整齊，原本照片都會保留。" />
               <ChoiceCard selected={!useCutout} accent="mist" title="先不用，直接用照片" onClick={() => setUseCutout(false)} description="適合網拍穿搭照或暫時不去背；搭配板會使用封面照，之後仍可補做。" />
             </div>
+            {useCutout && cutoutPhoto && <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-tile bg-oat-wash px-4 py-2 text-sm text-ink-2">
+              <span className="min-w-0">去背範圍：<b className="font-medium text-ink">{activeRegion ? '已框選' : '整張照片'}</b>{!activeRegion && '・照片裡有好幾件衣服時，可以先框出要的那件'}</span>
+              <span className="ml-auto flex gap-1">{activeRegion && <button type="button" onClick={() => setCutoutRegion(null)} className="min-h-11 px-2 text-ink-2 underline">改回整張</button>}<button type="button" onClick={() => setRegionDialog('select')} className="min-h-11 px-2 font-medium text-mist-deep underline">{activeRegion ? '調整範圍' : '框選範圍'}</button></span>
+            </div>}
           </fieldset>}
         </section>}
 
@@ -470,7 +537,8 @@ export function AddItemPage() {
             <PhotoPreview photo={cutoutPhoto} title="去背來源照片（會保留）" />
             <div className="space-y-2"><div className="relative aspect-[4/5] overflow-hidden rounded-block bg-tile"><img src={cutoutUrl ?? photos[0]?.url} alt="去背結果預覽" className="size-full object-contain p-8" /><span className="absolute left-3 top-3 rounded-full bg-sage-deep px-3 py-1.5 text-xs text-white">搭配板會用這張</span></div><p className="m-0 text-xs text-ink-2">去背結果・原照片仍保留</p></div>
           </div>}
-          {cutoutState === 'done' && <div className="flex flex-wrap gap-2"><Button variant="secondary" onClick={() => void processCutout()}>重新去背</Button><Button variant="ghost" onClick={continueWithOriginal}>不去背了，直接用照片</Button></div>}
+          {(cutoutState === 'done' || cutoutState === 'failed') && cutoutPhoto && <div className="flex flex-wrap items-center gap-2 rounded-tile bg-oat-wash px-4 py-2 text-sm text-ink-2"><span className="min-w-0 flex-1">{cutoutState === 'done' ? '多去掉或留了不要的東西？' : '照片裡東西太多也可能失敗。'}框出只要的那件再試一次。</span><Button variant="oat" onClick={() => setRegionDialog('retry')}>{activeRegion ? '調整範圍重新去背' : '框選範圍重新去背'}</Button></div>}
+          {cutoutState === 'done' && <div className="flex flex-wrap gap-2"><Button variant="secondary" onClick={() => void processCutout()}>{activeRegion ? '用同一範圍重新去背' : '重新去背'}</Button><Button variant="ghost" onClick={continueWithOriginal}>不去背了，直接用照片</Button></div>}
         </section>}
 
         {step === 3 && <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_250px]">
@@ -479,7 +547,7 @@ export function AddItemPage() {
             <FormSection title="基本" accent="oat">
               <Field label="品名" required><input value={form.name} onChange={(event) => updateForm('name', event.target.value)} required placeholder="例如：燕麥色羊毛圓領針織衫" className={INPUT_CLASS} /></Field>
               <fieldset className="space-y-2 border-0 p-0"><legend className="text-[13px] font-medium text-ink">類型<span className="ml-1 text-rose-deep">必填</span><small className="ml-2 text-ink-3">依你的衣櫃分類</small></legend><div className="flex flex-wrap gap-2" role="radiogroup" aria-label="衣物類型">{categories.map((category) => <Chip key={category.id} selected={form.categoryId === category.id} onClick={() => updateForm('categoryId', category.id)} dotColor={category.slot ? undefined : 'var(--color-line-strong)'}>{category.name}</Chip>)}</div></fieldset>
-              <div className="grid gap-3 sm:grid-cols-2"><div className="garment-brand-field flex min-w-0 flex-col gap-1.5"><span className="text-[13px] font-medium text-ink">品牌<small className="ml-1 text-[11px] font-normal text-ink-3">選填</small></span><Combobox label="品牌" value={form.brand ?? ''} options={brandSuggestions} onChange={(value) => updateForm('brand', value)} /></div><Field label="標籤尺寸"><input value={form.size} onChange={(event) => updateForm('size', event.target.value)} placeholder="衣物標籤上寫的尺寸" className={INPUT_CLASS} /></Field></div>
+              <div className="grid gap-3 sm:grid-cols-2"><div className="garment-brand-field flex min-w-0 flex-col gap-1.5"><span className="text-[13px] font-medium text-ink">品牌<small className="ml-1 text-[11px] font-normal text-ink-3">選填</small></span><Combobox label="品牌" value={form.brand ?? ''} options={brandSuggestions} onChange={(value) => updateForm('brand', value)} manageHref="/me/brands" /></div><Field label="標籤尺寸"><input value={form.size} onChange={(event) => updateForm('size', event.target.value)} placeholder="衣物標籤上寫的尺寸" className={INPUT_CLASS} /></Field></div>
               <Field label="季節" hint="可複選"><div className="flex flex-wrap gap-2">{SEASONS.map((season) => <Chip key={season} selected={form.seasons.includes(season)} onClick={() => toggleSeason(season)}>{season}</Chip>)}</div></Field>
             </FormSection>
             <FormSection title="平放尺寸" accent="mist" hint="單位 cm・選填">
@@ -490,16 +558,23 @@ export function AddItemPage() {
               <div className="flex flex-wrap gap-2">{COLORS.map((color) => <button key={color.name} type="button" aria-pressed={form.colorHex === color.hex} onClick={() => { updateForm('colorName', color.name); updateForm('colorHex', color.hex) }} className={`flex min-h-11 items-center gap-2 rounded-full border-[1.5px] px-2.5 text-xs ${form.colorHex === color.hex ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink'}`}><span aria-hidden="true" className="size-6 rounded-full border border-ink/15" style={{ background: color.hex }} />{color.name}</button>)}</div>
               <details className="border-t border-dashed border-line pt-3"><summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium">自訂色碼與第二色 <span className="ml-2 text-xs font-normal text-ink-3">選填</span></summary><div className="grid gap-3 sm:grid-cols-2"><div className="garment-info__color-field relative z-30"><Field label="主色色碼"><input type="color" value={form.colorHex} onChange={(event) => updateForm('colorHex', event.target.value)} className="h-12 w-full cursor-pointer rounded-btn border border-line bg-card p-1" /></Field></div><div className="garment-info__color-field relative z-30"><Field label="第二色"><input type="color" value={form.secondColorHex || '#FFFFFF'} onChange={(event) => updateForm('secondColorHex', event.target.value)} className="h-12 w-full cursor-pointer rounded-btn border border-line bg-card p-1" /></Field></div></div></details>
             </FormSection>
-            <FormSection title="材質" accent="sage" hint="可複選；可補成分比例">
-              <div className="flex flex-wrap gap-2">{MATERIALS.map((material) => { const selected = (form.material ?? '').split('、').includes(material); return <Chip key={material} selected={selected} onClick={() => toggleMaterial(material)}>{material}</Chip> })}</div>
-              <Field label="成分比例"><input value={form.materialComposition} onChange={(event) => updateForm('materialComposition', event.target.value)} placeholder="例如：羊毛 70%・尼龍 30%" className={INPUT_CLASS} /></Field>
+            <FormSection title="材質" accent="sage" hint="可選材質並填比例・全部選填">
+              <div className="flex items-center justify-between gap-2"><p className="m-0 text-xs leading-5 text-ink-2">點選材質，再依標籤填寫比例。</p><Link to="/me/materials" target="_blank" className="flex min-h-11 flex-none items-center gap-1 text-xs font-medium text-mist-deep">管理材質<Icon name="link" size={13} /><span className="sr-only">（在新分頁開啟）</span></Link></div>
+              <div className="garment-material__options flex flex-wrap gap-2">{materials.map((material) => <Chip key={material.name} selected={selectedMaterials.includes(material.name)} onClick={() => toggleMaterial(material.name)}>{material.name}</Chip>)}<button type="button" onClick={() => setShowCustomMaterial((current) => !current)} className="min-h-11 rounded-full border-[1.5px] border-dashed border-line-strong px-3.5 text-[13px] text-mist-deep">＋ 其他材質</button></div>
+              {showCustomMaterial && <div className="garment-material__custom-entry flex flex-wrap gap-2"><input autoFocus value={customMaterialName} onChange={(event) => setCustomMaterialName(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); void addCustomMaterial() } }} placeholder="輸入材質名稱" className={`${INPUT_CLASS} min-w-[180px] flex-1`} /><Button type="button" variant="secondary" disabled={addingMaterial} onClick={() => void addCustomMaterial()}>{addingMaterial ? '新增中…' : '新增並選取'}</Button></div>}
+              {selectedMaterials.length > 0 && <div role="group" aria-label="成分比例" className="garment-material__percentages space-y-3 rounded-tile bg-paper p-3 sm:p-4">
+                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1"><span className="text-[13px] font-medium text-ink">成分比例</span><span className="text-[11px] text-ink-3">照標籤填，可留白；合計不等於 100% 仍可儲存</span></div>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{selectedMaterials.map((material, index) => <div key={material} className="garment-material__percentage-row grid grid-cols-[minmax(0,1fr)_112px_40px] items-center gap-2"><label htmlFor={`material-percent-${index}`} className="min-w-0 truncate text-sm text-ink">{material}</label><span className="flex h-11 min-w-0 items-center rounded-btn border-[1.5px] border-line bg-card px-2.5 focus-within:border-mist-deep"><input id={`material-percent-${index}`} type="number" min="0" max="100" step="0.1" inputMode="decimal" value={form.materialPercentages[material] ?? ''} onChange={(event) => updateMaterialPercentage(material, event.target.value)} aria-label={`${material}比例`} className="min-w-0 flex-1 bg-transparent text-right font-num text-base outline-none" /><span className="ml-1 text-sm text-ink-2">%</span></span><button type="button" aria-label={`移除${material}`} onClick={() => toggleMaterial(material)} className="flex size-10 items-center justify-center rounded-btn text-ink-2 hover:bg-tile"><Icon name="x" size={16} /></button></div>)}</div>
+                <div className="flex items-center gap-3 border-t border-dashed border-line pt-2"><div aria-hidden="true" className="flex h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-line">{selectedMaterials.map((material, index) => <span key={material} className={`h-full ${index % 3 === 0 ? 'bg-oat-edge' : index % 3 === 1 ? 'bg-mist' : 'bg-rose'}`} style={{ width: `${Math.min(materialPercentageValues[material] ?? 0, 100)}%` }} />)}</div><span role="status" aria-live="polite" className={`whitespace-nowrap font-num text-xs font-bold ${materialPercentageTotal === 100 ? 'text-sage-deep' : 'text-ink-2'}`}>合計 {materialPercentageTotal}%{materialPercentageTotal === 100 ? ' ✓' : ''}</span></div>
+              </div>}
+              <Field label="其他成分說明" hint="舊資料或標籤補充・選填"><input value={form.materialComposition ?? ''} onChange={(event) => updateForm('materialComposition', event.target.value)} placeholder="例如：主布料／裡布說明" className={INPUT_CLASS} /></Field>
             </FormSection>
             <FormSection title="購買資訊" accent="oat" hint="全部選填">
-              <div className="grid gap-3 sm:grid-cols-2"><Field label="價格"><span className="flex h-12 items-center gap-2 rounded-btn border-[1.5px] border-line bg-card px-3"><span className="font-num text-xs text-ink-2">NT$</span><input type="number" min="0" step="1" value={form.purchasePrice ?? ''} onChange={(event) => updateForm('purchasePrice', event.target.value === '' ? null : Number(event.target.value))} placeholder="0" className="min-w-0 flex-1 bg-transparent text-right font-num text-lg outline-none" /></span></Field><Field label="購買通路"><input value={form.store} onChange={(event) => updateForm('store', event.target.value)} placeholder="店名或網站" className={INPUT_CLASS} /></Field></div>
+              <div className="grid gap-3 sm:grid-cols-2"><Field label="價格"><span className="flex h-12 items-center gap-2 rounded-btn border-[1.5px] border-line bg-card px-3"><span className="font-num text-xs text-ink-2">NT$</span><input type="number" min="0" step="1" value={form.purchasePrice ?? ''} onChange={(event) => updateForm('purchasePrice', event.target.value === '' ? null : Number(event.target.value))} placeholder="0" className="min-w-0 flex-1 bg-transparent text-right font-num text-lg outline-none" /></span></Field><div className="garment-shop-field flex min-w-0 flex-col gap-1.5"><span className="text-[13px] font-medium text-ink">購買通路<small className="ml-1 text-[11px] font-normal text-ink-3">選填</small></span><Combobox label="購買通路" entityName="通路" value={form.store ?? ''} options={shopSuggestions} onChange={(value) => updateForm('store', value)} manageHref="/me/shops" /></div></div>
               <DatePicker label="購買日期" value={form.purchaseDate} onChange={(value) => updateForm('purchaseDate', value)} clearable />
               <Field label="商品網址"><input type="url" value={form.productUrl} onChange={(event) => updateForm('productUrl', event.target.value)} placeholder="https://" className={INPUT_CLASS} /></Field>
             </FormSection>
-            <FormSection title="備註" accent="mist"><textarea rows={3} value={form.note} onChange={(event) => updateForm('note', event.target.value)} placeholder="洗滌方式、穿著感受或其他備註" className={`${INPUT_CLASS} h-auto resize-y py-3`} /></FormSection>
+            <FormSection title="備註" accent="mist"><MarkdownNoteField id="garment-note" rows={3} value={form.note ?? ''} onChange={(value) => updateForm('note', value)} placeholder="洗滌方式、穿著感受或其他備註" className={`${INPUT_CLASS} h-auto resize-y py-3`} /></FormSection>
           </form>
           <aside className="order-1 hidden space-y-3 lg:sticky lg:top-4 lg:order-2 lg:block"><PaperCard className="p-3"><Tape accent="mist" /><PhotoPreview photo={photos[0]} title="封面預覽" /><p className="mb-0 mt-2 text-xs text-ink-2">{form.name || '尚未命名'}<br />{selectedCategory?.name ?? '尚未選類型'}・{form.brand || '未填品牌'}・{form.size || '未填尺寸'}</p></PaperCard><nav aria-label="跳到欄位" className="space-y-1 text-sm">{['基本', '平放尺寸', '顏色', '材質', '購買資訊', '備註'].map((section) => <a key={section} href={`#section-${section}`} className="block min-h-9 py-2 text-ink-2">{section}</a>)}</nav></aside>
           </section>}
@@ -519,6 +594,18 @@ export function AddItemPage() {
         {step === 4 && <Button variant="oat" className="ml-auto" disabled={saving} onClick={() => void finish()}><Icon name="check" />{saving ? '儲存中…' : destination === 'wishlist' ? '加入選購清單' : closetStatus === 'not_arrived' ? '標記為未到貨' : '放進衣櫃'}</Button>}
       </footer>
       {uploading && <div className="fixed inset-0 z-30 flex items-center justify-center bg-scrim p-5"><div className="w-full max-w-md"><ImageUploadProgressState title="正在上傳照片" files={photos.map((photo, index) => ({ id: photo.id, name: photo.file.name, progress: 0, status: index === 0 ? '封面・上傳中' : '上傳中' }))} backgroundNote="照片完成後會保留在私人衣櫃空間。" /></div></div>}
+      {regionDialog && cutoutPhoto && <CutoutRegionDialog
+        imageUrl={cutoutPhoto.url}
+        initialRegion={activeRegion}
+        confirmLabel={regionDialog === 'retry' ? '用這個範圍去背' : '套用範圍'}
+        onCancel={() => setRegionDialog(null)}
+        onConfirm={(region) => {
+          const mode = regionDialog
+          setCutoutRegion(region ? { photoId: cutoutPhoto.id, region } : null)
+          setRegionDialog(null)
+          if (mode === 'retry') void processCutout(draftIdRef.current, cutoutPhotoIndex, region)
+        }}
+      />}
       {saving && <div className="fixed inset-0 z-40 flex items-center justify-center bg-scrim p-5"><div className="w-full max-w-sm">{useCutout && cutoutState !== 'done' ? <CutoutProcessingState /> : <PaperCard aria-busy="true" className="p-6 text-center"><span className="mx-auto mb-3 block size-8 animate-pulse rounded-full bg-sage" /><p className="m-0 font-hd text-xl">正在儲存衣物</p><p className="mb-0 mt-2 text-sm text-ink-2">照片和資料都會一併整理好。</p></PaperCard>}</div></div>}
       <Toast message={toast} onClose={() => setToast(null)} />
     </main>

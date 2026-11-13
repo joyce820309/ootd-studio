@@ -15,12 +15,12 @@ export function groupBySlot(items: ClosetItem[]): Record<Slot, ClosetItem[]> {
   return out
 }
 
-/** 預設搭配：每個必選部位挑穿著次數最多、目前可穿的那件 */
+/** 預設搭配：每個必選部位優先挑目前在家可穿、穿著次數最多的那件；都不在家時仍挑一件，方便自由搭配 */
 export function suggestDefaultPicks(items: ClosetItem[]): Picks {
   const grouped = groupBySlot(items)
   const picks = { ...EMPTY_PICKS }
   for (const slot of REQUIRED_SLOTS) {
-    const best = grouped[slot].filter((i) => isWearable(i.status)).sort((a, b) => (b.wearCount ?? 0) - (a.wearCount ?? 0))[0]
+    const best = [...grouped[slot]].sort((a, b) => Number(isWearable(b.status)) - Number(isWearable(a.status)) || (b.wearCount ?? 0) - (a.wearCount ?? 0))[0]
     picks[slot] = best?.id ?? null
   }
   return picks

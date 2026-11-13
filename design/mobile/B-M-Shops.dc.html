@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機購買通路管理</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.chip{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 9px;border-radius:999px;font-size:12px;white-space:nowrap}
+.row{display:flex;align-items:center;gap:10px;min-height:60px;padding:0 4px 0 12px;border-top:1.5px dashed #EADCC6;color:#3B2F25;text-decoration:none}
+.seg button{height:36px;padding:0 14px;border:0;border-radius:8px;background:transparent;font:500 13px 'Chiron GoRound TC';color:#5A4A3C}
+.seg button[aria-pressed="true"]{background:#FFFCF6;color:#3B2F25;font-weight:700;box-shadow:0 1px 2px rgba(59,47,37,.1)}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:900px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <header style="display:flex;align-items:center;gap:4px;padding:8px 8px 8px 4px;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-M-Lists.dc.html" aria-label="返回個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <h1 class="hd" style="margin:0;font-size:20px">購買通路</h1><span class="num" style="font-size:12px;color:#74624F;margin-left:4px">11</span>
+    <button type="button" aria-label="新增通路" style="margin-left:auto;width:44px;height:44px;border:0;background:none;color:#3B2F25;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+    <button type="button" style="height:44px;padding:0 10px;border:0;background:none;color:#3E6270;font:500 14px 'Chiron GoRound TC'">選取</button>
+  </header>
+  <main style="padding:12px 12px 40px;display:flex;flex-direction:column;gap:12px">
+    <section aria-label="可能重複" style="padding:12px;border-radius:14px;background:#FFF9EE;display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:13px;font-weight:500">可能是同一個通路</span>
+      <div style="padding:10px;border-radius:12px;background:#FFFCF6;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip" style="background:#F3E7D4">COS 台北信義店 <span class="num" style="color:#74624F">5</span></span><span class="chip" style="background:#F3E7D4">COS 信義店 <span class="num" style="color:#74624F">2</span></span></div>
+        <div style="display:flex;gap:6px;align-items:center"><span style="font-size:12px;color:#5A4A3C">→ 合併成 <b style="color:#3B2F25">COS 台北信義店</b></span><a href="B-M-Brands-Merge.dc.html" style="margin-left:auto;height:36px;padding:0 12px;border-radius:10px;border:1.5px solid #E2B866;background:#F2CF8E;font:500 12px 'Chiron GoRound TC';color:#3B2F25;display:flex;align-items:center;text-decoration:none">合併…</a></div>
+      </div>
+    </section>
+    <div class="seg" role="group" aria-label="類型" style="display:grid;grid-template-columns:repeat(3,1fr);padding:3px;border-radius:10px;background:#F3E7D4"><button type="button" aria-pressed="true">全部</button><button type="button" aria-pressed="false">網路</button><button type="button" aria-pressed="false">實體</button></div>
+    <section aria-label="通路清單" style="border-radius:14px;background:#FFFCF6;padding:0 4px">
+      <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+        <a href="B-M-Brands-Actions.dc.html" class="row" style="border-top-color:{{r.bt}}">
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:500;display:flex;align-items:center;gap:6px">{{r.t}}<sc-if value="{{r.dup}}" hint-placeholder-val="{{ false }}"><span class="chip" style="height:20px;font-size:10px;background:#F6E7C6;color:#5A3F12">可能重複</span></sc-if></span><span style="display:flex;align-items:center;gap:6px;font-size:11px;color:#74624F"><span class="chip" style="height:18px;font-size:10px;padding:0 6px;background:{{r.kbg}};color:{{r.kfg}}">{{r.k}}</span>最後用 <span class="num">{{r.last}}</span></span></span>
+          <span class="num" style="font-size:14px;font-weight:700">{{r.n}}</span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#74624F"><path d="M9 6l6 6-6 6"></path></svg>
+        </a>
+      </sc-for>
+    </section>
+    <span style="font-size:11px;line-height:1.6;color:#74624F;padding:0 4px">點一列的動作、合併、刪除面板和品牌相同；編輯時多了「網路／實體」與官網網址。</span>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const K = { '網路': ['#DCE8EC', '#24424D'], '實體': ['#E6EEE2', '#2E3F2B'], '未分類': ['#F3E7D4', '#5A4A3C'] };
+    const R = [['UNIQLO 線上', '網路', 14, '11/12'], ['蝦皮', '網路', 10, '11/10'], ['COS 台北信義店', '實體', 5, '10/18', 1], ['ZARA 官網', '網路', 5, '11/06'], ['COS 官網', '網路', 5, '11/01'], ['COS 信義店', '實體', 2, '09/02', 1], ['朋友轉賣', '未分類', 2, '08/20']];
+    return { rows: R.map(([t, k, n, last, dup], i) => ({ t, k, n, last, dup: !!dup, kbg: K[k][0], kfg: K[k][1], bt: i ? '#EADCC6' : 'transparent' })) };
+  }
+}
+</script>
+</body>
+</html>

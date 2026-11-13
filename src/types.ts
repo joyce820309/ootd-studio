@@ -5,6 +5,14 @@ export type ItemStatus = 'ok' | 'not_arrived' | 'cleaning' | 'repair' | 'lent' |
 
 export type CutoutStatus = 'pending' | 'processing' | 'done' | 'failed' | 'skipped'
 
+/** 去背範圍：以照片寬高百分比表示的矩形（左上角 x/y 與寬高，0–100） */
+export interface CutoutRegion {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
 /** 示範資料用的衣物剪影；正式資料使用去背圖片。 */
 export type GarmentShape =
   | 'tee'
@@ -29,6 +37,8 @@ export interface Category {
 }
 
 export type AddItemDestination = 'closet' | 'wishlist'
+export type ShopKind = 'online' | 'physical' | 'other'
+export type MaterialPercentages = Record<string, number>
 
 export interface NewGarmentInput {
   name: string
@@ -42,6 +52,7 @@ export interface NewGarmentInput {
   seasons: string[]
   material?: string
   materialComposition?: string
+  materialPercentages?: MaterialPercentages
   purchasePrice?: number | null
   purchaseDate?: string | null
   store?: string
@@ -78,6 +89,7 @@ export interface ClosetItem {
   fit?: string
   material?: string
   materialComposition?: string
+  materialPercentages?: MaterialPercentages
   seasons?: string[]
   occasions?: string[]
   purchaseDate?: string
@@ -133,6 +145,8 @@ export interface WishlistItem {
   /** 想買的理由（手帳筆記） */
   reason?: string
   material?: string
+  materialComposition?: string
+  materialPercentages?: MaterialPercentages
   returnPolicy?: string
   boughtItemId?: string
   createdAt?: string
@@ -158,6 +172,8 @@ export interface WishlistInput {
   priority: WishPriority | null
   reason?: string
   material?: string
+  materialComposition?: string
+  materialPercentages?: MaterialPercentages
   returnPolicy?: string
   status: Exclude<WishStatus, 'bought'>
   /** undefined＝不變更所屬群組；null＝移出群組 */
@@ -184,6 +200,14 @@ export type OutfitPick =
 
 export type OutfitTemplate = 'full' | 'column' | 'free'
 
+export type StudioBackgroundTheme = 'plain' | 'oat' | 'lemon' | 'rose' | 'mist' | 'journal' | 'custom'
+export type StudioBackgroundMode = 'on' | 'soft' | 'off'
+
+export interface StudioBackgroundCustom {
+  a: string
+  b: string
+}
+
 export interface Placement {
   /** 中心點，佔畫布寬度的百分比。 */
   x: number
@@ -206,6 +230,9 @@ export interface Outfit {
   layout?: Partial<FreeLayout>
   occasion?: string
   note?: string
+  bgTheme?: StudioBackgroundTheme
+  bgBlobMode?: StudioBackgroundMode
+  bgCustom?: StudioBackgroundCustom
   /** 含未購買單品的「如果買了」試搭，不計入穿著次數 */
   isHypothetical?: boolean
 }
@@ -285,6 +312,9 @@ export interface DiaryEntry {
   weather: DiaryWeather | null
   temperatureC: number | null
   note: string
+  bgTheme?: StudioBackgroundTheme
+  bgBlobMode?: StudioBackgroundMode
+  bgCustom?: StudioBackgroundCustom
   photoUrl?: string
   createdAt: string
 }
@@ -319,4 +349,26 @@ export interface BrandChange {
   name: string
   itemIds: string[]
   wishIds: string[]
+}
+
+export interface ManagedListSummary {
+  name: string
+  closetCount: number
+  wishCount: number
+  lastUsed: string | null
+  kind?: ShopKind
+  url?: string
+  aliases?: string[]
+  sortOrder?: number
+  isDefault?: boolean
+  isHidden?: boolean
+}
+
+export interface ManagedEntryChange {
+  name: string
+  itemIds: string[]
+  wishIds: string[]
+  itemValues?: Record<string, { value: string | null; percentages?: MaterialPercentages }>
+  wishValues?: Record<string, { value: string | null; percentages?: MaterialPercentages }>
+  entry?: Partial<ManagedListSummary>
 }

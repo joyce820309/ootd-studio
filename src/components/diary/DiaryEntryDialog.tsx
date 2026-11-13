@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { toUploadableImage } from '@/lib/image'
 import { Icon } from '@/components/ui/Icon'
+import { MarkdownNoteField } from '@/components/ui/MarkdownNote'
 import { todayISO } from '@/lib/date'
 import { entryPieces, FEEL_LABEL, formatDiaryDate, OCCASIONS, occasionTone, TONE_CLASS, WEATHER_LABEL, WEATHERS } from '@/lib/diary'
 import { SLOTS, STATUS_LABEL } from '@/lib/slots'
@@ -362,7 +363,7 @@ export function DiaryEntryDialog({
 
             <div className="flex flex-col gap-1.5">
               <label htmlFor={`${uid}-note`} className={fieldLabel}>備註<small className={hint}>哪裡好穿、哪裡不合適？</small></label>
-              <textarea id={`${uid}-note`} rows={3} value={note} onChange={(e) => setNote(e.target.value)} className="resize-y rounded-tile border-[1.5px] border-line-strong bg-card px-3.5 py-3 text-sm leading-[1.7] text-ink" />
+              <MarkdownNoteField id={`${uid}-note`} rows={3} value={note} onChange={setNote} className="w-full resize-y rounded-tile border-[1.5px] border-line-strong bg-card px-3.5 py-3 text-sm leading-[1.7] text-ink" />
             </div>
 
             <div className="flex flex-col gap-1.5">

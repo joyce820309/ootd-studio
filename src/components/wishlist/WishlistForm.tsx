@@ -2,9 +2,14 @@ import { useEffect, useId, useState, type FormEvent, type ReactNode } from 'reac
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Chip } from '@/components/ui/Chip'
+import { Combobox } from '@/components/ui/Combobox'
 import { Icon } from '@/components/ui/Icon'
+import { MarkdownNoteField } from '@/components/ui/MarkdownNote'
 import { SLOTS } from '@/lib/slots'
 import { PRIORITY_LABEL, shopFromUrl, WISH_STATUS } from '@/lib/wishlist'
+import { fetchManagedList } from '@/lib/data'
+import { materialNames, parsePercentages } from '@/lib/materials'
+import type { ManagedListSummary } from '@/types'
 import type { WishlistInput, WishlistItem, WishPriority } from '@/types'
 
 type EditableStatus = WishlistInput['status']
@@ -29,6 +34,8 @@ interface Draft {
   status: EditableStatus
   returnPolicy: string
   material: string
+  materialComposition: string
+  materialPercentages: Record<string, string>
   reason: string
 }
 
@@ -57,11 +64,13 @@ function toDraft(item?: WishlistItem, defaults?: WishlistFormDefaults): Draft {
     status: item && item.status !== 'bought' ? item.status : 'considering',
     returnPolicy: item?.returnPolicy ?? '',
     material: item?.material ?? '',
+    materialComposition: item?.materialComposition ?? '',
+    materialPercentages: Object.fromEntries(Object.entries(item?.materialPercentages ?? {}).map(([name, value]) => [name, String(value)])),
     reason: item?.reason ?? '',
   }
 }
 
-type Errors = Partial<Record<'name' | 'slot' | 'price' | 'shipping' | 'targetPrice' | 'url' | 'necklineSize', string>>
+type Errors = Partial<Record<'name' | 'slot' | 'price' | 'shipping' | 'targetPrice' | 'url' | 'necklineSize' | 'materialPercentages', string>>
 
 function parseAmount(value: string): number | null | 'invalid' {
   const trimmed = value.replace(/[,\s]/g, '')
@@ -83,6 +92,7 @@ function validate(draft: Draft): { errors: Errors; input?: WishlistInput } {
   if (targetPrice === 'invalid') errors.targetPrice = '目標價請填整數。'
   const necklineSize = draft.necklineSize.trim() ? Number(draft.necklineSize) : null
   if (necklineSize !== null && (!Number.isFinite(necklineSize) || necklineSize < 0)) errors.necklineSize = '領口尺寸請填 0 以上的數字。'
+  if (Object.entries(draft.materialPercentages).some(([name, value]) => materialNames(draft.material).includes(name) && value.trim() && (!Number.isFinite(Number(value)) || Number(value) < 0 || Number(value) > 100))) errors.materialPercentages = '材質比例請填 0 到 100 之間的數字。'
   if (draft.url.trim() && !shopFromUrl(draft.url)) errors.url = '網址格式看起來不對，請確認是否以 https:// 開頭。'
   if (Object.keys(errors).length) return { errors }
   return {
@@ -104,6 +114,8 @@ function validate(draft: Draft): { errors: Errors; input?: WishlistInput } {
       priority: draft.priority,
       reason: draft.reason,
       material: draft.material,
+      materialComposition: draft.materialComposition,
+      materialPercentages: parsePercentages(draft.materialPercentages),
       returnPolicy: draft.returnPolicy,
       status: draft.status,
     },
@@ -157,6 +169,8 @@ export function WishlistForm({
     return guessed ? { ...draft, shop: guessed } : draft
   })
   const [errors, setErrors] = useState<Errors>({})
+  const [shopSuggestions, setShopSuggestions] = useState<string[]>([])
+  const [materials, setMaterials] = useState<ManagedListSummary[]>([])
   const editing = !!item
 
   useEffect(() => {
@@ -167,7 +181,30 @@ export function WishlistForm({
     }
   }, [])
 
+  useEffect(() => {
+    let active = true
+    void Promise.all([fetchManagedList('shops'), fetchManagedList('materials')]).then(([shops, materialList]) => {
+      if (!active) return
+      setShopSuggestions(shops.entries.map((entry) => entry.name))
+      const current = materialNames(item?.material)
+      const extras = current.filter((name) => !materialList.entries.some((entry) => entry.name === name)).map((name) => ({ name, aliases: [], sortOrder: 1000, isDefault: false, isHidden: false, closetCount: 0, wishCount: 0, lastUsed: null }))
+      setMaterials([...materialList.entries.filter((entry) => !entry.isHidden), ...extras])
+    }).catch(() => undefined)
+    return () => { active = false }
+  }, [item?.id, item?.material])
+
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) => setDraft((d) => ({ ...d, [key]: value }))
+
+  function toggleMaterial(name: string) {
+    const current = materialNames(draft.material)
+    const next = current.includes(name) ? current.filter((entry) => entry !== name) : [...current, name]
+    set('material', next.join('、'))
+    if (!next.includes(name)) {
+      const percentages = { ...draft.materialPercentages }
+      delete percentages[name]
+      set('materialPercentages', percentages)
+    }
+  }
 
   const onUrlBlur = () => {
     if (!draft.url.trim() || draft.shop.trim()) return
@@ -251,9 +288,7 @@ export function WishlistForm({
           </fieldset>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="店家／網站" htmlFor={id('shop')} hint="留空會顯示「尚未決定」。">
-              <input id={id('shop')} value={draft.shop} onChange={(e) => set('shop', e.target.value)} placeholder="例：COS 官網" aria-describedby={`${id('shop')}-hint`} className={inputClass} />
-            </Field>
+            <div className="flex min-w-0 flex-col gap-1.5"><span className="text-[13px] font-medium text-ink">店家／網站</span><Combobox label="店家／網站" entityName="通路" value={draft.shop} options={shopSuggestions} onChange={(value) => set('shop', value)} placeholder="選擇或輸入店家／網站" manageHref="/me/shops" /><span id={`${id('shop')}-hint`} className="text-xs text-ink-2">留空會顯示「尚未決定」。</span></div>
             <Field label="品牌" htmlFor={id('brand')}>
               <input id={id('brand')} value={draft.brand} onChange={(e) => set('brand', e.target.value)} placeholder="例：COS" className={inputClass} />
             </Field>
@@ -277,7 +312,7 @@ export function WishlistForm({
               <input id={id('size')} value={draft.size} onChange={(e) => set('size', e.target.value)} placeholder="例：S、36、EU 37.5" className={inputClass} />
             </Field>
             <Field label="尺寸備註" htmlFor={id('sizeNote')}>
-              <input id={id('sizeNote')} value={draft.sizeNote} onChange={(e) => set('sizeNote', e.target.value)} placeholder="例：36 有貨、只剩 L、肩寬 39 cm" className={inputClass} />
+              <MarkdownNoteField id={id('sizeNote')} value={draft.sizeNote} onChange={(value) => set('sizeNote', value)} rows={2} placeholder="例：36 有貨、只剩 L、肩寬 39 cm" className="w-full min-w-0 rounded-btn border-[1.5px] border-line bg-card px-3 py-2.5 text-sm leading-6 text-ink placeholder:text-ink-3" />
             </Field>
           </div>
 
@@ -317,13 +352,20 @@ export function WishlistForm({
             <Field label="退換貨" htmlFor={id('returnPolicy')}>
               <input id={id('returnPolicy')} value={draft.returnPolicy} onChange={(e) => set('returnPolicy', e.target.value)} placeholder="例：30 天內可退" className={inputClass} />
             </Field>
-            <Field label="材質" htmlFor={id('material')}>
-              <input id={id('material')} value={draft.material} onChange={(e) => set('material', e.target.value)} placeholder="例：羊毛 70%、聚酯纖維 30%" className={inputClass} />
-            </Field>
           </div>
 
+          <fieldset className="m-0 space-y-3 border-0 p-0">
+            <legend className="mb-1 flex w-full items-center gap-2 text-[13px] font-medium text-ink">材質<span className="text-[11px] font-normal text-ink-3">選填比例</span><Link to="/me/materials" target="_blank" className="ml-auto flex min-h-11 items-center gap-1 text-xs font-medium text-mist-deep">管理材質<Icon name="link" size={13} /><span className="sr-only">（在新分頁開啟）</span></Link></legend>
+            <div className="flex flex-wrap gap-2">{materials.map((material) => <Chip key={material.name} selected={materialNames(draft.material).includes(material.name)} onClick={() => toggleMaterial(material.name)} className="h-10">{material.name}</Chip>)}</div>
+            {materialNames(draft.material).length > 0 && <div role="group" aria-label="材質比例" className="space-y-2 rounded-tile bg-paper p-3">
+              {materialNames(draft.material).map((material, index) => <label key={material} htmlFor={`${id('materialPercent')}-${index}`} className="grid grid-cols-[minmax(0,1fr)_112px_40px] items-center gap-2 text-sm"><span className="min-w-0 truncate">{material}</span><span className="flex h-11 min-w-0 items-center rounded-btn border-[1.5px] border-line bg-card px-2.5 focus-within:border-mist-deep"><input id={`${id('materialPercent')}-${index}`} type="number" min="0" max="100" step="0.1" inputMode="decimal" value={draft.materialPercentages[material] ?? ''} onChange={(event) => set('materialPercentages', { ...draft.materialPercentages, [material]: event.target.value })} aria-label={`${material}比例`} className="min-w-0 flex-1 bg-transparent text-right font-num outline-none" /><span className="ml-1 text-ink-2">%</span></span><button type="button" aria-label={`移除${material}`} onClick={() => toggleMaterial(material)} className="flex size-10 items-center justify-center rounded-btn text-ink-2 hover:bg-tile"><Icon name="x" size={16} /></button></label>)}
+              {errors.materialPercentages && <span role="alert" className="text-xs text-rose-deep">{errors.materialPercentages}</span>}
+            </div>}
+            {draft.materialComposition && <details className="text-xs text-ink-3"><summary className="min-h-9 cursor-pointer">舊版成分文字</summary><input value={draft.materialComposition} onChange={(event) => set('materialComposition', event.target.value)} aria-label="舊版成分文字" className={inputClass} /></details>}
+          </fieldset>
+
           <Field label="想買的理由" htmlFor={id('reason')}>
-            <textarea id={id('reason')} value={draft.reason} onChange={(e) => set('reason', e.target.value)} rows={3} placeholder="例：衣櫃缺一件比炭灰更正式、但不黑的外套。" className="w-full min-w-0 rounded-btn border-[1.5px] border-line bg-card px-3 py-2.5 text-sm leading-6 text-ink placeholder:text-ink-3" />
+            <MarkdownNoteField id={id('reason')} value={draft.reason} onChange={(value) => set('reason', value)} rows={3} placeholder="例：衣櫃缺一件比炭灰更正式、但不黑的外套。" className="w-full min-w-0 rounded-btn border-[1.5px] border-line bg-card px-3 py-2.5 text-sm leading-6 text-ink placeholder:text-ink-3" />
           </Field>
 
           {!editing && (

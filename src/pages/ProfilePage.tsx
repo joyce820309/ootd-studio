@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { Icon } from '@/components/ui/Icon'
+import { MarkdownNote, MarkdownNoteField } from '@/components/ui/MarkdownNote'
 import { PaperCard, TiltLabel, WashBlob } from '@/components/ui/Paper'
 import { LoadingState, PageState } from '@/components/ui/PageState'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
@@ -304,6 +305,8 @@ export function ProfilePage() {
         <nav aria-label="個人資料的其他頁面" className="flex flex-wrap gap-2 xl:hidden">
           <Link to="/me/measurements" className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] border-line-strong bg-card px-4 text-sm text-ink no-underline hover:border-ink-3"><Icon name="calendar" size={16} />量測紀錄<Icon name="next" size={14} className="text-ink-3" /></Link>
           <Link to="/me/brands" className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] border-line-strong bg-card px-4 text-sm text-ink no-underline hover:border-ink-3"><Icon name="closet" size={16} />品牌管理<Icon name="next" size={14} className="text-ink-3" /></Link>
+          <Link to="/me/shops" className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] border-line-strong bg-card px-4 text-sm text-ink no-underline hover:border-ink-3"><Icon name="closet" size={16} />購買通路<Icon name="next" size={14} className="text-ink-3" /></Link>
+          <Link to="/me/materials" className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] border-line-strong bg-card px-4 text-sm text-ink no-underline hover:border-ink-3"><Icon name="closet" size={16} />材質<Icon name="next" size={14} className="text-ink-3" /></Link>
         </nav>
 
         {error && <div role="alert"><PageState icon="alert" tone="rose" compact title="尺寸筆記暫時載入失敗" description={`${error} 目前仍可編輯示範欄位。`} action={<Button onClick={() => window.location.reload()} variant="secondary">重新載入</Button>} /></div>}
@@ -359,7 +362,7 @@ export function ProfilePage() {
           })}
           <label className="flex flex-col gap-1.5 text-[13px] text-ink">
             這次量測備註 <span className="text-xs text-ink-3">選填</span>
-            <textarea value={draft.note} onChange={(event) => setDraft((current) => ({ ...current, note: event.target.value }))} rows={2} placeholder="例如：更新腰圍、腿長" className="resize-y rounded-btn border-[1.5px] border-line bg-paper px-3 py-2.5 text-sm outline-none placeholder:text-ink-3 focus:border-mist-deep" />
+            <MarkdownNoteField id="measurement-note" value={draft.note} onChange={(value) => setDraft((current) => ({ ...current, note: value }))} rows={2} placeholder="例如：更新腰圍、腿長" className="w-full resize-y rounded-btn border-[1.5px] border-line bg-paper px-3 py-2.5 text-sm outline-none placeholder:text-ink-3 focus:border-mist-deep" />
           </label>
           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
             <span className="text-xs text-ink-3">{editingId ? `正在編輯 ${dateLabel(draft.measuredOn)} 的紀錄` : baseline ? '已帶入最近一次數值；儲存會新增快照，不會覆蓋舊紀錄' : '至少填一項，儲存第一筆量測快照'}</span>
@@ -481,7 +484,7 @@ export function ProfilePage() {
             <PaperCard className="space-y-3 p-4 text-sm leading-6 text-ink-2"><p className="m-0">還沒有量測紀錄。先填一兩項尺寸，就能開始建立你的尺寸筆記。</p><Button variant="secondary" className="h-10 px-3 text-[13px]" onClick={startNewMeasurement}><Icon name="plus" size={16} />新增一次</Button></PaperCard>
           ) : (
             <ol className="m-0 flex list-none flex-col gap-2 p-0">
-              {measurements.slice(0, 3).map((measurement, index) => <li key={measurement.id} className={`rounded-tile border-l-4 bg-card p-3.5 shadow-paper ${index === 0 ? 'border-sage' : index === 1 ? 'border-mist' : 'border-oat'}`}><Link to={`/me/measurements/${measurement.id}`} className="block text-ink no-underline"><div className="flex items-center justify-between gap-2"><span className="font-num font-bold">{dateLabel(measurement.measuredOn)}</span><span className="text-xs text-ink-2">{index === 0 ? '最近量測' : ''}</span></div><p className="mb-0 mt-1 text-xs leading-5 text-ink-2">{measurement.note || '尺寸紀錄'}</p></Link></li>)}
+              {measurements.slice(0, 3).map((measurement, index) => <li key={measurement.id} className={`rounded-tile border-l-4 bg-card p-3.5 shadow-paper ${index === 0 ? 'border-sage' : index === 1 ? 'border-mist' : 'border-oat'}`}><Link to={`/me/measurements/${measurement.id}`} className="block text-ink no-underline"><div className="flex items-center justify-between gap-2"><span className="font-num font-bold">{dateLabel(measurement.measuredOn)}</span><span className="text-xs text-ink-2">{index === 0 ? '最近量測' : ''}</span></div><MarkdownNote value={measurement.note || '尺寸紀錄'} className="mt-1 line-clamp-2 text-xs leading-5 text-ink-2" /></Link></li>)}
             </ol>
           )}
           {measurements.length > 0 && <Button variant="secondary" className="h-10 w-full px-3 text-[13px]" onClick={startNewMeasurement}><Icon name="plus" size={16} />新增量測</Button>}

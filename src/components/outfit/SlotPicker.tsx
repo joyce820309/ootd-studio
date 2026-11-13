@@ -38,7 +38,6 @@ export function SlotPicker({ meta, items, selectedId, onSelect }: Props) {
             <OptionCard
               key={item.id}
               selected={selectedId === item.id}
-              disabled={!wearable}
               onClick={() => onSelect(item.id)}
               caption={item.name}
               badge={wearable ? undefined : STATUS_LABEL[item.status]}
