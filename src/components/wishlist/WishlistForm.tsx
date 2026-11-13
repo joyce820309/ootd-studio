@@ -24,6 +24,7 @@ interface Draft {
   targetPrice: string
   size: string
   sizeNote: string
+  necklineSize: string
   priority: WishPriority | null
   status: EditableStatus
   returnPolicy: string
@@ -51,6 +52,7 @@ function toDraft(item?: WishlistItem, defaults?: WishlistFormDefaults): Draft {
     targetPrice: num(item?.targetPrice),
     size: item?.size ?? '',
     sizeNote: item?.sizeNote ?? '',
+    necklineSize: item?.necklineSize == null ? '' : String(item.necklineSize),
     priority: item?.priority ?? null,
     status: item && item.status !== 'bought' ? item.status : 'considering',
     returnPolicy: item?.returnPolicy ?? '',
@@ -59,7 +61,7 @@ function toDraft(item?: WishlistItem, defaults?: WishlistFormDefaults): Draft {
   }
 }
 
-type Errors = Partial<Record<'name' | 'slot' | 'price' | 'shipping' | 'targetPrice' | 'url', string>>
+type Errors = Partial<Record<'name' | 'slot' | 'price' | 'shipping' | 'targetPrice' | 'url' | 'necklineSize', string>>
 
 function parseAmount(value: string): number | null | 'invalid' {
   const trimmed = value.replace(/[,\s]/g, '')
@@ -79,6 +81,8 @@ function validate(draft: Draft): { errors: Errors; input?: WishlistInput } {
   if (shipping === 'invalid') errors.shipping = '運費請填整數，免運可填 0。'
   const targetPrice = parseAmount(draft.targetPrice)
   if (targetPrice === 'invalid') errors.targetPrice = '目標價請填整數。'
+  const necklineSize = draft.necklineSize.trim() ? Number(draft.necklineSize) : null
+  if (necklineSize !== null && (!Number.isFinite(necklineSize) || necklineSize < 0)) errors.necklineSize = '領口尺寸請填 0 以上的數字。'
   if (draft.url.trim() && !shopFromUrl(draft.url)) errors.url = '網址格式看起來不對，請確認是否以 https:// 開頭。'
   if (Object.keys(errors).length) return { errors }
   return {
@@ -96,6 +100,7 @@ function validate(draft: Draft): { errors: Errors; input?: WishlistInput } {
       brand: draft.brand,
       size: draft.size,
       sizeNote: draft.sizeNote,
+      necklineSize: draft.slot === 'top' ? necklineSize : null,
       priority: draft.priority,
       reason: draft.reason,
       material: draft.material,
@@ -253,6 +258,7 @@ export function WishlistForm({
               <input id={id('brand')} value={draft.brand} onChange={(e) => set('brand', e.target.value)} placeholder="例：COS" className={inputClass} />
             </Field>
           </div>
+          {draft.slot === 'top' && <Field label="領口尺寸（cm）" htmlFor={id('necklineSize')} error={errors.necklineSize} hint="選填；衣領尺寸或領圍"><input id={id('necklineSize')} type="number" min="0" step="0.1" inputMode="decimal" value={draft.necklineSize} onChange={(event) => set('necklineSize', event.target.value)} placeholder="選填" aria-invalid={!!errors.necklineSize} className={`${inputClass} font-num tabular`} /></Field>}
 
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <Field label="價格" htmlFor={id('price')} error={errors.price} required>

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>品牌管理（風格 B）</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 14px;border-radius:10px;font:500 13px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-o{background:#F2CF8E;border-color:#E2B866;color:#3B2F25}
+.btn-d{background:transparent;color:#8E4A3E}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+.paper{position:relative;background:#FFFCF6;border-radius:16px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -16px rgba(59,47,37,.22)}
+.side a{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border-radius:10px;color:#3B2F25;text-decoration:none;font-size:14px}
+.side a[aria-current="page"]{background:#FFFCF6;font-weight:700;box-shadow:inset 3px 0 0 #F2CF8E}
+.tr{display:grid;grid-template-columns:40px minmax(0,1fr) 64px 64px 96px 168px;align-items:center;min-height:56px;padding:0 12px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.tr.th{min-height:40px;border-top:0;font-size:12px;color:#74624F}
+.ib{width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:#5A4A3C;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.cb{width:20px;height:20px;border-radius:6px;border:1.5px solid #C9B79C;background:#FFFCF6;display:inline-flex;align-items:center;justify-content:center}
+.cb.on{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+.chip{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 10px;border-radius:999px;font-size:12px;white-space:nowrap}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:100%;min-height:1240px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px 32px 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <span class="logo" style="font-size:22px;font-weight:600;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></span>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto"><a class="nav-a" href="B-Home.dc.html">首頁</a><a class="nav-a" href="B-Closet.dc.html">我的衣櫃</a><a class="nav-a" href="B-Outfit.dc.html">今日搭配</a><a class="nav-a" href="B-Diary.dc.html">穿搭日記</a><a class="nav-a" href="B-Wishlist.dc.html">選購清單</a></nav>
+    <a href="B-Body.dc.html" aria-label="個人資料" style="width:44px;height:44px;margin-bottom:6px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#3B2F25;color:#FBF4E8;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka;box-shadow:0 0 0 3px #F2CF8E">J</span></a>
+  </header>
+
+  <main style="max-width:1320px;margin:0 auto;padding:28px 32px 56px;display:grid;grid-template-columns:220px minmax(0,1fr) 340px;gap:28px;align-items:start">
+    <!-- 個人資料子導覽 -->
+    <nav aria-label="個人資料" class="side" style="display:flex;flex-direction:column;gap:2px;position:sticky;top:16px">
+      <span style="font-size:12px;color:#74624F;padding:0 12px 6px">個人資料</span>
+      <a href="B-Body.dc.html">體態與尺寸</a>
+      <a href="B-History.dc.html">量測紀錄</a>
+      <a href="B-Brands.dc.html" aria-current="page">品牌<span class="num" style="margin-left:auto;font-size:12px;color:#74624F">14</span></a>
+      <a href="#tags" style="color:#74624F">購買通路<span style="margin-left:auto;font-size:11px">之後</span></a>
+      <a href="#tags" style="color:#74624F">材質・場合標籤<span style="margin-left:auto;font-size:11px">之後</span></a>
+    </nav>
+
+    <section style="display:flex;flex-direction:column;gap:18px;min-width:0">
+      <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:6px;margin-right:auto">
+          <h1 class="hd" style="margin:0;font-size:32px">品牌</h1>
+          <span style="font-size:13px;color:#5A4A3C">新增衣物時輸入過的品牌都在這裡。改名、合併會一起更新所有衣物。</span>
+        </div>
+        <button class="btn btn-s" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M12 5v14M5 12h14"></path></svg>新增品牌</button>
+      </div>
+
+      <!-- 可能重複 -->
+      <section aria-labelledby="dup-t" class="paper" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px;background:#FFF9EE;overflow:hidden">
+        <span aria-hidden="true" style="position:absolute;right:-20px;top:-22px;width:90px;height:90px;border-radius:22px;background:rgba(240,196,118,.45);mix-blend-mode:multiply;transform:rotate(14deg)"></span>
+        <h2 id="dup-t" style="margin:0;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:500;position:relative"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#9A6B43"><path d="M12 4l9 16H3zM12 10v4M12 17h.01"></path></svg>可能是同一個品牌（2 組）</h2>
+        <sc-for list="{{dups}}" as="d" hint-placeholder-count="2">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:#FFFCF6;position:relative">
+            <sc-for list="{{d.items}}" as="x" hint-placeholder-count="3"><span class="chip" style="background:#F3E7D4">{{x.t}}<span class="num" style="color:#74624F">{{x.n}}</span></span></sc-for>
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;color:#74624F"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+            <span style="font-size:13px">合併成 <b style="font-weight:700">{{d.to}}</b></span>
+            <span style="margin-left:auto;display:flex;gap:6px"><button class="btn btn-s" type="button" style="height:36px">不是同一個</button><button class="btn btn-o" type="button" style="height:36px">合併…</button></span>
+          </div>
+        </sc-for>
+      </section>
+
+      <!-- 清單 -->
+      <section aria-label="品牌清單" class="paper" style="padding:12px 6px 6px">
+        <div style="display:flex;gap:10px;align-items:center;padding:0 12px 10px;flex-wrap:wrap">
+          <label style="flex:1 1 220px;display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:10px;border:1.5px solid #D9C7AC;background:#FBF4E8;color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14zM16 16l4 4"></path></svg><input aria-label="搜尋品牌" placeholder="搜尋品牌" style="flex:1;border:0;background:transparent;font:400 14px 'Chiron GoRound TC';color:#3B2F25"></label>
+          <button class="chip" type="button" style="height:36px;border:1.5px solid #E2D2B8;background:#FFFCF6;cursor:pointer;font-family:inherit">沒用到的 <span class="num">2</span></button>
+          <span style="display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:10px;border:1.5px solid #D9C7AC;background:#FFFCF6;font-size:13px">件數多到少<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px"><path d="M6 9l6 6 6-6"></path></svg></span>
+        </div>
+
+        <!-- 批次列 -->
+        <div role="toolbar" aria-label="已選取的品牌" style="display:flex;align-items:center;gap:10px;margin:0 6px 8px;padding:8px 12px;border-radius:12px;background:#3B2F25;color:#FBF4E8;font-size:13px">
+          已選 <b class="num">2</b> 個：cos、COS
+          <span style="margin-left:auto;display:flex;gap:6px"><button class="btn" type="button" style="height:34px;background:#F2CF8E;color:#3B2F25">合併…</button><button class="btn" type="button" style="height:34px;background:transparent;color:#F4DDD6;border-color:rgba(244,221,214,.4)">刪除</button><button class="btn" type="button" style="height:34px;background:transparent;color:#FBF4E8">取消選取</button></span>
+        </div>
+
+        <div role="table" aria-label="品牌">
+          <div role="row" class="tr th"><span role="columnheader"><span class="cb" aria-label="全選"></span></span><span role="columnheader">名稱</span><span role="columnheader" style="text-align:right">衣櫃</span><span role="columnheader" style="text-align:right">選購</span><span role="columnheader" style="padding-left:14px">最後使用</span><span role="columnheader" style="text-align:right">動作</span></div>
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+            <div role="row" class="tr" style="background:{{r.bg}}">
+              <span role="cell"><span class="cb {{r.cbc}}" role="checkbox" aria-checked="{{r.on}}" aria-label="選取 {{r.t}}"><sc-if value="{{r.onB}}" hint-placeholder-val="{{ false }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12l5 5L20 7"></path></svg></sc-if></span></span>
+              <span role="cell" style="display:flex;align-items:center;gap:8px;min-width:0">
+                <sc-if value="{{r.edit}}" hint-placeholder-val="{{ false }}">
+                  <input aria-label="品牌名稱" value="{{r.t}}" style="flex:1;min-width:0;height:38px;border:1.5px solid #3E6270;border-radius:8px;background:#FFFCF6;padding:0 10px;font:500 14px 'Chiron GoRound TC';color:#3B2F25">
+                  <button class="ib" type="button" aria-label="儲存名稱" style="background:#3B2F25;color:#FBF4E8"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M5 12l5 5L20 7"></path></svg></button><button class="ib" type="button" aria-label="取消改名"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+                </sc-if>
+                <sc-if value="{{r.view}}" hint-placeholder-val="{{ true }}"><span style="font-weight:500">{{r.t}}</span><sc-if value="{{r.dup}}" hint-placeholder-val="{{ false }}"><span class="chip" style="height:22px;font-size:11px;background:#F6E7C6;color:#5A3F12">可能重複</span></sc-if></sc-if>
+              </span>
+              <span role="cell" class="num" style="text-align:right;color:{{r.c1}}">{{r.a}}</span>
+              <span role="cell" class="num" style="text-align:right;color:{{r.c2}}">{{r.b}}</span>
+              <span role="cell" class="num" style="padding-left:14px;font-size:13px;color:#5A4A3C">{{r.last}}</span>
+              <span role="cell" style="display:flex;justify-content:flex-end;gap:2px">
+                <a class="ib" href="B-Closet.dc.html" aria-label="看 {{r.t}} 的衣物"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg></a>
+                <button class="ib" type="button" aria-label="改名 {{r.t}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"></path></svg></button>
+                <button class="ib" type="button" aria-label="把 {{r.t}} 合併到其他品牌"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M6 4v5a6 6 0 0 0 6 6h6M6 20v-5M15 12l3 3-3 3"></path></svg></button>
+                <button class="ib" type="button" aria-label="刪除 {{r.t}}" style="color:#8E4A3E"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"></path></svg></button>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </section>
+
+    <!-- 右：合併／刪除對話框（側欄樣式） -->
+    <aside style="display:flex;flex-direction:column;gap:18px;position:sticky;top:16px">
+      <section role="dialog" aria-labelledby="mg-t" class="paper" style="padding:18px;display:flex;flex-direction:column;gap:12px">
+        <span aria-hidden="true" style="position:absolute;left:50%;top:-10px;width:80px;height:22px;margin-left:-40px;border-radius:2px;background:rgba(240,196,118,.75);mix-blend-mode:multiply;transform:rotate(-3deg)"></span>
+        <h2 id="mg-t" class="hd" style="margin:0;font-size:21px">合併品牌</h2>
+        <span style="font-size:13px;color:#5A4A3C">要保留哪一個名稱？</span>
+        <div role="radiogroup" aria-labelledby="mg-t" style="display:flex;flex-direction:column;gap:6px">
+          <label style="display:flex;align-items:center;gap:10px;min-height:46px;padding:0 12px;border-radius:10px;border:2px solid #3B2F25;background:#FFF9EE;font-size:14px"><input type="radio" name="keep" checked style="width:18px;height:18px;accent-color:#3B2F25">COS<span class="num" style="margin-left:auto;font-size:12px;color:#5A4A3C">12 件</span></label>
+          <label style="display:flex;align-items:center;gap:10px;min-height:46px;padding:0 12px;border-radius:10px;border:1.5px solid #E2D2B8;font-size:14px"><input type="radio" name="keep" style="width:18px;height:18px;accent-color:#3B2F25">cos<span class="num" style="margin-left:auto;font-size:12px;color:#5A4A3C">1 件</span></label>
+          <label style="display:flex;align-items:center;gap:10px;min-height:46px;padding:0 12px;border-radius:10px;border:1.5px dashed #D9C7AC;font-size:14px;color:#5A4A3C"><input type="radio" name="keep" style="width:18px;height:18px;accent-color:#3B2F25">取一個新名稱…</label>
+        </div>
+        <div style="padding:10px 12px;border-radius:10px;background:#E6EEE2;color:#2E3F2B;font-size:13px;line-height:1.7"><b class="num">13</b> 件衣物的品牌會改成 <b>COS</b>；「cos」會從清單移除。</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-s" type="button">取消</button><button class="btn btn-p" type="button">合併</button></div>
+      </section>
+
+      <section role="dialog" aria-labelledby="del-t" class="paper" style="padding:18px;display:flex;flex-direction:column;gap:12px">
+        <span style="font-size:11px;color:#74624F">刪除還有衣物在用的品牌時</span>
+        <h2 id="del-t" class="hd" style="margin:0;font-size:21px">刪除「ZARA」？</h2>
+        <span style="font-size:13px;line-height:1.7;color:#5A4A3C">還有 <b class="num" style="color:#3B2F25">9</b> 件衣物用這個品牌。要怎麼處理它們？</span>
+        <div role="radiogroup" aria-labelledby="del-t" style="display:flex;flex-direction:column;gap:6px">
+          <label style="display:flex;align-items:center;gap:10px;min-height:46px;padding:0 12px;border-radius:10px;border:2px solid #3B2F25;font-size:14px"><input type="radio" name="del" checked style="width:18px;height:18px;accent-color:#3B2F25">品牌欄位清空</label>
+          <label style="display:flex;align-items:center;gap:10px;min-height:46px;padding:0 12px;border-radius:10px;border:1.5px solid #E2D2B8;font-size:14px"><input type="radio" name="del" style="width:18px;height:18px;accent-color:#3B2F25">改成另一個品牌…</label>
+        </div>
+        <span style="font-size:12px;color:#74624F">沒有衣物在用的品牌，直接刪除、不跳這個視窗。刪除後 10 秒內可以復原。</span>
+        <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-s" type="button">取消</button><button class="btn" type="button" style="background:#8E4A3E;color:#FFFCF6">刪除</button></div>
+      </section>
+    </aside>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const R = [
+      ['UNIQLO', 15, 3, '11/12'], ['COS', 10, 2, '11/12', 'on', 'dup'], ['ZARA', 9, 0, '11/06'], ['Levi\'s', 4, 0, '11/03'],
+      ['UNITED ARROWS', 2, 1, '10/18', '', '', 'edit'], ['Arket', 3, 0, '09/30'], ['cos', 1, 0, '10/02', 'on', 'dup'], ['COSS', 0, 1, '11/01', '', 'dup'],
+      ['Holeproof', 1, 0, '08/14'], ['Beams', 0, 0, '—']
+    ];
+    return {
+      dups: [
+        { to: 'COS', items: [{ t: 'COS', n: 12 }, { t: 'cos', n: 1 }, { t: 'COSS', n: 1 }] },
+        { to: 'UNIQLO', items: [{ t: 'UNIQLO', n: 18 }, { t: 'Uniqlo', n: 1 }] }
+      ],
+      rows: R.map(([t, a, b, last, on, dup, edit]) => ({
+        t, a, b, last, on: on ? 'true' : 'false', onB: !!on, cbc: on ? 'on' : '', dup: !!dup, edit: !!edit, view: !edit,
+        bg: on ? '#FFF6E2' : edit ? '#FBF4E8' : 'transparent', c1: a ? '#3B2F25' : '#74624F', c2: b ? '#3B2F25' : '#74624F'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

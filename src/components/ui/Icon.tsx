@@ -26,6 +26,10 @@ const PATHS = {
   reset: 'M3 12a9 9 0 1 0 3-6.7M3 4v5h5',
   calendar: 'M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4',
   more: 'M5 12h.01M12 12h.01M19 12h.01',
+  edit: 'M4 20h4L19 9l-4-4L4 16zM13 7l4 4',
+  merge: 'M6 4v5a6 6 0 0 0 6 6h6M6 20v-5M15 12l3 3-3 3',
+  trash: 'M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13',
+  arrowRight: 'M5 12h14M13 6l6 6-6 6',
 } as const
 
 export type IconName = keyof typeof PATHS

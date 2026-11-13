@@ -1,16 +1,18 @@
 import { useMemo, useState, type ReactNode } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { ItemTile } from '@/components/closet/ItemTile'
 import { ButtonLink } from '@/components/ui/Button'
 import { Chip } from '@/components/ui/Chip'
 import { Icon } from '@/components/ui/Icon'
 import { LoadingState, PageState } from '@/components/ui/PageState'
 import { PaperCard, TiltLabel } from '@/components/ui/Paper'
+import { Select } from '@/components/ui/Select'
 import { fetchClosetItems, useAsync } from '@/lib/data'
 import { SLOTS } from '@/lib/slots'
 import type { ItemStatus, Slot } from '@/types'
 
 const STATUS_OPTIONS: { value: ItemStatus | 'all'; label: string }[] = [
-  { value: 'all', label: '全部狀態' }, { value: 'ok', label: '可穿' }, { value: 'cleaning', label: '送洗中' },
+  { value: 'all', label: '全部狀態' }, { value: 'ok', label: '可穿' }, { value: 'not_arrived', label: '未到貨' }, { value: 'cleaning', label: '送洗中' },
   { value: 'repair', label: '維修中' }, { value: 'lent', label: '借出' }, { value: 'stored', label: '收納中' },
 ]
 
@@ -20,7 +22,9 @@ export function ClosetPage() {
   const [q, setQ] = useState('')
   const [season, setSeason] = useState('')
   const [color, setColor] = useState('')
-  const [brand, setBrand] = useState('')
+  const [searchParams] = useSearchParams()
+  // 品牌管理頁「看這個品牌的衣物」會帶 ?brand=
+  const [brand, setBrand] = useState(() => searchParams.get('brand') ?? '')
   const [size, setSize] = useState('')
   const [status, setStatus] = useState<ItemStatus | 'all'>('all')
   const [material, setMaterial] = useState('')
@@ -96,11 +100,11 @@ export function ClosetPage() {
         </div>
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:hidden" aria-label="衣物分類"><Chip selected={slot === 'all'} onClick={() => setSlot('all')}>全部</Chip>{SLOTS.map((meta) => <Chip key={meta.slot} selected={slot === meta.slot} dotColor={meta.solid} onClick={() => setSlot(meta.slot)}>{meta.label}</Chip>)}</div>
         {filtersOpen && <PaperCard className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-6">
-          <FilterField label="季節"><select value={season} onChange={(event) => setSeason(event.target.value)} className="h-11 w-full rounded-sm border border-line bg-paper px-2 text-sm"><option value="">全部季節</option>{['春', '夏', '秋', '冬'].map((value) => <option key={value} value={value}>{value}</option>)}</select></FilterField>
+          <FilterField label="季節" plain><Select label="季節" value={season} options={[{ value: '', label: '全部季節' }, ...['春', '夏', '秋', '冬'].map((value) => ({ value, label: value }))]} onChange={setSeason} triggerClassName={FILTER_SELECT} /></FilterField>
           <FilterField label="顏色"><input value={color} onChange={(event) => setColor(event.target.value)} placeholder="例如：燕麥" className="h-11 w-full rounded-sm border border-line bg-paper px-2 text-sm" /></FilterField>
           <FilterField label="品牌"><input value={brand} onChange={(event) => setBrand(event.target.value)} placeholder="輸入品牌" className="h-11 w-full rounded-sm border border-line bg-paper px-2 text-sm" /></FilterField>
           <FilterField label="尺寸"><input value={size} onChange={(event) => setSize(event.target.value)} placeholder="輸入尺寸" className="h-11 w-full rounded-sm border border-line bg-paper px-2 text-sm" /></FilterField>
-          <FilterField label="狀態"><select value={status} onChange={(event) => setStatus(event.target.value as ItemStatus | 'all')} className="h-11 w-full rounded-sm border border-line bg-paper px-2 text-sm">{STATUS_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></FilterField>
+          <FilterField label="狀態" plain><Select label="狀態" value={status} options={STATUS_OPTIONS} onChange={(next: ItemStatus | 'all') => setStatus(next)} triggerClassName={FILTER_SELECT} /></FilterField>
           <FilterField label="材質"><input value={material} onChange={(event) => setMaterial(event.target.value)} placeholder="輸入材質" className="h-11 w-full rounded-sm border border-line bg-paper px-2 text-sm" /></FilterField>
         </PaperCard>}
         {hasAnyFilter && <div className="flex flex-wrap items-center gap-2">{slot !== 'all' && <button type="button" onClick={() => setSlot('all')} className="min-h-9 rounded-full border border-line bg-card px-3 text-xs text-ink-2">{SLOTS.find((meta) => meta.slot === slot)?.label} ×</button>}{q.trim() && <button type="button" onClick={() => setQ('')} className="min-h-9 rounded-full border border-line bg-card px-3 text-xs text-ink-2">搜尋：{q} ×</button>}{activeFilters.map((filter) => <button key={filter.id} type="button" onClick={filter.clear} className="min-h-9 rounded-full border border-line bg-card px-3 text-xs text-ink-2">{filter.label} ×</button>)}<button type="button" onClick={clearFilters} className="min-h-9 px-2 text-xs text-mist-deep underline">清除篩選</button></div>}
@@ -126,6 +130,10 @@ export function ClosetPage() {
   )
 }
 
-function FilterField({ label, children }: { label: string; children: ReactNode }) {
+const FILTER_SELECT = 'h-11 w-full rounded-sm border border-line bg-paper px-2 text-sm text-ink'
+
+/** plain：內容是自訂下拉選單（本身有 aria-label），標題只做視覺，不用 label 包住按鈕 */
+function FilterField({ label, plain = false, children }: { label: string; plain?: boolean; children: ReactNode }) {
+  if (plain) return <div className="flex min-w-0 flex-col gap-1 text-xs text-ink-2"><span aria-hidden="true">{label}</span>{children}</div>
   return <label className="flex min-w-0 flex-col gap-1 text-xs text-ink-2">{label}{children}</label>
 }

@@ -26,6 +26,7 @@ export function Chip({ selected = false, dotColor, className = '', children, ...
 
 const STATUS_CLASS: Record<ItemStatus, string> = {
   ok: 'bg-status-ok-bg text-status-ok-fg',
+  not_arrived: 'bg-status-cleaning-bg text-status-cleaning-fg',
   cleaning: 'bg-status-cleaning-bg text-status-cleaning-fg',
   repair: 'bg-status-repair-bg text-status-repair-fg',
   lent: 'bg-status-lent-bg text-status-lent-fg',
@@ -36,9 +37,9 @@ const STATUS_CLASS: Record<ItemStatus, string> = {
 /** 狀態標籤：色點＋文字，不只靠顏色辨識 */
 export function StatusTag({ status, className = '' }: { status: ItemStatus; className?: string }) {
   return (
-    <span className={`inline-flex h-[22px] items-center gap-1.5 rounded-full px-2 text-[11px] font-medium ${STATUS_CLASS[status]} ${className}`}>
-      <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
-      {STATUS_LABEL[status]}
+    <span className={`status-tag inline-flex h-[22px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2 text-[11px] font-medium ${STATUS_CLASS[status]} ${className}`}>
+      <span aria-hidden="true" className="status-tag__dot size-1.5 shrink-0 rounded-full bg-current" />
+      <span className="status-tag__label">{STATUS_LABEL[status]}</span>
     </span>
   )
 }

@@ -26,6 +26,7 @@ export const REQUIRED_SLOTS = SLOTS.filter((s) => s.required).map((s) => s.slot)
 
 export const STATUS_LABEL: Record<ItemStatus, string> = {
   ok: '可穿',
+  not_arrived: '未到貨',
   cleaning: '送洗中',
   repair: '維修中',
   lent: '借出',

@@ -7,6 +7,7 @@ import { OutfitBoard } from '@/components/outfit/OutfitBoard'
 import { DestructiveActionDialog } from '@/components/ui/B10States'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
+import { Select } from '@/components/ui/Select'
 import { LoadingState, PageState } from '@/components/ui/PageState'
 import { TiltLabel } from '@/components/ui/Paper'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
@@ -702,13 +703,17 @@ function ListView({ ctx }: { ctx: Ctx }) {
               </button>
             </span>
           )}
-          <label className="ml-auto flex items-center gap-2 text-[13px] text-ink-2">
-            排序
-            <select value={sort} onChange={(e) => setSort(e.target.value as 'new' | 'old')} className="h-11 rounded-btn border-[1.5px] border-line-strong bg-card px-3 text-[13px] text-ink md:h-10">
-              <option value="new">新到舊</option>
-              <option value="old">舊到新</option>
-            </select>
-          </label>
+          <div className="ml-auto flex items-center gap-2 text-[13px] text-ink-2">
+            <span aria-hidden="true">排序</span>
+            <Select
+              label="排序"
+              value={sort}
+              options={[{ value: 'new', label: '新到舊' }, { value: 'old', label: '舊到新' }]}
+              onChange={(next: 'new' | 'old') => setSort(next)}
+              align="right"
+              triggerClassName="h-11 rounded-btn border-[1.5px] border-line-strong bg-card px-3 text-[13px] text-ink md:h-10"
+            />
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="w-11 text-xs text-ink-3">場合</span>

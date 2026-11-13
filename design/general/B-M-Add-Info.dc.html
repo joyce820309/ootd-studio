@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機新增衣物・資料</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sec{padding:16px;border-radius:16px;background:#FFFCF6;display:flex;flex-direction:column;gap:14px}
+.tape{align-self:flex-start;display:inline-flex;height:30px;align-items:center;padding:0 12px;border-radius:3px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';transform:rotate(-1.5deg);box-shadow:0 2px 4px rgba(59,47,37,.1)}
+.f{display:flex;flex-direction:column;gap:7px;min-width:0}
+.l{font-size:13px;font-weight:500}
+.l small{font-size:11px;font-weight:400;color:#74624F;margin-left:6px}
+.req{color:#8E4A3E;font-weight:400;font-size:11px;margin-left:6px}
+.inp{height:50px;border:1.5px solid #D9C7AC;border-radius:12px;background:#FFFCF6;padding:0 14px;font:400 16px 'Chiron GoRound TC';color:#3B2F25;width:100%}
+.unit{display:flex;align-items:center;height:50px;border:1.5px solid #D9C7AC;border-radius:12px;background:#FFFCF6;padding:0 12px;gap:6px}
+.unit input{flex:1;min-width:0;border:0;background:transparent;font:700 17px Nunito,'Chiron GoRound TC',sans-serif;color:#3B2F25;text-align:right;height:100%}
+.unit span{font:600 12px Nunito;color:#5A4A3C}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;white-space:nowrap;flex:none}
+.chip[aria-checked="true"],.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+.sw{width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(59,47,37,.15);padding:0}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:2580px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <header style="padding:8px 12px 10px 4px;border-bottom:1.5px dashed #D9C7AC;display:flex;flex-direction:column;gap:6px;background:#FBF4E8">
+    <div style="display:flex;align-items:center;gap:4px">
+      <a href="B-M-Add-Cutout.dc.html" aria-label="上一步" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+      <h1 class="hd" style="margin:0;font-size:20px">衣物資料</h1>
+      <span style="margin-left:auto;font-size:12px;color:#5A4A3C">第 <b class="num">3</b> / 4 步</span>
+    </div>
+    <div aria-hidden="true" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding-left:16px"><span style="height:5px;border-radius:3px;background:#B7CBB0"></span><span style="height:5px;border-radius:3px;background:#B7CBB0"></span><span style="height:5px;border-radius:3px;background:#3B2F25"></span><span style="height:5px;border-radius:3px;background:#EADCC6"></span></div>
+  </header>
+
+  <main style="flex:1;padding:14px 16px 120px;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="width:64px;height:76px;border-radius:12px;background:#F3E7D4;display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 100 100" style="width:78%;height:78%" role="img" aria-label="封面：去背圖"><path d="M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z" fill="#D9CBB3" stroke="rgba(59,47,37,.22)" stroke-width="0.6"></path></svg></span>
+      <span style="font-size:13px;line-height:1.7;color:#5A4A3C">必填只有<b style="font-weight:500;color:#3B2F25">品名</b>和<b style="font-weight:500;color:#3B2F25">類型</b>，其他想到再補。</span>
+    </div>
+
+    <section class="sec" aria-labelledby="b-t">
+      <span id="b-t" class="tape" style="background:rgba(240,196,118,.8)">基本</span>
+      <div class="f"><label class="l" for="n">品名<span class="req">必填</span></label><input id="n" class="inp" value="燕麥色羊毛圓領針織衫"></div>
+      <div class="f"><span class="l" id="tp">類型<span class="req">必填</span></span>
+        <div role="radiogroup" aria-labelledby="tp" style="display:flex;gap:6px;overflow:hidden;margin-right:-16px">
+          <sc-for list="{{types}}" as="t" hint-placeholder-count="9"><button class="chip" type="button" role="radio" aria-checked="{{t.on}}"><span style="width:9px;height:9px;border-radius:3px;background:{{t.c}}"></span>{{t.t}}</button></sc-for>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="f"><label class="l" for="br">品牌</label><button id="br" type="button" aria-haspopup="dialog" class="inp" style="display:flex;align-items:center;text-align:left">COS<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="margin-left:auto;width:18px;height:18px;color:#74624F"><path d="M6 9l6 6 6-6"></path></svg></button></div>
+        <div class="f"><label class="l" for="ts">標籤尺寸</label><input id="ts" class="inp num" value="M"></div>
+      </div>
+      <div class="f"><span class="l">季節<small>可複選</small></span><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px"><button class="chip" type="button" aria-pressed="false" style="justify-content:center">春</button><button class="chip" type="button" aria-pressed="false" style="justify-content:center">夏</button><button class="chip" type="button" aria-pressed="true" style="justify-content:center">秋</button><button class="chip" type="button" aria-pressed="true" style="justify-content:center">冬</button></div></div>
+    </section>
+
+    <section class="sec" aria-labelledby="s-t">
+      <div style="display:flex;align-items:center;gap:8px"><span id="s-t" class="tape" style="background:rgba(150,186,198,.8)">平放尺寸</span><span style="font-size:11px;color:#5A4A3C">上衣／T 恤・cm・選填</span></div>
+      <div role="img" aria-label="上衣量法示意：1 肩寬、2 袖長、3 胸寬、4 衣長" style="position:relative;align-self:center;width:200px;height:200px;border-radius:14px;background:#F6E9D3">
+        <svg viewBox="-6 -6 112 112" style="position:absolute;inset:8px;width:184px;height:184px" aria-hidden="true">
+          <path d="M30 18L42 14Q50 22 58 14L70 18L86 32L76 42L70 38V86H30V38L24 42L14 32Z" fill="#FFFCF6" stroke="#B9A88E" stroke-width="1"></path>
+          <g stroke="#9A6B43" stroke-width="1.1"><line x1="30" y1="10" x2="70" y2="10"></line><line x1="73" y1="13" x2="90" y2="29"></line><line x1="30" y1="50" x2="70" y2="50"></line><line x1="8" y1="18" x2="8" y2="86"></line></g>
+          <g fill="#9A6B43"><circle cx="50" cy="10" r="4.6"></circle><circle cx="81.5" cy="21" r="4.6"></circle><circle cx="50" cy="50" r="4.6"></circle><circle cx="8" cy="52" r="4.6"></circle></g>
+          <g font-family="Nunito" font-weight="700" font-size="5.6" fill="#FFFCF6" text-anchor="middle"><text x="50" y="12">1</text><text x="81.5" y="23">2</text><text x="50" y="52">3</text><text x="8" y="54">4</text></g>
+        </svg>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <sc-for list="{{flat}}" as="x" hint-placeholder-count="4">
+          <div class="f"><label class="l" for="m{{x.n}}" style="display:flex;align-items:center;gap:6px"><span class="num" style="width:20px;height:20px;border-radius:50%;background:#9A6B43;color:#FFFCF6;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center">{{x.n}}</span>{{x.k}}</label><div class="unit"><input id="m{{x.n}}" value="{{x.v}}" inputmode="decimal"><span>cm</span></div></div>
+        </sc-for>
+      </div>
+      <div style="padding:10px 12px;border-radius:12px;background:#DCE8EC;color:#24424D;font-size:12px;line-height:1.7">胸寬 56 × 2 = 112 cm，比你的上胸圍 84 cm 多 28 cm：寬鬆落肩版型。</div>
+      <span style="font-size:11px;line-height:1.7;color:#74624F">平放在桌面量，不要拉扯布料；網拍的尺寸表通常也是平放量，可以直接照抄。</span>
+    </section>
+
+    <section class="sec" aria-labelledby="c-t">
+      <span id="c-t" class="tape" style="background:rgba(222,166,152,.8)">顏色</span>
+      <div class="f"><span class="l">從照片取色<small>點一下就套用</small></span>
+        <div style="display:flex;gap:6px;overflow:hidden;margin-right:-16px">
+          <sc-for list="{{picked}}" as="c" hint-placeholder-count="3"><button type="button" class="chip" aria-pressed="{{c.on}}" style="padding:0 12px 0 5px"><span style="width:28px;height:28px;border-radius:50%;background:{{c.hex}};border:1.5px solid rgba(59,47,37,.15)"></span>{{c.t}}</button></sc-for>
+        </div>
+      </div>
+      <div class="f"><span class="l" id="cg">色系<small>用來篩選</small></span>
+        <div role="radiogroup" aria-labelledby="cg" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px 4px">
+          <sc-for list="{{colors}}" as="c" hint-placeholder-count="16"><span style="display:flex;flex-direction:column;align-items:center;gap:3px"><button class="sw" type="button" role="radio" aria-checked="{{c.sel}}" aria-label="{{c.t}}" style="background:{{c.hex}};box-shadow:{{c.ring}}"></button><span style="font-size:10px;color:#5A4A3C">{{c.t}}</span></span></sc-for>
+        </div>
+      </div>
+      <details style="border-top:1.5px dashed #EADCC6;padding-top:8px">
+        <summary style="min-height:44px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;list-style:none">自訂色碼與第二色<span style="font-size:11px;font-weight:400;color:#74624F">選填</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;margin-left:auto"><path d="M6 9l6 6 6-6"></path></svg></summary>
+      </details>
+    </section>
+
+    <section class="sec" aria-labelledby="mt-t">
+      <span id="mt-t" class="tape" style="background:rgba(167,192,158,.85)">材質</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <sc-for list="{{mats}}" as="x" hint-placeholder-count="8"><button class="chip" type="button" aria-pressed="{{x.on}}">{{x.t}}</button></sc-for>
+      </div>
+      <div class="f"><label class="l" for="cmp">成分比例<small>選填</small></label><input id="cmp" class="inp" value="羊毛 70%・尼龍 30%"></div>
+    </section>
+
+    <section class="sec" aria-labelledby="by-t">
+      <span id="by-t" class="tape" style="background:rgba(240,196,118,.6)">購買資訊</span>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="f"><label class="l" for="pr">價格</label><div class="unit"><span>NT$</span><input id="pr" value="3,490"></div></div>
+        <div class="f"><label class="l" for="sh">購買通路</label><input id="sh" class="inp" value="COS 信義店"></div>
+      </div>
+      <div class="f"><span class="l">購買日期</span><button type="button" aria-haspopup="dialog" class="unit" style="gap:10px;font:400 15px 'Chiron GoRound TC';color:#3B2F25;text-align:left"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg>2025 年 10 月 18 日（六）<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="margin-left:auto;width:16px;height:16px;color:#74624F"><path d="M6 9l6 6 6-6"></path></svg></button></div>
+      <div class="f"><label class="l" for="url">商品網址<small>網拍買的可以貼上</small></label><input id="url" class="inp" type="url" placeholder="https://"></div>
+    </section>
+
+    <section class="sec" aria-labelledby="nt-t">
+      <span id="nt-t" class="tape" style="background:rgba(150,186,198,.6)">備註</span>
+      <textarea aria-labelledby="nt-t" rows="3" style="border:1.5px solid #D9C7AC;border-radius:12px;background:#FFFCF6;padding:12px 14px;font:400 16px/1.7 'Chiron GoRound TC';color:#3B2F25;resize:none">手洗或裝洗衣袋冷水洗。袖子稍長，反折一次剛好。</textarea>
+    </section>
+  </main>
+
+  <footer style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:#FBF4E8;border-top:1.5px dashed #D9C7AC;display:flex;align-items:center;gap:10px">
+    <span style="font-size:12px;color:#4A6245">必填 2 / 2 已完成</span>
+    <a href="B-M-Add-Done.dc.html" style="margin-left:auto;display:flex;align-items:center;justify-content:center;gap:6px;height:52px;padding:0 24px;border-radius:12px;background:#3B2F25;color:#FBF4E8;font:500 15px 'Chiron GoRound TC';text-decoration:none">確認<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M9 6l6 6-6 6"></path></svg></a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2580}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const sel = '#D9CBB3';
+    return {
+      types: [['上衣／T 恤', '#F2CF8E', true], ['襯衫／外套', '#A9C6CF'], ['背心', '#F2CF8E'], ['內衣／小可愛', '#E2B4A8'], ['裙子', '#B7CBB0'], ['褲子', '#B7CBB0'], ['洋裝', '#E2B4A8'], ['鞋子', '#E2B4A8'], ['包包', '#D9C7AC']].map(([t, c, on]) => ({ t, c, on: on ? 'true' : 'false' })),
+      flat: [{ n: 1, k: '肩寬', v: '52' }, { n: 2, k: '袖長', v: '20' }, { n: 3, k: '胸寬', v: '56' }, { n: 4, k: '衣長', v: '64' }],
+      picked: [['燕麥', '#D9CBB3', true], ['奶油白', '#EFE6D2'], ['淺卡其', '#C9B79C']].map(([t, hex, on]) => ({ t, hex, on: on ? 'true' : 'false' })),
+      colors: [['白', '#F4F1EA'], ['米', '#EFE6D2'], ['燕麥', '#D9CBB3'], ['駝', '#B88A5A'], ['咖啡', '#5A4031'], ['灰', '#9A9893'], ['黑', '#232322'], ['海軍藍', '#2E3A4F'], ['藍', '#8FA3BC'], ['綠', '#8C9A86'], ['黃', '#E8C66A'], ['橘', '#D98A4E'], ['紅', '#A8423A'], ['酒紅', '#6E2E34'], ['粉', '#E7B9B4'], ['紫', '#8E7AA6'], ['多色', 'conic-gradient(#E7B9B4,#E8C66A,#8C9A86,#8FA3BC,#E7B9B4)'], ['其他', '#FFFCF6']]
+        .map(([t, hex]) => ({ t, hex, sel: hex === sel ? 'true' : 'false', ring: hex === sel ? '0 0 0 2px #FFFCF6, 0 0 0 4px #3B2F25' : 'none' })),
+      mats: ['棉', '羊毛', '喀什米爾', '聚酯纖維', '尼龍', '麻', '丹寧', '皮革', '＋ 其他'].map(t => ({ t, on: t === '羊毛' || t === '尼龍' ? 'true' : 'false' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

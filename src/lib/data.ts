@@ -1,7 +1,7 @@
 import { todayISO } from './date'
 import { useEffect, useState } from 'react'
 import { SAMPLE_BODY_MEASUREMENTS, SAMPLE_CATEGORIES, SAMPLE_COMPARE_GROUPS, SAMPLE_DIARY, SAMPLE_ITEMS, SAMPLE_PROFILE, SAMPLE_WISHLIST } from '@/data/sample'
-import type { AddItemDestination, BodyMeasurement, BodyMeasurementInput, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, GarmentShape, ItemStatus, NewGarmentInput, Outfit, ProfilePreferences, Slot, StudioCanvasItem, WishlistInput, WishlistItem, WishStatus } from '@/types'
+import type { AddItemDestination, BodyMeasurement, BodyMeasurementInput, BrandChange, BrandSummary, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, GarmentShape, ItemStatus, NewGarmentInput, Outfit, ProfilePreferences, Slot, StudioCanvasItem, WishlistInput, WishlistItem, WishStatus } from '@/types'
 import { toUploadableImage } from '@/lib/image'
 import { supabase } from './supabase'
 
@@ -101,6 +101,7 @@ interface ItemRow {
   second_color_hex?: string | null
   brand: string | null
   size: string | null
+  neckline_size?: number | null
   fit?: string | null
   material?: string | null
   material_composition?: string | null
@@ -143,6 +144,7 @@ function itemFromRow(row: ItemRow, urls: Record<string, string>, photos?: Closet
     secondColorHex: row.second_color_hex ?? undefined,
     brand: row.brand ?? undefined,
     size: row.size ?? undefined,
+    necklineSize: row.neckline_size ?? undefined,
     fit: row.fit ?? undefined,
     material: row.material ?? undefined,
     materialComposition: row.material_composition ?? undefined,
@@ -176,7 +178,7 @@ export async function fetchClosetItems(): Promise<ClosetItem[]> {
   if (!supabase) return demoClosetItems.filter((item) => item.status !== 'retired').map((item) => ({ ...item }))
   const { data, error } = await supabase
     .from('items')
-    .select('id,name,category_id,color_name,color_hex,brand,size,fit,material,material_composition,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(name,slot)')
+    .select('id,name,category_id,color_name,color_hex,brand,size,neckline_size,fit,material,material_composition,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(name,slot)')
     .neq('status', 'retired')
     .eq('is_draft', false)
     .order('created_at', { ascending: false })
@@ -185,6 +187,20 @@ export async function fetchClosetItems(): Promise<ClosetItem[]> {
   const imagePaths = rows.flatMap((row) => [row.image_cutout_path, row.image_original_path].filter((path): path is string => !!path))
   const urls = await signed(imagePaths)
   return rows.map((row) => itemFromRow(row, urls))
+}
+
+/** 過去衣物使用過的品牌，供新增衣物品牌欄位建議；仍可手動輸入新品牌。 */
+export async function fetchClosetBrands(): Promise<string[]> {
+  // 品牌管理頁手動新增的品牌也列進建議
+  if (!supabase) return [...new Set([...demoClosetItems.map((item) => item.brand?.trim()), ...demoBrands].filter((brand): brand is string => !!brand))].sort((a, b) => a.localeCompare(b, 'zh-TW'))
+  const [{ data, error }, manual] = await Promise.all([
+    supabase.from('items').select('brand').eq('is_draft', false).not('brand', 'is', null),
+    supabase.from('brands').select('name'),
+  ])
+  if (error) throw error
+  // brands 表在 0011 之前不存在，讀不到時只用衣物上的品牌
+  const extra = manual.error ? [] : (manual.data ?? []).map((row) => row.name as string)
+  return [...new Set([...(data ?? []).map((row) => row.brand?.trim()), ...extra].filter((brand): brand is string => !!brand))].sort((a, b) => a.localeCompare(b, 'zh-TW'))
 }
 
 /** 讀取單件衣物完整資料、多張照片、原圖與去背圖（若有）。 */
@@ -198,7 +214,7 @@ export async function fetchClosetItemDetail(id: string): Promise<ClosetItem | nu
     return { ...item, categoryId: category?.id ?? item.categoryId, categoryName: category?.name ?? item.categoryId, categorySlot: category ? category.slot : item.categorySlot ?? item.slot, seasons: item.seasons ?? [], flatMeasurements: item.flatMeasurements ?? {}, photos: [...(demoClosetPhotos.get(id) ?? [])] }
   }
   const { data, error } = await supabase.from('items')
-    .select('id,name,category_id,color_name,color_hex,second_color_hex,brand,size,fit,material,material_composition,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(id,name,slot,sort),item_photos(id,storage_path,sort_order,is_cover)')
+    .select('id,name,category_id,color_name,color_hex,second_color_hex,brand,size,neckline_size,fit,material,material_composition,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(id,name,slot,sort),item_photos(id,storage_path,sort_order,is_cover)')
     .eq('id', id)
     .eq('is_draft', false)
     .maybeSingle()
@@ -224,7 +240,7 @@ function closetItemPayload(input: Partial<ClosetItem> & { categoryId?: string })
   const payload: Record<string, unknown> = {}
   const fields: [keyof ClosetItem, string][] = [
     ['name', 'name'], ['categoryId', 'category_id'], ['colorName', 'color_name'], ['colorHex', 'color_hex'],
-    ['secondColorHex', 'second_color_hex'], ['brand', 'brand'], ['size', 'size'], ['fit', 'fit'],
+    ['secondColorHex', 'second_color_hex'], ['brand', 'brand'], ['size', 'size'], ['necklineSize', 'neckline_size'], ['fit', 'fit'],
     ['material', 'material'], ['materialComposition', 'material_composition'], ['seasons', 'seasons'],
     ['occasions', 'occasions'], ['purchaseDate', 'purchase_date'], ['purchasePrice', 'purchase_price'],
     ['store', 'store'], ['productUrl', 'product_url'], ['note', 'note'], ['flatMeasurements', 'flat_measurements'],
@@ -384,7 +400,7 @@ export async function deleteClosetItem(id: string): Promise<{ demo: boolean; cle
 }
 
 const ACTIVE_WISH_STATUSES: WishStatus[] = ['considering', 'waiting', 'ready']
-const WISHLIST_COLUMNS = 'id,name,slot,color_hex,color_name,shop,price,shipping,target_price,url,size,size_note,brand,material,return_policy,reason,priority,status,compare_group_id,image_cutout_path,image_original_path,bought_item_id,created_at'
+const WISHLIST_COLUMNS = 'id,name,slot,color_hex,color_name,shop,price,shipping,target_price,url,size,size_note,neckline_size,brand,material,return_policy,reason,priority,status,compare_group_id,image_cutout_path,image_original_path,bought_item_id,created_at'
 
 interface WishlistRow {
   id: string
@@ -399,6 +415,7 @@ interface WishlistRow {
   url: string | null
   size: string | null
   size_note: string | null
+  neckline_size: number | null
   brand: string | null
   material: string | null
   return_policy: string | null
@@ -430,6 +447,7 @@ async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
       url: r.url ?? undefined,
       size: r.size ?? undefined,
       sizeNote: r.size_note ?? undefined,
+      necklineSize: r.neckline_size ?? undefined,
       brand: r.brand ?? undefined,
       material: r.material ?? undefined,
       returnPolicy: r.return_policy ?? undefined,
@@ -484,6 +502,7 @@ function wishlistPayload(input: WishlistInput) {
     brand: blankToNull(input.brand),
     size: blankToNull(input.size),
     size_note: blankToNull(input.sizeNote),
+    neckline_size: input.necklineSize ?? null,
     priority: input.priority,
     reason: blankToNull(input.reason),
     material: blankToNull(input.material),
@@ -509,6 +528,7 @@ function demoWishFromInput(id: string, input: WishlistInput, base?: WishlistItem
     targetPrice: input.targetPrice ?? undefined,
     brand: optional(input.brand),
     size: optional(input.size),
+    necklineSize: input.necklineSize ?? base?.necklineSize,
     sizeNote: optional(input.sizeNote),
     priority: input.priority ?? undefined,
     reason: optional(input.reason),
@@ -582,6 +602,7 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
       colorHex: wish.colorHex,
       brand: wish.brand,
       size: wish.size,
+      necklineSize: wish.necklineSize,
       status: 'ok',
       cutoutUrl: wish.cutoutUrl,
       shape: wish.shape,
@@ -594,7 +615,7 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
   const client = supabase
   const { data, error } = await client
     .from('wishlist_items')
-    .select('id,name,slot,category_id,color_hex,color_name,second_color_hex,brand,size,size_note,seasons,material,material_composition,flat_measurements,shop,url,reason,status,image_original_path,image_cutout_path')
+    .select('id,name,slot,category_id,color_hex,color_name,second_color_hex,brand,size,size_note,neckline_size,seasons,material,material_composition,flat_measurements,shop,url,reason,status,image_original_path,image_cutout_path')
     .eq('id', id)
     .single()
   if (error) throw error
@@ -631,6 +652,7 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
       color_hex: data.color_hex,
       second_color_hex: data.second_color_hex,
       size: data.size || data.size_note || '',
+      neckline_size: data.neckline_size,
       brand: data.brand,
       seasons: data.seasons ?? [],
       material: data.material,
@@ -828,7 +850,8 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         secondColorHex: input.secondColorHex || undefined,
         brand: input.brand || undefined,
         size: input.size || undefined,
-        status: 'ok',
+        necklineSize: input.necklineSize ?? undefined,
+        status: input.closetStatus ?? 'ok',
         seasons: [...input.seasons],
         material: input.material || undefined,
         materialComposition: input.materialComposition || undefined,
@@ -876,6 +899,7 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
     color_hex: input.colorHex,
     second_color_hex: input.secondColorHex || null,
     size: input.size?.trim() || '',
+    neckline_size: input.necklineSize ?? null,
     brand: input.brand?.trim() || null,
     seasons: input.seasons,
     material: input.material?.trim() || null,
@@ -905,6 +929,7 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         second_color_hex: input.secondColorHex || null,
         brand: input.brand?.trim() || null,
         size: input.size?.trim() || null,
+        neckline_size: input.necklineSize ?? null,
         seasons: input.seasons,
         shop: input.store?.trim() || '尚未決定',
         price: input.purchasePrice ?? 0,
@@ -1005,6 +1030,7 @@ export async function updateGarmentDraft(id: string, input: NewGarmentInput): Pr
     second_color_hex: input.secondColorHex || null,
     brand: input.brand?.trim() || null,
     size: input.size?.trim() || '',
+    neckline_size: input.necklineSize ?? null,
     seasons: input.seasons,
     material: input.material?.trim() || null,
     material_composition: input.materialComposition?.trim() || null,
@@ -1033,7 +1059,7 @@ export async function finalizeGarmentDraft(id: string, input: NewGarmentInput): 
   if (input.destination === 'wishlist' && !category.slot) throw new Error('「其他」分類不能加入選購清單，請選擇有搭配部位的類型。')
 
   if (input.destination === 'closet') {
-    const { error } = await supabase.from('items').update({ status: 'ok', is_draft: false }).eq('id', id).eq('is_draft', true)
+    const { error } = await supabase.from('items').update({ status: input.closetStatus ?? 'ok', is_draft: false }).eq('id', id).eq('is_draft', true)
     if (error) throw error
     return { id, destination: 'closet', demo: false }
   }
@@ -1053,6 +1079,7 @@ export async function finalizeGarmentDraft(id: string, input: NewGarmentInput): 
     price: input.purchasePrice ?? 0,
     url: input.productUrl?.trim() || null,
     size_note: input.size?.trim() || null,
+    neckline_size: input.necklineSize ?? null,
     material: input.material?.trim() || null,
     material_composition: input.materialComposition?.trim() || null,
     flat_measurements: Object.fromEntries(Object.entries(input.flatMeasurements).filter(([, value]) => value !== null)),
@@ -1573,5 +1600,145 @@ export async function deleteDiaryEntry(id: string): Promise<{ demo: boolean }> {
   const { error } = await supabase.from('outfits').delete().eq('id', id)
   if (error) throw error
   if (data?.photo_path) await supabase.storage.from(CUTOUT_BUCKET).remove([data.photo_path])
+  return { demo: false }
+}
+
+// ---------- 品牌管理 ----------
+
+/** 示範模式：手動新增、還沒有衣物在用的品牌，以及標記「不是同一個」的組合 */
+let demoBrands = new Set<string>(['Beams'])
+const demoDistinctGroups = new Set<string>()
+
+const laterDate = (a: string | null, b?: string | null) => (b && (!a || b > a) ? b : a)
+
+function summarizeBrands(
+  closet: { brand?: string | null; date?: string | null }[],
+  wishes: { brand?: string | null; date?: string | null }[],
+  manual: string[],
+): BrandSummary[] {
+  const map = new Map<string, BrandSummary>()
+  const entry = (name: string) => {
+    let found = map.get(name)
+    if (!found) map.set(name, (found = { name, closetCount: 0, wishCount: 0, lastUsed: null }))
+    return found
+  }
+  for (const name of manual) entry(name)
+  for (const row of closet) {
+    const name = row.brand?.trim()
+    if (!name) continue
+    const e = entry(name)
+    e.closetCount += 1
+    e.lastUsed = laterDate(e.lastUsed, row.date?.slice(0, 10))
+  }
+  for (const row of wishes) {
+    const name = row.brand?.trim()
+    if (!name) continue
+    const e = entry(name)
+    e.wishCount += 1
+    e.lastUsed = laterDate(e.lastUsed, row.date?.slice(0, 10))
+  }
+  return [...map.values()]
+}
+
+/** 品牌清單（含衣櫃／選購件數、最後使用日）與使用者標記為「不是同一個」的組合 */
+export async function fetchBrands(): Promise<{ brands: BrandSummary[]; distinctGroups: string[] }> {
+  if (!supabase) {
+    return {
+      brands: summarizeBrands(
+        demoClosetItems.map((item) => ({ brand: item.brand, date: laterDate(item.lastWornAt ?? null, item.purchaseDate) })),
+        demoWishlistItems.filter((wish) => wish.status !== 'bought').map((wish) => ({ brand: wish.brand, date: wish.createdAt })),
+        [...demoBrands],
+      ),
+      distinctGroups: [...demoDistinctGroups],
+    }
+  }
+  const [items, wishes, manual, groups] = await Promise.all([
+    supabase.from('items').select('brand,created_at,last_worn_at').eq('is_draft', false).not('brand', 'is', null),
+    supabase.from('wishlist_items').select('brand,created_at').neq('status', 'bought').not('brand', 'is', null),
+    supabase.from('brands').select('name'),
+    supabase.from('brand_distinct_groups').select('group_key'),
+  ])
+  for (const result of [items, wishes, manual, groups]) if (result.error) throw result.error
+  return {
+    brands: summarizeBrands(
+      (items.data ?? []).map((row) => ({ brand: row.brand, date: laterDate(row.created_at, row.last_worn_at) })),
+      (wishes.data ?? []).map((row) => ({ brand: row.brand, date: row.created_at })),
+      (manual.data ?? []).map((row) => row.name as string),
+    ),
+    distinctGroups: (groups.data ?? []).map((row) => row.group_key as string),
+  }
+}
+
+/** 新增一個還沒有衣物在用的品牌 */
+export async function createBrand(name: string): Promise<{ demo: boolean }> {
+  const trimmed = name.trim()
+  if (!trimmed) throw new Error('請輸入品牌名稱。')
+  if (trimmed.length > 60) throw new Error('品牌名稱最多 60 個字。')
+  if (!supabase) {
+    demoBrands.add(trimmed)
+    return { demo: true }
+  }
+  const { error } = await supabase.from('brands').upsert({ name: trimmed }, { onConflict: 'owner_id,name', ignoreDuplicates: true })
+  if (error) throw error
+  return { demo: false }
+}
+
+/**
+ * 把 from 裡的每個品牌換成 to（null＝清空品牌欄位），衣物與選購清單一起更新。
+ * 改名、合併、刪除都用這個；回傳每個品牌被改到的資料，供復原。
+ */
+export async function replaceBrands(from: string[], to: string | null): Promise<BrandChange[]> {
+  const target = to?.trim() || null
+  if (target && target.length > 60) throw new Error('品牌名稱最多 60 個字。')
+  const names = [...new Set(from)].filter((name) => name !== target)
+  if (!supabase) {
+    const changes = names.map((name) => ({
+      name,
+      itemIds: demoClosetItems.filter((item) => item.brand?.trim() === name).map((item) => item.id),
+      wishIds: demoWishlistItems.filter((wish) => wish.brand?.trim() === name).map((wish) => wish.id),
+    }))
+    const hit = new Set(names)
+    demoClosetItems = demoClosetItems.map((item) => (item.brand && hit.has(item.brand.trim()) ? { ...item, brand: target ?? undefined } : item))
+    demoWishlistItems = demoWishlistItems.map((wish) => (wish.brand && hit.has(wish.brand.trim()) ? { ...wish, brand: target ?? undefined } : wish))
+    demoBrands = new Set([...demoBrands].filter((name) => !hit.has(name)))
+    if (target) demoBrands.add(target)
+    for (const key of [...demoDistinctGroups]) if (key.split('\n').some((name) => hit.has(name))) demoDistinctGroups.delete(key)
+    return changes
+  }
+  const changes: BrandChange[] = []
+  // 一個品牌呼叫一次，才能分別記住要復原哪些資料
+  for (const name of names) {
+    const { data, error } = await supabase.rpc('replace_brands', { p_from: [name], p_to: target })
+    if (error) throw error
+    const result = (data ?? {}) as { items?: string[]; wishes?: string[] }
+    changes.push({ name, itemIds: result.items ?? [], wishIds: result.wishes ?? [] })
+  }
+  return changes
+}
+
+/** 復原剛刪除的品牌：把衣物與選購改回原名，並放回品牌清單 */
+export async function restoreBrands(changes: BrandChange[]): Promise<void> {
+  if (!supabase) {
+    for (const change of changes) {
+      demoClosetItems = demoClosetItems.map((item) => (change.itemIds.includes(item.id) ? { ...item, brand: change.name } : item))
+      demoWishlistItems = demoWishlistItems.map((wish) => (change.wishIds.includes(wish.id) ? { ...wish, brand: change.name } : wish))
+      demoBrands.add(change.name)
+    }
+    return
+  }
+  for (const change of changes) {
+    const { error } = await supabase.rpc('restore_brand', { p_name: change.name, p_items: change.itemIds, p_wishes: change.wishIds })
+    if (error) throw error
+  }
+}
+
+/** 「不是同一個」：之後不再把這組名稱列為可能重複 */
+export async function markBrandsDistinct(groupKey: string): Promise<{ demo: boolean }> {
+  if (!supabase) {
+    demoDistinctGroups.add(groupKey)
+    return { demo: true }
+  }
+  const { error } = await supabase.from('brand_distinct_groups').upsert({ group_key: groupKey }, { onConflict: 'owner_id,group_key', ignoreDuplicates: true })
+  if (error) throw error
   return { demo: false }
 }

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機品牌管理</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.chip{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 9px;border-radius:999px;font-size:12px;white-space:nowrap}
+.row{display:flex;align-items:center;gap:10px;min-height:60px;padding:0 4px 0 12px;border-top:1.5px dashed #EADCC6;background:none;border-left:0;border-right:0;border-bottom:0;width:100%;text-align:left;font-family:inherit;color:#3B2F25}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:390px;height:1000px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <header style="display:flex;align-items:center;gap:4px;padding:8px 8px 8px 4px;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Body.dc.html" aria-label="返回個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <h1 class="hd" style="margin:0;font-size:20px">品牌</h1><span class="num" style="font-size:12px;color:#74624F;margin-left:4px">14</span>
+    <button type="button" aria-label="新增品牌" style="margin-left:auto;width:44px;height:44px;border:0;border-radius:10px;background:none;color:#3B2F25;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+    <button type="button" style="height:44px;padding:0 10px;border:0;background:none;color:#3E6270;font:500 14px 'Chiron GoRound TC'">選取</button>
+  </header>
+
+  <main style="padding:12px 12px 40px;display:flex;flex-direction:column;gap:12px">
+    <section aria-labelledby="dup" style="position:relative;padding:12px;border-radius:14px;background:#FFF9EE;overflow:hidden;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 10px 20px -14px rgba(59,47,37,.25)">
+      <span aria-hidden="true" style="position:absolute;right:-16px;top:-18px;width:64px;height:64px;border-radius:16px;background:rgba(240,196,118,.45);mix-blend-mode:multiply;transform:rotate(14deg)"></span>
+      <h2 id="dup" style="margin:0;font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;position:relative"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;color:#9A6B43"><path d="M12 4l9 16H3zM12 10v4M12 17h.01"></path></svg>可能是同一個品牌</h2>
+      <sc-for list="{{dups}}" as="d" hint-placeholder-count="2">
+        <div style="padding:10px;border-radius:12px;background:#FFFCF6;display:flex;flex-direction:column;gap:8px;position:relative">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><sc-for list="{{d.items}}" as="x" hint-placeholder-count="3"><span class="chip" style="background:#F3E7D4">{{x.t}}<span class="num" style="color:#74624F">{{x.n}}</span></span></sc-for></div>
+          <div style="display:flex;gap:6px;align-items:center"><span style="font-size:12px;color:#5A4A3C">→ 合併成 <b style="color:#3B2F25">{{d.to}}</b></span><button type="button" style="margin-left:auto;height:36px;padding:0 10px;border-radius:10px;border:1.5px solid #D9C7AC;background:#FFFCF6;font:500 12px 'Chiron GoRound TC';color:#3B2F25">不是</button><a href="B-M-Brands-Merge.dc.html" style="height:36px;padding:0 12px;border-radius:10px;border:1.5px solid #E2B866;background:#F2CF8E;font:500 12px 'Chiron GoRound TC';color:#3B2F25;display:flex;align-items:center;text-decoration:none">合併…</a></div>
+        </div>
+      </sc-for>
+    </section>
+
+    <div style="display:flex;gap:8px;align-items:center">
+      <label style="flex:1;display:flex;align-items:center;gap:8px;height:44px;padding:0 12px;border-radius:12px;border:1.5px solid #D9C7AC;background:#FFFCF6;color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14zM16 16l4 4"></path></svg><input aria-label="搜尋品牌" placeholder="搜尋品牌" style="flex:1;min-width:0;border:0;background:transparent;font:400 16px 'Chiron GoRound TC';color:#3B2F25"></label>
+      <button type="button" aria-label="排序：件數多到少" style="height:44px;padding:0 10px;border-radius:12px;border:1.5px solid #D9C7AC;background:#FFFCF6;font:500 12px 'Chiron GoRound TC';color:#3B2F25;display:flex;align-items:center;gap:4px">件數<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px"><path d="M6 9l6 6 6-6"></path></svg></button>
+    </div>
+
+    <section aria-label="品牌清單" style="border-radius:14px;background:#FFFCF6;padding:0 4px">
+      <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+        <a href="B-M-Brands-Actions.dc.html" class="row" style="text-decoration:none;border-top-color:{{r.bt}}">
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:500;display:flex;align-items:center;gap:6px">{{r.t}}<sc-if value="{{r.dup}}" hint-placeholder-val="{{ false }}"><span class="chip" style="height:20px;font-size:10px;background:#F6E7C6;color:#5A3F12">可能重複</span></sc-if></span><span style="font-size:11px;color:#74624F">衣櫃 <span class="num">{{r.a}}</span>・選購 <span class="num">{{r.b}}</span>・最後用 <span class="num">{{r.last}}</span></span></span>
+          <span class="num" style="font-size:14px;font-weight:700;color:{{r.cc}}">{{r.sum}}</span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#74624F"><path d="M9 6l6 6-6 6"></path></svg>
+        </a>
+      </sc-for>
+    </section>
+    <span style="font-size:11px;line-height:1.6;color:#74624F;padding:0 4px">點一列打開動作：看衣物、改名、合併、刪除。右上「選取」可以一次選多個合併。</span>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const R = [['UNIQLO', 15, 3, '11/12'], ['COS', 10, 2, '11/12', 1], ['ZARA', 9, 0, '11/06'], ['Levi\'s', 4, 0, '11/03'], ['Arket', 3, 0, '09/30'], ['UNITED ARROWS', 2, 1, '10/18'], ['cos', 1, 0, '10/02', 1], ['COSS', 0, 1, '11/01', 1], ['Beams', 0, 0, '—']];
+    return {
+      dups: [{ to: 'COS', items: [{ t: 'COS', n: 12 }, { t: 'cos', n: 1 }, { t: 'COSS', n: 1 }] }, { to: 'UNIQLO', items: [{ t: 'UNIQLO', n: 18 }, { t: 'Uniqlo', n: 1 }] }],
+      rows: R.map(([t, a, b, last, dup], i) => ({ t, a, b, last, dup: !!dup, sum: a + b, cc: a + b ? '#3B2F25' : '#74624F', bt: i ? '#EADCC6' : 'transparent' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

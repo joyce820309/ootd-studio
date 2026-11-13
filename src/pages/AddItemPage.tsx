@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent, type ReactNode } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { Button } from '@/components/ui/Button'
 import { Chip } from '@/components/ui/Chip'
+import { Combobox } from '@/components/ui/Combobox'
 import { Icon } from '@/components/ui/Icon'
 import { ImageUploadProgressState, CutoutFailureState, CutoutProcessingState } from '@/components/ui/B10States'
 import { PaperCard, Tape, TiltLabel, WashBlob } from '@/components/ui/Paper'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
-import { fetchCategories, createGarmentDraft, updateGarmentDraft, finalizeGarmentDraft, discardGarmentDraft, removeItemBackground, getGarmentPhotoUrl } from '@/lib/data'
+import { fetchCategories, fetchClosetBrands, createGarmentDraft, updateGarmentDraft, finalizeGarmentDraft, discardGarmentDraft, removeItemBackground, getGarmentPhotoUrl } from '@/lib/data'
 import { toUploadableImage } from '@/lib/image'
 import type { AddItemDestination, Category, NewGarmentInput } from '@/types'
 
@@ -16,10 +17,11 @@ type CutoutState = 'idle' | 'processing' | 'done' | 'failed' | 'demo'
 type Photo = { id: string; file: File; url: string }
 type MeasureField = { key: string; label: string }
 
-type FormState = Omit<NewGarmentInput, 'flatMeasurements' | 'seasons' | 'destination' | 'useCutout' | 'purchaseDate'> & {
+type FormState = Omit<NewGarmentInput, 'flatMeasurements' | 'seasons' | 'destination' | 'useCutout' | 'purchaseDate' | 'necklineSize'> & {
   seasons: string[]
   flatMeasurements: Record<string, string>
   purchaseDate: string | null
+  necklineSize: string
 }
 
 const MAX_PHOTOS = 8
@@ -45,7 +47,7 @@ const SIZING: Record<string, MeasureField[]> = {
 }
 const BASE_FORM: FormState = {
   name: '', categoryId: '', colorName: '燕麥', colorHex: '#D9CBB3', secondColorHex: '', brand: '', size: '',
-  seasons: [], material: '', materialComposition: '', purchasePrice: null, purchaseDate: null, store: '', productUrl: '', note: '', flatMeasurements: {},
+  seasons: [], necklineSize: '', material: '', materialComposition: '', purchasePrice: null, purchaseDate: null, store: '', productUrl: '', note: '', flatMeasurements: {},
 }
 
 function slotSizing(category: Category | undefined): MeasureField[] {
@@ -81,11 +83,13 @@ function fieldNumber(value: string) {
 export function AddItemPage() {
   const navigate = useNavigate()
   const [categories, setCategories] = useState<Category[]>([])
+  const [brandSuggestions, setBrandSuggestions] = useState<string[]>([])
   const [photos, setPhotos] = useState<Photo[]>([])
   const [cutoutPhotoId, setCutoutPhotoId] = useState<string | null>(null)
   const [form, setForm] = useState<FormState>(BASE_FORM)
   const [step, setStep] = useState<Step>(1)
   const [destination, setDestination] = useState<AddItemDestination>('closet')
+  const [closetStatus, setClosetStatus] = useState<'ok' | 'not_arrived'>('ok')
   const [useCutout, setUseCutout] = useState(true)
   const [cutoutState, setCutoutState] = useState<CutoutState>('idle')
   const [cutoutUrl, setCutoutUrl] = useState<string | null>(null)
@@ -114,9 +118,10 @@ export function AddItemPage() {
 
   useEffect(() => {
     let alive = true
-    fetchCategories().then((items) => {
+    Promise.all([fetchCategories(), fetchClosetBrands().catch(() => [])]).then(([items, brands]) => {
       if (!alive) return
       setCategories(items)
+      setBrandSuggestions(brands)
       setForm((current) => ({ ...current, categoryId: current.categoryId || items[0]?.id || '' }))
     }).catch((cause: Error) => alive && setError(cause.message || '衣物分類載入失敗。'))
       .finally(() => alive && setLoadingCategories(false))
@@ -279,7 +284,9 @@ export function AddItemPage() {
   function toInput(): NewGarmentInput {
     return {
       ...form,
+      necklineSize: selectedCategory?.slot === 'top' ? fieldNumber(form.necklineSize) : null,
       destination,
+      closetStatus,
       useCutout,
       flatMeasurements: Object.fromEntries(measurements.map(({ key }) => [key, fieldNumber(form.flatMeasurements[key] ?? '')])),
     }
@@ -322,6 +329,7 @@ export function AddItemPage() {
     setCutoutPhotoId(null)
     setForm(initialForm(categories))
     setDestination('closet')
+    setClosetStatus('ok')
     setUseCutout(true)
     setCutoutState('idle')
     setCutoutUrl(null)
@@ -398,6 +406,7 @@ export function AddItemPage() {
     ? useCutout ? '下一步會上傳照片並開始去背' : '略過去背，直接保留原始照片'
     : step === 2 ? cutoutState === 'done' ? '去背圖會用在搭配板，原照片仍會保留' : '去背失敗仍可用原始照片繼續'
       : step === 3 ? '必填只有品名和類型，其他想到再補' : '確認後就會儲存這件衣物'
+  const necklineField = selectedCategory?.slot === 'top' ? <Field label="領口尺寸" hint="cm・選填"><span className="garment-sizing__neckline-control flex h-12 items-center gap-2 rounded-btn border-[1.5px] border-line bg-card px-3 focus-within:border-mist-deep"><input type="number" min="0" step="0.1" inputMode="decimal" value={form.necklineSize} onChange={(event) => updateForm('necklineSize', event.target.value)} placeholder="選填" className="min-w-0 flex-1 bg-transparent text-right font-num text-lg outline-none" /><span className="font-num text-xs text-ink-2">cm</span></span></Field> : null
 
   if (loadingCategories) return <main className="mx-auto max-w-5xl px-4 py-10"><div role="status">正在準備衣物分類…</div></main>
 
@@ -470,15 +479,16 @@ export function AddItemPage() {
             <FormSection title="基本" accent="oat">
               <Field label="品名" required><input value={form.name} onChange={(event) => updateForm('name', event.target.value)} required placeholder="例如：燕麥色羊毛圓領針織衫" className={INPUT_CLASS} /></Field>
               <fieldset className="space-y-2 border-0 p-0"><legend className="text-[13px] font-medium text-ink">類型<span className="ml-1 text-rose-deep">必填</span><small className="ml-2 text-ink-3">依你的衣櫃分類</small></legend><div className="flex flex-wrap gap-2" role="radiogroup" aria-label="衣物類型">{categories.map((category) => <Chip key={category.id} selected={form.categoryId === category.id} onClick={() => updateForm('categoryId', category.id)} dotColor={category.slot ? undefined : 'var(--color-line-strong)'}>{category.name}</Chip>)}</div></fieldset>
-              <div className="grid gap-3 sm:grid-cols-2"><Field label="品牌"><input value={form.brand} onChange={(event) => updateForm('brand', event.target.value)} placeholder="選填" className={INPUT_CLASS} /></Field><Field label="標籤尺寸"><input value={form.size} onChange={(event) => updateForm('size', event.target.value)} placeholder="衣物標籤上寫的尺寸" className={INPUT_CLASS} /></Field></div>
+              <div className="grid gap-3 sm:grid-cols-2"><div className="garment-brand-field flex min-w-0 flex-col gap-1.5"><span className="text-[13px] font-medium text-ink">品牌<small className="ml-1 text-[11px] font-normal text-ink-3">選填</small></span><Combobox label="品牌" value={form.brand ?? ''} options={brandSuggestions} onChange={(value) => updateForm('brand', value)} /></div><Field label="標籤尺寸"><input value={form.size} onChange={(event) => updateForm('size', event.target.value)} placeholder="衣物標籤上寫的尺寸" className={INPUT_CLASS} /></Field></div>
               <Field label="季節" hint="可複選"><div className="flex flex-wrap gap-2">{SEASONS.map((season) => <Chip key={season} selected={form.seasons.includes(season)} onClick={() => toggleSeason(season)}>{season}</Chip>)}</div></Field>
             </FormSection>
             <FormSection title="平放尺寸" accent="mist" hint="單位 cm・選填">
-              {measurements.length ? <><div className="mb-2 rounded-tile bg-apricot p-3 text-xs leading-5 text-ink-2">平放在桌面量，不要拉扯布料；網拍尺寸表通常也是平放量。誤差 1–2 cm 屬於正常。</div><div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{measurements.map((field) => <Field key={field.key} label={field.label}><span className="flex h-12 items-center rounded-btn border-[1.5px] border-line bg-card px-3 focus-within:border-mist-deep"><input type="number" min="0" step="0.1" inputMode="decimal" value={form.flatMeasurements[field.key] ?? ''} onChange={(event) => updateForm('flatMeasurements', { ...form.flatMeasurements, [field.key]: event.target.value })} placeholder="選填" className="min-w-0 flex-1 bg-transparent text-right font-num text-lg font-bold outline-none" /><span className="ml-2 font-num text-xs text-ink-2">cm</span></span></Field>)}</div></> : <p className="m-0 text-sm text-ink-2">這個分類暫無建議的平放尺寸欄位。</p>}
+              <div className="garment-sizing__guide rounded-tile bg-apricot p-3 text-xs leading-5 text-ink-2">平放在桌面量，不要拉扯布料；網拍尺寸表通常也是平放量。誤差 1–2 cm 屬於正常。</div>
+              {measurements.length > 0 ? <div className="garment-sizing__fields grid grid-cols-3 gap-3">{measurements.map((field) => <Fragment key={field.key}><Field label={field.label}><span className="flex h-12 items-center rounded-btn border-[1.5px] border-line bg-card px-2.5 focus-within:border-mist-deep sm:px-3"><input type="number" min="0" step="0.1" inputMode="decimal" value={form.flatMeasurements[field.key] ?? ''} onChange={(event) => updateForm('flatMeasurements', { ...form.flatMeasurements, [field.key]: event.target.value })} placeholder="選填" className="min-w-0 flex-1 bg-transparent text-right font-num text-lg font-bold outline-none" /><span className="ml-1 font-num text-xs text-ink-2">cm</span></span></Field>{field.key === 'length' && necklineField && <div className="garment-sizing__neckline">{necklineField}</div>}</Fragment>)}{necklineField && !measurements.some((field) => field.key === 'length') && <div className="garment-sizing__neckline">{necklineField}</div>}</div> : <><p className="m-0 text-sm text-ink-2">這個分類暫無建議的平放尺寸欄位。</p>{necklineField}</>}
             </FormSection>
             <FormSection title="顏色" accent="rose" hint="選一個色系作篩選">
               <div className="flex flex-wrap gap-2">{COLORS.map((color) => <button key={color.name} type="button" aria-pressed={form.colorHex === color.hex} onClick={() => { updateForm('colorName', color.name); updateForm('colorHex', color.hex) }} className={`flex min-h-11 items-center gap-2 rounded-full border-[1.5px] px-2.5 text-xs ${form.colorHex === color.hex ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink'}`}><span aria-hidden="true" className="size-6 rounded-full border border-ink/15" style={{ background: color.hex }} />{color.name}</button>)}</div>
-              <details className="border-t border-dashed border-line pt-3"><summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium">自訂色碼與第二色 <span className="ml-2 text-xs font-normal text-ink-3">選填</span></summary><div className="grid gap-3 sm:grid-cols-2"><Field label="主色色碼"><input type="color" value={form.colorHex} onChange={(event) => updateForm('colorHex', event.target.value)} className="h-12 w-full rounded-btn border border-line bg-card p-1" /></Field><Field label="第二色"><input type="color" value={form.secondColorHex || '#FFFFFF'} onChange={(event) => updateForm('secondColorHex', event.target.value)} className="h-12 w-full rounded-btn border border-line bg-card p-1" /></Field></div></details>
+              <details className="border-t border-dashed border-line pt-3"><summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium">自訂色碼與第二色 <span className="ml-2 text-xs font-normal text-ink-3">選填</span></summary><div className="grid gap-3 sm:grid-cols-2"><div className="garment-info__color-field relative z-30"><Field label="主色色碼"><input type="color" value={form.colorHex} onChange={(event) => updateForm('colorHex', event.target.value)} className="h-12 w-full cursor-pointer rounded-btn border border-line bg-card p-1" /></Field></div><div className="garment-info__color-field relative z-30"><Field label="第二色"><input type="color" value={form.secondColorHex || '#FFFFFF'} onChange={(event) => updateForm('secondColorHex', event.target.value)} className="h-12 w-full cursor-pointer rounded-btn border border-line bg-card p-1" /></Field></div></div></details>
             </FormSection>
             <FormSection title="材質" accent="sage" hint="可複選；可補成分比例">
               <div className="flex flex-wrap gap-2">{MATERIALS.map((material) => { const selected = (form.material ?? '').split('、').includes(material); return <Chip key={material} selected={selected} onClick={() => toggleMaterial(material)}>{material}</Chip> })}</div>
@@ -496,7 +506,7 @@ export function AddItemPage() {
 
         {step === 4 && <section className="grid gap-6 md:grid-cols-[260px_minmax(0,1fr)]">
           <PaperCard className="relative space-y-3 p-3"><Tape accent="oat" /><PhotoPreview photo={photos[0]} title="搭配板預覽" /><div><p className="mb-1 font-medium">{form.name}</p><p className="m-0 text-sm text-ink-2">{form.colorName}・{form.brand || '未填品牌'}・{form.size || '未填尺寸'}</p></div><div className="flex flex-wrap gap-1.5"><span className="rounded-full bg-tile px-2.5 py-1 text-xs">{photos.length} 張照片</span><span className="rounded-full bg-sage-soft px-2.5 py-1 text-xs text-sage-ink">{cutoutState === 'done' && useCutout ? '去背圖' : '使用原圖'}</span><span className="rounded-full bg-mist-soft px-2.5 py-1 text-xs text-mist-ink">平放尺寸 {Object.values(form.flatMeasurements).filter(Boolean).length} 項</span></div></PaperCard>
-          <div className="space-y-5"><h1 className="m-0 font-hd text-3xl">要放到哪裡？</h1><div role="radiogroup" aria-label="儲存位置" className="space-y-3"><ChoiceCard selected={destination === 'closet'} accent="sage" title="我的衣櫃（已購買）" description="可以馬上用在今日搭配。" onClick={() => setDestination('closet')} /><ChoiceCard selected={destination === 'wishlist'} accent="rose" title="選購清單（還在考慮）" description="網拍穿搭照和尺寸表一起留著，方便比較。" disabled={!selectedCategory?.slot} onClick={() => setDestination('wishlist')} /></div><div className="space-y-1 rounded-tile bg-card p-4 text-sm text-ink-2"><p className="m-0">搭配板用圖：<b className="font-medium text-ink">{cutoutState === 'done' && useCutout ? '去背圖' : '封面原圖'}</b></p><p className="m-0">平放尺寸：<b className="font-medium text-ink">已填 {Object.values(form.flatMeasurements).filter(Boolean).length} 項</b></p></div><label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={continueAdding} onChange={(event) => setContinueAdding(event.target.checked)} className="size-5 accent-[var(--color-ink)]" />存好後繼續新增下一件</label></div>
+          <div className="space-y-5"><h1 className="m-0 font-hd text-3xl">要放到哪裡？</h1><div role="radiogroup" aria-label="儲存位置與到貨狀態" className="space-y-3"><ChoiceCard selected={destination === 'closet' && closetStatus === 'ok'} accent="sage" title="我的衣櫃（已購買）" description="可以馬上用在今日搭配。" onClick={() => { setDestination('closet'); setClosetStatus('ok') }} /><ChoiceCard selected={destination === 'closet' && closetStatus === 'not_arrived'} accent="mist" title="網購未到貨" description="先放進衣櫃管理；到貨前不會出現在可穿與搭配候選中。" onClick={() => { setDestination('closet'); setClosetStatus('not_arrived') }} /><ChoiceCard selected={destination === 'wishlist'} accent="rose" title="選購清單（還在考慮）" description="網拍穿搭照和尺寸表一起留著，方便比較。" disabled={!selectedCategory?.slot} onClick={() => setDestination('wishlist')} /></div><div className="space-y-1 rounded-tile bg-card p-4 text-sm text-ink-2"><p className="m-0">搭配板用圖：<b className="font-medium text-ink">{cutoutState === 'done' && useCutout ? '去背圖' : '封面原圖'}</b></p><p className="m-0">儲存狀態：<b className="font-medium text-ink">{destination === 'wishlist' ? '選購清單・考慮中' : closetStatus === 'not_arrived' ? '衣櫃・未到貨' : '衣櫃・可穿'}</b></p><p className="m-0">平放尺寸：<b className="font-medium text-ink">已填 {Object.values(form.flatMeasurements).filter(Boolean).length} 項</b></p></div><label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={continueAdding} onChange={(event) => setContinueAdding(event.target.checked)} className="size-5 accent-[var(--color-ink)]" />存好後繼續新增下一件</label></div>
         </section>}
       </div>
 
@@ -506,7 +516,7 @@ export function AddItemPage() {
         {step === 1 && <Button variant="primary" className="ml-auto" disabled={uploading || convertingPhotos || photos.length === 0} onClick={() => void beginMediaStep()}>{convertingPhotos ? 'HEIC 轉檔中…' : uploading ? '照片上傳中…' : '下一步'}<Icon name="next" /></Button>}
         {step === 2 && <Button variant="primary" className="ml-auto" disabled={cutoutState === 'processing'} onClick={() => { if (cutoutState === 'failed' || cutoutState === 'demo') continueWithOriginal(); else setStep(3) }}>下一步<Icon name="next" /></Button>}
         {step === 3 && <Button variant="primary" className="ml-auto" disabled={uploading} type="submit" form="garment-info-form">{uploading ? '儲存草稿中…' : '確認'}<Icon name="next" /></Button>}
-        {step === 4 && <Button variant="oat" className="ml-auto" disabled={saving} onClick={() => void finish()}><Icon name="check" />{saving ? '儲存中…' : destination === 'closet' ? '放進衣櫃' : '加入選購清單'}</Button>}
+        {step === 4 && <Button variant="oat" className="ml-auto" disabled={saving} onClick={() => void finish()}><Icon name="check" />{saving ? '儲存中…' : destination === 'wishlist' ? '加入選購清單' : closetStatus === 'not_arrived' ? '標記為未到貨' : '放進衣櫃'}</Button>}
       </footer>
       {uploading && <div className="fixed inset-0 z-30 flex items-center justify-center bg-scrim p-5"><div className="w-full max-w-md"><ImageUploadProgressState title="正在上傳照片" files={photos.map((photo, index) => ({ id: photo.id, name: photo.file.name, progress: 0, status: index === 0 ? '封面・上傳中' : '上傳中' }))} backgroundNote="照片完成後會保留在私人衣櫃空間。" /></div></div>}
       {saving && <div className="fixed inset-0 z-40 flex items-center justify-center bg-scrim p-5"><div className="w-full max-w-sm">{useCutout && cutoutState !== 'done' ? <CutoutProcessingState /> : <PaperCard aria-busy="true" className="p-6 text-center"><span className="mx-auto mb-3 block size-8 animate-pulse rounded-full bg-sage" /><p className="m-0 font-hd text-xl">正在儲存衣物</p><p className="mb-0 mt-2 text-sm text-ink-2">照片和資料都會一併整理好。</p></PaperCard>}</div></div>}

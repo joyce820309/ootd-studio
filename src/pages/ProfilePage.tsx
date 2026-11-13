@@ -301,6 +301,11 @@ export function ProfilePage() {
           <p className="m-0 max-w-2xl text-[14px] leading-7 text-ink-2 sm:text-[15px]">記下你的尺寸，讓合身比對和搭配建議更貼近你。每一格都可以留白，想到再補就好。</p>
         </div>
 
+        <nav aria-label="個人資料的其他頁面" className="flex flex-wrap gap-2 xl:hidden">
+          <Link to="/me/measurements" className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] border-line-strong bg-card px-4 text-sm text-ink no-underline hover:border-ink-3"><Icon name="calendar" size={16} />量測紀錄<Icon name="next" size={14} className="text-ink-3" /></Link>
+          <Link to="/me/brands" className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] border-line-strong bg-card px-4 text-sm text-ink no-underline hover:border-ink-3"><Icon name="closet" size={16} />品牌管理<Icon name="next" size={14} className="text-ink-3" /></Link>
+        </nav>
+
         {error && <div role="alert"><PageState icon="alert" tone="rose" compact title="尺寸筆記暫時載入失敗" description={`${error} 目前仍可編輯示範欄位。`} action={<Button onClick={() => window.location.reload()} variant="secondary">重新載入</Button>} /></div>}
 
         <section aria-label="量測完成度" className="flex items-center gap-3 rounded-tile bg-sage-soft px-4 py-3">

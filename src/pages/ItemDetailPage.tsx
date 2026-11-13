@@ -3,14 +3,16 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ItemImage } from '@/components/closet/ItemImage'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Chip, StatusTag } from '@/components/ui/Chip'
+import { Combobox } from '@/components/ui/Combobox'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { DestructiveActionDialog } from '@/components/ui/B10States'
 import { Icon } from '@/components/ui/Icon'
 import { LoadingState, PageState } from '@/components/ui/PageState'
 import { PaperCard, TiltLabel } from '@/components/ui/Paper'
+import { Select } from '@/components/ui/Select'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
-import { addClosetItemPhotos, deleteClosetItem, fetchCategories, fetchClosetItemDetail, recordClosetItemWear, removeClosetItemPhoto, removeItemBackground, setClosetPhotoCover, updateClosetItem, updateClosetItemStatus } from '@/lib/data'
-import { STATUS_LABEL } from '@/lib/slots'
+import { addClosetItemPhotos, deleteClosetItem, fetchCategories, fetchClosetBrands, fetchClosetItemDetail, recordClosetItemWear, removeClosetItemPhoto, removeItemBackground, setClosetPhotoCover, updateClosetItem, updateClosetItemStatus } from '@/lib/data'
+import { isWearable, STATUS_LABEL } from '@/lib/slots'
 import type { Category, ClosetItem, ItemStatus } from '@/types'
 
 const SEASONS = ['春', '夏', '秋', '冬']
@@ -21,7 +23,7 @@ const MEASURE_LABELS: Record<string, string> = {
 }
 const INPUT = 'h-11 w-full rounded-btn border-[1.5px] border-line bg-paper px-3 text-sm text-ink outline-none focus:border-mist-deep'
 
-type EditableFields = Pick<ClosetItem, 'name' | 'categoryId' | 'colorName' | 'colorHex' | 'secondColorHex' | 'brand' | 'size' | 'fit' | 'material' | 'materialComposition' | 'seasons' | 'occasions' | 'purchaseDate' | 'purchasePrice' | 'store' | 'productUrl' | 'note' | 'flatMeasurements'>
+type EditableFields = Pick<ClosetItem, 'name' | 'categoryId' | 'colorName' | 'colorHex' | 'secondColorHex' | 'brand' | 'size' | 'necklineSize' | 'fit' | 'material' | 'materialComposition' | 'seasons' | 'occasions' | 'purchaseDate' | 'purchasePrice' | 'store' | 'productUrl' | 'note' | 'flatMeasurements'>
 
 function editableFields(item: ClosetItem): EditableFields {
   return {
@@ -32,6 +34,7 @@ function editableFields(item: ClosetItem): EditableFields {
     secondColorHex: item.secondColorHex ?? '',
     brand: item.brand ?? '',
     size: item.size ?? '',
+    necklineSize: item.necklineSize ?? undefined,
     fit: item.fit ?? '',
     material: item.material ?? '',
     materialComposition: item.materialComposition ?? '',
@@ -60,6 +63,7 @@ export function ItemDetailPage() {
   const navigate = useNavigate()
   const [item, setItem] = useState<ClosetItem | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
+  const [brandSuggestions, setBrandSuggestions] = useState<string[]>([])
   const [form, setForm] = useState<EditableFields | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -76,9 +80,10 @@ export function ItemDetailPage() {
   const reload = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true)
     try {
-      const [nextItem, nextCategories] = await Promise.all([fetchClosetItemDetail(id), fetchCategories()])
+      const [nextItem, nextCategories, nextBrands] = await Promise.all([fetchClosetItemDetail(id), fetchCategories(), fetchClosetBrands().catch(() => [])])
       setItem(nextItem)
       setCategories(nextCategories)
+      setBrandSuggestions(nextBrands)
       setForm(nextItem ? editableFields(nextItem) : null)
       setError(null)
     } catch (cause) {
@@ -252,7 +257,7 @@ export function ItemDetailPage() {
         </section>
 
         <section className="closet-item-detail__content min-w-0 space-y-5">
-          <div className="closet-item-detail__heading flex items-start gap-3"><div className="mr-auto min-w-0"><TiltLabel accent="mist">{category?.name ?? item.categoryName ?? '衣物'}</TiltLabel><h1 id="closet-item-title" className="mb-1 mt-3 break-words font-hd text-3xl text-ink sm:text-[34px]">{item.name}</h1><p className="m-0 text-sm text-ink-2">{item.colorName}{item.brand ? `・${item.brand}` : ''}{item.size ? `・${item.size}` : ''}</p></div><div className="flex items-center gap-1"><StatusTag status={item.status} /><button type="button" aria-label="切換常穿收藏" aria-pressed={item.isFavorite} onClick={async () => { try { await updateClosetItem(item.id, { isFavorite: !item.isFavorite }); await reload() } catch (cause) { setToast({ tone: 'error', text: cause instanceof Error ? cause.message : '收藏狀態更新失敗。' }) } }} className={`flex size-11 items-center justify-center rounded-btn ${item.isFavorite ? 'text-rose-deep' : 'text-ink-3'}`}><Icon name="wish" /></button></div></div>
+          <div className="closet-item-detail__heading flex items-start gap-3"><div className="mr-auto min-w-0"><TiltLabel accent="mist">{category?.name ?? item.categoryName ?? '衣物'}</TiltLabel><h1 id="closet-item-title" className="mb-1 mt-3 break-words font-hd text-3xl text-ink sm:text-[34px]">{item.name}</h1><p className="m-0 text-sm text-ink-2">{item.colorName}{item.brand ? `・${item.brand}` : ''}{item.size ? `・${item.size}` : ''}</p></div><div className="closet-item-detail__status-actions flex shrink-0 items-center gap-1"><StatusTag status={item.status} className="closet-item-detail__status" /><button type="button" aria-label="切換常穿收藏" aria-pressed={item.isFavorite} onClick={async () => { try { await updateClosetItem(item.id, { isFavorite: !item.isFavorite }); await reload() } catch (cause) { setToast({ tone: 'error', text: cause instanceof Error ? cause.message : '收藏狀態更新失敗。' }) } }} className={`closet-item-detail__favorite flex size-11 items-center justify-center rounded-btn ${item.isFavorite ? 'text-rose-deep' : 'text-ink-3'}`}><Icon name="wish" /></button></div></div>
 
           <PaperCard className="closet-item-detail__wear-stats grid grid-cols-3 divide-x divide-dashed divide-line p-4 text-center">
             <div><p className="m-0 font-num text-2xl font-bold">{item.wearCount ?? 0}</p><p className="mb-0 mt-1 text-xs text-ink-2">穿著次數</p></div>
@@ -264,10 +269,11 @@ export function ItemDetailPage() {
             <PaperCard className="space-y-4 p-4 sm:p-5">
               <h2 className="m-0 font-hd text-xl">衣物資料</h2>
               <label className="flex flex-col gap-1.5 text-[13px]">品名<input required value={form?.name ?? ''} onChange={(event) => updateForm('name', event.target.value)} className={INPUT} /></label>
-              <label className="flex flex-col gap-1.5 text-[13px]">分類<select value={form?.categoryId ?? ''} onChange={(event) => updateForm('categoryId', event.target.value)} className={INPUT}>{categories.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}</select></label>
+              <div className="flex flex-col gap-1.5 text-[13px]"><span aria-hidden="true">分類</span><Select label="分類" value={form?.categoryId ?? ''} options={categories.map((entry) => ({ value: entry.id, label: entry.name }))} onChange={(value) => updateForm('categoryId', value)} placeholder="選擇分類" triggerClassName="h-11 w-full rounded-btn border-[1.5px] border-line bg-paper px-3 text-sm text-ink" /></div>
               <div className="grid grid-cols-2 gap-3"><label className="flex flex-col gap-1.5 text-[13px]">色系<input value={form?.colorName ?? ''} onChange={(event) => updateForm('colorName', event.target.value)} className={INPUT} /></label><label className="flex flex-col gap-1.5 text-[13px]">主色<input type="color" value={form?.colorHex ?? item.colorHex} onChange={(event) => updateForm('colorHex', event.target.value)} className="h-11 w-full rounded-btn border border-line bg-card p-1" /></label></div>
               <div className="closet-item-detail__second-color space-y-1.5"><span className="text-[13px]">第二色（選填）</span><div className="flex items-center gap-2"><input aria-label="第二色" type="color" value={form?.secondColorHex || '#FFFFFF'} onChange={(event) => updateForm('secondColorHex', event.target.value)} className="h-11 min-w-0 flex-1 rounded-btn border border-line bg-card p-1" /><span className="shrink-0 text-xs text-ink-3">{form?.secondColorHex ? '已設定' : '未設定'}</span><Button type="button" variant="ghost" aria-label="清除第二色" onClick={() => updateForm('secondColorHex', '')}>清除</Button></div></div>
-              <div className="grid grid-cols-2 gap-3"><label className="flex flex-col gap-1.5 text-[13px]">品牌<input value={form?.brand ?? ''} onChange={(event) => updateForm('brand', event.target.value)} className={INPUT} /></label><label className="flex flex-col gap-1.5 text-[13px]">標籤尺寸<input value={form?.size ?? ''} onChange={(event) => updateForm('size', event.target.value)} className={INPUT} /></label></div>
+              <div className="grid grid-cols-2 gap-3"><div className="flex min-w-0 flex-col gap-1.5 text-[13px]"><span aria-hidden="true">品牌</span><Combobox label="品牌" value={form?.brand ?? ''} options={brandSuggestions} onChange={(value) => updateForm('brand', value)} /></div><label className="flex flex-col gap-1.5 text-[13px]">標籤尺寸<input value={form?.size ?? ''} onChange={(event) => updateForm('size', event.target.value)} className={INPUT} /></label></div>
+              {categories.find((entry) => entry.id === form?.categoryId)?.slot === 'top' && <label className="flex flex-col gap-1.5 text-[13px]">領口尺寸（cm・選填）<input type="number" min="0" step="0.1" value={form?.necklineSize ?? ''} onChange={(event) => updateForm('necklineSize', event.target.value === '' ? undefined : Number(event.target.value))} className={INPUT} /></label>}
               <div className="grid grid-cols-2 gap-3"><label className="flex flex-col gap-1.5 text-[13px]">版型<input value={form?.fit ?? ''} onChange={(event) => updateForm('fit', event.target.value)} className={INPUT} /></label><label className="flex flex-col gap-1.5 text-[13px]">材質<input value={form?.material ?? ''} onChange={(event) => updateForm('material', event.target.value)} className={INPUT} /></label></div>
               <div className="space-y-2"><span className="text-[13px]">季節</span><div className="flex flex-wrap gap-2">{SEASONS.map((season) => <Chip key={season} selected={form?.seasons?.includes(season)} onClick={() => updateForm('seasons', (form?.seasons ?? []).includes(season) ? form!.seasons!.filter((value) => value !== season) : [...(form?.seasons ?? []), season])}>{season}</Chip>)}</div></div>
               <label className="flex flex-col gap-1.5 text-[13px]">場合<input value={form?.occasions?.join('、') ?? ''} onChange={(event) => updateForm('occasions', event.target.value.split('、').map((value) => value.trim()).filter(Boolean))} placeholder="例如：上班、週末、旅行" className={INPUT} /></label>
@@ -280,8 +286,8 @@ export function ItemDetailPage() {
             </PaperCard>
               <div className="hidden justify-end gap-2 md:flex"><Button variant="secondary" onClick={() => { setForm(editableFields(item)); setEditing(false) }}>取消</Button><Button type="submit" variant="primary" disabled={saving}>{saving ? '儲存中…' : '儲存修改'}</Button></div>
           </form> : <>
-            <div className="flex flex-wrap gap-2"><Button variant="secondary" onClick={() => { setForm(editableFields(item)); setEditing(true) }}><Icon name="reset" size={17} />編輯</Button><Button variant="secondary" onClick={() => void markWorn()}><Icon name="check" size={17} />記錄今天穿了</Button><details className="relative"><summary className="flex h-11 cursor-pointer list-none items-center gap-2 rounded-btn border-[1.5px] border-line-strong bg-card px-4 text-sm text-ink [&::-webkit-details-marker]:hidden"><Icon name="closet" size={17} />變更狀態</summary><div className="absolute left-0 top-full z-10 mt-2 min-w-40 rounded-card bg-card p-2 shadow-float">{(['ok', 'cleaning', 'repair', 'lent', 'stored'] as ItemStatus[]).map((status) => <button key={status} type="button" onClick={() => void changeStatus(status)} className="flex min-h-11 w-full items-center rounded-sm px-3 text-left text-sm hover:bg-paper">{STATUS_LABEL[status]}</button>)}</div></details><Button variant="ghost" onClick={() => setConfirmAction('archive')}><Icon name="closet" size={17} />封存</Button></div>
-            <PaperCard className="closet-item-detail__information space-y-3 p-4"><h2 className="m-0 font-hd text-xl">衣物資訊</h2><InfoRow label="顏色" value={item.colorName} color={item.colorHex} /><InfoRow label="品牌" value={item.brand} /><InfoRow label="標籤尺寸" value={item.size} /><InfoRow label="版型" value={item.fit} /><InfoRow label="材質" value={item.material} /><InfoRow label="成分" value={item.materialComposition} /><InfoRow label="季節" value={item.seasons?.join('、')} /><InfoRow label="場合" value={item.occasions?.join('、')} /><InfoRow label="購買日期" value={item.purchaseDate ? formatDate(item.purchaseDate) : undefined} /><InfoRow label="購買價格" value={item.purchasePrice == null ? undefined : formatPrice(item.purchasePrice)} /><InfoRow label="購買通路" value={item.store} /><InfoRow label="商品網址" value={item.productUrl} href={item.productUrl} /></PaperCard>
+            <div className="flex flex-wrap gap-2"><Button variant="secondary" onClick={() => { setForm(editableFields(item)); setEditing(true) }}><Icon name="reset" size={17} />編輯</Button><Button variant="secondary" onClick={() => void markWorn()} disabled={!isWearable(item.status)}><Icon name="check" size={17} />記錄今天穿了</Button><details className="relative"><summary className="flex h-11 cursor-pointer list-none items-center gap-2 rounded-btn border-[1.5px] border-line-strong bg-card px-4 text-sm text-ink [&::-webkit-details-marker]:hidden"><Icon name="closet" size={17} />變更狀態</summary><div className="absolute left-0 top-full z-10 mt-2 min-w-40 rounded-card bg-card p-2 shadow-float">{(['ok', 'not_arrived', 'cleaning', 'repair', 'lent', 'stored'] as ItemStatus[]).map((status) => <button key={status} type="button" onClick={() => void changeStatus(status)} className="flex min-h-11 w-full items-center rounded-sm px-3 text-left text-sm hover:bg-paper">{STATUS_LABEL[status]}</button>)}</div></details><Button variant="ghost" onClick={() => setConfirmAction('archive')}><Icon name="closet" size={17} />封存</Button></div>
+            <PaperCard className="closet-item-detail__information space-y-3 p-4"><h2 className="m-0 font-hd text-xl">衣物資訊</h2><InfoRow label="顏色" value={item.colorName} color={item.colorHex} /><InfoRow label="品牌" value={item.brand} /><InfoRow label="標籤尺寸" value={item.size} />{item.categorySlot === 'top' && <InfoRow label="領口尺寸" value={item.necklineSize == null ? undefined : `${item.necklineSize} cm`} />}<InfoRow label="版型" value={item.fit} /><InfoRow label="材質" value={item.material} /><InfoRow label="成分" value={item.materialComposition} /><InfoRow label="季節" value={item.seasons?.join('、')} /><InfoRow label="場合" value={item.occasions?.join('、')} /><InfoRow label="購買日期" value={item.purchaseDate ? formatDate(item.purchaseDate) : undefined} /><InfoRow label="購買價格" value={item.purchasePrice == null ? undefined : formatPrice(item.purchasePrice)} /><InfoRow label="購買通路" value={item.store} /><InfoRow label="商品網址" value={item.productUrl} href={item.productUrl} /></PaperCard>
             {Object.keys(item.flatMeasurements ?? {}).length > 0 && <PaperCard className="space-y-3 p-4"><div className="flex items-center justify-between"><h2 className="m-0 font-hd text-xl">平放尺寸</h2><Button variant="ghost" className="h-9 px-2 text-xs" onClick={() => { setForm(editableFields(item)); setEditing(true) }}>編輯尺寸</Button></div><p className="m-0 text-xs text-ink-2">單位 cm・平放測量，不拉扯布料</p><div className="grid grid-cols-2 gap-x-4">{Object.entries(item.flatMeasurements ?? {}).map(([key, value]) => <InfoRow key={key} label={MEASURE_LABELS[key] ?? key} value={value == null ? undefined : `${value} cm`} />)}</div></PaperCard>}
             <PaperCard className="closet-item-detail__notes space-y-2 p-4"><h2 className="m-0 font-hd text-xl">我的筆記</h2><p className={`m-0 whitespace-pre-wrap ${item.note ? 'font-hd text-lg leading-8 text-ink-2' : 'font-sans text-xs leading-5 text-ink-3'}`}>{item.note || '還沒有筆記，編輯衣物即可新增。'}</p></PaperCard>
             <section className="closet-item-detail__pairings space-y-5"><h2 className="closet-item-detail__pairings-title m-0 ml-3 font-hd text-xl">常一起穿的</h2><PaperCard className="closet-item-detail__pairings-card p-4 text-sm leading-6 text-ink-2">穿搭日記尚未啟用，記錄穿著後就能整理常搭單品。</PaperCard></section>

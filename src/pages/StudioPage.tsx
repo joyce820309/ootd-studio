@@ -28,7 +28,7 @@ const FILTERS: { id: Filter; label: string; slots?: Slot[]; dot?: string }[] = [
   { id: 'outer', label: '外套', slots: ['outer'], dot: 'bg-mist' },
   { id: 'shoes', label: '鞋包', slots: ['shoes', 'bag', 'acc'], dot: 'bg-rose' },
 ]
-const STATUS: Record<ClosetItem['status'], string> = { ok: '可穿', cleaning: '送洗中', repair: '維修中', lent: '借出', stored: '收納中', retired: '已淘汰' }
+const STATUS: Record<ClosetItem['status'], string> = { ok: '可穿', not_arrived: '未到貨', cleaning: '送洗中', repair: '維修中', lent: '借出', stored: '收納中', retired: '已淘汰' }
 
 function defaultDraft(): StudioDraft {
   return { name: '今天想穿什麼？', paper: 'apricot', pieces: [] }

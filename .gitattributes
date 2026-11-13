@@ -1,0 +1,2 @@
+# 上游 Modern Web Guidance 範例含 Markdown／程式碼區塊尾端空白，保留原始內容。
+.agents/skills/modern-web-guidance/guides/** whitespace=-trailing-space

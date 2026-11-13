@@ -50,16 +50,17 @@ src/
     freeLayout.ts        自由擺放：預設位置、範圍限制、圖層操作
     diary.ts             日記場合／天氣／感受文字、月曆格、月統計、今日搭配↔日記（再穿一次、今天排好的單品）
     wishlist.ts          選購狀態文字、價格格式、網址推測店家、衣櫃可搭件數／重複度估算
+    brands.ts            品牌：相似品牌偵測（可能重複）、排序、日期格式
   data/sample.ts         示範資料（繁中）
   components/
-    ui/                  Button、Chip/StatusTag、Icon、Paper（PaperCard、TiltLabel、Tape、WashBlob、LogoSticker）、Toast
-    layout/              AppHeader、MobileTabBar、AppLayout、PageStub
+    ui/                  Button、Chip/StatusTag、Icon、Select、Combobox、DatePicker、Paper（PaperCard、TiltLabel、Tape、WashBlob、LogoSticker）、Toast
+    layout/              AppHeader、MobileTabBar、AppLayout、PageStub、ProfileNav（`/me` 底下共用外框 ProfileLayout：xl 以上左側子導覽，以下用 ProfileBreadcrumb 麵包屑）
     closet/              GarmentArt（示範剪影）、ItemImage、ItemTile
     outfit/              OutfitBoard（固定板型）、SlotPicker、FreeCanvas（自由擺放）
     diary/               DiaryParts（評分、場合／感受標籤、月曆小拼貼）、DiaryEntryDialog（記一筆／編輯）
     wishlist/            WishlistTabs、WishlistForm（新增／編輯）、BoughtDialog（移至已購買）、CompareGroupDialog
-  pages/                 Landing、Login、Home、Closet、AddItem、ItemDetail、Outfit、Studio、Wishlist、Compare、Diary、Profile、MeasurementHistory
-supabase/migrations/     0001_init.sql … 0007_outfit_diary.sql（依序執行）
+  pages/                 Landing、Login、Home、Closet、AddItem、ItemDetail、Outfit、Studio、Wishlist、Compare、Diary、Profile、MeasurementHistory、Brands
+supabase/migrations/     0001_init.sql … 0011_brands.sql（依序執行）
 ```
 
 ## 路由與進度
@@ -81,6 +82,7 @@ supabase/migrations/     0001_init.sql … 0007_outfit_diary.sql（依序執行�
 | `/me` | 個人資料・新增量測（儲存為新快照） | 完成 → B-Body |
 | `/me/measurements` | 量測紀錄・依日期／對照表（`?view=table`） | 完成 → B-History、B-History-Table、B-M-History |
 | `/me/measurements/:id` | 單次紀錄（手機獨立頁；桌面在列表右側） | 完成 → B-M-History-Detail |
+| `/me/brands` | 品牌管理（新增／改名／合併／刪除＋10 秒復原、可能重複提示；`/me` 頁首有入口） | 完成 → B-Brands、B-M-Brands-* |
 
 新頁面一律拆成獨立檔案 `src/pages/XxxPage.tsx`，並對照設計稿同名畫面（含手機版 B-M-*）；尚未實作的頁面可用 `components/layout/PageStub` 暫代。
 
@@ -130,6 +132,7 @@ supabase/migrations/     0001_init.sql … 0007_outfit_diary.sql（依序執行�
 ### 元件慣例
 - 日期欄位一律用 `components/ui/DatePicker`（值為 `'YYYY-MM-DD'` 字串），**不要用原生 `<input type="date">`**；日期工具在 `src/lib/date.ts`，設計規格見 `design/B-DatePicker.dc.html`。
 - 優先用 `components/ui` 的現有元件：`Button`（primary / oat / secondary / ghost / danger / sage）、`DatePicker`、`Chip`、`StatusTag`、`PaperCard`、`TiltLabel`、`Tape`、`WashBlob`、`Icon`、`Toast`。
+- 下拉選單**不要用原生 `<select>`／`<datalist>`**：固定選項用 `components/ui/Select`（桌面浮動清單、手機底部清單，可用 `display`／`triggerClassName` 自訂按鈕外觀）；可打字建立新值的用 `Combobox`。樣式依 `design/general/B-Combobox.dc.html`。
 - Header：紙色背景＋燕麥色貼紙 Logo，目前頁面用燕麥色底線標示。
 - 圓角 token：`rounded-tag`(3) `sm`(8) `btn`(10) `tile`(12) `card`(14) `block`(20)。
 - 陰影 token：`shadow-paper`、`sticker`、`float`、`sheet`、`oat`；衣物圖用 `drop-shadow-garment`。
@@ -145,7 +148,8 @@ supabase/migrations/     0001_init.sql … 0007_outfit_diary.sql（依序執行�
 ## Supabase
 
 - 體態量測：`/me` 每次儲存都新增一筆 `body_measurements`「當天完整快照」，以最近一筆預填，不覆蓋舊紀錄；編輯歷史紀錄則更新指定快照。歷史頁用相鄰兩筆比較：不同→燕麥底顯示差值、上一筆沒有→霧藍「第一次記」、相同→「—」。只列數字，**不畫趨勢圖、不用紅綠色評價增減**。欄位 migration 已整併至 `0005_split_body_circumferences.sql`：上胸圍／下胸圍、肚臍圍，以及五指襪／一般襪／裸腳各自的腳長／腳寬／前掌圍／腳背圍。
-- 資料表：`profiles`、`categories`、`items`、`item_photos`、`wishlist_items`、`compare_groups`、`outfits`、`outfit_items`、`body_measurements`。
+- 資料表：`profiles`、`categories`、`items`、`item_photos`、`wishlist_items`、`compare_groups`、`outfits`、`outfit_items`、`body_measurements`、`brands`、`brand_distinct_groups`。
+- 品牌名稱仍存在 `items.brand`／`wishlist_items.brand` 文字欄位；`brands` 只放手動新增的品牌，`brand_distinct_groups` 記「不是同一個」。改名、合併、刪除一律走 `replace_brands` RPC（衣物與選購一起更新），復原用 `restore_brand`。
 - 每張表都有 `owner_id default auth.uid()` 並啟用 RLS，只有本人能讀寫。新增資料表時照同樣模式。
 - 新使用者註冊時由 `handle_new_user` trigger 建立 profile 與預設分類；分類不要寫死在 UI。
 - 圖片放私人 bucket `closet-images`，路徑第一層必須是使用者 id：`{uid}/...`；衣物原圖為 `{uid}/{item_id}/original.ext`，多圖索引在 `item_photos`，讀取用 signed URL。未完成新增會以 `items.is_draft = true` 隱藏。
@@ -183,6 +187,8 @@ supabase/migrations/     0001_init.sql … 0007_outfit_diary.sql（依序執行�
 | B12 | 穿搭日記・月曆 | `B-Diary.dc.html` | 1440 | `/diary` |
 | B12.1 | 穿搭日記・列表與篩選 | `B-Diary-List.dc.html` | 1440 | `/diary?view=list` |
 | B12.2 | 穿搭日記・記一筆 | `B-Diary-New.dc.html` | 1440 | `/diary/new`（對話框） |
+| B13 | 元件：可輸入的下拉選單（品牌） | `B-Combobox.dc.html` | 1440 | `components/ui/Combobox` |
+| B14 | 品牌管理 | `B-Brands.dc.html` | 1440 | `/me/brands` |
 | BM0 | 手機 Landing | `B-M-Landing.dc.html` | 390 | `/` |
 | BM0.1 | 手機登入 | `B-M-Login.dc.html` | 390 | `/login` |
 | BM1 | 手機首頁 | `B-M-Home.dc.html` | 390 | `/home` |
@@ -199,7 +205,11 @@ supabase/migrations/     0001_init.sql … 0007_outfit_diary.sql（依序執行�
 | BM8.1 | 手機去背（可略過） | `B-M-Add-Cutout.dc.html` | 390 | `/closet/new`（第 2 步） |
 | BM8.2 | 手機衣物資料 | `B-M-Add-Info.dc.html` | 390 | `/closet/new`（第 3 步） |
 | BM8.3 | 手機放到哪裡 | `B-M-Add-Done.dc.html` | 390 | `/closet/new`（第 4 步） |
+| BM9 | 手機品牌選擇 | `B-M-Combobox.dc.html` | 390 | `components/ui/Combobox`（手機版） |
+| BM10 | 手機品牌管理 | `B-M-Brands.dc.html` | 390 | `/me/brands` |
+| BM10.1 | 品牌動作・改名 | `B-M-Brands-Actions.dc.html` | 390 | `/me/brands`（底部面板） |
+| BM10.2 | 合併品牌 | `B-M-Brands-Merge.dc.html` | 390 | `/me/brands`（底部面板） |
+| BM10.3 | 刪除品牌・復原 | `B-M-Brands-Delete.dc.html` | 390 | `/me/brands`（底部面板） |
 
 
-
-沒有手機版設計稿的頁面（衣櫃、衣物詳細、新增衣物、選購清單、個人資料），比照 BM1–BM6 的版面規則自行延伸：單欄排列、底部固定主要按鈕、選擇類操作改用 bottom sheet。
+沒有手機版設計稿的頁面（衣櫃、衣物詳細、新增衣物、選購清單、個人資料），比照 BM 開頭的版面規則自行延伸：單欄排列、底部固定主要按鈕、選擇類操作改用 bottom sheet。

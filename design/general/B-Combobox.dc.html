@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>可輸入的下拉選單（風格 B）</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.lbl{display:inline-flex;align-items:center;height:34px;padding:0 14px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.st{display:flex;flex-direction:column;gap:10px;min-width:0}
+.st-h{display:flex;align-items:baseline;gap:8px;font-size:14px;font-weight:700}
+.st-h b{font:700 12px Nunito;color:#74624F}
+.fr{position:relative;height:470px;padding:22px 24px;border-radius:16px;background:#FBF4E8;border:1.5px dashed #D9C7AC;display:flex;flex-direction:column;gap:6px}
+.cap{margin:0;font-size:12px;line-height:1.7;color:#5A4A3C}
+.fl{font-size:13px;font-weight:500}
+.fl small{font-size:12px;font-weight:400;color:#74624F;margin-left:6px}
+.box{display:flex;align-items:center;gap:8px;height:48px;padding:0 6px 0 14px;border-radius:12px;border:1.5px solid #D9C7AC;background:#FFFCF6;font-size:15px;color:#3B2F25}
+.box .ph{color:#74624F}
+.box .caret{margin-left:auto;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#74624F}
+.box .clr{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#5A4A3C}
+.pop{margin-top:6px;border-radius:14px;background:#FFFCF6;box-shadow:0 14px 30px -10px rgba(59,47,37,.45);padding:6px;display:flex;flex-direction:column}
+.grp{padding:8px 10px 4px;font-size:11px;color:#74624F}
+.opt{display:flex;align-items:center;gap:10px;min-height:42px;padding:0 10px;border-radius:9px;font-size:14px}
+.opt .cnt{margin-left:auto;font:600 12px Nunito,'Chiron GoRound TC';color:#74624F}
+.opt.act{background:#F6E7C6}
+.opt.sel .ck{color:#3B2F25}
+.ck{width:18px;color:transparent}
+mark{background:rgba(240,196,118,.6);color:inherit;border-radius:3px;padding:0 1px}
+.new{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 10px;border-radius:9px;border-top:1.5px dashed #EADCC6;margin-top:4px;font-size:14px;color:#3E6270;font-weight:500}
+.foot{display:flex;align-items:center;justify-content:space-between;padding:8px 10px 4px;border-top:1.5px dashed #EADCC6;margin-top:4px;font-size:11px;color:#74624F}
+.foot a{color:#3E6270;font-size:12px;font-weight:500}
+.spec{padding:20px 22px;border-radius:16px;background:#FFFCF6;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -16px rgba(59,47,37,.22);display:flex;flex-direction:column;gap:10px}
+.spec-r{display:grid;grid-template-columns:76px 1fr;gap:10px;font-size:12px;line-height:1.65}
+.spec-r span:first-child{color:#74624F}
+kbd{display:inline-flex;align-items:center;height:20px;padding:0 6px;border-radius:5px;border:1.5px solid #D9C7AC;border-bottom-width:2.5px;background:#FBF4E8;font:600 11px Nunito,'Chiron GoRound TC',sans-serif;color:#3B2F25}
+code{font-family:Nunito,monospace;font-size:12px;background:#F3E7D4;padding:1px 6px;border-radius:5px}
+</style>
+</helmet>
+<div style="width:1440px;min-height:1720px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;padding:64px 96px;display:flex;flex-direction:column;gap:36px">
+  <header style="display:flex;flex-direction:column;gap:12px;max-width:900px">
+    <span class="lbl" style="align-self:flex-start;background:rgba(150,186,198,.8);transform:rotate(-1.5deg)">元件</span>
+    <h1 class="hd" style="margin:0;font-size:36px">可輸入的下拉選單 Combobox</h1>
+    <p style="margin:0;font-size:15px;line-height:1.8;color:#5A4A3C">從清單挑，或直接打字建立新的。第一個用在「品牌」：選項來自衣櫃和選購清單裡出現過的所有品牌，依使用次數排序。同一個元件之後也能用在購買通路、材質、場合標籤。</p>
+  </header>
+
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 31px">
+
+    <!-- 01 -->
+    <div class="st">
+      <div class="st-h"><b>01</b>收合：未填／已選</div>
+      <div class="fr" style="gap:18px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span class="fl">品牌<small>選填</small></span>
+          <div class="box"><span class="ph">選擇或輸入品牌</span><span class="caret"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M6 9l6 6 6-6"></path></svg></span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span class="fl">品牌<small>已選</small></span>
+          <div class="box"><span>COS</span><span class="clr" style="margin-left:auto" aria-label="清除"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"></path></svg></span><span class="caret" style="margin-left:0"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M6 9l6 6 6-6"></path></svg></span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span class="fl">品牌<small>剛建立的新品牌</small></span>
+          <div class="box"><span>Lemaire</span><span style="font-size:11px;padding:2px 8px;border-radius:999px;background:#DCE8EC;color:#24424D">新</span><span class="clr" style="margin-left:auto"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"></path></svg></span><span class="caret" style="margin-left:0"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M6 9l6 6 6-6"></path></svg></span></div>
+          <span style="font-size:12px;color:#5A4A3C">存檔後才會真的加入品牌清單；取消就不會留下。</span>
+        </div>
+      </div>
+      <p class="cap">整個欄位都可以打字；右邊箭頭打開完整清單。已選時多一顆 ✕ 可以清除。</p>
+    </div>
+
+    <!-- 02 -->
+    <div class="st">
+      <div class="st-h"><b>02</b>展開：常用＋全部</div>
+      <div class="fr">
+        <span class="fl">品牌</span>
+        <div class="box" style="border-color:#3E6270"><span class="ph">選擇或輸入品牌</span><span style="width:1.5px;height:20px;background:#3B2F25;margin-left:-6px"></span><span class="caret"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M6 15l6-6 6 6"></path></svg></span></div>
+        <div class="pop" role="listbox" aria-label="品牌">
+          <span class="grp">最常用</span>
+          <sc-for list="{{top}}" as="o" hint-placeholder-count="3"><div class="opt {{o.cls}}" role="option" aria-selected="{{o.sel}}"><svg class="ic ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>{{o.t}}<span class="cnt">{{o.n}} 件</span></div></sc-for>
+          <span class="grp" style="border-top:1.5px dashed #EADCC6;margin-top:4px">全部（A–Z）</span>
+          <sc-for list="{{rest}}" as="o" hint-placeholder-count="3"><div class="opt" role="option" aria-selected="false"><svg class="ic ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>{{o.t}}<span class="cnt">{{o.n}} 件</span></div></sc-for>
+          <div class="foot"><span>共 <span class="num">14</span> 個品牌・可上下捲動</span><a href="B-Brands.dc.html">管理品牌</a></div>
+        </div>
+      </div>
+      <p class="cap">件數＝衣櫃＋選購清單裡用到這個品牌的數量。鍵盤移到的那一列是燕麥底；目前選中的有 ✓。</p>
+    </div>
+
+    <!-- 03 -->
+    <div class="st">
+      <div class="st-h"><b>03</b>打字篩選＋建立新品牌</div>
+      <div class="fr">
+        <span class="fl">品牌</span>
+        <div class="box" style="border-color:#3E6270"><span>le</span><span style="width:1.5px;height:20px;background:#3B2F25;margin-left:-7px"></span><span class="clr" style="margin-left:auto"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"></path></svg></span><span class="caret" style="margin-left:0"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M6 15l6-6 6 6"></path></svg></span></div>
+        <div class="pop" role="listbox" aria-label="品牌">
+          <div class="opt act" role="option" aria-selected="false"><svg class="ic ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg><span><mark>Le</mark>vi's</span><span class="cnt">4 件</span></div>
+          <div class="opt" role="option" aria-selected="false"><svg class="ic ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg><span>Ho<mark>le</mark>proof</span><span class="cnt">1 件</span></div>
+          <div class="new" role="option" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"></path></svg>建立新品牌「le」</div>
+        </div>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px">
+          <span class="fl">品牌<small>打完整名稱後</small></span>
+          <div class="box" style="border-color:#3E6270"><span>Lemaire</span><span class="caret"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M6 15l6-6 6 6"></path></svg></span></div>
+          <div class="pop" role="listbox" aria-label="品牌" style="margin-top:0">
+            <div style="padding:10px 10px 6px;font-size:12px;color:#5A4A3C">沒有符合的品牌</div>
+            <div class="new act" role="option" aria-selected="false" style="border-top:0;margin-top:0;background:#F6E7C6;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"></path></svg>建立新品牌「Lemaire」<kbd style="margin-left:auto">Enter</kbd></div>
+          </div>
+        </div>
+      </div>
+      <p class="cap">比對時忽略大小寫、全形半形和前後空白；符合的字用燕麥色標出。完全一樣的名稱不會出現「建立」。</p>
+    </div>
+
+    <!-- 04 -->
+    <div class="st">
+      <div class="st-h"><b>04</b>可能打錯字</div>
+      <div class="fr">
+        <span class="fl">品牌</span>
+        <div class="box" style="border-color:#3E6270"><span>COSS</span><span class="caret"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M6 15l6-6 6 6"></path></svg></span></div>
+        <div class="pop" role="listbox" aria-label="品牌">
+          <div style="display:flex;gap:8px;align-items:flex-start;margin:4px;padding:10px 12px;border-radius:10px;background:#DCE8EC;color:#24424D;font-size:12px;line-height:1.6"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;margin-top:2px"><path d="M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM12 11v5M12 8h.01"></path></svg><span>你是不是要找已經有的品牌？</span></div>
+          <div class="opt act" role="option" aria-selected="false"><svg class="ic ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>COS<span style="font-size:11px;padding:1px 7px;border-radius:999px;background:#E6EEE2;color:#2E3F2B">很像</span><span class="cnt">12 件</span></div>
+          <div class="opt" role="option" aria-selected="false"><svg class="ic ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>COS STORES<span class="cnt">2 件</span></div>
+          <div class="new" role="option" aria-selected="false" style="color:#5A4A3C;font-weight:400"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"></path></svg>還是要建立「COSS」</div>
+        </div>
+      </div>
+      <p class="cap">打字結果和既有品牌只差一兩個字時，把相似的放最上面，「建立」退到最後、改成灰色文字，降低打錯字直接被存起來的機會。</p>
+    </div>
+
+    <!-- 05 -->
+    <div class="st">
+      <div class="st-h"><b>05</b>第一次使用・還沒有品牌</div>
+      <div class="fr">
+        <span class="fl">品牌</span>
+        <div class="box" style="border-color:#3E6270"><span class="ph">選擇或輸入品牌</span><span class="caret"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M6 15l6-6 6 6"></path></svg></span></div>
+        <div class="pop" style="align-items:center;padding:22px 16px;gap:8px;text-align:center">
+          <span aria-hidden="true" style="position:relative;width:64px;height:48px"><span style="position:absolute;left:0;top:6px;width:40px;height:40px;border-radius:10px;background:rgba(150,186,198,.5);mix-blend-mode:multiply;transform:rotate(-8deg)"></span><span style="position:absolute;left:22px;top:0;width:40px;height:40px;border-radius:10px;background:rgba(240,196,118,.55);mix-blend-mode:multiply;transform:rotate(6deg)"></span></span>
+          <span style="font-size:14px;font-weight:500">還沒有任何品牌</span>
+          <span style="font-size:12px;line-height:1.6;color:#5A4A3C">直接輸入就會建立，之後新增衣物都能從這裡挑。</span>
+        </div>
+      </div>
+      <p class="cap">沒有資料時不顯示空清單，而是提示可以直接打字。</p>
+    </div>
+
+    <!-- 06 手機 -->
+    <div class="st">
+      <div class="st-h"><b>06</b>手機・全螢幕清單</div>
+      <div style="position:relative;height:470px;border-radius:24px;overflow:hidden;background:#FBF4E8;box-shadow:0 0 0 1.5px #D9C7AC">
+        <div aria-hidden="true" style="position:absolute;inset:0;background:rgba(59,47,37,.42)"></div>
+        <section role="dialog" aria-modal="true" aria-label="選擇品牌" style="position:absolute;left:0;right:0;bottom:0;top:28px;background:#FFFCF6;border-radius:20px 20px 0 0;padding:8px 14px;display:flex;flex-direction:column;gap:8px">
+          <span aria-hidden="true" style="align-self:center;width:40px;height:4px;border-radius:2px;background:#D9C7AC"></span>
+          <div style="display:flex;align-items:center;gap:6px"><span class="hd" style="font-size:19px">品牌</span><span style="margin-left:auto;font-size:13px;color:#3E6270">取消</span></div>
+          <div class="box" style="height:46px;border-color:#3E6270;padding-left:10px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#5A4A3C"><path d="M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14zM16 16l4 4"></path></svg><span>u</span></div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{mob}}" as="o" hint-placeholder-count="4"><div class="opt" style="min-height:48px;border-bottom:1.5px dashed #EADCC6;border-radius:0"><span>{{o.a}}<mark>{{o.m}}</mark>{{o.b}}</span><span class="cnt">{{o.n}} 件</span></div></sc-for>
+            <div class="new" style="border-top:0;min-height:48px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"></path></svg>建立新品牌「u」</div>
+          </div>
+        </section>
+      </div>
+      <p class="cap">手機點欄位直接打開底部清單，搜尋框自動取得焦點；選了就關閉。每列 48px 高，好點。</p>
+    </div>
+  </div>
+
+  <div class="spec">
+    <span class="hd" style="font-size:19px">規格</span>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 40px">
+      <div class="spec-r"><span>值</span><span>選到的品牌 <code>id</code>；新建的先暫存名稱，<b style="font-weight:500">存檔衣物時才建立</b>品牌，取消就不留下</span></div>
+      <div class="spec-r"><span>排序</span><span>先「最常用」前 3 個，再依名稱 A–Z、中文依注音；件數相同時最近用過的在前</span></div>
+      <div class="spec-r"><span>比對</span><span>忽略大小寫、全形半形、前後與重複空白；「COS」「cos」「ＣＯＳ」視為同一個</span></div>
+      <div class="spec-r"><span>相似</span><span>名稱差 1–2 個字元（或其中一個包含另一個）時，在「建立」前先推薦既有品牌</span></div>
+      <div class="spec-r"><span>鍵盤</span><span><kbd>↓</kbd> 打開／往下　<kbd>↑</kbd> 往上　<kbd>Enter</kbd> 選取或建立　<kbd>Esc</kbd> 關閉並還原　<kbd>Tab</kbd> 選取目前這列並離開</span></div>
+      <div class="spec-r"><span>無障礙</span><span>輸入框 <code>role="combobox"</code>＋<code>aria-expanded</code>、<code>aria-activedescendant</code>；清單 <code>role="listbox"</code>；結果數量用 <code>aria-live</code> 讀出</span></div>
+      <div class="spec-r"><span>不做的事</span><span>清單裡<b style="font-weight:500">不能改名或刪除</b>品牌（會影響很多件衣服），統一到「品牌管理」頁處理</span></div>
+      <div class="spec-r"><span>重複使用</span><span>同一個元件可用在購買通路、材質、場合標籤；多選版本把已選的顯示成可移除的標籤</span></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      top: [{ t: 'UNIQLO', n: 18, cls: 'act', sel: 'false' }, { t: 'COS', n: 12, cls: 'sel', sel: 'true' }, { t: 'ZARA', n: 9, cls: '', sel: 'false' }],
+      rest: [{ t: 'Arket', n: 3 }, { t: 'Beams', n: 2 }, { t: 'Levi\'s', n: 4 }],
+      mob: [{ a: '', m: 'U', b: 'NIQLO', n: 18 }, { a: '', m: 'U', b: 'NITED ARROWS', n: 3 }, { a: 'Massim', m: 'u', b: 'tti Dutti', n: 2 }]
+    };
+  }
+}
+</script>
+</body>
+</html>

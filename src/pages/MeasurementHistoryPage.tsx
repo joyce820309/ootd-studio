@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { ProfileBreadcrumb } from '@/components/layout/ProfileNav'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import { LoadingState, PageState } from '@/components/ui/PageState'
@@ -87,7 +88,7 @@ function DiffBadge({ kind, delta, compact = false }: { kind: DiffKind; delta: nu
 function MeasurementPageHeader({ view, setView }: { view: 'date' | 'table'; setView: (view: 'date' | 'table') => void }) {
   return (
     <>
-      <nav aria-label="麵包屑" className="flex items-center gap-2 text-[13px] text-ink-2"><Link to="/me">個人資料</Link><span aria-hidden="true">›</span><span aria-current="page">量測紀錄</span></nav>
+      <ProfileBreadcrumb current="量測紀錄" className="-mt-2 mb-3" />
       <div className="flex flex-wrap items-end gap-4">
         <div className="mr-auto flex flex-col gap-3">
           <TiltLabel accent="mist">尺寸筆記本</TiltLabel>

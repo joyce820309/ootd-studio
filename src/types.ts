@@ -1,7 +1,7 @@
 /** 搭配板上的部位。順序即固定板型由上而下的邏輯順序。 */
 export type Slot = 'outer' | 'top' | 'bottom' | 'shoes' | 'bag' | 'acc'
 
-export type ItemStatus = 'ok' | 'cleaning' | 'repair' | 'lent' | 'stored' | 'retired'
+export type ItemStatus = 'ok' | 'not_arrived' | 'cleaning' | 'repair' | 'lent' | 'stored' | 'retired'
 
 export type CutoutStatus = 'pending' | 'processing' | 'done' | 'failed' | 'skipped'
 
@@ -38,6 +38,7 @@ export interface NewGarmentInput {
   secondColorHex?: string
   brand?: string
   size?: string
+  necklineSize?: number | null
   seasons: string[]
   material?: string
   materialComposition?: string
@@ -48,6 +49,7 @@ export interface NewGarmentInput {
   note?: string
   flatMeasurements: Record<string, number | null>
   destination: AddItemDestination
+  closetStatus?: Extract<ItemStatus, 'ok' | 'not_arrived'>
   useCutout: boolean
 }
 
@@ -72,6 +74,7 @@ export interface ClosetItem {
   secondColorHex?: string
   brand?: string
   size?: string
+  necklineSize?: number
   fit?: string
   material?: string
   materialComposition?: string
@@ -123,6 +126,7 @@ export interface WishlistItem {
   brand?: string
   /** 預計購買的尺寸 */
   size?: string
+  necklineSize?: number
   targetPrice?: number
   /** 1 低・2 中・3 高 */
   priority?: WishPriority
@@ -150,6 +154,7 @@ export interface WishlistInput {
   brand?: string
   size?: string
   sizeNote?: string
+  necklineSize?: number | null
   priority: WishPriority | null
   reason?: string
   material?: string
@@ -299,3 +304,19 @@ export interface DiaryEntryInput {
 
 /** 新照片 File、null＝移除照片、undefined＝不變 */
 export type DiaryPhotoChange = File | null | undefined
+
+/** 品牌管理：一個品牌名稱在衣櫃與選購清單的使用情況 */
+export interface BrandSummary {
+  name: string
+  closetCount: number
+  wishCount: number
+  /** 最後一次新增、穿著或放進選購清單的日期（YYYY-MM-DD） */
+  lastUsed: string | null
+}
+
+/** 改名／合併／刪除時被改到的資料，給「復原」用 */
+export interface BrandChange {
+  name: string
+  itemIds: string[]
+  wishIds: string[]
+}

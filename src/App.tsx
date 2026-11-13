@@ -1,5 +1,6 @@
 import { createBrowserRouter, Link, RouterProvider } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
+import { ProfileLayout } from '@/components/layout/ProfileNav'
 import { AuthProvider, RequireAuth } from '@/lib/auth'
 import { ClosetPage } from '@/pages/ClosetPage'
 import { HomePage } from '@/pages/HomePage'
@@ -11,6 +12,7 @@ import { OutfitPage } from '@/pages/OutfitPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { StudioPage } from '@/pages/StudioPage'
 import { AddItemPage } from '@/pages/AddItemPage'
+import { BrandsPage } from '@/pages/BrandsPage'
 import { DiaryPage } from '@/pages/DiaryPage'
 import { ComparePage } from '@/pages/ComparePage'
 import { WishlistPage } from '@/pages/WishlistPage'
@@ -46,9 +48,16 @@ const router = createBrowserRouter([
       { path: '/diary/:id/edit', element: <DiaryPage /> },
       { path: '/wishlist', element: <WishlistPage /> },
       { path: '/wishlist/compare', element: <ComparePage /> },
-      { path: '/me', element: <ProfilePage /> },
-      { path: '/me/measurements', element: <MeasurementHistoryPage /> },
-      { path: '/me/measurements/:id', element: <MeasurementHistoryPage /> },
+      {
+        // 個人資料：大螢幕共用左側子導覽
+        element: <ProfileLayout />,
+        children: [
+          { path: '/me', element: <ProfilePage /> },
+          { path: '/me/measurements', element: <MeasurementHistoryPage /> },
+          { path: '/me/measurements/:id', element: <MeasurementHistoryPage /> },
+          { path: '/me/brands', element: <BrandsPage /> },
+        ],
+      },
     ],
   },
   { path: '*', element: <NotFound /> },
