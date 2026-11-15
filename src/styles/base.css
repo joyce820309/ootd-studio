@@ -73,3 +73,104 @@
   background-image: repeating-linear-gradient(transparent 0 31px, var(--color-line) 31px 32px);
   line-height: 32px;
 }
+
+/*
+ * 便利貼 StickyNote（B19）：依 data-tone 提供顏色變數，元件只讀 var(--note-*)。
+ * 色值都來自 tokens.css。
+ */
+.sticky-note[data-tone='mist'] {
+  --note-bg: var(--color-mist-soft);
+  --note-empty: var(--color-note-mist-empty);
+  --note-fold: var(--color-note-mist-fold);
+  --note-empty-fold: var(--color-note-mist-empty-fold);
+  --note-title: var(--color-mist-ink);
+  --note-text: var(--color-note-mist-text);
+  --note-accent: var(--color-mist-deep);
+  --note-edge: var(--color-mist);
+}
+.sticky-note[data-tone='sage'] {
+  --note-bg: var(--color-sage-soft);
+  --note-empty: var(--color-note-sage-empty);
+  --note-fold: var(--color-note-sage-fold);
+  --note-empty-fold: var(--color-note-sage-empty-fold);
+  --note-title: var(--color-sage-ink);
+  --note-text: var(--color-note-sage-text);
+  --note-accent: var(--color-sage-deep);
+  --note-edge: var(--color-sage);
+}
+.sticky-note[data-tone='rose'] {
+  --note-bg: var(--color-rose-soft);
+  --note-empty: var(--color-note-rose-empty);
+  --note-fold: var(--color-note-rose-fold);
+  --note-empty-fold: var(--color-note-rose-empty-fold);
+  --note-title: var(--color-note-rose-text);
+  --note-text: var(--color-note-rose-text);
+  --note-accent: var(--color-rose-deep);
+  --note-edge: var(--color-rose);
+}
+.sticky-note[data-tone='oat'] {
+  --note-bg: var(--color-oat-soft);
+  --note-empty: var(--color-note-oat-empty);
+  --note-fold: var(--color-note-oat-fold);
+  --note-empty-fold: var(--color-note-oat-empty-fold);
+  --note-title: var(--color-oat-ink);
+  --note-text: var(--color-note-oat-text);
+  --note-accent: var(--color-oat-deep);
+  --note-edge: var(--color-oat-edge);
+}
+.sticky-note {
+  --note-paper: var(--note-bg);
+  --note-corner: var(--note-fold);
+  background-color: var(--note-paper);
+}
+.sticky-note[data-empty] {
+  --note-paper: var(--note-empty);
+  --note-corner: var(--note-empty-fold);
+}
+/* 右下折角 */
+.sticky-note__fold {
+  background: linear-gradient(135deg, var(--note-corner) 50%, var(--color-paper) 50%);
+}
+/* hand：手帳橫線，每行 32px */
+.sticky-note--ruled {
+  background-image: repeating-linear-gradient(transparent 0 31px, var(--color-note-rule) 31px 32px);
+  background-origin: content-box;
+}
+/* grid：白色方格紙 */
+.sticky-note--grid {
+  background-color: var(--color-card);
+  background-image:
+    linear-gradient(var(--color-note-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-note-grid) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+/* 收合時底部漸層淡出 */
+.sticky-note__fade {
+  background: linear-gradient(transparent, var(--note-paper));
+}
+.sticky-note__list > li {
+  position: relative;
+}
+.sticky-note__list > li::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  border-radius: 50%;
+  background: var(--note-accent);
+}
+.sticky-note__list--hand > li {
+  padding-left: 20px;
+}
+.sticky-note__list--hand > li::before {
+  top: 13px;
+  width: 7px;
+  height: 7px;
+}
+.sticky-note__list--mixed > li {
+  padding-left: 18px;
+}
+.sticky-note__list--mixed > li::before {
+  top: 10px;
+  width: 6px;
+  height: 6px;
+}

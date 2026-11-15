@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>踩雷覆盤</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+</style>
+</helmet>
+<div style="width:100%;min-height:1500px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
+      <a class="nav-a" href="B-Home.dc.html">首頁</a>
+      <a class="nav-a" href="B-Closet.dc.html" aria-current="page" style="border-bottom-color:#F2CF8E;color:#3B2F25;font-weight:700">我的衣櫃</a>
+      <a class="nav-a" href="B-Outfit.dc.html">今日搭配</a>
+      <a class="nav-a" href="#diary">穿搭日記</a>
+      <a class="nav-a" href="B-Wishlist.dc.html">選購清單</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:4px;padding-bottom:10px">
+      <button class="ibtn" type="button" aria-label="通知" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"></path></svg></button>
+      <a href="B-Body.dc.html" aria-label="個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#FFFCF6;border:1.5px solid #3B2F25;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span></a>
+    </div>
+  </header>
+  <main style="max-width:1240px;margin:0 auto;padding:24px clamp(16px,4vw,48px) 64px;display:flex;flex-direction:column;gap:22px">
+    <nav aria-label="麵包屑" style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5A4A3C;flex-wrap:wrap">
+      <a href="B-Lessons.dc.html" style="display:inline-flex;align-items:center;gap:4px;min-height:44px"><svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>踩雷筆記本</a><span>/</span><span>ZARA 合身短版襯衫</span>
+    </nav>
+
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span class="lbl" style="background:#E2B4A8;transform:rotate(-2deg)">踩雷覆盤</span>
+      <h1 class="hd" style="margin:0;font-size:30px">ZARA 合身短版襯衫・S</h1>
+      <span class="tag" style="background:#F4DDD6;color:#7E3F34"><span class="dot" style="background:#8E4A3E"></span>已退貨・11/15</span>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-s" type="button">編輯原因</button><button class="btn btn-p" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>完成覆盤</button></div>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
+      <aside aria-label="這件衣物" style="flex:1 1 280px;max-width:340px;display:flex;flex-direction:column;gap:14px">
+        <div class="paper" style="padding:14px">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:12px;background:#F3E7D4;display:flex;align-items:center;justify-content:center">
+            <svg viewBox="0 0 100 100" style="width:68%;height:68%;filter:drop-shadow(0 10px 12px rgba(59,47,37,.16));opacity:.9" role="img" aria-label="白色合身短版襯衫"><path d="M32 16L44 12L50 20L56 12L68 16L80 30L88 70L78 72L70 40V74H30V40L22 72L12 70L20 30Z" fill="#F4F1EA" stroke="rgba(59,47,37,.28)" stroke-width="0.7"></path><path d="M50 20V74M44 12L50 22L56 12" fill="none" stroke="rgba(59,47,37,.32)" stroke-width="1"></path></svg>
+            <span style="position:absolute;left:10px;top:10px" class="tag" title="不會出現在衣櫃和搭配"><span style="background:rgba(255,252,246,.94);padding:4px 10px;border-radius:999px;font-size:11px;color:#5A4A3C">只留在筆記本</span></span>
+          </div>
+        </div>
+        <dl class="paper" style="padding:6px 18px">
+          <div><dt>品牌</dt><dd>ZARA</dd></div>
+          <div><dt>尺寸標</dt><dd class="num">S</dd></div>
+          <div><dt>材質</dt><dd>棉 70%・聚酯纖維 27%・彈性纖維 3%</dd></div>
+          <div><dt>購買通路</dt><dd>ZARA 官網</dd></div>
+          <div><dt>價格</dt><dd class="num">NT$1,290・已退款</dd></div>
+          <div style="border-bottom:0"><dt>購買日</dt><dd class="num">2026/11/08</dd></div>
+        </dl>
+        <p style="margin:0;font-size:12px;line-height:1.7;color:#5A4A3C">退貨後照片、尺寸、材質都保留，只是不會出現在衣櫃、今日搭配和統計裡。</p>
+      </aside>
+
+      <div style="flex:3 1 640px;min-width:0;display:flex;flex-direction:column;gap:22px">
+        <section aria-labelledby="h-why" class="paper" style="padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+          <h2 id="h-why" class="hd" style="margin:0;font-size:20px">哪裡不對</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{reasons}}" as="r" hint-placeholder-count="4">
+              <span class="tag" style="height:32px;padding:0 12px;background:{{r.bg}};color:{{r.fg}}"><span style="font-size:11px;opacity:.8">{{r.k}}</span>{{r.t}}</span>
+            </sc-for>
+          </div>
+        </section>
+
+        <section aria-labelledby="h-size" class="paper" style="padding:18px 20px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+            <h2 id="h-size" class="hd" style="margin:0;font-size:20px">尺寸對照</h2>
+            <span style="font-size:12px;color:#5A4A3C">身體：<span class="num">2026/10/03</span> 的量測（購買前最近一次）・衣服：平放尺寸 ×2</span>
+            <span style="margin-left:auto;display:flex;gap:12px;font-size:12px;color:#5A4A3C;align-items:center"><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:22px;height:10px;border-radius:3px;background:#C5D8BE"></span>你常穿的範圍</span><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:50%;background:#8E4A3E"></span>這件</span></span>
+          </div>
+          <div role="table" aria-label="尺寸對照" style="display:flex;flex-direction:column">
+            <div role="row" class="trow" style="font-size:12px;color:#5A4A3C;min-height:36px;border-top:0">
+              <span role="columnheader">部位</span><span role="columnheader" style="text-align:right">這件</span><span role="columnheader" style="text-align:right">我的身體</span><span role="columnheader" style="text-align:right">差多少</span><span role="columnheader" style="padding-left:12px">和常穿的比</span><span role="columnheader">判定</span>
+            </div>
+            <sc-for list="{{rows}}" as="r" hint-placeholder-count="5">
+              <div role="row" class="trow">
+                <span role="cell" style="font-weight:500">{{r.part}}</span>
+                <span role="cell" class="num" style="text-align:right">{{r.item}}</span>
+                <span role="cell" class="num" style="text-align:right;color:#5A4A3C">{{r.body}}</span>
+                <span role="cell" class="num" style="text-align:right;font-weight:700;color:{{r.fg}}">{{r.diff}}</span>
+                <span role="cell" style="padding-left:12px">
+                  <span style="position:relative;display:block;height:30px">
+                    <span style="position:absolute;left:0;right:0;top:14px;height:2px;background:#EADCC6"></span>
+                    <span style="position:absolute;left:{{r.bl}}%;width:{{r.bw}}%;top:8px;height:14px;border-radius:4px;background:#C5D8BE"></span>
+                    <span style="position:absolute;left:{{r.ml}}%;top:8px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:{{r.mk}};box-shadow:0 0 0 2px #FFFCF6"></span>
+                    <span class="num" style="position:absolute;left:{{r.bl}}%;top:22px;font-size:10px;color:#4A6245;white-space:nowrap">{{r.band}}</span>
+                  </span>
+                </span>
+                <span role="cell"><span class="tag" style="background:{{r.jbg}};color:{{r.fg}}">{{r.judge}}</span></span>
+              </div>
+            </sc-for>
+          </div>
+          <p style="margin:0;font-size:12px;line-height:1.7;color:#5A4A3C">「常穿的範圍」來自你留下且穿過 5 次以上的 7 件上衣；差多少＝這件 − 身體。</p>
+        </section>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px;align-items:start;padding-top:8px">
+          <section aria-labelledby="h-feel" class="sticky" style="background:#DCE8EC;transform:rotate(-.6deg)">
+            <span class="tape" aria-hidden="true"></span>
+            <button class="edit" type="button" aria-label="編輯我的體感"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"></path></svg></button>
+            <h2 id="h-feel" class="hd" style="margin:0 0 8px;font-size:22px;line-height:32px;color:#24424D">我的體感</h2>
+            <ul class="bn">
+              <li>扣上第二顆扣子，胸口就拉出橫向皺褶，扣子之間會開縫。</li>
+              <li>手往前伸的時候肩膀卡住，背後很緊。</li>
+              <li>腰身和長度其實很喜歡，搭高腰褲剛好。</li>
+            </ul>
+            <span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,#B9D0D8 50%,#FBF4E8 50%)"></span>
+          </section>
+
+          <section aria-labelledby="h-ai" class="sticky" style="background:#E6EEE2;transform:rotate(.5deg)">
+            <span class="tape" aria-hidden="true" style="background:rgba(222,166,152,.6);transform:rotate(2deg)"></span>
+            <span style="position:absolute;right:14px;top:16px;font:700 11px Nunito;letter-spacing:.14em;color:#4A6245">AI・參考用</span>
+            <h2 id="h-ai" class="hd" style="margin:0 0 8px;font-size:22px;line-height:32px;color:#2E3F2B">AI 覆盤</h2>
+            <ul class="bn" style="--dot:#4A6245">
+              <li><b>胸圍鬆份只有 +4 cm。</b>你常穿的上衣是 +9～+15 cm，扣子開縫是典型的鬆份不足。</li>
+              <li><b>肩寬比你窄 2 cm，</b>而且彈性纖維只有 3%，手往前伸時背部沒有餘量。</li>
+              <li>腰圍 +14 cm、衣長 52 cm 都在你的舒適範圍，<b>版型本身適合你，是尺寸選小了。</b></li>
+            </ul>
+            <span style="display:block;margin-top:10px;font-size:11px;line-height:1.6;color:#3F5A3B"><span class="num">11/15</span> 從外部 AI 貼上・依據：平放尺寸、10/03 量測、7 件常穿上衣</span>
+            <span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,#C5D8BE 50%,#FBF4E8 50%)"></span>
+          </section>
+        </div>
+
+        <section aria-labelledby="h-rule" class="paper" style="padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 id="h-rule" class="hd" style="margin:0;font-size:20px">下次的挑選規則</h2><span style="font-size:12px;color:#5A4A3C">打開的規則，會在新增選購、比較試搭、新增衣物時提醒你</span></div>
+          <sc-for list="{{rules}}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:12px;background:#FBF4E8;flex-wrap:wrap">
+              <span class="tag" style="background:{{r.sbg}};color:{{r.sfg}}">{{r.scope}}</span>
+              <span style="flex:1 1 260px;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:500">{{r.t}}</span><span style="font-size:12px;color:#5A4A3C">{{r.why}}</span></span>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;min-height:44px;cursor:pointer"><span class="sw" aria-hidden="true" style="background:{{r.swbg}}"><span style="left:{{r.swl}}px"></span></span><input type="checkbox" checked="{{r.on}}" style="position:absolute;opacity:0;width:1px;height:1px">提醒我</label>
+            </div>
+          </sc-for>
+          <button type="button" class="btn btn-g" style="align-self:flex-start;padding:0 6px;color:#3E6270">＋ 自己加一條規則</button>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const R = { bg: '#F4DDD6', fg: '#7E3F34' }, O = { bg: '#E6EEE2', fg: '#2E3F2B' }, N = { bg: '#F3E7D4', fg: '#5A4A3C' };
+    // part, item, body, diff text, domain [min,max], band [a,b], value, judge, tone
+    const rows = [
+      ['胸圍', '88', '上胸圍 84', '+4', [-4, 24], [9, 15], 4, '偏緊', R, '+9～+15'],
+      ['肩寬', '36', '38', '−2', [-6, 8], [0, 3], -2, '偏窄', R, '0～+3'],
+      ['腰圍', '80', '66', '+14', [-4, 24], [8, 18], 14, '剛好', O, '+8～+18'],
+      ['衣長', '52', '—', '—', [40, 70], [50, 58], 52, '剛好', O, '50～58 cm'],
+      ['袖長', '58', '手臂 55', '+3', [-6, 10], [1, 5], 3, '剛好', O, '+1～+5']
+    ];
+    const pct = (v, d) => Math.round((v - d[0]) / (d[1] - d[0]) * 1000) / 10;
+    return {
+      reasons: [['尺寸', '胸口太緊'], ['尺寸', '肩膀卡'], ['其他', '扣子間開縫'], ['材質', '沒彈性']].map(([k, t]) => ({ k, t, bg: k === '尺寸' ? '#F4DDD6' : '#F3E7D4', fg: k === '尺寸' ? '#7E3F34' : '#5A4A3C' })),
+      rows: rows.map(([part, item, body, diff, d, b, v, judge, tone, band]) => ({
+        part, item, body, diff, judge, band, fg: tone.fg, jbg: tone.bg,
+        bl: pct(b[0], d), bw: pct(b[1], d) - pct(b[0], d), ml: pct(v, d), mk: tone === R ? '#8E4A3E' : '#4A6245'
+      })),
+      rules: [
+        ['ZARA・襯衫', 'ZARA 的襯衫選 M，不要選 S', '這次 S 的胸圍只比你大 4 cm', 1, 'brand'],
+        ['所有襯衫', '平放胸寬至少 47 cm（胸圍 ≥ 94）', '你常穿的上衣胸圍鬆份 +9 cm 以上', 1, 'cat'],
+        ['合身款', '彈性纖維 < 5% 的合身款，肩寬要 ≥ 38 cm', '沒彈性又窄肩，手往前伸會卡', 0, 'cat']
+      ].map(([scope, t, why, on, kind]) => ({
+        scope, t, why, on: !!on, sbg: kind === 'brand' ? '#F6E7C6' : '#DCE8EC', sfg: kind === 'brand' ? '#5A3F12' : '#24424D',
+        swbg: on ? '#4A6245' : '#D9C7AC', swl: on ? 20 : 2
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

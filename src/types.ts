@@ -1,7 +1,10 @@
 /** 搭配板上的部位。順序即固定板型由上而下的邏輯順序。 */
 export type Slot = 'outer' | 'top' | 'bottom' | 'shoes' | 'bag' | 'acc'
 
-export type ItemStatus = 'ok' | 'not_arrived' | 'cleaning' | 'repair' | 'lent' | 'stored' | 'retired'
+export type ItemStatus = 'ok' | 'not_arrived' | 'cleaning' | 'repair' | 'lent' | 'stored' | 'retired' | LessonStatus
+
+/** 踩雷後的衣物狀態：不出現在衣櫃、今日搭配、統計，照片與尺寸保留 */
+export type LessonStatus = 'returned' | 'exchanged' | 'unworn' | 'given_away'
 
 export type CutoutStatus = 'pending' | 'processing' | 'done' | 'failed' | 'skipped'
 
@@ -108,6 +111,12 @@ export interface ClosetItem {
   shape?: GarmentShape
   wearCount?: number
   lastWornAt?: string
+  /** 'YYYY-MM-DD'：收到日期，鑑賞期從這天算 */
+  receivedOn?: string
+  /** 換貨自哪一件 */
+  exchangedFrom?: string
+  /** 去背圖在 Storage 的路徑（複製衣物用） */
+  cutoutPath?: string
 }
 
 export interface ClosetPhoto {
@@ -334,6 +343,67 @@ export interface DiaryEntryInput {
 
 /** 新照片 File、null＝移除照片、undefined＝不變 */
 export type DiaryPhotoChange = File | null | undefined
+
+/** 踩雷後怎麼處理：已退貨／換貨／留著但不會穿／轉賣・送人 */
+export type ReviewDecision = 'returned' | 'exchanged' | 'kept' | 'given_away'
+
+/** 換貨換成什麼：換尺寸／換顏色／換別款 */
+export type ExchangeKind = 'size' | 'color' | 'other'
+
+/** 規則檢查方式：能對應到欄位的可自動檢查，其餘只提醒 */
+export type LessonRuleCheck = 'auto' | 'remind'
+
+/** 規則類型：品牌、類別、尺寸 */
+export type LessonRuleKind = 'brand' | 'category' | 'size'
+
+export interface LessonRule {
+  id: string
+  /** 適用範圍文字，例如「ZARA・襯衫」 */
+  scope: string
+  kind: LessonRuleKind
+  checkKind: LessonRuleCheck
+  text: string
+  why: string
+  active: boolean
+  createdAt: string
+  sourceReviewId?: string
+}
+
+export type LessonRuleInput = Omit<LessonRule, 'id' | 'createdAt'> & { id?: string }
+
+/** 一件衣物的踩雷覆盤（每件衣物一筆） */
+export interface ReviewRecord {
+  id: string
+  itemId: string
+  /** 標記當下的衣物快照，衣物資料之後被改也看得到當時情況 */
+  itemName: string
+  brand?: string
+  size?: string
+  material?: string
+  price?: number
+  purchaseDate?: string
+  decision: ReviewDecision
+  /** 'YYYY-MM-DD'，只有已退貨才有 */
+  returnedOn?: string
+  /** 換貨：換成什麼、換貨日、補差價 */
+  exchangeKind?: ExchangeKind
+  exchangeSize?: string
+  exchangeColorName?: string
+  exchangeColorHex?: string
+  exchangedOn?: string
+  exchangeExtra?: number
+  reasons: string[]
+  /** 我的體感：一行一點 */
+  personalNote: string[]
+  /** AI 覆盤：從外部 AI 貼回來的原因，一行一點 */
+  aiSummary: string[]
+  /** 貼上 AI 回覆的時間 */
+  aiPastedAt?: string
+  createdAt: string
+  updatedAt?: string
+}
+
+export type ReviewRecordInput = Omit<ReviewRecord, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }
 
 /** 品牌管理：一個品牌名稱在衣櫃與選購清單的使用情況 */
 export interface BrandSummary {

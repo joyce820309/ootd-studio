@@ -71,6 +71,29 @@
   --color-sage-ink: #2E3F2B;
   --color-sage-wash: rgb(167 192 158 / 0.6);
 
+  /* 便利貼 StickyNote（B19）：底色用各主題 soft；這裡補折角、內文、空狀態與膠帶色 */
+  --color-note-mist-fold: #B9D0D8;
+  --color-note-mist-text: #24323A;
+  --color-note-mist-empty: #EDF3F5;
+  --color-note-mist-empty-fold: #C9DCE2;
+  --color-note-sage-fold: #C5D8BE;
+  --color-note-sage-text: #2E3F2B;
+  --color-note-sage-empty: #F0F5EE;
+  --color-note-sage-empty-fold: #D6E3D1;
+  --color-note-rose-fold: #E8C3B8;
+  --color-note-rose-text: #5E2A22;
+  --color-note-rose-empty: #F9ECE8;
+  --color-note-rose-empty-fold: #EFD5CD;
+  --color-note-oat-fold: #EBD3A0;
+  --color-note-oat-text: #4A3410;
+  --color-note-oat-empty: #FAF1DD;
+  --color-note-oat-empty-fold: #F1E0BA;
+  --color-note-tape-oat: rgb(240 196 118 / 0.62);
+  --color-note-tape-rose: rgb(222 166 152 / 0.6);
+  --color-note-tape-mist: rgb(150 186 198 / 0.6);
+  --color-note-rule: rgb(62 98 112 / 0.22);
+  --color-note-grid: rgb(150 186 198 / 0.22);
+
   /* 狀態標籤（底色 / 文字） */
   --color-status-ok-bg: #DCE7D8;
   --color-status-ok-fg: #3F5A3B;
@@ -107,6 +130,7 @@
   --shadow-sticker: 0 2px 4px rgb(59 47 37 / 0.14);
   --shadow-float: 0 14px 30px -10px rgb(59 47 37 / 0.45);
   --shadow-sheet: 0 -14px 30px rgb(59 47 37 / 0.16);
+  --shadow-note: 0 1px 0 rgb(59 47 37 / 0.05), 0 14px 22px -14px rgb(36 66 77 / 0.4);
   --shadow-oat: 0 8px 16px -6px rgb(124 90 30 / 0.45);
 
   /* 去背衣物投影：淺色衣物在紙色上也看得清楚 */

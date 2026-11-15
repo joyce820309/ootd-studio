@@ -8,7 +8,7 @@ import { Icon } from '@/components/ui/Icon'
 import { MarkdownNoteField } from '@/components/ui/MarkdownNote'
 import { todayISO } from '@/lib/date'
 import { entryPieces, FEEL_LABEL, formatDiaryDate, OCCASIONS, occasionTone, TONE_CLASS, WEATHER_LABEL, WEATHERS } from '@/lib/diary'
-import { SLOTS, STATUS_LABEL } from '@/lib/slots'
+import { isInCloset, SLOTS, STATUS_LABEL } from '@/lib/slots'
 import type { ClosetItem, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, Slot } from '@/types'
 
 type Source = 'today' | 'past' | 'pick'
@@ -410,7 +410,7 @@ function PiecePicker({ closet, picks, onChange }: { closet: ClosetItem[]; picks:
   return (
     <div className="flex flex-col gap-2.5 rounded-tile border-[1.5px] border-dashed border-line p-2.5">
       {SLOTS.map((meta) => {
-        const options = closet.filter((c) => c.slot === meta.slot && c.status !== 'retired')
+        const options = closet.filter((c) => c.slot === meta.slot && isInCloset(c.status))
         const labelId = `piece-${meta.slot}`
         const set = (id: string | null) => {
           const next = { ...picks }

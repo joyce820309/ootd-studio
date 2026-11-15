@@ -45,6 +45,8 @@ export interface DatePickerProps {
   name?: string
   id?: string
   className?: string
+  /** 外面已經有可見標題時（例如表單列），只留給螢幕閱讀器 */
+  hideLabel?: boolean
 }
 
 type View = 'days' | 'months'
@@ -82,6 +84,7 @@ export function DatePicker({
   name,
   id: idProp,
   className = '',
+  hideLabel = false,
 }: DatePickerProps) {
   const autoId = useId()
   const id = idProp ?? `date-${autoId}`
@@ -448,7 +451,7 @@ export function DatePicker({
 
   return (
     <div ref={wrapRef} className={`relative flex flex-col gap-1.5 ${className}`}>
-      <label htmlFor={id} className="text-[13px] font-medium text-ink">
+      <label htmlFor={id} className={hideLabel ? 'sr-only' : 'text-[13px] font-medium text-ink'}>
         {label}
         {required && <span className="ml-1 text-rose-deep">*</span>}
       </label>

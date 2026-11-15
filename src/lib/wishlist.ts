@@ -1,4 +1,4 @@
-import { isWearable, SLOTS } from './slots'
+import { isInCloset, isWearable, SLOTS } from './slots'
 import type { ClosetItem, Slot, WishlistItem, WishPriority, WishStatus } from '@/types'
 
 export const WISH_STATUS: Record<WishStatus, { label: string; className: string }> = {
@@ -131,7 +131,7 @@ export function wishInsights(wish: WishlistItem, closet: ClosetItem[]): WishInsi
   const matching = wearable.filter((item) => item.slot !== wish.slot && colorsGoTogether(item.colorHex, wish.colorHex))
   const matchCount = matching.length
 
-  const sameSlot = closet.filter((item) => item.slot === wish.slot && item.status !== 'retired')
+  const sameSlot = closet.filter((item) => item.slot === wish.slot && isInCloset(item.status))
   let closest: ClosetItem | undefined
   let best = Infinity
   for (const item of sameSlot) {

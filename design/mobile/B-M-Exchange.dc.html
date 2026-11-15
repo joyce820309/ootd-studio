@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機換貨・複製成新衣物</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.mrow{display:flex;flex-direction:column;gap:6px;padding:12px 0;border-top:1.5px dashed #EADCC6}
+.fin{height:48px;width:100%;border:1.5px solid #E2D2B8;border-radius:12px;background:#FFFCF6;padding:0 12px;font:400 15px 'Chiron GoRound TC';color:#3B2F25}
+</style>
+</helmet>
+<div style="width:390px;height:2040px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden">
+  <header style="display:flex;align-items:center;gap:4px;padding:8px 8px 8px 4px;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-M-Review-Mark.dc.html" aria-label="上一步" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <h1 class="hd" style="margin:0;font-size:20px">建立換到的那件</h1>
+  </header>
+  <main style="padding:12px 12px 120px;display:flex;flex-direction:column;gap:14px">
+    <div role="note" style="padding:12px 14px;border-radius:14px;background:#F6E7C6;display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:14px;font-weight:700;color:#5A3F12">從「ZARA 合身短版襯衫・S」複製</span>
+      <span style="font-size:12px;line-height:1.6;color:#5A3F12">只要看標成「已改」和「要重填」的欄位。</span>
+      <span style="display:flex;gap:6px"><span class="tag" style="height:22px;font-size:11px;background:#FFFCF6;color:#5A4A3C">沿用 8</span><span class="tag" style="height:22px;font-size:11px;background:#E6EEE2;color:#2E3F2B">已改 1</span><span class="tag" style="height:22px;font-size:11px;background:#FFFCF6;color:#5A3F12;box-shadow:inset 0 0 0 1.5px #E2B866">要重填 2</span></span>
+    </div>
+
+    <div style="display:flex;gap:8px;align-items:center">
+      <sc-for list="{{photos}}" as="p" hint-placeholder-count="3">
+        <label style="position:relative;width:72px;height:72px;border-radius:10px;background:{{p.bg}};box-shadow:0 0 0 2px #3B2F25;cursor:pointer"><input type="checkbox" checked="{{p.on}}" aria-label="沿用{{p.name}}" style="position:absolute;opacity:0;width:1px;height:1px"><span aria-hidden="true" style="position:absolute;right:4px;top:4px;width:20px;height:20px;border-radius:6px;background:#3B2F25;color:#FBF4E8;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" style="width:13px;height:13px;stroke-width:2.4"><path d="M5 12l5 5L20 7"></path></svg></span></label>
+      </sc-for>
+      <button type="button" aria-label="加新照片" style="width:72px;height:72px;border-radius:10px;border:1.5px dashed #D9C7AC;background:transparent;color:#5A4A3C;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+    </div>
+
+    <form aria-label="衣物資料" class="paper" style="padding:2px 14px 6px">
+      <sc-for list="{{rows}}" as="r" hint-placeholder-count="10">
+        <div class="mrow" style="border-top-color:{{r.bt}}">
+          <span style="display:flex;align-items:center;gap:8px"><label for="{{r.id}}" style="font-size:13px;font-weight:500;flex:1">{{r.k}}</label><span class="tag" style="height:22px;font-size:11px;background:{{r.sbg}};color:{{r.sfg}};box-shadow:{{r.ssh}}">{{r.s}}</span></span>
+          <input id="{{r.id}}" class="fin" value="{{r.v}}" placeholder="{{r.ph}}" style="border-color:{{r.bd}};background:{{r.ibg}}">
+          <sc-if value="{{r.hint}}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:{{r.hc}}">{{r.hint}}</span></sc-if>
+        </div>
+      </sc-for>
+      <div class="mrow">
+        <span style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:500;flex:1">平放尺寸 cm</span><span class="tag" style="height:22px;font-size:11px;background:#FFFCF6;color:#5A3F12;box-shadow:inset 0 0 0 1.5px #E2B866">要重填</span></span>
+        <span style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <sc-for list="{{flat}}" as="f" hint-placeholder-count="5"><label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:#5A4A3C">{{f.k}}<input class="fin num" placeholder="S：{{f.old}}" style="height:44px;border-color:#E2B866;background:#FFF9EE"></label></sc-for>
+        </span>
+        <span style="font-size:12px;line-height:1.6;color:#5A3F12">換了尺寸所以清空；灰字是 S 的數字。可以先空著，之後再補。</span>
+      </div>
+      <div class="mrow">
+        <label style="display:flex;align-items:center;gap:10px;font-size:13px;min-height:44px;cursor:pointer"><span style="flex:1">沿用舊的筆記</span><span class="sw" aria-hidden="true" style="background:#D9C7AC"><span style="left:2px"></span></span><input type="checkbox" style="position:absolute;opacity:0;width:1px;height:1px"></label>
+        <a href="B-M-Review.dc.html" style="font-size:13px;min-height:44px;display:flex;align-items:center">換貨自：ZARA 合身短版襯衫・S（已換貨）</a>
+      </div>
+    </form>
+
+    <section aria-labelledby="mchk" class="sticky" style="background:#F4DDD6;transform:rotate(-.5deg);margin-top:8px;padding:26px 16px 22px 18px">
+      <span class="tape" aria-hidden="true" style="width:80px;margin-left:-40px"></span>
+      <h2 id="mchk" class="hd" style="margin:0 0 6px;font-size:20px;line-height:32px;color:#5E2A22">收到後試穿這兩處</h2>
+      <ul class="bn" style="--dot:#8E4A3E"><li style="color:#5E2A22">胸口：扣子之間會不會開縫。</li><li style="color:#5E2A22">肩膀：手往前伸會不會卡。</li></ul>
+      <span style="display:block;margin-top:6px;font-size:12px;color:#7E3F34">鑑賞期到 <span class="num">11/25</span></span>
+      <span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,#E8C3B8 50%,#FBF4E8 50%)"></span>
+    </section>
+  </main>
+  <footer style="position:absolute;left:0;right:0;bottom:0;padding:12px 12px 28px;background:#FBF4E8;border-top:1.5px dashed #D9C7AC">
+    <a class="btn btn-p" href="B-M-Detail.dc.html" style="width:100%;height:52px;font-size:15px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>存成新衣物</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2040}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const S = {
+      keep: { s: '沿用', sbg: '#F3E7D4', sfg: '#5A4A3C', ssh: 'none', bd: '#E2D2B8', ibg: '#FFFCF6' },
+      changed: { s: '已改', sbg: '#E6EEE2', sfg: '#2E3F2B', ssh: 'none', bd: '#A7C09E', ibg: '#F4F8F2' },
+      need: { s: '要重填', sbg: '#FFFCF6', sfg: '#5A3F12', ssh: 'inset 0 0 0 1.5px #E2B866', bd: '#E2B866', ibg: '#FFF9EE' }
+    };
+    const R = [
+      ['n', '品名', 'ZARA 合身短版襯衫', 'keep'], ['b', '品牌', 'ZARA', 'keep'], ['c', '類別', '上衣・襯衫', 'keep'], ['co', '顏色', '白 #F4F1EA', 'keep'],
+      ['sz', '尺寸', 'M', 'changed', '原本是 S', '#2E3F2B'], ['m', '材質', '棉 70・聚酯 27・彈性 3', 'keep'], ['sh', '購買通路', 'ZARA 官網', 'keep'],
+      ['p', '價格', 'NT$1,290', 'keep'], ['d', '購買日期', '2026/11/08', 'keep'], ['r', '收到日期', '', 'need', '鑑賞期從這天起算', '#5A3F12', '選擇日期']
+    ];
+    return {
+      photos: [['去背圖', '#F3E7D4'], ['平拍照', '#B9AE9B'], ['網拍照', '#DCE8EC']].map(([name, bg]) => ({ name, bg, on: true })),
+      rows: R.map(([id, k, v, st, hint, hc, ph], i) => Object.assign({ id: 'm-' + id, k, v, hint: hint || '', hc: hc || '#5A4A3C', ph: ph || '', bt: i ? '#EADCC6' : 'transparent' }, S[st])),
+      flat: [['肩寬', '36'], ['胸寬', '44'], ['腰寬', '40'], ['衣長', '52'], ['袖長', '58']].map(([k, old]) => ({ k, old }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import type { ItemStatus, Slot } from '@/types'
+import type { ItemStatus, LessonStatus, Slot } from '@/types'
 
 export interface SlotMeta {
   slot: Slot
@@ -32,7 +32,18 @@ export const STATUS_LABEL: Record<ItemStatus, string> = {
   lent: '借出',
   stored: '收納中',
   retired: '已淘汰',
+  returned: '已退貨',
+  exchanged: '已換貨',
+  unworn: '留著不穿',
+  given_away: '轉賣・送人',
 }
+
+/** 踩雷後的狀態：只出現在踩雷筆記本 */
+export const LESSON_STATUSES: LessonStatus[] = ['returned', 'exchanged', 'unworn', 'given_away']
+export const isLessonStatus = (status: ItemStatus): status is LessonStatus => (LESSON_STATUSES as ItemStatus[]).includes(status)
+
+/** 還在衣櫃裡（不含封存與踩雷） */
+export const isInCloset = (status: ItemStatus) => status !== 'retired' && !isLessonStatus(status)
 
 /** 只有「可穿」與「收納中」可以放進今日搭配 */
 export const isWearable = (status: ItemStatus) => status === 'ok' || status === 'stored'

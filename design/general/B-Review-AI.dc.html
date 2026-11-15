@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>AI 覆盤・複製與貼上</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.step{display:flex;flex-direction:column;gap:14px}
+.sn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#3B2F25;color:#FBF4E8;font:700 14px Nunito;flex:none}
+.pre{margin:0;padding:14px 16px;border-radius:12px;background:#FBF4E8;box-shadow:inset 0 0 0 1.5px #EADCC6;font:400 12.5px/1.75 ui-monospace,'Chiron GoRound TC',monospace;color:#3B2F25;white-space:pre-wrap}
+.ck{display:flex;align-items:center;gap:8px;min-height:36px;font-size:13px;cursor:pointer}
+.box{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex:none}
+</style>
+</helmet>
+<div style="width:1440px;height:1300px;box-sizing:border-box;padding:48px 56px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:30px">
+  <header style="display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span class="lbl" style="background:#B7CBB0;transform:rotate(-2deg);align-self:flex-start">覆盤頁・AI 區塊</span>
+      <h1 class="hd" style="margin:0;font-size:32px">AI 覆盤：複製出去、貼回來</h1>
+    </div>
+    <p style="margin:0 0 4px auto;max-width:560px;font-size:13px;line-height:1.8;color:#5A4A3C">平台不呼叫任何 AI，不會產生費用。平台只做兩件事：把資料整理成一段可以直接貼給 AI 的文字；把你貼回來的回覆，照固定格式拆成「AI 覆盤」便利貼和規則草稿。</p>
+  </header>
+
+  <div style="display:grid;grid-template-columns:360px 1fr 1fr;gap:32px;align-items:start">
+    <section class="step" aria-labelledby="st1">
+      <div style="display:flex;align-items:center;gap:10px"><span class="sn">1</span><h2 id="st1" class="hd" style="margin:0;font-size:21px">還沒覆盤</h2></div>
+      <div class="sticky" style="background:#EEF3EB;transform:rotate(.5deg)">
+        <span class="tape" aria-hidden="true" style="background:rgba(222,166,152,.6);transform:rotate(2deg)"></span>
+        <h3 class="hd" style="margin:0 0 6px;font-size:22px;line-height:32px;color:#2E3F2B">AI 覆盤</h3>
+        <p style="margin:0 0 14px;font-size:13px;line-height:1.7;color:#3F5A3B">還沒有內容。把資料複製給你常用的 AI，再把回覆貼回來。</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button type="button" class="btn btn-p" style="justify-content:flex-start"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h11v12H8zM5 16V4h11"></path></svg>① 複製資料給 AI</button>
+          <button type="button" class="btn btn-s" style="justify-content:flex-start"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6v3H9zM6 6h12v15H6zM9 12h6M9 16h4"></path></svg>② 貼上 AI 的回覆</button>
+        </div>
+        <span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,#D3E0CD 50%,#FBF4E8 50%)"></span>
+      </div>
+      <p style="margin:0;font-size:12px;line-height:1.7;color:#5A4A3C">這是覆盤頁（B17.1）右邊那張「AI 覆盤」便利貼的空白狀態。不想用 AI 也沒關係，規則可以自己加。</p>
+    </section>
+
+    <section class="step" aria-labelledby="st2">
+      <div style="display:flex;align-items:center;gap:10px"><span class="sn">2</span><h2 id="st2" class="hd" style="margin:0;font-size:21px">複製資料給 AI</h2></div>
+      <div class="paper" role="dialog" aria-labelledby="st2t" style="padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center"><h3 id="st2t" style="margin:0;font-size:15px;font-weight:700">要給 AI 的資料</h3><button class="ibtn" type="button" aria-label="關閉" style="margin-left:auto;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px 14px">
+          <sc-for list="{{incl}}" as="i" hint-placeholder-count="6">
+            <label class="ck"><span class="box" aria-hidden="true" style="background:{{i.bg}};box-shadow:inset 0 0 0 1.5px #3B2F25;color:#FBF4E8"><svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:2.4"><path d="M5 12l5 5L20 7"></path></svg></span><input type="checkbox" checked="{{i.on}}" style="position:absolute;opacity:0;width:1px;height:1px">{{i.t}}</label>
+          </sc-for>
+        </div>
+        <pre class="pre">請幫我覆盤一件買錯的衣服，用繁體中文回答。
+
+【衣物】ZARA 合身短版襯衫・S・上衣／襯衫
+材質：棉 70%、聚酯纖維 27%、彈性纖維 3%
+平放尺寸（cm）：肩寬 36、胸寬 44、腰寬 40、衣長 52、袖長 58
+
+【我的身體】2026/10/03 量測
+上胸圍 84、下胸圍 70、腰圍 66、肩寬 38、手臂長 55
+
+【我常穿的上衣 7 件：衣服 − 身體】
+胸圍 +9～+15、肩寬 0～+3、腰圍 +8～+18、袖長 +1～+5、衣長 50～58
+
+【哪裡不對】胸口太緊、肩膀卡、扣子間開縫、沒彈性
+【穿上的感覺】扣上第二顆扣子，胸口就拉出橫向皺褶……
+
+請照這個格式回覆：
+原因：
+- （一行一個原因）
+規則：
+- 範圍｜條件（例如：襯衫｜平放胸寬 ≥ 47）</pre>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:#5A4A3C;flex:1">約 <span class="num">420</span> 字・不含照片和價格</span>
+          <button type="button" class="btn btn-p"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h11v12H8zM5 16V4h11"></path></svg>複製</button>
+        </div>
+      </div>
+      <div role="status" style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;background:#3B2F25;color:#FBF4E8;font-size:13px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M5 12l5 5L20 7"></path></svg>已複製，貼到你常用的 AI，再回來按「貼上 AI 的回覆」</div>
+      <p style="margin:0;font-size:12px;line-height:1.7;color:#5A4A3C">結尾的「回覆格式」是關鍵：AI 照格式回答，平台就能把規則拆出來，完全不用平台自己判斷。</p>
+    </section>
+
+    <section class="step" aria-labelledby="st3">
+      <div style="display:flex;align-items:center;gap:10px"><span class="sn">3</span><h2 id="st3" class="hd" style="margin:0;font-size:21px">貼上回覆、確認規則</h2></div>
+      <div class="paper" style="padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+        <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:15px;font-weight:700">AI 的回覆</span>
+          <textarea rows="11" style="resize:vertical;border:1.5px solid #A7C09E;border-radius:12px;background:#FBF4E8;padding:10px 12px;font:400 12.5px/1.75 ui-monospace,'Chiron GoRound TC',monospace;color:#3B2F25">原因：
+- 胸圍鬆份只有 +4 cm，你常穿的是 +9～+15，扣子開縫是鬆份不足。
+- 肩寬比你窄 2 cm，彈性纖維只有 3%，手往前伸時背部沒有餘量。
+- 腰圍、衣長都在舒適範圍，版型適合你，是尺寸選小了。
+規則：
+- ZARA 襯衫｜尺寸選 M
+- 襯衫｜平放胸寬 ≥ 47
+- 合身款｜彈性纖維低於 5% 先看實品</textarea></label>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#2E3F2B"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M5 12l5 5L20 7"></path></svg>認出 3 個原因、3 條規則</div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:14px;font-weight:700">規則草稿 <span style="font-weight:400;font-size:12px;color:#5A4A3C">勾選的才會開始提醒</span></span>
+          <sc-for list="{{rules}}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#FBF4E8">
+              <label class="ck" style="min-height:44px"><span class="box" aria-hidden="true" style="background:{{r.bg}};box-shadow:inset 0 0 0 1.5px #3B2F25;color:#FBF4E8"><svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:2.4"><path d="M5 12l5 5L20 7"></path></svg></span><input type="checkbox" checked="{{r.on}}" aria-label="採用：{{r.t}}" style="position:absolute;opacity:0;width:1px;height:1px"></label>
+              <span style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span class="tag" style="height:20px;font-size:10px;background:#DCE8EC;color:#24424D">{{r.scope}}</span><span class="tag" style="height:20px;font-size:10px;background:{{r.kbg}};color:{{r.kfg}}">{{r.kind}}</span></span><span style="font-size:14px;font-weight:500">{{r.t}}</span></span>
+              <button type="button" class="btn btn-g" style="height:40px;padding:0 8px;font-size:12px;color:#3E6270">改數字</button>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-g">取消</button><button type="button" class="btn btn-p">放進覆盤頁</button></div>
+      </div>
+      <div role="note" style="padding:12px 14px;border-radius:12px;background:#F6E7C6;font-size:12px;line-height:1.7;color:#5A3F12"><b>沒照格式回答時：</b>整段放進「AI 覆盤」便利貼，提示「沒有認出規則，可以手動加」，不會擋住儲存。</div>
+    </section>
+  </div>
+
+  <section aria-labelledby="rs" class="paper" style="padding:18px 22px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
+    <h2 id="rs" class="hd" style="margin:0;font-size:20px;grid-column:1/-1">平台怎麼判斷規則（全部是程式比對，不用 AI）</h2>
+    <div style="font-size:12px;line-height:1.8;color:#5A4A3C"><b style="color:#3B2F25">可自動檢查</b><br>條件能對應到欄位：尺寸碼、平放尺寸（≥ ≤）、材質比例。例如「平放胸寬 ≥ 47」。</div>
+    <div style="font-size:12px;line-height:1.8;color:#5A4A3C"><b style="color:#3B2F25">只提醒</b><br>認不出欄位的句子，例如「先看實品」。只要範圍符合（品牌／類別），就原文顯示。</div>
+    <div style="font-size:12px;line-height:1.8;color:#5A4A3C"><b style="color:#3B2F25">範圍</b><br>「｜」左邊比對品牌、類別或「合身款」等版型標籤；比對不到的範圍，規則存成「只提醒」。</div>
+    <div style="font-size:12px;line-height:1.8;color:#5A4A3C"><b style="color:#3B2F25">之後都能改</b><br>草稿採用後，可以在踩雷筆記本的規則清單改數字或關掉。</div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      incl: [['衣物與平放尺寸', 1], ['10/03 量測', 1], ['常穿範圍', 1], ['材質', 1], ['哪裡不對', 1], ['穿上的感覺', 1]].map(([t, on]) => ({ t, on: !!on, bg: on ? '#3B2F25' : '#FFFCF6' })),
+      rules: [
+        ['ZARA・襯衫', '尺寸選 M', '可自動檢查', 1],
+        ['襯衫', '平放胸寬 ≥ 47 cm', '可自動檢查', 1],
+        ['合身款', '彈性纖維低於 5% 先看實品', '只提醒', 0]
+      ].map(([scope, t, kind, on]) => ({ scope, t, kind, on: !!on, bg: on ? '#3B2F25' : '#FFFCF6', kbg: kind === '只提醒' ? '#F6E7C6' : '#E6EEE2', kfg: kind === '只提醒' ? '#5A3F12' : '#2E3F2B' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

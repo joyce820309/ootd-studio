@@ -71,7 +71,10 @@ export function ClosetPage() {
       <div className="flex flex-wrap items-center gap-3 sm:gap-4">
         <TiltLabel accent="mist" as="h1">我的衣櫃</TiltLabel>
         {items && <span className="font-num text-sm text-ink-2 tabular">{items.length} 件・可穿 {availableCount}</span>}
-        <ButtonLink to="/closet/new" variant="oat" className="ml-auto hidden sm:inline-flex"><Icon name="plus" />新增衣物</ButtonLink>
+        <div className="ml-auto flex items-center gap-2">
+          <ButtonLink to="/closet/lessons" variant="ghost" className="px-3 !text-rose-deep"><Icon name="alert" size={18} />踩雷筆記本</ButtonLink>
+          <ButtonLink to="/closet/new" variant="oat" className="hidden sm:inline-flex"><Icon name="plus" />新增衣物</ButtonLink>
+        </div>
       </div>
 
       <div className="flex min-w-0 flex-col gap-3">

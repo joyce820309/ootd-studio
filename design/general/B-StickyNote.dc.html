@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>元件：便利貼</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.lines{background-origin:content-box}
+ul.hn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+ul.hn li{position:relative;padding-left:20px;font-size:17px;line-height:32px}
+ul.hn li::before{content:"";position:absolute;left:3px;top:13px;width:7px;height:7px;border-radius:50%;background:var(--dot,#3E6270)}
+.cell{display:flex;flex-direction:column;gap:10px}
+.cap{font-size:12px;color:#5A4A3C}
+.h2{margin:0;font-size:24px}
+.ptab{display:grid;grid-template-columns:150px 200px 130px 1fr;font-size:13px}
+.ptab>span{padding:10px 12px;border-top:1.5px dashed #EADCC6}
+.do{padding:14px 16px;border-radius:12px;font-size:13px;line-height:1.75}
+</style>
+</helmet>
+<div style="width:1440px;height:3010px;box-sizing:border-box;padding:56px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:44px">
+
+  <header style="display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span class="lbl" style="background:#A9C6CF;transform:rotate(-2deg);align-self:flex-start">元件</span>
+      <h1 class="hd" style="margin:0;font-size:36px">便利貼 StickyNote</h1>
+    </div>
+    <p style="margin:0 0 4px auto;max-width:600px;font-size:13px;line-height:1.8;color:#5A4A3C">一個元件，三種寫法（variant）× 四種顏色（tone）。可以「隨手貼」，但顏色有意思、數量有上限，所以貼多了也不會亂。<br>檔案：<span class="num">components/ui/StickyNote.tsx</span></p>
+  </header>
+
+  <section aria-labelledby="s1" style="display:flex;flex-direction:column;gap:18px">
+    <h2 id="s1" class="hd h2">寫法 variant</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:40px;align-items:start">
+      <div class="cell">
+        <span class="tag" style="align-self:flex-start;background:#3B2F25;color:#FBF4E8">hand（原 A）</span>
+        <div class="sticky lines" style="background-color:#DCE8EC;transform:rotate(-.6deg);background-image:repeating-linear-gradient(transparent 0 31px,rgba(62,98,112,.22) 31px 32px)">
+          <span class="tape" aria-hidden="true"></span>
+          <h3 class="hd" style="margin:0;font-size:22px;line-height:32px;color:#24424D">我的筆記</h3>
+          <ul class="hn hd" style="color:#24323A"><li>手洗或裝洗衣袋冷水洗。</li><li>搭高腰褲時前襬微塞，比例最好看。</li><li>袖子稍長，反折一次剛好。</li></ul>
+          <span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,#B9D0D8 50%,#FBF4E8 50%)"></span>
+        </div>
+        <span class="cap">全部用手帳字，內文 17px、行高 32px，紙上有橫線。<br><b style="color:#3B2F25">用在：</b>使用者自己寫的短筆記、心情。超過 4 行自動收合。</span>
+      </div>
+      <div class="cell">
+        <span class="tag" style="align-self:flex-start;background:#3B2F25;color:#FBF4E8">mixed（原 B）</span>
+        <div class="sticky" style="background:#E6EEE2;transform:rotate(.5deg)">
+          <span class="tape" aria-hidden="true" style="background:rgba(222,166,152,.6);transform:rotate(2deg)"></span>
+          <span style="position:absolute;right:14px;top:16px;font:700 11px Nunito;letter-spacing:.14em;color:#4A6245">AI・參考用</span>
+          <h3 class="hd" style="margin:0 0 8px;font-size:22px;line-height:32px;color:#2E3F2B">AI 覆盤</h3>
+          <ul class="bn" style="--dot:#4A6245"><li><b>胸圍鬆份只有 +4 cm，</b>你常穿的是 +9～+15。</li><li>腰圍、衣長都在舒適範圍。</li></ul>
+          <span style="display:block;margin-top:8px;font-size:11px;color:#3F5A3B">依據：平放尺寸、10/03 量測</span>
+          <span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,#C5D8BE 50%,#FBF4E8 50%)"></span>
+        </div>
+        <span class="cap">標題手帳字 22px，內文圓體 14px。<br><b style="color:#3B2F25">用在：</b>有數字、AI 產生、可能很長的內容。</span>
+      </div>
+      <div class="cell">
+        <span class="tag" style="align-self:flex-start;background:#3B2F25;color:#FBF4E8">grid（原 C）</span>
+        <div style="display:flex;flex-direction:column">
+          <span class="lbl" style="background:#A9C6CF;transform:rotate(-2deg);align-self:flex-start;margin:0 0 -10px 14px;position:relative;z-index:1">穿搭小抄</span>
+          <div style="position:relative;padding:28px 22px 22px;border-radius:14px;background-color:#FFFCF6;background-image:linear-gradient(rgba(150,186,198,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(150,186,198,.22) 1px,transparent 1px);background-size:16px 16px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)">
+            <ul class="hn hd" style="color:#3B2F25"><li>寬褲配短上衣</li><li>大地色＋一點霧藍</li><li>鞋包同色系</li></ul>
+          </div>
+        </div>
+        <span class="cap">白色方格紙，標題是一條紙膠帶，不傾斜。<br><b style="color:#3B2F25">用在：</b>要和旁邊白卡對齊的地方，例如列表、側欄、日記內頁。</span>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="s2" style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:baseline;gap:14px"><h2 id="s2" class="hd h2">顏色 tone</h2><span class="cap">顏色代表「誰寫的、是什麼」，不是隨意挑。</span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:28px;align-items:start">
+      <sc-for list="{{tones}}" as="t" hint-placeholder-count="4">
+        <div class="cell">
+          <div class="sticky" style="background:{{t.bg}};transform:rotate({{t.r}}deg);padding:26px 18px 22px">
+            <span class="tape" aria-hidden="true" style="width:80px;margin-left:-40px;background:{{t.tape}}"></span>
+            <h3 class="hd" style="margin:0 0 6px;font-size:22px;line-height:32px;color:{{t.title}}">{{t.head}}</h3>
+            <p style="margin:0;font-size:14px;line-height:1.8;color:{{t.text}}">{{t.body}}</p>
+            <span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,{{t.fold}} 50%,#FBF4E8 50%)"></span>
+          </div>
+          <span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700">{{t.name}}<span class="num" style="font-weight:500;font-size:11px;color:#5A4A3C">{{t.hex}}</span></span>
+          <span class="cap">{{t.use}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section aria-labelledby="s3" style="display:flex;flex-direction:column;gap:18px">
+    <h2 id="s3" class="hd h2">狀態</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:40px;align-items:start">
+      <div class="cell">
+        <div class="sticky" style="background-color:#DCE8EC;transform:rotate(-.6deg);background-image:repeating-linear-gradient(transparent 0 31px,rgba(62,98,112,.22) 31px 32px);background-origin:content-box">
+          <span class="tape" aria-hidden="true"></span>
+          <h3 class="hd" style="margin:0;font-size:22px;line-height:32px;color:#24424D">我的筆記</h3>
+          <div style="position:relative;max-height:128px;overflow:hidden">
+            <ul class="hn hd" style="color:#24323A"><li>可調式後帶，前摺變拖鞋、繞踝變包鞋。</li><li>奢華麂皮鞋面，越穿越有光澤。</li><li>蓬鬆羊皮內裡，長時間穿也不悶。</li><li>甘蔗 EVA 中底，輕量又回彈。</li><li>金屬扣環五金。</li></ul>
+            <span aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:48px;background:linear-gradient(rgba(220,232,236,0),#DCE8EC)"></span>
+          </div>
+          <button type="button" aria-expanded="false" style="margin-top:6px;height:40px;padding:0 12px;border:0;border-radius:10px;background:rgba(255,252,246,.7);color:#24424D;font:500 13px 'Chiron GoRound TC'">展開全部 <span class="num">5</span> 則</button>
+          <span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,#B9D0D8 50%,#FBF4E8 50%)"></span>
+        </div>
+        <span class="cap"><b style="color:#3B2F25">收合</b>：hand 超過 4 行、mixed 超過 6 行。</span>
+      </div>
+      <div class="cell">
+        <button type="button" class="sticky" style="background:#EDF3F5;transform:rotate(.4deg);border:0;text-align:left;width:100%;font-family:inherit;cursor:pointer">
+          <span class="tape" aria-hidden="true" style="opacity:.7"></span>
+          <span class="hd" style="display:block;font-size:22px;line-height:32px;color:#24424D">我的筆記</span>
+          <span class="hd" style="display:flex;align-items:center;gap:8px;font-size:17px;line-height:32px;color:#3E6270"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"></path></svg>寫下穿搭心得、洗滌方式…</span>
+          <span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,#C9DCE2 50%,#FBF4E8 50%)"></span>
+        </button>
+        <span class="cap"><b style="color:#3B2F25">空的</b>：顏色淡一階，整張是按鈕，點了進入編輯。</span>
+      </div>
+      <div class="cell">
+        <div class="sticky" style="background:#DCE8EC;transform:none">
+          <span class="tape" aria-hidden="true"></span>
+          <label style="display:flex;flex-direction:column;gap:8px"><span class="hd" style="font-size:22px;line-height:32px;color:#24424D">我的筆記</span>
+            <textarea rows="4" style="resize:vertical;border:1.5px solid #A9C6CF;border-radius:10px;background:#FFFCF6;padding:8px 10px;font:400 14px/1.7 'Chiron GoRound TC';color:#3B2F25">- 手洗或裝洗衣袋冷水洗
+- 搭高腰褲時前襬微塞</textarea></label>
+          <span style="display:flex;align-items:center;gap:8px;margin-top:10px"><span style="font-size:11px;color:#3E6270;flex:1">「- 」開頭會變成清單</span><button class="btn btn-g" type="button" style="height:40px;padding:0 10px;color:#24424D">取消</button><button class="btn btn-p" type="button" style="height:40px;padding:0 14px">儲存</button></span>
+        </div>
+        <span class="cap"><b style="color:#3B2F25">編輯中</b>：便利貼轉正、不傾斜，方便打字；自動儲存草稿。</span>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="s3m" style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:baseline;gap:14px"><h2 id="s3m" class="hd h2">手機（390）</h2><span class="cap">同一個元件，寬度 &lt; 640px 時自動換成手機尺寸，不用多一個參數。</span></div>
+    <div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap">
+      <div style="width:390px;flex:none;padding:20px 12px 24px;border-radius:24px;background:#FBF4E8;box-shadow:inset 0 0 0 1.5px #EADCC6;display:flex;flex-direction:column;gap:30px">
+        <div class="sticky" style="background-color:#DCE8EC;background-image:repeating-linear-gradient(transparent 0 31px,rgba(62,98,112,.22) 31px 32px);background-origin:content-box;transform:rotate(-.6deg);padding:26px 16px 22px 18px">
+          <span class="tape" aria-hidden="true" style="width:80px;margin-left:-40px"></span>
+          <button class="edit" type="button" aria-label="編輯筆記" style="right:2px;top:4px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"></path></svg></button>
+          <h3 class="hd" style="margin:0;font-size:20px;line-height:32px;color:#24424D">我的筆記</h3>
+          <div style="position:relative;max-height:128px;overflow:hidden">
+            <ul class="hn hd" style="color:#24323A"><li>可調式後帶，前摺變拖鞋、繞踝變包鞋。</li><li>奢華麂皮鞋面，越穿越有光澤。</li><li>蓬鬆羊皮內裡，長時間穿也不悶。</li><li>甘蔗 EVA 中底，輕量又回彈。</li></ul>
+            <span aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:48px;background:linear-gradient(rgba(220,232,236,0),#DCE8EC)"></span>
+          </div>
+          <button type="button" aria-expanded="false" style="margin-top:6px;height:40px;padding:0 12px;border:0;border-radius:10px;background:rgba(255,252,246,.7);color:#24424D;font:500 13px 'Chiron GoRound TC'">展開全部 <span class="num">4</span> 則</button>
+          <span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,#B9D0D8 50%,#FBF4E8 50%)"></span>
+        </div>
+        <div class="sticky" style="background:#E6EEE2;transform:rotate(.5deg);padding:26px 16px 22px 18px">
+          <span class="tape" aria-hidden="true" style="width:80px;margin-left:-40px;background:rgba(222,166,152,.6);transform:rotate(2deg)"></span>
+          <span style="position:absolute;right:12px;top:14px;font:700 10px Nunito;letter-spacing:.14em;color:#4A6245">AI・參考用</span>
+          <h3 class="hd" style="margin:0 0 6px;font-size:20px;line-height:32px;color:#2E3F2B">AI 覆盤</h3>
+          <ul class="bn" style="--dot:#4A6245"><li><b>胸圍鬆份只有 +4 cm，</b>你常穿的是 +9～+15。</li><li>版型適合你，是尺寸選小了。</li></ul>
+          <span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,#C5D8BE 50%,#FBF4E8 50%)"></span>
+        </div>
+      </div>
+      <div style="flex:1;min-width:420px;display:flex;flex-direction:column;gap:14px">
+        <div class="paper" style="padding:6px 18px">
+          <div role="table" aria-label="桌機與手機尺寸" style="display:grid;grid-template-columns:150px 1fr 1fr;font-size:13px">
+            <span role="columnheader" style="padding:10px 0;font-weight:700">項目</span><span role="columnheader" style="padding:10px 0;font-weight:700">桌機</span><span role="columnheader" style="padding:10px 0;font-weight:700">手機（&lt; 640px）</span>
+            <sc-for list="{{mob}}" as="m" hint-placeholder-count="7">
+              <span role="cell" style="padding:10px 0;border-top:1.5px dashed #EADCC6;font-weight:500">{{m.k}}</span><span role="cell" class="num" style="padding:10px 0;border-top:1.5px dashed #EADCC6;color:#5A4A3C">{{m.d}}</span><span role="cell" class="num" style="padding:10px 0;border-top:1.5px dashed #EADCC6;color:#3B2F25">{{m.m}}</span>
+            </sc-for>
+          </div>
+        </div>
+        <span class="cap" style="line-height:1.8">手機上傾斜角度、顏色、收合行數、「每畫面最多 2 張」都和桌機一樣。<br>編輯時：手機改成從下方滑出的編輯面板（全寬 textarea），避免鍵盤擋住便利貼。<br>用到的手機畫面：BM16 衣物詳細、BM14.1 覆盤、BM15 踩雷筆記本。</span>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="s4" class="paper" style="padding:22px 24px;display:flex;flex-direction:column;gap:6px">
+    <h2 id="s4" class="hd h2" style="margin-bottom:8px">Props</h2>
+    <div role="table" aria-label="StickyNote props" class="ptab">
+      <span role="columnheader" style="border-top:0;font-weight:700">prop</span><span role="columnheader" style="border-top:0;font-weight:700">值</span><span role="columnheader" style="border-top:0;font-weight:700">預設</span><span role="columnheader" style="border-top:0;font-weight:700">說明</span>
+      <sc-for list="{{props}}" as="p" hint-placeholder-count="10">
+        <span role="cell" class="num" style="font-weight:700">{{p.n}}</span><span role="cell" class="num">{{p.v}}</span><span role="cell" class="num" style="color:#5A4A3C">{{p.d}}</span><span role="cell" style="color:#5A4A3C">{{p.t}}</span>
+      </sc-for>
+    </div>
+  </section>
+
+  <section aria-labelledby="s5" style="display:flex;flex-direction:column;gap:16px">
+    <h2 id="s5" class="hd h2">隨手貼，但不亂</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="do" style="background:#E6EEE2;color:#2E3F2B"><b>這樣用</b><br>・一個畫面最多 2 張便利貼；並排時一左一右傾斜、膠帶換顏色。<br>・傾斜角度由 id 算出（−0.8°、−0.4°、0.4°、0.8° 選一個），同一張每次打開都一樣，不會跳動。<br>・顏色照意思用：霧藍是我寫的、綠是 AI、玫瑰是踩雷或警告、燕麥是提示。<br>・螢幕閱讀器把它當成一般區塊（section＋標題）；傾斜只是外觀。</div>
+      <div class="do" style="background:#F4DDD6;color:#5E2A22"><b>不要這樣</b><br>・不要用在表單、表格、錯誤訊息或主要按鈕上。<br>・hand 不要用小於 17px 的字（手帳字只有一種粗細，太小會糊）。<br>・不要整頁都是便利貼；它是「重點」，不是卡片的替代品。<br>・AI 寫的內容不要用 hand，避免看起來像你自己寫的。</div>
+    </div>
+    <div class="paper" style="padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:14px;font-weight:700">目前用到的地方</span>
+      <sc-for list="{{uses}}" as="u" hint-placeholder-count="6">
+        <span style="display:flex;gap:12px;font-size:13px;padding:6px 0;border-top:1.5px dashed #EADCC6;align-items:center"><span style="width:240px;font-weight:500">{{u.where}}</span><span class="num" style="width:200px;color:#5A4A3C">{{u.v}}</span><span style="width:12px;height:12px;border-radius:3px;background:{{u.c}}"></span><span style="color:#5A4A3C">{{u.note}}</span></span>
+      </sc-for>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3010}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      tones: [
+        { name: 'mist 霧藍', hex: '#DCE8EC', bg: '#DCE8EC', fold: '#B9D0D8', title: '#24424D', text: '#24323A', tape: 'rgba(240,196,118,.62)', r: -0.6, head: '我的體感', body: '扣上第二顆扣子，胸口就拉出皺褶。', use: '我寫的：筆記、體感、自己的規則' },
+        { name: 'sage 鼠尾草', hex: '#E6EEE2', bg: '#E6EEE2', fold: '#C5D8BE', title: '#2E3F2B', text: '#2E3F2B', tape: 'rgba(222,166,152,.6)', r: 0.5, head: 'AI 覆盤', body: '版型適合你，是尺寸選小了。', use: 'AI 產生：覆盤、搭配建議；要標「參考用」' },
+        { name: 'rose 玫瑰', hex: '#F4DDD6', bg: '#F4DDD6', fold: '#E8C3B8', title: '#5E2A22', text: '#5E2A22', tape: 'rgba(240,196,118,.62)', r: -0.4, head: '踩過雷', body: 'ZARA 襯衫 S 胸口太緊，看 M。', use: '踩雷、提醒、注意事項' },
+        { name: 'oat 燕麥', hex: '#F6E7C6', bg: '#F6E7C6', fold: '#EBD3A0', title: '#5A3F12', text: '#4A3410', tape: 'rgba(150,186,198,.6)', r: 0.8, head: '小撇步', body: '袖子反折一次，比例剛好。', use: '提示、小撇步、日記裡的心情' }
+      ],
+      props: [
+        ['variant', "'hand' | 'mixed' | 'grid'", "'mixed'", '寫法，見上方'],
+        ['tone', "'mist' | 'sage' | 'rose' | 'oat'", "'mist'", '顏色＝內容的意思'],
+        ['title', 'string', '—', '標題（hand、mixed 寫在紙上；grid 變成膠帶標籤）'],
+        ['children / items', 'ReactNode | string[]', '—', '內容；給 string[] 會排成清單'],
+        ['tilt', "'auto' | 'none'", "'auto'", 'auto 依 id 算角度；grid 永遠不傾斜'],
+        ['id', 'string', '—', '算傾斜角度用，例如 item.id'],
+        ['tape', "'auto' | 'oat' | 'rose' | 'mist' | false", "'auto'", 'auto 會和 tone 錯開'],
+        ['collapsible', 'boolean | number', 'true', 'true＝hand 4 行、mixed 6 行；數字＝自訂行數'],
+        ['badge', 'string', '—', '右上角小字，例如「AI・參考用」'],
+        ['footnote', 'string', '—', '底部小字，例如 AI 的依據'],
+        ['editable / onSave', 'boolean / (text)=>void', 'false', '右上鉛筆；空的時候整張可點'],
+        ['placeholder', 'string', '—', '空的時候顯示的提示']
+      ].map(([n, v, d, t]) => ({ n, v, d, t })),
+      mob: [['內距（上右下左）', '28 / 22 / 26 / 24 px', '26 / 16 / 22 / 18 px'], ['標題字', '22px', '20px'], ['紙膠帶', '96 × 24 px', '80 × 24 px'], ['hand 內文', '17px／行高 32px', '17px／行高 32px（不縮）'], ['mixed 內文', '14px', '14px'], ['鉛筆按鈕位置', '右 8・上 8', '右 2・上 4（仍 44×44）'], ['摺角', '26px', '26px']].map(([k, d, m]) => ({ k, d, m })),
+      uses: [
+        ['B5／BM16 衣物詳細・我的筆記', 'hand・mist・editable', '#DCE8EC', '超過 4 行收合'],
+        ['B17.1 覆盤・我的體感', 'mixed・mist・editable', '#DCE8EC', '常有數字，所以用 mixed'],
+        ['B17.1 覆盤・AI 覆盤', 'mixed・sage', '#E6EEE2', 'badge＝AI・參考用，footnote＝依據'],
+        ['B18 踩雷筆記本・我的挑選規則', 'mixed・mist', '#DCE8EC', '內容是開關列表'],
+        ['B12 穿搭日記・心情（建議）', 'hand・oat', '#F6E7C6', '一句話心情'],
+        ['B2 今日搭配・AI 建議（建議）', 'mixed・sage', '#E6EEE2', '可取代現在的綠色區塊']
+      ].map(([where, v, c, note]) => ({ where, v, c, note }))
+    };
+  }
+}
+</script>
+</body>
+</html>

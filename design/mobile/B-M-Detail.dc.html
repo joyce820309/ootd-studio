@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機衣物詳細</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+dl div{padding:12px 2px}
+ul.hn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+ul.hn li{position:relative;padding-left:20px;font-size:17px;line-height:32px;color:#24323A}
+ul.hn li::before{content:"";position:absolute;left:3px;top:13px;width:7px;height:7px;border-radius:50%;background:#3E6270}
+.act{display:flex;align-items:center;gap:14px;width:100%;min-height:56px;padding:0 16px;border:0;border-top:1.5px dashed #EADCC6;background:transparent;font:500 15px 'Chiron GoRound TC';color:#3B2F25;text-align:left;text-decoration:none;cursor:pointer}
+</style>
+</helmet>
+<div style="width:390px;height:2000px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden">
+  <header style="position:relative;z-index:2;display:flex;align-items:center;gap:4px;padding:8px 6px 8px 4px;background:#FBF4E8;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Closet.dc.html" aria-label="返回我的衣櫃" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <span style="font-size:13px;color:#5A4A3C">我的衣櫃 / 上衣</span>
+    <button type="button" aria-label="編輯" style="margin-left:auto;width:44px;height:44px;border:0;background:none;color:#3B2F25;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"></path></svg></button>
+    <button type="button" aria-label="更多動作" aria-haspopup="dialog" aria-expanded="{{menuOpen}}" onClick="{{openMenu}}" style="width:44px;height:44px;border:0;background:none;color:#3B2F25;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"></path></svg></button>
+  </header>
+
+  <main style="padding:14px 12px 120px;display:flex;flex-direction:column;gap:18px">
+    <section aria-label="衣物圖片" style="display:flex;flex-direction:column;gap:10px">
+      <div style="position:relative;aspect-ratio:1/1;border-radius:16px;background:#F3E7D4;display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <span aria-hidden="true" style="position:absolute;left:14%;top:12%;width:72%;height:76%;border-radius:24px;background:rgba(240,196,118,.32);mix-blend-mode:multiply;transform:rotate(-3deg)"></span>
+        <svg viewBox="0 0 100 100" style="position:relative;width:72%;height:72%;filter:drop-shadow(0 12px 14px rgba(59,47,37,.18))" role="img" aria-label="燕麥色羊毛圓領針織衫，去背圖"><path d="M32 16L44 13Q50 19 56 13L68 16L80 30L88 78L78 80L70 42V86H30V42L22 80L12 78L20 30Z" fill="#D9CBB3" stroke="rgba(59,47,37,.22)" stroke-width="0.5"></path><path d="M30 80H70M44 13Q50 21 56 13" fill="none" stroke="rgba(59,47,37,.3)" stroke-width="0.8"></path></svg>
+        <div role="group" aria-label="圖片版本" style="position:absolute;left:10px;bottom:10px;display:inline-flex;padding:3px;background:rgba(255,252,246,.94);border-radius:10px">
+          <button type="button" aria-pressed="true" style="height:36px;padding:0 12px;border:0;border-radius:8px;background:#3B2F25;color:#FBF4E8;font:500 13px 'Chiron GoRound TC'">去背圖</button>
+          <button type="button" aria-pressed="false" style="height:36px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:#3B2F25;font:500 13px 'Chiron GoRound TC'">原始照片</button>
+        </div>
+        <span class="num" style="position:absolute;right:10px;bottom:10px;height:28px;padding:0 10px;border-radius:999px;background:rgba(59,47,37,.7);color:#FBF4E8;font-size:12px;display:flex;align-items:center">1 / 4</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <span aria-hidden="true" style="width:56px;height:56px;border-radius:10px;border:2px solid #3E6270;background:#F3E7D4"></span>
+        <span aria-hidden="true" style="width:56px;height:56px;border-radius:10px;background:#B9AE9B"></span>
+        <span aria-hidden="true" style="width:56px;height:56px;border-radius:10px;background:#DCE8EC"></span>
+        <span aria-hidden="true" style="width:56px;height:56px;border-radius:10px;background:#EFE6D6"></span>
+        <button type="button" aria-label="新增照片" style="width:56px;height:56px;border-radius:10px;border:1.5px dashed #D9C7AC;background:transparent;color:#5A4A3C;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+      </div>
+    </section>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span class="lbl" style="align-self:flex-start;background:rgba(240,196,118,.85);transform:rotate(-1.5deg);font-size:17px">上衣・針織衫</span>
+      <h1 class="hd" style="margin:0;font-size:26px;line-height:1.35">燕麥色羊毛圓領針織衫</h1>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <span class="tag" style="background:#DCE7D8;color:#3F5A3B"><span class="dot" style="background:#3F5A3B"></span>可穿</span>
+        <span class="tag" style="background:#F4DDD6;color:#7E3F34">常穿</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      <div class="paper" style="padding:12px;display:flex;flex-direction:column;gap:2px"><span class="num" style="font-size:22px;font-weight:700">14</span><span style="font-size:11px;color:#5A4A3C">穿著次數</span></div>
+      <div class="paper" style="padding:12px;display:flex;flex-direction:column;gap:2px"><span class="num" style="font-size:22px;font-weight:700">11/06</span><span style="font-size:11px;color:#5A4A3C">最近穿著</span></div>
+      <div class="paper" style="padding:12px;display:flex;flex-direction:column;gap:2px"><span class="num" style="font-size:22px;font-weight:700">NT$249</span><span style="font-size:11px;color:#5A4A3C">每次成本</span></div>
+    </div>
+
+    <dl class="paper" style="padding:2px 14px">
+      <sc-for list="{{info}}" as="i" hint-placeholder-count="10"><div style="border-bottom-color:{{i.bb}}"><dt>{{i.k}}</dt><dd>{{i.v}}</dd></div></sc-for>
+    </dl>
+
+    <section aria-labelledby="m-flat" class="paper" style="padding:14px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:baseline;gap:6px"><h2 id="m-flat" class="hd" style="margin:0;font-size:19px">平放尺寸</h2><span style="font-size:12px;color:#74624F">cm</span></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+        <sc-for list="{{flat}}" as="f" hint-placeholder-count="4"><div style="display:flex;flex-direction:column;gap:2px;padding:8px;border-radius:10px;background:#FBF4E8"><span style="font-size:11px;color:#5A4A3C">{{f.k}}</span><span class="num" style="font-size:18px;font-weight:700">{{f.v}}</span></div></sc-for>
+      </div>
+      <span style="font-size:12px;line-height:1.6;color:#24424D">胸寬 56 × 2 = 112 cm，比你的上胸圍多 28 cm：寬鬆落肩版型。</span>
+    </section>
+
+    <section aria-labelledby="m-note" class="sticky" style="background-color:#DCE8EC;background-image:repeating-linear-gradient(transparent 0 31px,rgba(62,98,112,.22) 31px 32px);background-origin:content-box;transform:rotate(-.6deg);margin-top:10px;padding:26px 16px 22px 18px">
+      <!-- StickyNote variant="hand" tone="mist" editable collapsible（手機尺寸見 B-StickyNote.dc.html） -->
+      <span class="tape" aria-hidden="true" style="width:80px;margin-left:-40px"></span>
+      <button class="edit" type="button" aria-label="編輯筆記" style="right:2px;top:4px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"></path></svg></button>
+      <h2 id="m-note" class="hd" style="margin:0;font-size:20px;line-height:32px;color:#24424D">我的筆記</h2>
+      <ul class="hn hd"><li>手洗或裝洗衣袋冷水洗。</li><li>搭高腰褲時前襬微塞，比例最好看。</li><li>袖子稍長，反折一次剛好。</li></ul>
+      <span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,#B9D0D8 50%,#FBF4E8 50%)"></span>
+    </section>
+
+    <section aria-labelledby="m-pair" style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 id="m-pair" class="hd" style="margin:0;font-size:19px">常一起穿的</h2><a href="B-M-Outfit.dc.html" style="font-size:13px;min-height:44px;display:flex;align-items:center">用這件搭一套</a></div>
+      <div style="display:flex;gap:8px;overflow-x:auto;margin:0 -12px;padding:0 12px">
+        <sc-for list="{{paired}}" as="x" hint-placeholder-count="5">
+          <span style="display:flex;flex-direction:column;gap:4px;flex:none;width:84px">
+            <span style="display:flex;align-items:center;justify-content:center;width:84px;height:84px;border-radius:12px;background:#F3E7D4"><svg viewBox="0 0 100 100" style="width:76%;height:76%" role="img" aria-label="{{x.name}}"><path d="{{x.d}}" fill="{{x.hex}}" stroke="rgba(59,47,37,.22)" stroke-width="0.8"></path></svg></span>
+            <span class="num" style="font-size:11px;color:#5A4A3C">一起穿 {{x.n}} 次</span>
+          </span>
+        </sc-for>
+      </div>
+    </section>
+
+    <div style="display:flex;justify-content:center;gap:4px;padding-top:8px;border-top:1.5px dashed #D9C7AC">
+      <button class="btn btn-g" type="button" style="font-size:13px">封存</button>
+      <a class="btn btn-g" href="B-M-Review-Mark.dc.html" style="font-size:13px;color:#7E3F34">這件踩雷了</a>
+      <button class="btn btn-g" type="button" style="font-size:13px;color:#8E4A3E">刪除</button>
+    </div>
+  </main>
+
+  <footer style="position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;gap:8px;padding:12px 12px 28px;background:#FBF4E8;border-top:1.5px dashed #D9C7AC">
+    <button type="button" class="btn btn-s" style="flex:1;height:52px">記錄今天穿了</button>
+    <a class="btn btn-o" href="B-M-Outfit.dc.html" style="flex:1.3;height:52px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>加入今日搭配</a>
+  </footer>
+
+  <sc-if value="{{menu}}" hint-placeholder-val="{{ false }}">
+    <div aria-hidden="true" onClick="{{closeMenu}}" style="position:absolute;inset:0;z-index:5;background:rgba(59,47,37,.42)"></div>
+    <section role="dialog" aria-modal="true" aria-label="更多動作" style="position:absolute;left:0;right:0;bottom:0;z-index:6;background:#FFFCF6;border-radius:22px 22px 0 0;padding:8px 0 28px;display:flex;flex-direction:column">
+      <span aria-hidden="true" style="align-self:center;width:40px;height:4px;border-radius:2px;background:#D9C7AC;margin-bottom:10px"></span>
+      <button class="act" type="button" style="border-top:0"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"></path></svg>編輯衣物資料</button>
+      <button class="act" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>變更狀態（可穿／送洗／待修）</button>
+      <a class="act" href="B-M-Review-Mark.dc.html" style="color:#7E3F34"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 16H3zM12 10v4M12 17h.01"></path></svg><span style="display:flex;flex-direction:column;gap:2px">這件踩雷了<span style="font-size:12px;font-weight:400;color:#5A4A3C">退貨、不穿或轉賣，記下原因與尺寸</span></span></a>
+      <a class="act" href="B-M-Exchange.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h11v12H8zM5 16V4h11"></path></svg><span style="display:flex;flex-direction:column;gap:2px">複製這件<span style="font-size:12px;font-weight:400;color:#5A4A3C">買了另一個顏色或尺寸，改幾個欄位就好</span></span></a>
+      <button class="act" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v13H4zM4 7l2-3h12l2 3M10 12h4"></path></svg>封存</button>
+      <button class="act" type="button" style="color:#8E4A3E"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"></path></svg>刪除</button>
+      <button type="button" class="btn btn-s" onClick="{{closeMenu}}" style="margin:12px 16px 0;height:48px">取消</button>
+    </section>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2000}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { menu: false }; }
+  renderVals() {
+    const G = {
+      pants: 'M32 10H68L72 90H56L50 36L44 90H28Z',
+      coat: 'M30 12L44 10L50 30L56 10L70 12L84 28L90 84L80 86L72 46L74 92H26L28 46L20 86L10 84L16 28Z',
+      shoe: 'M14 62V46Q24 44 34 52Q48 62 70 62Q86 62 88 72V76H14Z',
+      skirt: 'M36 14H64L80 86H20Z'
+    };
+    const it = (name, hex, s, n) => ({ name, hex, d: G[s], n });
+    const I = [['顏色', '燕麥 #D9CBB3'], ['品牌', 'COS'], ['標籤尺寸', 'M'], ['版型', '落肩・寬鬆'], ['材質', '羊毛 70%・尼龍 30%'], ['季節', '秋・冬'], ['場合', '上班・週末・旅行'], ['購買日期', '2025/10/18'], ['購買價格', 'NT$3,490'], ['店家', 'COS 台北信義店']];
+    return {
+      menu: this.state.menu, menuOpen: this.state.menu ? 'true' : 'false',
+      openMenu: () => this.setState({ menu: true }), closeMenu: () => this.setState({ menu: false }),
+      sheetTop: 1540,
+      info: I.map(([k, v], i) => ({ k, v, bb: i === I.length - 1 ? 'transparent' : '#EADCC6' })),
+      flat: [{ k: '肩寬', v: '52' }, { k: '袖長', v: '20' }, { k: '胸寬', v: '56' }, { k: '衣長', v: '64' }],
+      paired: [it('深藍打褶西裝褲', '#2E3A4F', 'pants', 6), it('炭灰短版西裝外套', '#3D3D3B', 'coat', 5), it('淺藍直筒牛仔褲', '#8FA3BC', 'pants', 4), it('黑色樂福鞋', '#1F1F1E', 'shoe', 4), it('鼠尾草綠百褶裙', '#8C9A86', 'skirt', 2)]
+    };
+  }
+}
+</script>
+</body>
+</html>

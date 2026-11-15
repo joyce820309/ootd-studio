@@ -130,10 +130,18 @@ a{color:#3E6270}
           </div>
         </section>
 
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <span style="font-size:13px;font-weight:500">我的筆記</span>
-          <p class="hd" style="margin:0;padding:6px 16px;border-radius:12px;background:#FFFCF6;font-size:16px;line-height:32px;background-image:repeating-linear-gradient(transparent 0 31px,#EADCC6 31px 32px);background-origin:content-box">手洗或裝洗衣袋冷水洗。搭高腰褲時前襬微塞，比例最好看；袖子稍長，反折一次剛好。</p>
-        </div>
+        <section aria-labelledby="note-t" style="position:relative;margin-top:10px;padding:28px 22px 26px 24px;border-radius:3px;background-color:#DCE8EC;background-image:repeating-linear-gradient(transparent 0 31px,rgba(62,98,112,.22) 31px 32px);background-origin:content-box;transform:rotate(-.6deg);box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)">
+          <!-- StickyNote variant="hand" tone="mist" editable collapsible（規格見 B-StickyNote.dc.html） -->
+          <span aria-hidden="true" style="position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg)"></span>
+          <button type="button" aria-label="編輯筆記" style="position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"></path></svg></button>
+          <h3 id="note-t" class="hd" style="margin:0;font-size:22px;font-weight:400;line-height:32px;color:#24424D">我的筆記</h3>
+          <ul class="hd" style="margin:0;padding:0 0 0 20px;font-size:17px;line-height:32px;color:#24323A">
+            <li>手洗或裝洗衣袋冷水洗。</li>
+            <li>搭高腰褲時前襬微塞，比例最好看。</li>
+            <li>袖子稍長，反折一次剛好。</li>
+          </ul>
+          <span aria-hidden="true" style="position:absolute;right:0;bottom:0;width:26px;height:26px;background:linear-gradient(135deg,#B9D0D8 50%,#FBF4E8 50%)"></span>
+        </section>
 
         <div style="display:flex;flex-direction:column;gap:10px">
           <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="hd" style="font-size:19px;font-weight:700">常一起穿的</span><a href="B-Outfit.dc.html" style="font-size:13px">用這件搭一套</a></div>
@@ -152,6 +160,8 @@ a{color:#3E6270}
           <button class="btn btn-s" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg>編輯</button>
           <button class="btn btn-g" type="button">記錄今天穿了</button>
           <span style="margin-left:auto;display:flex;gap:4px">
+            <a class="btn btn-g" href="B-Exchange.dc.html" style="font-size:13px;font-weight:400">複製這件</a>
+            <a class="btn btn-g" href="B-Review-Mark.dc.html" style="font-size:13px;font-weight:400;color:#7E3F34">這件踩雷了</a>
             <button class="btn btn-g" type="button" style="font-size:13px;font-weight:400">封存</button>
             <button class="btn btn-g" type="button" style="font-size:13px;font-weight:400;color:#8E4A3E">刪除</button>
           </span>
@@ -161,7 +171,7 @@ a{color:#3E6270}
   </main>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1440}}'>
 class Component extends DCLogic {
   renderVals() {
     const G = {

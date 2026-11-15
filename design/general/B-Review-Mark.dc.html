@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>標記踩雷</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.out{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;border-radius:12px;background:#FFFCF6;font:400 12px 'Chiron GoRound TC';color:#5A4A3C;text-align:left;cursor:pointer}
+</style>
+</helmet>
+<div style="width:1440px;height:1060px;position:relative;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;overflow:hidden">
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
+      <a class="nav-a" href="B-Home.dc.html">首頁</a>
+      <a class="nav-a" href="B-Closet.dc.html" aria-current="page" style="border-bottom-color:#F2CF8E;color:#3B2F25;font-weight:700">我的衣櫃</a>
+      <a class="nav-a" href="B-Outfit.dc.html">今日搭配</a>
+      <a class="nav-a" href="#diary">穿搭日記</a>
+      <a class="nav-a" href="B-Wishlist.dc.html">選購清單</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:4px;padding-bottom:10px">
+      <button class="ibtn" type="button" aria-label="通知" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"></path></svg></button>
+      <a href="B-Body.dc.html" aria-label="個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#FFFCF6;border:1.5px solid #3B2F25;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span></a>
+    </div>
+  </header>
+  <div aria-hidden="true" style="max-width:1240px;margin:0 auto;padding:40px 48px;display:flex;gap:40px">
+    <div style="flex:1;aspect-ratio:1/1;max-width:540px;border-radius:14px;background:#F3E7D4"></div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:14px"><div style="height:40px;width:60%;border-radius:8px;background:#EADCC6"></div><div style="height:300px;border-radius:14px;background:#FFFCF6"></div><div style="height:180px;border-radius:14px;background:#FFFCF6"></div></div>
+  </div>
+  <div aria-hidden="true" style="position:absolute;inset:0;background:rgba(59,47,37,.42)"></div>
+
+  <section role="dialog" aria-modal="true" aria-labelledby="dlg-t" class="paper" style="position:absolute;left:50%;top:48px;width:720px;margin-left:-360px;padding:24px 28px;display:flex;flex-direction:column;gap:18px;border-radius:18px">
+    <div style="display:flex;align-items:flex-start;gap:14px">
+      <span style="width:56px;height:56px;border-radius:12px;background:#F3E7D4;display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 100 100" style="width:80%;height:80%" aria-hidden="true"><path d="M32 16L44 12L50 20L56 12L68 16L80 30L88 70L78 72L70 40V74H30V40L22 72L12 70L20 30Z" fill="#F4F1EA" stroke="rgba(59,47,37,.3)" stroke-width="1"></path></svg></span>
+      <div style="display:flex;flex-direction:column;gap:2px"><h2 id="dlg-t" class="hd" style="margin:0;font-size:24px">這件踩雷了</h2><span style="font-size:13px;color:#5A4A3C">ZARA 合身短版襯衫・S・<span class="num">11/08</span> 買</span></div>
+      <button class="ibtn" type="button" aria-label="關閉" style="margin-left:auto;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+
+    <fieldset style="margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:8px">
+      <legend style="font-size:14px;font-weight:700;margin-bottom:8px">後來怎麼處理</legend>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+        <sc-for list="{{outs}}" as="o" hint-placeholder-count="4">
+          <button type="button" role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" class="out" style="border:{{o.bd}};background:{{o.bg}}"><span style="font-size:14px;font-weight:700;color:#3B2F25">{{o.t}}</span>{{o.d}}</button>
+        </sc-for>
+      </div>
+      <sc-if value="{{exchange}}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;background:#F6E7C6">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span style="font-size:13px;font-weight:700;color:#5A3F12;width:60px">換成</span>
+            <sc-for list="{{kinds}}" as="k" hint-placeholder-count="3"><button type="button" class="chip" aria-pressed="{{k.on}}" onClick="{{k.pick}}">{{k.t}}</button></sc-for>
+          </div>
+          <sc-if value="{{kSize}}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#5A3F12"><span style="width:60px;font-weight:700">尺寸</span><span class="num" style="height:40px;padding:0 14px;border-radius:10px;background:rgba(255,252,246,.6);display:flex;align-items:center;text-decoration:line-through;color:#74624F">S</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M5 12h14M13 6l6 6-6 6"></path></svg><input aria-label="換成的尺寸" value="M" class="num" style="width:80px;height:40px;border:1.5px solid #E2B866;border-radius:10px;background:#FFFCF6;padding:0 12px;font-size:15px;font-weight:700;color:#3B2F25"></div>
+          </sc-if>
+          <sc-if value="{{kColor}}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#5A3F12"><span style="width:60px;font-weight:700">顏色</span><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:18px;border-radius:5px;background:#F4F1EA;box-shadow:inset 0 0 0 1px rgba(59,47,37,.2)"></span>白</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M5 12h14M13 6l6 6-6 6"></path></svg><button type="button" class="btn btn-s" style="height:40px;padding:0 12px"><span style="width:18px;height:18px;border-radius:5px;background:#8FA3BC"></span>藍</button><span style="font-size:12px">（色系選擇器同 B6）</span></div>
+          </sc-if>
+          <sc-if value="{{kOther}}" hint-placeholder-val="{{ false }}">
+            <span style="font-size:13px;line-height:1.6;color:#5A3F12">換成同一家的另一款：下一步會複製品牌、通路、價格、購買日，品名和尺寸請重新填。</span>
+          </sc-if>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#5A3F12"><span style="width:60px;font-weight:700">換貨日</span><button type="button" class="btn btn-s" style="height:40px;padding:0 12px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M4 7h16v13H4zM4 11h16M9 3v4M15 3v4"></path></svg><span class="num">2026/11/15</span></button><span style="font-size:12px">補差價（選填）</span><input aria-label="補差價" placeholder="NT$0" class="num" style="width:96px;height:40px;border:1.5px solid #E2D2B8;border-radius:10px;background:#FFFCF6;padding:0 10px;font-size:13px"></div>
+        </div>
+      </sc-if>
+      <sc-if value="{{returned}}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#5A4A3C">退貨日期<button type="button" class="btn btn-s" style="height:40px;padding:0 12px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M4 7h16v13H4zM4 11h16M9 3v4M15 3v4"></path></svg><span class="num">2026/11/15</span></button><span style="font-size:12px">（日期元件見 B11）</span></div>
+      </sc-if>
+    </fieldset>
+
+    <fieldset style="margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:12px">
+      <legend style="font-size:14px;font-weight:700;margin-bottom:8px">哪裡不對 <span style="font-weight:400;font-size:12px;color:#5A4A3C">可複選</span></legend>
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <span style="width:40px;flex:none;padding-top:10px;font-size:12px;color:#5A4A3C">{{g.k}}</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{g.items}}" as="c" hint-placeholder-count="6"><button type="button" class="chip" aria-pressed="{{c.on}}" onClick="{{c.toggle}}">{{c.t}}</button></sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </fieldset>
+
+    <label style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:14px;font-weight:700">穿上的感覺 <span style="font-weight:400;font-size:12px;color:#5A4A3C">選填，會變成「我的體感」便利貼</span></span>
+      <textarea rows="3" style="resize:vertical;border:1.5px solid #E2D2B8;border-radius:12px;background:#FBF4E8;padding:10px 12px;font:400 14px/1.7 'Chiron GoRound TC';color:#3B2F25">扣上第二顆扣子，胸口就拉出橫向皺褶，扣子之間會開縫。手往前伸的時候肩膀卡住。</textarea>
+    </label>
+
+    <label style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:#E6EEE2;cursor:pointer">
+      <span class="sw" aria-hidden="true" style="background:{{aiBg}}"><span style="left:{{aiL}}px"></span></span>
+      <input type="checkbox" checked="{{ai}}" onChange="{{toggleAi}}" style="position:absolute;opacity:0;width:1px;height:1px">
+      <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:500;color:#2E3F2B">之後整理資料給 AI 覆盤</span><span style="font-size:12px;line-height:1.6;color:#3F5A3B">平台不會自動呼叫 AI。覆盤頁會幫你把尺寸、<span class="num">10/03</span> 量測、常穿範圍整理成一段文字，複製去問 AI，再把回覆貼回來（見 B17.3）。</span></span>
+    </label>
+
+    <div style="display:flex;align-items:center;gap:10px;border-top:1.5px dashed #EADCC6;padding-top:16px">
+      <span style="font-size:12px;line-height:1.6;color:#5A4A3C;flex:1">{{foot}}</span>
+      <button class="btn btn-g" type="button">取消</button>
+      <a class="btn btn-p" href="{{next}}">{{cta}}</a>
+    </div>
+  </section>
+  <span style="position:absolute;left:32px;bottom:20px;font-size:12px;color:#FBF4E8">入口：衣物詳細 › 更多 › 「這件踩雷了」；選購清單已收到的商品也有同一個入口</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.state = { out: 'exchange', kind: 'size', ai: true, on: { '胸口太緊': 1, '肩膀卡': 1, '扣子間開縫': 1, '沒彈性': 1 } };
+  }
+  renderVals() {
+    const st = this.state;
+    const G = [
+      ['尺寸', ['胸口太緊', '胸口太鬆', '肩膀卡', '肩太寬', '腰太緊', '腰太鬆', '太短', '太長', '袖子太短', '袖子太長']],
+      ['材質', ['刺癢', '太薄會透', '悶熱', '沒彈性', '起毛球', '容易皺']],
+      ['其他', ['顏色和照片不同', '版型不適合我', '扣子間開縫', '做工差', '其實不需要']]
+    ];
+    const O = [['returned', '已退貨', '退款後資料仍保留'], ['exchange', '換貨', '下一步複製成新的一件'], ['kept', '留著但不會穿', '之後可以改成轉賣'], ['gone', '轉賣・送人', '記下去處就好']];
+    const ex = st.out === 'exchange';
+    return {
+      outs: O.map(([id, t, d]) => ({ t, d, on: st.out === id ? 'true' : 'false', bd: st.out === id ? '2px solid #3B2F25' : '1.5px solid #E2D2B8', bg: st.out === id ? '#FFFCF6' : '#FBF4E8', pick: () => this.setState({ out: id }) })),
+      returned: st.out === 'returned', exchange: ex,
+      kinds: [['size', '換尺寸'], ['color', '換顏色'], ['other', '換別款']].map(([id, t]) => ({ t, on: st.kind === id ? 'true' : 'false', pick: () => this.setState({ kind: id }) })),
+      kSize: st.kind === 'size', kColor: st.kind === 'color', kOther: st.kind === 'other',
+      foot: ex ? '原本這件標成「已換貨」，連同 S 的尺寸留在踩雷筆記本；換到的那件會出現在衣櫃。' : '衣物會移到「踩雷筆記本」，尺寸和照片都保留，不會再出現在衣櫃和搭配裡。',
+      next: ex ? 'B-Exchange.dc.html' : 'B-Review.dc.html',
+      groups: G.map(([k, items]) => ({ k, items: items.map(t => ({ t, on: st.on[t] ? 'true' : 'false', toggle: () => this.setState({ on: Object.assign({}, st.on, { [t]: st.on[t] ? 0 : 1 }) }) })) })),
+      ai: st.ai, aiBg: st.ai ? '#4A6245' : '#D9C7AC', aiL: st.ai ? 20 : 2,
+      toggleAi: () => this.setState({ ai: !st.ai }),
+      cta: ex ? '儲存，下一步建立換到的那件' : (st.ai ? '儲存並前往覆盤' : '儲存')
+    };
+  }
+}
+</script>
+</body>
+</html>

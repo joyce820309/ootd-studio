@@ -1,5 +1,5 @@
 import { monthGrid, parseISODate, todayISO, WEEKDAYS } from './date'
-import { isWearable, STATUS_LABEL } from './slots'
+import { isInCloset, isWearable, STATUS_LABEL } from './slots'
 import type { BoardPiece } from '@/components/outfit/OutfitBoard'
 import type { ClosetItem, DiaryEntry, DiaryFeel, DiaryWeather, Slot } from '@/types'
 
@@ -96,7 +96,7 @@ export function monthStats(entries: DiaryEntry[], closet: ClosetItem[]): MonthSt
     .slice(0, 3)
     .map(([id, count]) => ({ item: byId.get(id)!, count }))
   const unworn = closet
-    .filter((c) => c.status !== 'retired' && !counts.has(c.id))
+    .filter((c) => isInCloset(c.status) && !counts.has(c.id))
     .sort((a, b) => Number(isWearable(a.status)) - Number(isWearable(b.status)) || (a.wearCount ?? 0) - (b.wearCount ?? 0))
     .slice(0, 4)
   return { days, avgRating, comfyDays, top, unworn }

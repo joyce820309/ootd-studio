@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機 AI 覆盤・複製與貼上</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.pre{margin:0;padding:12px;border-radius:12px;background:#FBF4E8;box-shadow:inset 0 0 0 1.5px #EADCC6;font:400 12px/1.7 ui-monospace,'Chiron GoRound TC',monospace;color:#3B2F25;white-space:pre-wrap;max-height:260px;overflow:hidden}
+.mtab{flex:1;height:40px;border:0;border-radius:8px;background:transparent;font:500 13px 'Chiron GoRound TC';color:#5A4A3C}
+.mtab[aria-selected="true"]{background:#FFFCF6;color:#3B2F25;font-weight:700;box-shadow:0 1px 2px rgba(59,47,37,.1)}
+.box{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:inset 0 0 0 1.5px #3B2F25;color:#FBF4E8}
+</style>
+</helmet>
+<div style="width:390px;height:844px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden">
+  <div aria-hidden="true" style="padding:60px 12px;display:flex;flex-direction:column;gap:12px"><div style="height:120px;border-radius:14px;background:#FFFCF6"></div><div style="height:240px;border-radius:14px;background:#DCE8EC"></div></div>
+  <div aria-hidden="true" style="position:absolute;inset:0;background:rgba(59,47,37,.42)"></div>
+
+  <section role="dialog" aria-modal="true" aria-labelledby="mai-t" style="position:absolute;left:0;right:0;top:56px;bottom:0;background:#FFFCF6;border-radius:22px 22px 0 0;padding:8px 16px 0;display:flex;flex-direction:column;gap:14px">
+    <span aria-hidden="true" style="align-self:center;width:40px;height:4px;border-radius:2px;background:#D9C7AC"></span>
+    <div style="display:flex;align-items:center"><h2 id="mai-t" class="hd" style="margin:0;font-size:20px">AI 覆盤</h2><span style="margin-left:8px;font-size:11px;color:#5A4A3C">平台不呼叫 AI</span><button type="button" aria-label="關閉" style="margin-left:auto;width:44px;height:44px;border:0;background:none;color:#3B2F25;display:flex;align-items:center;justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+    <div role="tablist" aria-label="步驟" style="display:flex;padding:3px;border-radius:10px;background:#F3E7D4">
+      <button class="mtab" type="button" role="tab" aria-selected="{{t1}}" onClick="{{toCopy}}">① 複製給 AI</button>
+      <button class="mtab" type="button" role="tab" aria-selected="{{t2}}" onClick="{{toPaste}}">② 貼上回覆</button>
+    </div>
+
+    <sc-if value="{{isCopy}}" hint-placeholder-val="{{ true }}">
+      <pre class="pre">請幫我覆盤一件買錯的衣服，用繁體中文回答。
+
+【衣物】ZARA 合身短版襯衫・S・上衣／襯衫
+材質：棉 70%、聚酯纖維 27%、彈性纖維 3%
+平放尺寸（cm）：肩寬 36、胸寬 44、腰寬 40、衣長 52、袖長 58
+
+【我的身體】2026/10/03 量測
+上胸圍 84、下胸圍 70、腰圍 66、肩寬 38……</pre>
+      <span style="font-size:12px;color:#5A4A3C">約 <span class="num">420</span> 字・結尾附回覆格式・<button type="button" style="border:0;background:none;padding:0;color:#3E6270;font:500 12px 'Chiron GoRound TC';min-height:32px">選擇要包含的資料</button></span>
+      <div role="status" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#E6EEE2;color:#2E3F2B;font-size:12px;line-height:1.5"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M5 12l5 5L20 7"></path></svg>按下複製後，切到你常用的 AI App 貼上；回來時這裡會自動切到「② 貼上回覆」。</div>
+      <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:#FFFCF6;border-top:1.5px dashed #EADCC6"><button type="button" class="btn btn-p" onClick="{{toPaste}}" style="width:100%;height:52px;font-size:15px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h11v12H8zM5 16V4h11"></path></svg>複製</button></div>
+    </sc-if>
+
+    <sc-if value="{{isPaste}}" hint-placeholder-val="{{ false }}">
+      <textarea aria-label="AI 的回覆" rows="6" style="resize:none;border:1.5px solid #A7C09E;border-radius:12px;background:#FBF4E8;padding:10px 12px;font:400 12px/1.7 ui-monospace,'Chiron GoRound TC',monospace;color:#3B2F25">原因：
+- 胸圍鬆份只有 +4 cm，扣子開縫是鬆份不足。
+- 肩寬比你窄 2 cm，彈性纖維只有 3%。
+規則：
+- ZARA 襯衫｜尺寸選 M
+- 襯衫｜平放胸寬 ≥ 47
+- 合身款｜彈性纖維低於 5% 先看實品</textarea>
+      <span style="font-size:12px;color:#2E3F2B">認出 2 個原因、3 條規則・勾選的會開始提醒</span>
+      <sc-for list="{{rules}}" as="r" hint-placeholder-count="3">
+        <label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:#FBF4E8;min-height:56px;cursor:pointer">
+          <span class="box" aria-hidden="true" style="background:{{r.bg}}"><svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:2.4"><path d="M5 12l5 5L20 7"></path></svg></span>
+          <input type="checkbox" checked="{{r.on}}" style="position:absolute;opacity:0;width:1px;height:1px">
+          <span style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="display:flex;gap:4px"><span class="tag" style="height:18px;font-size:10px;background:#DCE8EC;color:#24424D">{{r.scope}}</span><span class="tag" style="height:18px;font-size:10px;background:{{r.kbg}};color:{{r.kfg}}">{{r.kind}}</span></span><span style="font-size:14px;font-weight:500">{{r.t}}</span></span>
+        </label>
+      </sc-for>
+      <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:#FFFCF6;border-top:1.5px dashed #EADCC6"><a class="btn btn-p" href="B-M-Review.dc.html" style="width:100%;height:52px;font-size:15px">放進覆盤頁</a></div>
+    </sc-if>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { step: 'copy' }; }
+  renderVals() {
+    const st = this.state;
+    return {
+      isCopy: st.step === 'copy', isPaste: st.step === 'paste',
+      t1: st.step === 'copy' ? 'true' : 'false', t2: st.step === 'paste' ? 'true' : 'false',
+      toCopy: () => this.setState({ step: 'copy' }), toPaste: () => this.setState({ step: 'paste' }),
+      rules: [['ZARA・襯衫', '尺寸選 M', '可自動檢查', 1], ['襯衫', '平放胸寬 ≥ 47 cm', '可自動檢查', 1], ['合身款', '彈性纖維低於 5% 先看實品', '只提醒', 0]]
+        .map(([scope, t, kind, on]) => ({ scope, t, kind, on: !!on, bg: on ? '#3B2F25' : '#FFFCF6', kbg: kind === '只提醒' ? '#F6E7C6' : '#E6EEE2', kfg: kind === '只提醒' ? '#5A3F12' : '#2E3F2B' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

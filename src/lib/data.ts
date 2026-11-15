@@ -1,10 +1,11 @@
 import { todayISO } from './date'
 import { useEffect, useState } from 'react'
 import { SAMPLE_BODY_MEASUREMENTS, SAMPLE_CATEGORIES, SAMPLE_COMPARE_GROUPS, SAMPLE_DIARY, SAMPLE_ITEMS, SAMPLE_PROFILE, SAMPLE_WISHLIST } from '@/data/sample'
-import type { AddItemDestination, BodyMeasurement, BodyMeasurementInput, BrandChange, BrandSummary, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, CutoutRegion, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, GarmentShape, ItemStatus, ManagedEntryChange, ManagedListSummary, NewGarmentInput, Outfit, ProfilePreferences, ShopKind, Slot, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, StudioCanvasItem, WishlistInput, WishlistItem, WishStatus } from '@/types'
+import type { AddItemDestination, BodyMeasurement, BodyMeasurementInput, BrandChange, BrandSummary, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, CutoutRegion, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, GarmentShape, ItemStatus, LessonRule, LessonRuleInput, LessonStatus, ManagedEntryChange, ManagedListSummary, NewGarmentInput, Outfit, ProfilePreferences, ReviewDecision, ReviewRecord, ReviewRecordInput, ShopKind, Slot, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, StudioCanvasItem, WishlistInput, WishlistItem, WishStatus } from '@/types'
 import { toUploadableImage } from '@/lib/image'
 import { MATERIAL_DEFAULTS, materialNames } from '@/lib/materials'
 import { supabase } from './supabase'
+import { isInCloset, isLessonStatus } from './slots'
 
 const CUTOUT_BUCKET = 'closet-images'
 const SIGNED_URL_TTL = 60 * 60
@@ -19,6 +20,8 @@ let demoCompareClosetItems: { groupId: string; itemId: string }[] = []
 const demoGarmentDraftFiles = new Map<string, File[]>()
 const demoManagedShops = new Map<string, { kind: ShopKind; url?: string }>()
 const demoManagedMaterials = new Map<string, { aliases: string[]; sortOrder: number; isDefault: boolean; isHidden: boolean }>(MATERIAL_DEFAULTS.map((material) => [material.name, { aliases: [...material.aliases], sortOrder: material.sortOrder, isDefault: true, isHidden: false }]))
+let demoReviewRecords: ReviewRecord[] = []
+let demoLessonRules: LessonRule[] = []
 
 function cloneProfile(profile: ProfilePreferences): ProfilePreferences {
   return {
@@ -170,6 +173,7 @@ function itemFromRow(row: ItemRow, urls: Record<string, string>, photos?: Closet
     shape: fallbackShape(row.categories?.slot ?? null),
     wearCount: row.wear_count,
     lastWornAt: row.last_worn_at ?? undefined,
+    cutoutPath: row.image_cutout_path ?? undefined,
   }
 }
 
@@ -180,11 +184,11 @@ async function signed(paths: string[]): Promise<Record<string, string>> {
 }
 
 export async function fetchClosetItems(): Promise<ClosetItem[]> {
-  if (!supabase) return demoClosetItems.filter((item) => item.status !== 'retired').map((item) => ({ ...item }))
+  if (!supabase) return demoClosetItems.filter((item) => isInCloset(item.status)).map((item) => ({ ...item }))
   const { data, error } = await supabase
     .from('items')
     .select('id,name,category_id,color_name,color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(name,slot)')
-    .neq('status', 'retired')
+    .not('status', 'in', '(retired,returned,exchanged,unworn,given_away)')
     .eq('is_draft', false)
     .order('created_at', { ascending: false })
   if (error) throw error
@@ -238,6 +242,12 @@ export async function fetchClosetItemDetail(id: string): Promise<ClosetItem | nu
   }))
   const item = itemFromRow(row, urls, photos)
   item.categoryName = row.categories?.name
+  // 0016 之後才有的欄位；還沒執行 migration 時略過
+  const extra = await supabase.from('items').select('received_on,exchanged_from').eq('id', id).maybeSingle()
+  if (!extra.error && extra.data) {
+    item.receivedOn = (extra.data.received_on as string | null) ?? undefined
+    item.exchangedFrom = (extra.data.exchanged_from as string | null) ?? undefined
+  }
   return item
 }
 
@@ -1779,6 +1789,407 @@ export async function markBrandsDistinct(groupKey: string): Promise<{ demo: bool
     return { demo: true }
   }
   const { error } = await supabase.from('brand_distinct_groups').upsert({ group_key: groupKey }, { onConflict: 'owner_id,group_key', ignoreDuplicates: true })
+  if (error) throw error
+  return { demo: false }
+}
+
+/* ── 踩雷覆盤與挑選規則 ───────────────────────────── */
+
+const DECISION_STATUS: Record<ReviewDecision, LessonStatus> = { returned: 'returned', exchanged: 'exchanged', kept: 'unworn', given_away: 'given_away' }
+
+interface ReviewRow {
+  id: string
+  item_id: string
+  item_name: string
+  brand: string | null
+  size: string | null
+  material: string | null
+  price: number | string | null
+  purchase_date: string | null
+  decision: string
+  returned_on: string | null
+  exchange_kind?: string | null
+  exchange_size?: string | null
+  exchange_color_name?: string | null
+  exchange_color_hex?: string | null
+  exchanged_on?: string | null
+  exchange_extra?: number | string | null
+  reasons: string[] | null
+  personal_note: string[] | null
+  ai_summary: string[] | null
+  ai_pasted_at?: string | null
+  created_at: string
+  updated_at: string | null
+}
+
+function reviewFromRow(row: ReviewRow): ReviewRecord {
+  const decision: ReviewDecision =
+    row.decision === 'kept' || row.decision === 'not_worn' ? 'kept' : row.decision === 'given_away' ? 'given_away' : row.decision === 'exchanged' ? 'exchanged' : 'returned'
+  const kind = row.exchange_kind
+  return {
+    id: row.id,
+    itemId: row.item_id,
+    itemName: row.item_name,
+    brand: row.brand ?? undefined,
+    size: row.size ?? undefined,
+    material: row.material ?? undefined,
+    price: row.price == null ? undefined : Number(row.price),
+    purchaseDate: row.purchase_date ?? undefined,
+    decision,
+    returnedOn: row.returned_on ?? undefined,
+    exchangeKind: kind === 'size' || kind === 'color' || kind === 'other' ? kind : undefined,
+    exchangeSize: row.exchange_size ?? undefined,
+    exchangeColorName: row.exchange_color_name ?? undefined,
+    exchangeColorHex: row.exchange_color_hex ?? undefined,
+    exchangedOn: row.exchanged_on ?? undefined,
+    exchangeExtra: row.exchange_extra == null ? undefined : Number(row.exchange_extra),
+    reasons: (row.reasons ?? []).filter(Boolean),
+    personalNote: (row.personal_note ?? []).filter(Boolean),
+    aiSummary: (row.ai_summary ?? []).filter(Boolean),
+    aiPastedAt: row.ai_pasted_at ?? undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at ?? undefined,
+  }
+}
+
+/** 所有覆盤，新到舊 */
+export async function fetchReviewRecords(): Promise<ReviewRecord[]> {
+  if (!supabase) return [...demoReviewRecords].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  const { data, error } = await supabase.from('review_records').select('*').order('created_at', { ascending: false })
+  if (error) throw error
+  return ((data ?? []) as ReviewRow[]).map(reviewFromRow)
+}
+
+/** 單件衣物的覆盤；沒有就回傳 null */
+export async function fetchReviewForItem(itemId: string): Promise<ReviewRecord | null> {
+  if (!supabase) return demoReviewRecords.find((record) => record.itemId === itemId) ?? null
+  const { data, error } = await supabase.from('review_records').select('*').eq('item_id', itemId).maybeSingle()
+  if (error) throw error
+  return data ? reviewFromRow(data as ReviewRow) : null
+}
+
+/**
+ * 儲存覆盤（每件衣物一筆，重複儲存會更新），並把衣物狀態改成對應的踩雷狀態。
+ */
+export async function saveReviewRecord(input: ReviewRecordInput): Promise<{ record: ReviewRecord; demo: boolean }> {
+  const now = new Date().toISOString()
+  const status = DECISION_STATUS[input.decision]
+  const exchanged = input.decision === 'exchanged'
+  const normalized: ReviewRecordInput = {
+    ...input,
+    returnedOn: input.decision === 'returned' ? input.returnedOn : undefined,
+    exchangeKind: exchanged ? input.exchangeKind : undefined,
+    exchangeSize: exchanged && input.exchangeKind === 'size' ? input.exchangeSize : undefined,
+    exchangeColorName: exchanged && input.exchangeKind === 'color' ? input.exchangeColorName : undefined,
+    exchangeColorHex: exchanged && input.exchangeKind === 'color' ? input.exchangeColorHex : undefined,
+    exchangedOn: exchanged ? input.exchangedOn : undefined,
+    exchangeExtra: exchanged ? input.exchangeExtra : undefined,
+  }
+
+  if (!supabase) {
+    const existing = demoReviewRecords.find((record) => record.itemId === input.itemId)
+    const record: ReviewRecord = { ...normalized, id: existing?.id ?? crypto.randomUUID(), createdAt: existing?.createdAt ?? now, updatedAt: now }
+    demoReviewRecords = existing ? demoReviewRecords.map((entry) => entry.id === existing.id ? record : entry) : [record, ...demoReviewRecords]
+    demoClosetItems = demoClosetItems.map((item) => item.id === input.itemId ? { ...item, status } : item)
+    return { record, demo: true }
+  }
+
+  const payload: Record<string, unknown> = {
+    item_id: normalized.itemId,
+    item_name: normalized.itemName,
+    brand: normalized.brand ?? null,
+    size: normalized.size ?? null,
+    material: normalized.material ?? null,
+    price: normalized.price ?? null,
+    purchase_date: normalized.purchaseDate || null,
+    decision: normalized.decision,
+    returned_on: normalized.returnedOn ?? null,
+    reasons: normalized.reasons,
+    personal_note: normalized.personalNote,
+    ai_summary: normalized.aiSummary,
+  }
+  // 換貨欄位在 0016 才有；不是換貨時不送，舊資料庫也能存退貨等其他處理方式
+  if (exchanged) {
+    Object.assign(payload, {
+      exchange_kind: normalized.exchangeKind ?? null,
+      exchange_size: normalized.exchangeSize ?? null,
+      exchange_color_name: normalized.exchangeColorName ?? null,
+      exchange_color_hex: normalized.exchangeColorHex ?? null,
+      exchanged_on: normalized.exchangedOn ?? null,
+      exchange_extra: normalized.exchangeExtra ?? null,
+    })
+  }
+  const { data, error } = await supabase.from('review_records').upsert(payload, { onConflict: 'owner_id,item_id' }).select('*').single()
+  if (error) throw error
+  const { error: statusError } = await supabase.from('items').update({ status }).eq('id', input.itemId)
+  if (statusError) throw statusError
+  return { record: reviewFromRow(data as ReviewRow), demo: false }
+}
+
+/** 只更新覆盤的部分欄位（我的體感、AI 覆盤），不動衣物狀態 */
+export async function updateReviewRecord(id: string, patch: Partial<Pick<ReviewRecord, 'personalNote' | 'aiSummary' | 'aiPastedAt' | 'reasons'>>): Promise<{ demo: boolean }> {
+  if (!supabase) {
+    demoReviewRecords = demoReviewRecords.map((record) => record.id === id ? { ...record, ...patch, updatedAt: new Date().toISOString() } : record)
+    return { demo: true }
+  }
+  const payload: Record<string, unknown> = {}
+  if (patch.personalNote) payload.personal_note = patch.personalNote
+  if (patch.aiSummary) payload.ai_summary = patch.aiSummary
+  if ('aiPastedAt' in patch) payload.ai_pasted_at = patch.aiPastedAt ?? null
+  if (patch.reasons) payload.reasons = patch.reasons
+  const { error } = await supabase.from('review_records').update(payload).eq('id', id)
+  if (error) throw error
+  return { demo: false }
+}
+
+/** 換貨換到的那件（新衣物的 exchanged_from 指向舊的） */
+export async function fetchExchangedTo(itemId: string): Promise<Pick<ClosetItem, 'id' | 'name' | 'size'> | null> {
+  if (!supabase) {
+    const item = demoClosetItems.find((entry) => entry.exchangedFrom === itemId)
+    return item ? { id: item.id, name: item.name, size: item.size } : null
+  }
+  const { data, error } = await supabase.from('items').select('id,name,size').eq('exchanged_from', itemId).eq('is_draft', false).limit(1).maybeSingle()
+  if (error) return null // 0016 之前沒有這個欄位
+  return data ? { id: data.id as string, name: data.name as string, size: (data.size as string | null) || undefined } : null
+}
+
+/** 複製衣物（換貨下一步、「複製這件」）：建立新衣物，照片在 Storage 裡複製一份 */
+export interface CopyItemInput {
+  name: string
+  categoryId: string
+  colorName: string
+  colorHex: string
+  secondColorHex?: string
+  brand?: string
+  size?: string
+  material?: string
+  materialComposition?: string
+  materialPercentages?: Record<string, number>
+  seasons: string[]
+  purchaseDate?: string
+  purchasePrice?: number | null
+  store?: string
+  productUrl?: string
+  note?: string
+  flatMeasurements: Record<string, number | null>
+  receivedOn?: string
+  exchangedFrom?: string
+  /** 換貨還沒收到時為 not_arrived */
+  status: Extract<ItemStatus, 'ok' | 'not_arrived'>
+  /** 要沿用的去背圖 */
+  copyCutout: boolean
+  /** 要沿用的照片（item_photos 的路徑），第一張當封面 */
+  photoPaths: string[]
+}
+
+export async function copyClosetItem(source: ClosetItem, input: CopyItemInput): Promise<{ id: string; demo: boolean }> {
+  if (!input.name.trim()) throw new Error('請填品名。')
+  const flatMeasurements = Object.fromEntries(Object.entries(input.flatMeasurements).filter(([, value]) => value !== null && Number.isFinite(value)))
+
+  if (!supabase) {
+    const id = `demo-copy-${Date.now()}`
+    const category = SAMPLE_CATEGORIES.find((entry) => entry.id === input.categoryId)
+    const keepImage = input.copyCutout || input.photoPaths.length > 0
+    demoClosetItems = [{
+      id,
+      name: input.name.trim(),
+      categoryId: input.categoryId,
+      slot: category?.slot ?? source.slot,
+      categorySlot: category?.slot ?? source.categorySlot,
+      categoryName: category?.name ?? source.categoryName,
+      colorName: input.colorName,
+      colorHex: input.colorHex,
+      secondColorHex: input.secondColorHex || undefined,
+      brand: input.brand || undefined,
+      size: input.size || undefined,
+      material: input.material || undefined,
+      materialComposition: input.materialComposition || undefined,
+      materialPercentages: input.materialPercentages,
+      seasons: [...input.seasons],
+      purchaseDate: input.purchaseDate || undefined,
+      purchasePrice: input.purchasePrice ?? undefined,
+      store: input.store || undefined,
+      productUrl: input.productUrl || undefined,
+      note: input.note || undefined,
+      flatMeasurements,
+      status: input.status,
+      cutoutUrl: keepImage ? source.cutoutUrl : undefined,
+      shape: source.shape,
+      wearCount: 0,
+      receivedOn: input.receivedOn,
+      exchangedFrom: input.exchangedFrom,
+    }, ...demoClosetItems]
+    return { id, demo: true }
+  }
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError) throw userError
+  if (!user) throw new Error('請重新登入後再新增衣物。')
+
+  const id = crypto.randomUUID()
+  const ext = (path: string) => path.split('.').pop() || 'jpg'
+  const copied: string[] = []
+  const payload: Record<string, unknown> = {
+    id,
+    category_id: input.categoryId,
+    name: input.name.trim(),
+    color_name: input.colorName,
+    color_hex: input.colorHex,
+    second_color_hex: input.secondColorHex || null,
+    size: input.size?.trim() || '',
+    brand: input.brand?.trim() || null,
+    seasons: input.seasons,
+    material: input.material?.trim() || null,
+    material_composition: input.materialComposition?.trim() || null,
+    material_percentages: input.materialPercentages ?? {},
+    purchase_date: input.purchaseDate || null,
+    purchase_price: input.purchasePrice ?? null,
+    store: input.store?.trim() || null,
+    product_url: input.productUrl?.trim() || null,
+    note: input.note?.trim() || null,
+    flat_measurements: flatMeasurements,
+    status: input.status,
+    cutout_status: 'skipped',
+  }
+  // 0016 的欄位只在有值時送出
+  if (input.receivedOn) payload.received_on = input.receivedOn
+  if (input.exchangedFrom) payload.exchanged_from = input.exchangedFrom
+
+  try {
+    const { error } = await supabase.from('items').insert(payload)
+    if (error) throw error
+
+    const bucket = supabase.storage.from(CUTOUT_BUCKET)
+    const photoRows = []
+    for (const [index, from] of input.photoPaths.entries()) {
+      const to = index === 0 ? `${user.id}/${id}/original.${ext(from)}` : `${user.id}/${id}/photos/${crypto.randomUUID()}.${ext(from)}`
+      const { error: copyError } = await bucket.copy(from, to)
+      if (copyError) throw copyError
+      copied.push(to)
+      photoRows.push({ owner_id: user.id, item_id: id, storage_path: to, sort_order: index, is_cover: index === 0 })
+    }
+    let cutoutPath: string | null = null
+    if (input.copyCutout && source.cutoutPath) {
+      cutoutPath = `${user.id}/${id}/cutout.${ext(source.cutoutPath)}`
+      const { error: copyError } = await bucket.copy(source.cutoutPath, cutoutPath)
+      if (copyError) throw copyError
+      copied.push(cutoutPath)
+    }
+    if (photoRows.length) {
+      const { error: photosError } = await supabase.from('item_photos').insert(photoRows)
+      if (photosError) throw photosError
+    }
+    if (photoRows.length || cutoutPath) {
+      const { error: imageError } = await supabase.from('items').update({
+        image_original_path: photoRows[0]?.storage_path ?? null,
+        image_cutout_path: cutoutPath,
+        cutout_status: cutoutPath ? 'done' : 'skipped',
+      }).eq('id', id)
+      if (imageError) throw imageError
+    }
+    return { id, demo: false }
+  } catch (error) {
+    if (copied.length) await supabase.storage.from(CUTOUT_BUCKET).remove(copied)
+    await supabase.from('items').delete().eq('id', id)
+    throw error
+  }
+}
+
+/** 取消踩雷：刪除覆盤（規則保留），衣物回到衣櫃 */
+export async function removeReviewRecord(record: ReviewRecord): Promise<{ demo: boolean }> {
+  if (!supabase) {
+    demoReviewRecords = demoReviewRecords.filter((entry) => entry.id !== record.id)
+    demoLessonRules = demoLessonRules.map((rule) => rule.sourceReviewId === record.id ? { ...rule, sourceReviewId: undefined } : rule)
+    demoClosetItems = demoClosetItems.map((item) => item.id === record.itemId ? { ...item, status: 'ok' } : item)
+    return { demo: true }
+  }
+  const { error } = await supabase.from('review_records').delete().eq('id', record.id)
+  if (error) throw error
+  const { error: statusError } = await supabase.from('items').update({ status: 'ok' }).eq('id', record.itemId)
+  if (statusError) throw statusError
+  return { demo: false }
+}
+
+/** 踩雷筆記本裡的衣物（已退貨／留著不穿／轉賣・送人），含圖片 */
+export async function fetchLessonItems(): Promise<ClosetItem[]> {
+  if (!supabase) return demoClosetItems.filter((item) => isLessonStatus(item.status)).map((item) => ({ ...item }))
+  const { data, error } = await supabase
+    .from('items')
+    .select('id,name,category_id,color_name,color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(name,slot)')
+    .in('status', ['returned', 'exchanged', 'unworn', 'given_away'])
+    .eq('is_draft', false)
+  if (error) throw error
+  const rows = (data ?? []) as unknown as ItemRow[]
+  const urls = await signed(rows.flatMap((row) => [row.image_cutout_path, row.image_original_path].filter((path): path is string => !!path)))
+  return rows.map((row) => itemFromRow(row, urls))
+}
+
+interface LessonRuleRow {
+  id: string
+  scope: string
+  kind: string | null
+  check_kind?: string | null
+  text: string
+  why: string
+  active: boolean
+  source_review_id: string | null
+  created_at: string
+}
+
+function ruleFromRow(row: LessonRuleRow): LessonRule {
+  return {
+    id: row.id,
+    scope: row.scope,
+    kind: row.kind === 'brand' || row.kind === 'size' ? row.kind : 'category',
+    checkKind: row.check_kind === 'auto' ? 'auto' : 'remind',
+    text: row.text,
+    why: row.why,
+    active: row.active,
+    sourceReviewId: row.source_review_id ?? undefined,
+    createdAt: row.created_at,
+  }
+}
+
+/** 挑選規則，新到舊 */
+export async function fetchLessonRules(): Promise<LessonRule[]> {
+  if (!supabase) return [...demoLessonRules].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  const { data, error } = await supabase.from('lesson_rules').select('*').order('created_at', { ascending: false })
+  if (error) throw error
+  return ((data ?? []) as LessonRuleRow[]).map(ruleFromRow)
+}
+
+/** 新增或更新一條規則（有 id 就更新） */
+export async function saveLessonRule(input: LessonRuleInput): Promise<{ rule: LessonRule; demo: boolean }> {
+  if (!supabase) {
+    const existing = input.id ? demoLessonRules.find((rule) => rule.id === input.id) : undefined
+    const rule: LessonRule = { ...input, id: existing?.id ?? crypto.randomUUID(), createdAt: existing?.createdAt ?? new Date().toISOString() }
+    demoLessonRules = existing ? demoLessonRules.map((entry) => entry.id === rule.id ? rule : entry) : [rule, ...demoLessonRules]
+    return { rule, demo: true }
+  }
+  const payload: Record<string, unknown> = {
+    scope: input.scope,
+    kind: input.kind,
+    text: input.text,
+    why: input.why,
+    active: input.active,
+    source_review_id: input.sourceReviewId ?? null,
+  }
+  // 0016 才有 check_kind；只有「可自動檢查」需要特別記
+  if (input.checkKind === 'auto') payload.check_kind = 'auto'
+  const query = input.id
+    ? supabase.from('lesson_rules').update(payload).eq('id', input.id)
+    : supabase.from('lesson_rules').insert(payload)
+  const { data, error } = await query.select('*').single()
+  if (error) throw error
+  return { rule: ruleFromRow(data as LessonRuleRow), demo: false }
+}
+
+export async function deleteLessonRule(id: string): Promise<{ demo: boolean }> {
+  if (!supabase) {
+    demoLessonRules = demoLessonRules.filter((rule) => rule.id !== id)
+    return { demo: true }
+  }
+  const { error } = await supabase.from('lesson_rules').delete().eq('id', id)
   if (error) throw error
   return { demo: false }
 }

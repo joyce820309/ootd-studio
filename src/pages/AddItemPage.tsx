@@ -13,6 +13,7 @@ import { Toast, type ToastMessage } from '@/components/ui/Toast'
 import { fetchCategories, fetchClosetBrands, fetchManagedList, createManagedEntry, createGarmentDraft, updateGarmentDraft, finalizeGarmentDraft, discardGarmentDraft, removeItemBackground, getGarmentPhotoUrl } from '@/lib/data'
 import { materialNames, parsePercentages } from '@/lib/materials'
 import { toUploadableImage } from '@/lib/image'
+import { GARMENT_COLORS } from '@/lib/colors'
 import type { AddItemDestination, Category, CutoutRegion, ManagedListSummary, NewGarmentInput } from '@/types'
 
 type Step = 1 | 2 | 3 | 4
@@ -31,14 +32,7 @@ type FormState = Omit<NewGarmentInput, 'flatMeasurements' | 'seasons' | 'destina
 const MAX_PHOTOS = 8
 const STEP_LABELS = ['照片', '去背', '資料', '確認']
 const SEASONS = ['春', '夏', '秋', '冬']
-const COLORS = [
-  { name: '白', hex: '#F4F1EA' }, { name: '米', hex: '#EFE6D2' }, { name: '燕麥', hex: '#D9CBB3' },
-  { name: '駝', hex: '#B88A5A' }, { name: '咖啡', hex: '#5A4031' }, { name: '灰', hex: '#9A9893' },
-  { name: '黑', hex: '#232322' }, { name: '海軍藍', hex: '#2E3A4F' }, { name: '藍', hex: '#8FA3BC' },
-  { name: '綠', hex: '#8C9A86' }, { name: '黃', hex: '#E8C66A' }, { name: '橘', hex: '#D98A4E' },
-  { name: '紅', hex: '#A8423A' }, { name: '酒紅', hex: '#6E2E34' }, { name: '粉', hex: '#E7B9B4' },
-  { name: '紫', hex: '#8E7AA6' }, { name: '多色', hex: '#8C9A86' }, { name: '其他', hex: '#D9C7AC' },
-]
+const COLORS = GARMENT_COLORS
 const INPUT_CLASS = 'h-12 w-full rounded-btn border-[1.5px] border-line bg-card px-3 text-sm text-ink outline-none focus:border-mist-deep'
 const SIZING: Record<string, MeasureField[]> = {
   top: [{ key: 'shoulder', label: '肩寬' }, { key: 'sleeve', label: '袖長' }, { key: 'chest', label: '胸寬' }, { key: 'length', label: '衣長' }],

@@ -32,6 +32,10 @@ const STATUS_CLASS: Record<ItemStatus, string> = {
   lent: 'bg-status-lent-bg text-status-lent-fg',
   stored: 'bg-status-stored-bg text-status-stored-fg',
   retired: 'bg-status-stored-bg text-ink-3',
+  returned: 'bg-status-repair-bg text-status-repair-fg',
+  exchanged: 'bg-status-lent-bg text-status-lent-fg',
+  unworn: 'bg-status-lent-bg text-status-lent-fg',
+  given_away: 'bg-status-cleaning-bg text-status-cleaning-fg',
 }
 
 /** 狀態標籤：色點＋文字，不只靠顏色辨識 */

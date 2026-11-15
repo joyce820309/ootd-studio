@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>我的筆記・便利貼提案</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.opt{display:flex;flex-direction:column;gap:14px}
+.tag{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#3B2F25}
+.tag b{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#3B2F25;color:#FBF4E8;font:700 13px Nunito}
+.why{margin:0;font-size:12px;line-height:1.7;color:#5A4A3C}
+.edit{position:absolute;right:10px;top:10px;width:40px;height:40px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.sticky{position:relative;padding:30px 22px 26px 24px;background:#DCE8EC;border-radius:3px 3px 3px 3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.45)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;background:linear-gradient(135deg,#B9D0D8 50%,#FBF4E8 50%);border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.lines{background-image:repeating-linear-gradient(transparent 0 31px,rgba(62,98,112,.22) 31px 32px)}
+ul.hn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+ul.hn li{position:relative;padding-left:20px;font-size:17px;line-height:32px;color:#24323A}
+ul.hn li::before{content:"";position:absolute;left:3px;top:13px;width:7px;height:7px;border-radius:50%;background:#3E6270}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:#3E6270}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:1440px;height:1480px;box-sizing:border-box;padding:56px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:36px">
+
+  <header style="display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span class="lbl" style="background:#A9C6CF;transform:rotate(-2deg);align-self:flex-start">提案・待決定</span>
+      <h1 class="hd" style="margin:0;font-size:34px">衣物詳細「我的筆記」改成藍色便利貼</h1>
+    </div>
+    <p style="margin:0 0 4px auto;max-width:520px;font-size:13px;line-height:1.8;color:#5A4A3C">三個版本都放在衣物詳細右欄的實際寬度（556px）裡，內容用你那雙 UGG 的真實筆記。手帳字體（霞鶩漫黑）只有一種粗細、小於 17px 會糊，所以內文一律 17px、行高 32px。</p>
+  </header>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:40px;align-items:start">
+
+    <section class="opt" aria-labelledby="oa">
+      <span class="tag" id="oa"><b>A</b>藍便利貼・全部手帳字（推薦）</span>
+      <div class="sticky lines" style="transform:rotate(-.6deg);background-color:#DCE8EC;background-origin:content-box">
+        <span class="tape" aria-hidden="true"></span>
+        <button class="edit" type="button" aria-label="編輯筆記"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"></path></svg></button>
+        <h3 class="hd" style="margin:0 0 0;font-size:22px;line-height:32px;color:#24424D">我的筆記</h3>
+        <ul class="hn hd">
+          <sc-for list="{{notes}}" as="n" hint-placeholder-count="6"><li>{{n}}</li></sc-for>
+        </ul>
+        <span class="fold" aria-hidden="true"></span>
+      </div>
+      <p class="why">最有手帳感。標題移進便利貼，跟紙膠帶、橫線一起變成「一張貼在頁面上的紙」。代價是長文字比較累，所以搭配下方的「超過 4 行先收合」。</p>
+    </section>
+
+    <section class="opt" aria-labelledby="ob">
+      <span class="tag" id="ob"><b>B</b>藍便利貼・標題手帳字、內文圓體</span>
+      <div class="sticky" style="transform:rotate(.5deg)">
+        <span class="tape" aria-hidden="true" style="background:rgba(222,166,152,.6);transform:rotate(2deg)"></span>
+        <button class="edit" type="button" aria-label="編輯筆記"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"></path></svg></button>
+        <h3 class="hd" style="margin:0 0 8px;font-size:22px;line-height:32px;color:#24424D">我的筆記</h3>
+        <ul class="bn">
+          <sc-for list="{{notes}}" as="n" hint-placeholder-count="6"><li>{{n}}</li></sc-for>
+        </ul>
+        <span class="fold" aria-hidden="true"></span>
+      </div>
+      <p class="why">外觀一樣可愛，但內文維持 14px 圓體，最好讀、最省高度。適合筆記常常是「貼上官網商品說明」這種長內容。</p>
+    </section>
+
+    <section class="opt" aria-labelledby="oc">
+      <span class="tag" id="oc"><b>C</b>標題膠帶＋方格紙</span>
+      <div style="display:flex;flex-direction:column;gap:0">
+        <span class="lbl" style="background:#A9C6CF;transform:rotate(-2deg);align-self:flex-start;margin:0 0 -10px 14px;position:relative;z-index:1">我的筆記</span>
+        <div style="position:relative;padding:28px 22px 22px;border-radius:14px;background-color:#FFFCF6;background-image:linear-gradient(rgba(150,186,198,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(150,186,198,.22) 1px,transparent 1px);background-size:16px 16px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)">
+          <button class="edit" type="button" aria-label="編輯筆記" style="color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"></path></svg></button>
+          <ul class="hn hd" style="padding-right:28px">
+            <sc-for list="{{notes}}" as="n" hint-placeholder-count="6"><li style="color:#3B2F25">{{n}}</li></sc-for>
+          </ul>
+        </div>
+      </div>
+      <p class="why">跟頁面其他區塊（成分、季節）的白卡一致，只換成方格紙＋膠帶標題。最穩，但「便利貼」的感覺最弱。</p>
+    </section>
+  </div>
+
+  <div style="height:0;border-top:1.5px dashed #D9C7AC"></div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 390px;gap:40px;align-items:start">
+    <section class="opt" aria-labelledby="sa">
+      <span class="tag" id="sa">A 的長內容：超過 4 行先收合</span>
+      <div class="sticky lines" style="transform:rotate(-.6deg);background-origin:content-box">
+        <span class="tape" aria-hidden="true"></span>
+        <button class="edit" type="button" aria-label="編輯筆記"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"></path></svg></button>
+        <h3 class="hd" style="margin:0;font-size:22px;line-height:32px;color:#24424D">我的筆記</h3>
+        <div style="position:relative;max-height:128px;overflow:hidden">
+          <ul class="hn hd">
+            <sc-for list="{{notes}}" as="n" hint-placeholder-count="6"><li>{{n}}</li></sc-for>
+          </ul>
+          <span aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:48px;background:linear-gradient(rgba(220,232,236,0),#DCE8EC)"></span>
+        </div>
+        <button type="button" aria-expanded="false" style="margin-top:6px;height:40px;padding:0 12px;border:0;border-radius:10px;background:rgba(255,252,246,.7);color:#24424D;font:500 13px 'Chiron GoRound TC';display:inline-flex;align-items:center;gap:6px;cursor:pointer">展開全部 <span class="num">6</span> 則<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M6 9l6 6 6-6"></path></svg></button>
+        <span class="fold" aria-hidden="true"></span>
+      </div>
+      <p class="why">頁面不會被一張便利貼撐很長；展開後就是上面 A 的完整樣子。</p>
+    </section>
+
+    <section class="opt" aria-labelledby="sb">
+      <span class="tag" id="sb">還沒寫筆記</span>
+      <button type="button" class="sticky" style="transform:rotate(.4deg);background:#EDF3F5;border:0;text-align:left;cursor:pointer;width:100%;font-family:inherit;opacity:1">
+        <span class="tape" aria-hidden="true" style="opacity:.7"></span>
+        <span class="hd" style="display:block;font-size:22px;line-height:32px;color:#24424D">我的筆記</span>
+        <span class="hd" style="display:flex;align-items:center;gap:8px;font-size:17px;line-height:32px;color:#3E6270"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"></path></svg>點這裡寫下穿搭心得、洗滌方式…</span>
+        <span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,#C9DCE2 50%,#FBF4E8 50%)"></span>
+      </button>
+      <p class="why">整張便利貼就是按鈕，點了直接進入編輯。顏色更淡一階，看得出「還是空的」。</p>
+    </section>
+
+    <section class="opt" aria-labelledby="sm">
+      <span class="tag" id="sm">手機（390）</span>
+      <div style="width:390px;padding:16px 16px 20px;border-radius:24px;background:#FBF4E8;box-shadow:inset 0 0 0 1.5px #EADCC6">
+        <div class="sticky lines" style="transform:rotate(-.6deg);padding:28px 16px 22px 18px;background-origin:content-box">
+          <span class="tape" aria-hidden="true" style="width:80px;margin-left:-40px"></span>
+          <button class="edit" type="button" aria-label="編輯筆記" style="right:4px;top:6px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"></path></svg></button>
+          <h3 class="hd" style="margin:0;font-size:20px;line-height:32px;color:#24424D">我的筆記</h3>
+          <div style="position:relative;max-height:128px;overflow:hidden">
+            <ul class="hn hd">
+              <sc-for list="{{notes}}" as="n" hint-placeholder-count="6"><li>{{n}}</li></sc-for>
+            </ul>
+            <span aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:48px;background:linear-gradient(rgba(220,232,236,0),#DCE8EC)"></span>
+          </div>
+          <button type="button" aria-expanded="false" style="margin-top:6px;height:40px;padding:0 12px;border:0;border-radius:10px;background:rgba(255,252,246,.7);color:#24424D;font:500 13px 'Chiron GoRound TC';cursor:pointer">展開全部 <span class="num">6</span> 則</button>
+          <span class="fold" aria-hidden="true"></span>
+        </div>
+      </div>
+      <p class="why">手機上傾斜角度一樣，左右留白縮小，收合規則相同。</p>
+    </section>
+  </div>
+
+  <section aria-labelledby="spec" style="padding:20px 24px;border-radius:14px;background:#FFFCF6;display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
+    <h2 id="spec" class="hd" style="margin:0;font-size:20px;grid-column:1/-1">規格（選定後照這個做）</h2>
+    <div style="font-size:12px;line-height:1.8;color:#5A4A3C"><b style="color:#3B2F25">顏色</b><br>紙 #DCE8EC（mist soft）<br>摺角 #B9D0D8・橫線 rgba(62,98,112,.22)<br>文字 #24323A／標題 #24424D</div>
+    <div style="font-size:12px;line-height:1.8;color:#5A4A3C"><b style="color:#3B2F25">紙膠帶</b><br>96×24px・rgba(240,196,118,.62)<br>旋轉 −3°・置中壓在上緣 −11px<br>便利貼本身旋轉 −0.6°</div>
+    <div style="font-size:12px;line-height:1.8;color:#5A4A3C"><b style="color:#3B2F25">字</b><br>A：標題 22px、內文 17px／行高 32px 手帳字<br>B：內文 14px 晴熙圓體<br>清單點用 7px 霧藍圓點</div>
+    <div style="font-size:12px;line-height:1.8;color:#5A4A3C"><b style="color:#3B2F25">行為</b><br>超過 4 行收合＋「展開全部」<br>右上鉛筆＝編輯；空的時候整張可點<br>筆記支援「- 」開頭自動成清單</div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1480}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      notes: [
+        '可調式後帶，兩種穿法｜前摺變拖鞋、繞踝變包鞋，自由切換造型，不用因為場合多帶一雙鞋。',
+        '奢華麂皮鞋面｜延續 Goldenstar 系列一貫的高級質感，隨穿著時間養出獨特光澤。',
+        '蓬鬆羊皮內裡｜搭配立體足床，貼合腳型，長時間穿著也不悶不磨腳。',
+        '甘蔗 EVA 中底及大底｜輕量支撐兼顧回彈感，兼顧永續材質運用。',
+        '再生聚酯纖維包邊｜細節處也選用再生材質，呼應品牌永續理念。',
+        '金屬扣環五金｜UGG® Logo 熱壓於鞋面與鞋舌，細節質感不馬虎。'
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
