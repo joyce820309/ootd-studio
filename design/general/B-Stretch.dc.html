@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>彈性尺寸</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.h2{margin:0;font-size:24px}
+.cap{font-size:12px;line-height:1.7;color:#5A4A3C}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fl{font-size:13px;font-weight:500}
+.fbox{display:flex;align-items:center;height:48px;border:1.5px solid #E2D2B8;border-radius:12px;background:#FFFCF6;padding:0 12px;gap:6px}
+.fbox input{flex:1;min-width:0;width:100%;border:0;background:transparent;font:700 18px Nunito,'Chiron GoRound TC';color:#3B2F25;text-align:right;outline:none}
+.unit{font-size:12px;color:#74624F}
+.stc{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:999px;background:#F6E7C6;color:#5A3F12;font-size:11px;font-weight:500}
+.srow{display:grid;grid-template-columns:150px 70px 90px 70px minmax(260px,1fr) 170px;align-items:center;gap:12px;min-height:64px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.state{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+</style>
+</helmet>
+<div style="width:1440px;height:2580px;box-sizing:border-box;padding:56px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:44px">
+
+  <header style="display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span class="lbl" style="background:#F2CF8E;transform:rotate(-2deg);align-self:flex-start">規格 v2</span>
+      <h1 class="hd" style="margin:0;font-size:36px">彈性尺寸：平放 ＋ 可拉伸</h1>
+    </div>
+    <p style="margin:0 0 4px auto;max-width:620px;font-size:13px;line-height:1.8;color:#5A4A3C">網拍常寫「胸寬 40-60」：平放 40，可拉到 60。這張是所有頁面共用的輸入、顯示、判定和規則提醒狀態；新增衣物、衣物詳細、覆盤、選購清單、比較試搭台都照這裡做。資料存在 <span class="num">flat_stretch</span>（migration 0013）。</p>
+  </header>
+
+  <section aria-labelledby="sa" style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:baseline;gap:14px"><h2 id="sa" class="hd h2">A・輸入</h2><span class="cap">用在 B6／BM8.2 新增衣物、B7 新增選購、衣物詳細的編輯。<span class="num">type="text" inputmode="decimal"</span>，手機一樣跳數字鍵盤。</span></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+
+      <div class="paper state">
+        <span class="tag" style="align-self:flex-start;background:#F3E7D4;color:#5A4A3C">A1 單一數字</span>
+        <div class="fld"><span class="fl">胸寬</span><div class="fbox"><input aria-label="胸寬" value="44"><span class="unit">cm</span></div>
+          <button type="button" class="btn btn-g" style="align-self:flex-start;height:36px;padding:0 4px;font-size:12px;color:#3E6270">＋ 有彈性</button></div>
+        <span class="cap">跟現在一樣。「＋ 有彈性」只出現在胸寬、腰寬、臀寬、大腿寬、袖口、褲口。</span>
+      </div>
+
+      <div class="paper state">
+        <span class="tag" style="align-self:flex-start;background:#E6EEE2;color:#2E3F2B">A2 直接貼上範圍</span>
+        <div class="fld"><span class="fl">胸寬</span><div class="fbox" style="border-color:#A7C09E"><input aria-label="胸寬" value="40-60"><span class="unit">cm</span></div>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:#2E3F2B"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M5 12l5 5L20 7"></path></svg>已辨識：平放 <b class="num">40</b>・可拉到 <b class="num">60</b> cm</span></div>
+        <span class="cap">接受 40-60、40~60、40～60、全形數字、帶 cm。順序相反自動對調；兩個數字一樣就當成單一值。</span>
+      </div>
+
+      <div class="paper state">
+        <span class="tag" style="align-self:flex-start;background:#F6E7C6;color:#5A3F12">A3 點「有彈性」展開兩格</span>
+        <div class="fld"><span class="fl">胸寬 <span class="stc">彈性</span></span>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center">
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:#5A4A3C">平放<span class="fbox"><input aria-label="胸寬平放" value="40"><span class="unit">cm</span></span></label>
+            <span aria-hidden="true" style="padding-top:18px;color:#74624F">↔</span>
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:#5A4A3C">拉開後<span class="fbox" style="border-color:#E2B866;background:#FFF9EE"><input aria-label="胸寬拉開後" value="60"><span class="unit">cm</span></span></label>
+          </div>
+          <span style="font-size:12px;color:#5A3F12">拉開後也量平放，不是一整圈</span>
+          <button type="button" class="btn btn-g" style="align-self:flex-start;height:36px;padding:0 4px;font-size:12px;color:#5A4A3C">移除彈性</button></div>
+      </div>
+
+      <div class="paper state">
+        <span class="tag" style="align-self:flex-start;background:#F6E7C6;color:#5A3F12">A4 一圈量提示</span>
+        <div class="fld"><span class="fl">胸寬</span><div class="fbox" style="border-color:#E2B866"><input aria-label="胸寬" value="80-120"><span class="unit">cm</span></div>
+          <div role="alert" style="padding:10px 12px;border-radius:10px;background:#F6E7C6;display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:13px;line-height:1.6;color:#5A3F12">這看起來像一整圈的數字。要除以 2，變成 <b class="num">40～60</b> 嗎？</span>
+            <span style="display:flex;gap:6px"><button type="button" class="btn btn-p" style="height:36px;padding:0 12px;font-size:12px">除以 2</button><button type="button" class="btn btn-g" style="height:36px;padding:0 10px;font-size:12px;color:#5A3F12">不用</button></span>
+          </div></div>
+        <span class="cap">只檢查胸寬、腰寬、臀寬。有身體量測：平放 &gt; 對應圍度 × 0.8；沒有：胸寬 &gt; 75、腰寬 &gt; 70、臀寬 &gt; 80。按「不用」後，這件衣服的這個欄位不再提示。</span>
+      </div>
+
+      <div class="paper state">
+        <span class="tag" style="align-self:flex-start;background:#F4DDD6;color:#7E3F34">A5 不能填範圍的欄位</span>
+        <div class="fld"><span class="fl">肩寬</span><div class="fbox" style="border-color:#C98A7C"><input aria-label="肩寬" value="36-40" aria-invalid="true" aria-describedby="e5"><span class="unit">cm</span></div>
+          <span id="e5" style="display:flex;align-items:center;gap:6px;font-size:12px;color:#8E4A3E"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M12 4l9 16H3zM12 10v4M12 17h.01"></path></svg>肩寬不會拉伸，請填一個數字</span></div>
+        <span class="cap">肩寬、衣長、袖長、褲長只收單一數字。錯誤提示用自己的樣式，取代瀏覽器原生泡泡。</span>
+      </div>
+
+      <div class="paper state">
+        <span class="tag" style="align-self:flex-start;background:#F4DDD6;color:#7E3F34">A6 看不懂／只有拉伸值</span>
+        <div class="fld"><span class="fl">胸寬</span><div class="fbox" style="border-color:#C98A7C"><input aria-label="胸寬" value="S/M" aria-invalid="true"><span class="unit">cm</span></div>
+          <span style="font-size:12px;color:#8E4A3E">看不懂這個寫法。範圍請寫成 40-60</span></div>
+        <div class="fld"><span class="fl">腰寬 <span class="stc">彈性</span></span>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center"><span class="fbox" style="border-color:#C98A7C"><input aria-label="腰寬平放" value="" placeholder="平放"></span><span aria-hidden="true" style="color:#74624F">↔</span><span class="fbox"><input aria-label="腰寬拉開後" value="45"><span class="unit">cm</span></span></div>
+          <span style="font-size:12px;color:#8E4A3E">要先填平放值，才能存拉伸值</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="sb" style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:baseline;gap:14px"><h2 id="sb" class="hd h2">B・顯示</h2><span class="cap">用在 B5／BM16 衣物詳細、B7 選購卡片、B7+ 比較試搭台。</span></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:22px;align-items:start">
+      <div class="paper" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span class="hd" style="font-size:19px">平放尺寸</span><span style="font-size:12px;color:#74624F">cm</span><span class="stc" style="margin-left:6px">材質有彈性・彈性纖維 6%</span></div>
+        <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px">
+          <sc-for list="{{flat}}" as="f" hint-placeholder-count="5">
+            <div style="display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:10px;background:{{f.bg}};box-shadow:{{f.ring}}"><span style="font-size:12px;color:#5A4A3C">{{f.k}}</span><span style="display:flex;align-items:baseline;gap:4px;white-space:nowrap"><span class="num" style="font-size:18px;font-weight:700">{{f.v}}</span><sc-if value="{{f.s}}" hint-placeholder-val="{{ false }}"><span class="num" style="font-size:14px;font-weight:700;color:#9A6B2A">↔ {{f.s}}</span></sc-if></span><sc-if value="{{f.s}}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;color:#5A3F12">彈性</span></sc-if></div>
+          </sc-for>
+        </div>
+        <span class="cap">有拉伸值的格子用燕麥色底，「↔ 60」用深燕麥色；沒有的照舊。</span>
+      </div>
+      <div class="paper" style="padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:13px;font-weight:700">給 AI 的文字（B17.3）</span>
+        <pre style="margin:0;padding:10px 12px;border-radius:10px;background:#FBF4E8;font:400 12px/1.7 ui-monospace,'Chiron GoRound TC',monospace;white-space:pre-wrap">平放尺寸（cm）：肩寬 38、胸寬 40（有彈性，可拉到 60）、衣長 56、袖長 60
+材質：棉 94%、彈性纖維 6%</pre>
+        <span class="cap">比較試搭台的尺寸列也顯示成「40 ↔ 60」。</span>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="sc" class="paper" style="padding:20px 22px;display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><h2 id="sc" class="hd h2">C・尺寸對照的判定</h2><span class="cap">用在 B17.1／BM14.1 覆盤。上胸圍 84 cm、常穿範圍 +9～+15。差多少＝衣服一圈 − 身體。</span>
+      <span style="margin-left:auto;display:flex;gap:14px;font-size:12px;color:#5A4A3C;align-items:center;flex-wrap:wrap">
+        <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:22px;height:10px;border-radius:3px;background:#C5D8BE"></span>常穿範圍</span>
+        <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:2px;height:14px;background:#3B2F25"></span>身體（0）</span>
+        <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:50%;background:#3B2F25"></span>平放</span>
+        <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:10px;height:10px;transform:rotate(45deg);background:#C9962F"></span>舒適拉伸 60%</span>
+        <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:50%;background:#FFFCF6;box-shadow:inset 0 0 0 2px #3B2F25"></span>拉到最大</span>
+      </span>
+    </div>
+    <div role="table" aria-label="彈性判定狀態" style="display:flex;flex-direction:column">
+      <div role="row" class="srow" style="font-size:12px;color:#5A4A3C;min-height:36px;border-top:0"><span role="columnheader">狀況</span><span role="columnheader" style="text-align:right">胸寬</span><span role="columnheader" style="text-align:right">一圈</span><span role="columnheader" style="text-align:right">差多少</span><span role="columnheader" style="padding-left:12px">對照</span><span role="columnheader">判定</span></div>
+      <sc-for list="{{cases}}" as="c" hint-placeholder-count="6">
+        <div role="row" class="srow">
+          <span role="cell" style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:700">{{c.n}}</span><span style="font-size:11px;color:#5A4A3C;line-height:1.5">{{c.why}}</span></span>
+          <span role="cell" class="num" style="text-align:right;white-space:nowrap">{{c.fs}}</span>
+          <span role="cell" class="num" style="text-align:right;color:#5A4A3C;white-space:nowrap">{{c.circ}}</span>
+          <span role="cell" class="num" style="text-align:right;font-weight:700;color:{{c.fg}}">{{c.diff}}</span>
+          <span role="cell" style="padding-left:12px">
+            <span style="position:relative;display:block;height:34px;opacity:{{c.mop}}">
+              <span style="position:absolute;left:0;right:0;top:16px;height:2px;background:#EADCC6"></span>
+              <span style="position:absolute;left:{{c.bl}}%;width:{{c.bw}}%;top:10px;height:14px;border-radius:4px;background:#C5D8BE;opacity:{{c.bop}}"></span>
+              <span style="position:absolute;left:{{c.zl}}%;top:4px;width:2px;height:26px;background:#3B2F25;opacity:{{c.zop}}"></span>
+              <span style="position:absolute;left:{{c.fl}}%;width:{{c.lw}}%;top:16px;height:2px;background:#C9962F"></span>
+              <span style="position:absolute;left:{{c.cl}}%;top:12px;width:10px;height:10px;margin-left:-5px;transform:rotate(45deg);background:#C9962F;opacity:{{c.cop}}"></span>
+              <span style="position:absolute;left:{{c.ml}}%;top:10px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#FFFCF6;box-shadow:inset 0 0 0 2px #3B2F25"></span>
+              <span style="position:absolute;left:{{c.fl}}%;top:10px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#3B2F25;box-shadow:0 0 0 2px #FFFCF6"></span>
+            </span>
+            <sc-if value="{{c.nob}}" hint-placeholder-val="{{ false }}"><span style="display:block;margin-top:-26px;font-size:12px;color:#5A4A3C">還沒有身體量測，不畫對照；量過之後就會出現</span></sc-if>
+          </span>
+          <span role="cell" style="display:flex;gap:4px;flex-wrap:wrap"><span class="tag" style="background:{{c.jbg}};color:{{c.fg}}">{{c.judge}}</span><sc-if value="{{c.note}}" hint-placeholder-val="{{ false }}"><span class="stc">{{c.note}}</span></sc-if></span>
+        </div>
+      </sc-for>
+    </div>
+    <span class="cap">常穿範圍以部位計算：算胸寬時排除有胸寬拉伸值的衣物；排除後少於 3 件就不顯示範圍。沒有拉伸值的部位完全照現有邏輯。</span>
+  </section>
+
+  <section aria-labelledby="sd" style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:baseline;gap:14px"><h2 id="sd" class="hd h2">D・挑選規則提醒</h2><span class="cap">用在 B7 新增選購、B7+ 比較試搭台。規則讀平放值與拉伸值；只有「至少」型規則會因彈性放寬。</span></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start">
+      <div class="paper state">
+        <span class="tag" style="align-self:flex-start;background:#E6EEE2;color:#2E3F2B">符合</span>
+        <span style="font-size:13px">規則：襯衫｜平放胸寬 ≥ 47</span>
+        <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#2E3F2B"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M5 12l5 5L20 7"></path></svg>平放 <b class="num">48</b>，符合</span>
+      </div>
+      <div class="paper state">
+        <span class="tag" style="align-self:flex-start;background:#F6E7C6;color:#5A3F12">有彈性，可能可以</span>
+        <span style="font-size:13px">規則：襯衫｜平放胸寬 ≥ 47</span>
+        <div role="note" style="padding:12px 14px;border-radius:12px;background:#F6E7C6;display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:14px;font-weight:700;color:#5A3F12">有彈性，可能可以</span>
+          <span style="font-size:13px;line-height:1.6;color:#5A3F12">平放 <b class="num">42</b>，未達 <b class="num">47</b>；可拉到 <b class="num">58</b>，舒適拉伸約 <b class="num">51.6</b>，達標。穿起來會比較貼身。</span>
+        </div>
+        <span class="cap">不算不符合，也不出現玫瑰色警告。</span>
+      </div>
+      <div class="paper state">
+        <span class="tag" style="align-self:flex-start;background:#F4DDD6;color:#7E3F34">不符合</span>
+        <span style="font-size:13px">規則：寬褲｜衣長 ≤ 98（不超過型）</span>
+        <div role="note" style="padding:12px 14px;border-radius:12px;background:#F4DDD6;display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:14px;font-weight:700;color:#5E2A22">可能太長</span>
+          <span style="font-size:13px;line-height:1.6;color:#5E2A22">褲長 <b class="num">104</b>，超過 <b class="num">98</b>。「不超過」型規則不因彈性放寬。</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="se" class="paper" style="padding:20px 22px;display:flex;flex-direction:column;gap:8px">
+    <h2 id="se" class="hd h2" style="margin-bottom:6px">E・各頁套用</h2>
+    <sc-for list="{{pages}}" as="p" hint-placeholder-count="7">
+      <div style="display:grid;grid-template-columns:260px 160px 1fr;gap:14px;padding:10px 0;border-top:1.5px dashed #EADCC6;font-size:13px"><span style="font-weight:500">{{p.page}}</span><span class="num" style="color:#5A4A3C">{{p.parts}}</span><span style="color:#5A4A3C">{{p.note}}</span></div>
+    </sc-for>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2580}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const B = 84, U = [9, 15], D = [-20, 40], K = 0.6;
+    const pct = v => Math.max(0, Math.min(100, Math.round((v - D[0]) / (D[1] - D[0]) * 1000) / 10));
+    const T = {
+      ok: { bg: '#E6EEE2', fg: '#2E3F2B' }, tight: { bg: '#F4DDD6', fg: '#7E3F34' },
+      snug: { bg: '#F6E7C6', fg: '#5A3F12' }, none: { bg: '#F3E7D4', fg: '#5A4A3C' }
+    };
+    const C = [
+      ['1 平放就剛好', '在常穿範圍內', 48, 58, true, true, '剛好', 'ok', '有彈性'],
+      ['2 比平常合身', '不拉也穿得下，但比常穿小', 44, 56, true, true, '偏緊', 'tight', '有彈性'],
+      ['3 有彈性・會貼身', '平放小於身體，舒適拉伸後夠', 40, 60, true, true, '有彈性・會貼身', 'snug', ''],
+      ['4 拉了也不夠', '舒適拉伸後仍小於身體', 36, 44, true, true, '太緊', 'tight', ''],
+      ['5 還沒量身體', '只顯示資訊，不判定', 40, 60, false, true, '—', 'none', '有彈性，可拉到 60'],
+      ['6 沒有常穿範圍', '常穿少於 3 件；平放 ×2 ≥ 身體', 44, 56, true, false, '—', 'none', '有彈性']
+    ];
+    return {
+      flat: [['肩寬', '38'], ['胸寬', '40', '60'], ['腰寬', '36', '48'], ['衣長', '56'], ['袖長', '60']].map(([k, v, s]) => ({ k, v, s: s || '', bg: s ? '#FFF6E2' : '#FBF4E8', ring: s ? 'inset 0 0 0 1.5px #EBD3A0' : 'none' })),
+      cases: C.map(([n, why, F, S, hasB, hasU, judge, tone, note]) => {
+        const f = F * 2 - B, c = (F + (S - F) * K) * 2 - B, m = S * 2 - B;
+        return {
+          n, why, judge, note, fs: F + ' ↔ ' + S, circ: (F * 2) + '～' + (S * 2),
+          diff: hasB ? (f > 0 ? '+' : '') + f : '—', fg: T[tone].fg, jbg: T[tone].bg,
+          bl: pct(U[0]), bw: pct(U[1]) - pct(U[0]), bop: hasU && hasB ? 1 : 0, zl: pct(0), zop: hasB ? 1 : 0,
+          mop: hasB ? 1 : 0, nob: !hasB, fl: pct(f), lw: pct(m) - pct(f), cl: pct(c), cop: hasB ? 1 : 0, ml: pct(m)
+        };
+      }),
+      pages: [
+        ['B6／BM8.2 新增衣物', 'A', '平放尺寸區每個可拉伸欄位'],
+        ['衣物詳細的編輯', 'A', '清掉平放值時，對應拉伸值一起刪'],
+        ['B5／BM16 衣物詳細', 'B', '平放尺寸格子＋材質彈性提示（彈性纖維 ≥ 2%，含萊卡、Spandex、氨綸、PU）'],
+        ['B17.1／BM14.1 覆盤', 'C', '尺寸對照列換成這裡的畫法'],
+        ['B17.3／BM14.3 給 AI 的文字', 'B', '「胸寬 40（有彈性，可拉到 60）」'],
+        ['B7 新增選購（含手機）', 'A＋D', '網拍貼上「40-60」最常見；規則提醒顯示在表單下方'],
+        ['B7+ 比較試搭台', 'B＋D', '尺寸列顯示 40 ↔ 60；候選品小標顯示規則結果'],
+        ['移至已購買／B17.2 換貨複製', '—', '移至已購買：拉伸值一起帶；換尺寸複製：平放與拉伸都清空']
+      ].map(([page, parts, note]) => ({ page, parts, note }))
+    };
+  }
+}
+</script>
+</body>
+</html>

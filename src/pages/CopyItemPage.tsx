@@ -12,6 +12,7 @@ import { addClosetItemPhotos, copyClosetItem, fetchCategories, fetchClosetItemDe
 import { GARMENT_COLORS } from '@/lib/colors'
 import { todayISO } from '@/lib/date'
 import { appraisalEnd, exchangeChecks, FLAT_LABELS } from '@/lib/review'
+import { canStretch, measureToText, resolveMeasure } from '@/lib/stretch'
 import type { Category, ClosetItem, ReviewRecord, Slot } from '@/types'
 
 type FieldStatus = 'keep' | 'changed' | 'need'
@@ -30,7 +31,7 @@ const DEFAULT_FLAT_KEYS: Record<Slot, string[]> = {
   top: ['shoulder', 'chest', 'waist', 'length', 'sleeve'],
   outer: ['shoulder', 'chest', 'waist', 'length', 'sleeve'],
   bottom: ['waist', 'hip', 'thigh', 'rise', 'length', 'hem'],
-  shoes: ['innerLength', 'heelHeight'],
+  shoes: ['innerLength', 'width', 'heelHeight'],
   bag: ['width', 'height', 'depth'],
   acc: [],
 }
@@ -168,7 +169,8 @@ function CopyItemForm({ source, onDone }: { source: Source; onDone: (id: string)
       price: item.purchasePrice != null ? String(item.purchasePrice + (exchange?.exchangeExtra ?? 0)) : '',
       purchaseDate: item.purchaseDate ?? '',
       receivedOn: '',
-      flat: Object.fromEntries(flatKeys.map((key) => [key, sizeChanged ? '' : item.flatMeasurements?.[key] != null ? String(item.flatMeasurements[key]) : ''])),
+      // 換尺寸：平放值與拉伸值都清空；同尺寸沿用（有彈性的顯示成 40-60）
+      flat: Object.fromEntries(flatKeys.map((key) => [key, sizeChanged ? '' : measureToText(item.flatMeasurements?.[key], item.flatStretch?.[key])])),
       keepNote: false,
     }
   }, [item, exchange, kind, flatKeys, sizeChanged])
@@ -216,6 +218,7 @@ function CopyItemForm({ source, onDone }: { source: Source; onDone: (id: string)
 
   const checks = exchange ? exchangeChecks(exchange.reasons) : []
   const sourceLabel = `${item.name}${item.size ? `・${item.size}` : ''}`
+  const flatLabel = (key: string) => key === 'width' && item.slot === 'shoes' ? '鞋寬' : FLAT_LABELS[key] ?? key
   const backTo = exchange ? `/closet/${item.id}/review` : `/closet/${item.id}`
 
   const submit = async (event: FormEvent) => {
@@ -223,11 +226,13 @@ function CopyItemForm({ source, onDone }: { source: Source; onDone: (id: string)
     if (!form.name.trim()) return setError('請填品名。')
     if (form.price.trim() && !/^\d+(\.\d+)?$/.test(form.price.trim())) return setError('價格請填數字。')
     const flatMeasurements: Record<string, number | null> = {}
+    const flatStretch: Record<string, number> = {}
     for (const key of flatKeys) {
-      const raw = form.flat[key]?.trim()
-      if (!raw) continue
-      if (!/^\d+(\.\d+)?$/.test(raw)) return setError(`${FLAT_LABELS[key] ?? key}請填數字。`)
-      flatMeasurements[key] = Number(raw)
+      const resolved = resolveMeasure({ key, label: flatLabel(key) }, form.flat[key] ?? '')
+      if (resolved.error) return setError(`${flatLabel(key)}：${resolved.error}`)
+      if (resolved.flat == null) continue
+      flatMeasurements[key] = resolved.flat
+      if (resolved.stretch != null) flatStretch[key] = resolved.stretch
     }
     setError(null)
     setSaving(true)
@@ -251,6 +256,7 @@ function CopyItemForm({ source, onDone }: { source: Source; onDone: (id: string)
         productUrl: kind === 'other' ? undefined : item.productUrl,
         note: form.keepNote ? item.note : undefined,
         flatMeasurements,
+        flatStretch,
         receivedOn: exchange ? form.receivedOn || undefined : undefined,
         exchangedFrom: exchange ? item.id : undefined,
         status: exchange && !form.receivedOn ? 'not_arrived' : 'ok',
@@ -429,12 +435,12 @@ function CopyItemForm({ source, onDone }: { source: Source; onDone: (id: string)
                   const old = item.flatMeasurements?.[key]
                   return (
                     <label key={key} className="flex flex-col gap-1 text-xs text-ink-2">
-                      {FLAT_LABELS[key] ?? key}
+                      {flatLabel(key)}
                       <input
                         inputMode="decimal"
                         value={form.flat[key] ?? ''}
                         onChange={(e) => setForm((current) => ({ ...current, flat: { ...current.flat, [key]: e.target.value } }))}
-                        placeholder={sizeChanged && old != null ? `${item.size || '舊'}：${old}` : 'cm'}
+                        placeholder={sizeChanged && old != null ? `${item.size || '舊'}：${measureToText(old, item.flatStretch?.[key])}` : canStretch(key) ? 'cm・可填 40-60' : 'cm'}
                         className={`h-11 w-full rounded-btn border-[1.5px] px-2.5 font-num text-sm text-ink placeholder:text-ink-3 ${FIELD_BORDER[flatStatus]}`}
                       />
                     </label>

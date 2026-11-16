@@ -13,6 +13,7 @@ import { Select } from '@/components/ui/Select'
 import { LoadingState, PageState } from '@/components/ui/PageState'
 import { TiltLabel } from '@/components/ui/Paper'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
+import { ProfileAvatarLink } from '@/components/layout/ProfileAvatarLink'
 import { createDiaryEntry, deleteDiaryEntry, fetchClosetItems, fetchDiaryEntries, updateDiaryEntry } from '@/lib/data'
 import { parseISODate, todayISO, toISODate, WEEKDAYS } from '@/lib/date'
 import {
@@ -252,6 +253,7 @@ function DiaryHeader({ view, onNew, viewHref }: { view: 'calendar' | 'list'; onN
           {seg('calendar', '月曆', 'calendar')}
           {seg('list', '列表', 'diary')}
         </nav>
+        <ProfileAvatarLink className="-mr-1" />
       </div>
       {/* 桌面 */}
       <div className="hidden flex-wrap items-end gap-4 md:flex">

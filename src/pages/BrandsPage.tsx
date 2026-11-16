@@ -361,7 +361,7 @@ export function BrandsPage() {
       <section className="flex min-w-0 flex-col gap-3 md:gap-[18px]">
         {/* 手機頂部 */}
         <header className="-mx-3 flex items-center gap-1 border-b-[1.5px] border-dashed border-line-strong py-2 pl-1 pr-2 md:hidden">
-          <Link to="/me" aria-label="返回個人資料" className="flex size-11 items-center justify-center text-ink"><Icon name="back" size={22} /></Link>
+          <Link to="/me" aria-label="返回我的" className="flex size-11 items-center justify-center text-ink"><Icon name="back" size={22} /></Link>
           <h1 className="m-0 font-hd text-xl">品牌</h1>
           {data && <span className="ml-1 font-num text-xs text-ink-3 tabular">{brands.length}</span>}
           <button type="button" aria-label="新增品牌" onClick={startAdding} className="ml-auto flex size-11 items-center justify-center rounded-btn bg-transparent text-ink"><Icon name="plus" size={22} /></button>

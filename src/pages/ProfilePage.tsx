@@ -7,119 +7,20 @@ import { MarkdownNote, MarkdownNoteField } from '@/components/ui/MarkdownNote'
 import { PaperCard, TiltLabel, WashBlob } from '@/components/ui/Paper'
 import { LoadingState, PageState } from '@/components/ui/PageState'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
-import { SAMPLE_PROFILE } from '@/data/sample'
-import { fetchProfileData, saveBodyMeasurement, saveProfilePreferences } from '@/lib/data'
+import { SAMPLE_BODY_PROFILE, SAMPLE_PROFILE } from '@/data/sample'
+import { fetchProfileData, saveBodyMeasurement, saveBodyProfile, saveProfilePreferences } from '@/lib/data'
 import { todayISO } from '@/lib/date'
-import type { BodyMeasurement, BodyMeasurementInput, ProfilePreferences, ShoeSize } from '@/types'
+import { FOOT_FIELDS, FOOT_TABS, MEASUREMENT_GROUPS, METRIC_KEYS, blankMeasurementDraft, fixedDraftValues, fixedProfileToDraft, measurementDateLabel, measurementToDraft, toBodyProfileInput, toMeasurementInput, type FixedDraft, type FixedKey, type MeasurementDraft, type MeasurementGroup } from '@/lib/bodyMeasurement'
+import type { BodyMeasurement, BodyProfile, ProfilePreferences, ShoeSize } from '@/types'
 
-type MeasurementKey = 'heightCm' | 'weightKg' | 'shoulderCm' | 'upperBustCm' | 'underBustCm' | 'waistCm' | 'navelCm' | 'hipCm' | 'armCm' | 'inseamCm' | 'thighCm' | 'footToeLengthCm' | 'footToeWidthCm' | 'footToeBallCm' | 'footToeInstepCm' | 'footSockLengthCm' | 'footSockWidthCm' | 'footSockBallCm' | 'footSockInstepCm' | 'footBareLengthCm' | 'footBareWidthCm' | 'footBareBallCm' | 'footBareInstepCm'
-type MeasurementDraft = Record<MeasurementKey, string> & { measuredOn: string; note: string }
-
-type MeasurementGroup = {
-  title: string
-  accent: 'oat' | 'mist' | 'sage' | 'rose'
-  fields: { key: MeasurementKey; label: string; unit: string }[]
-}
-
-const GROUPS: MeasurementGroup[] = [
-  { title: '基本', accent: 'oat', fields: [{ key: 'heightCm', label: '身高', unit: 'cm' }, { key: 'weightKg', label: '體重', unit: 'kg' }] },
-  { title: '上半身', accent: 'mist', fields: [{ key: 'shoulderCm', label: '肩寬', unit: 'cm' }, { key: 'upperBustCm', label: '上胸圍', unit: 'cm' }, { key: 'underBustCm', label: '下胸圍', unit: 'cm' }, { key: 'armCm', label: '手臂長', unit: 'cm' }] },
-  { title: '下半身', accent: 'sage', fields: [{ key: 'waistCm', label: '腰圍', unit: 'cm' }, { key: 'navelCm', label: '肚臍圍', unit: 'cm' }, { key: 'hipCm', label: '臀圍', unit: 'cm' }, { key: 'inseamCm', label: '腿長（內側）', unit: 'cm' }, { key: 'thighCm', label: '大腿圍', unit: 'cm' }] },
-  { title: '腳', accent: 'rose', fields: [
-    { key: 'footToeLengthCm', label: '腳長', unit: 'cm' }, { key: 'footToeWidthCm', label: '腳寬', unit: 'cm' }, { key: 'footToeBallCm', label: '前掌圍', unit: 'cm' }, { key: 'footToeInstepCm', label: '腳背圍', unit: 'cm' },
-    { key: 'footSockLengthCm', label: '腳長', unit: 'cm' }, { key: 'footSockWidthCm', label: '腳寬', unit: 'cm' }, { key: 'footSockBallCm', label: '前掌圍', unit: 'cm' }, { key: 'footSockInstepCm', label: '腳背圍', unit: 'cm' },
-    { key: 'footBareLengthCm', label: '腳長', unit: 'cm' }, { key: 'footBareWidthCm', label: '腳寬', unit: 'cm' }, { key: 'footBareBallCm', label: '前掌圍', unit: 'cm' }, { key: 'footBareInstepCm', label: '腳背圍', unit: 'cm' },
-  ] },
-]
-
-const METRIC_KEYS: MeasurementKey[] = GROUPS.flatMap((group) => group.fields.map((field) => field.key))
 const FIT_OPTIONS = ['高腰', '直筒', '落肩', '九分褲長', '合身', 'A 字']
 const DEFAULT_SHOE_SIZE: ShoeSize = { label: '新鞋款', eu: '', us: '', uk: '', jp: '' }
-const FOOT_TABS = [
-  { id: 'toe', label: '穿五指襪', prefix: 'footToe', accent: 'oat' },
-  { id: 'sock', label: '穿一般襪', prefix: 'footSock', accent: 'mist' },
-  { id: 'bare', label: '裸腳', prefix: 'footBare', accent: 'rose' },
-] as const
+const GROUPS = MEASUREMENT_GROUPS
+const blankDraft = blankMeasurementDraft
+const dateLabel = measurementDateLabel
 
 function today() {
   return todayISO()
-}
-
-function blankDraft(): MeasurementDraft {
-  return {
-    measuredOn: today(), note: '', heightCm: '', weightKg: '', shoulderCm: '', upperBustCm: '', underBustCm: '',
-    waistCm: '', navelCm: '', hipCm: '', armCm: '', inseamCm: '', thighCm: '',
-    footToeLengthCm: '', footToeWidthCm: '', footToeBallCm: '', footToeInstepCm: '',
-    footSockLengthCm: '', footSockWidthCm: '', footSockBallCm: '', footSockInstepCm: '',
-    footBareLengthCm: '', footBareWidthCm: '', footBareBallCm: '', footBareInstepCm: '',
-  }
-}
-
-function measurementToDraft(measurement: BodyMeasurement): MeasurementDraft {
-  return {
-    measuredOn: measurement.measuredOn,
-    note: measurement.note,
-    heightCm: measurement.heightCm?.toString() ?? '',
-    weightKg: measurement.weightKg?.toString() ?? '',
-    shoulderCm: measurement.shoulderCm?.toString() ?? '',
-    upperBustCm: measurement.upperBustCm?.toString() ?? '',
-    underBustCm: measurement.underBustCm?.toString() ?? '',
-    waistCm: measurement.waistCm?.toString() ?? '',
-    navelCm: measurement.navelCm?.toString() ?? '',
-    hipCm: measurement.hipCm?.toString() ?? '',
-    armCm: measurement.armCm?.toString() ?? '',
-    inseamCm: measurement.inseamCm?.toString() ?? '',
-    thighCm: measurement.thighCm?.toString() ?? '',
-    footToeLengthCm: measurement.footToeLengthCm?.toString() ?? '',
-    footToeWidthCm: measurement.footToeWidthCm?.toString() ?? '',
-    footToeBallCm: measurement.footToeBallCm?.toString() ?? '',
-    footToeInstepCm: measurement.footToeInstepCm?.toString() ?? '',
-    footSockLengthCm: measurement.footSockLengthCm?.toString() ?? '',
-    footSockWidthCm: measurement.footSockWidthCm?.toString() ?? '',
-    footSockBallCm: measurement.footSockBallCm?.toString() ?? '',
-    footSockInstepCm: measurement.footSockInstepCm?.toString() ?? '',
-    footBareLengthCm: measurement.footBareLengthCm?.toString() ?? '',
-    footBareWidthCm: measurement.footBareWidthCm?.toString() ?? '',
-    footBareBallCm: measurement.footBareBallCm?.toString() ?? '',
-    footBareInstepCm: measurement.footBareInstepCm?.toString() ?? '',
-  }
-}
-
-function toMeasurementInput(draft: MeasurementDraft, id?: string): BodyMeasurementInput {
-  const numberOrNull = (value: string) => value.trim() ? Number(value) : null
-  return {
-    ...(id ? { id } : {}),
-    measuredOn: draft.measuredOn,
-    note: draft.note.trim(),
-    heightCm: numberOrNull(draft.heightCm),
-    weightKg: numberOrNull(draft.weightKg),
-    shoulderCm: numberOrNull(draft.shoulderCm),
-    upperBustCm: numberOrNull(draft.upperBustCm),
-    underBustCm: numberOrNull(draft.underBustCm),
-    waistCm: numberOrNull(draft.waistCm),
-    navelCm: numberOrNull(draft.navelCm),
-    hipCm: numberOrNull(draft.hipCm),
-    armCm: numberOrNull(draft.armCm),
-    inseamCm: numberOrNull(draft.inseamCm),
-    thighCm: numberOrNull(draft.thighCm),
-    footToeLengthCm: numberOrNull(draft.footToeLengthCm),
-    footToeWidthCm: numberOrNull(draft.footToeWidthCm),
-    footToeBallCm: numberOrNull(draft.footToeBallCm),
-    footToeInstepCm: numberOrNull(draft.footToeInstepCm),
-    footSockLengthCm: numberOrNull(draft.footSockLengthCm),
-    footSockWidthCm: numberOrNull(draft.footSockWidthCm),
-    footSockBallCm: numberOrNull(draft.footSockBallCm),
-    footSockInstepCm: numberOrNull(draft.footSockInstepCm),
-    footBareLengthCm: numberOrNull(draft.footBareLengthCm),
-    footBareWidthCm: numberOrNull(draft.footBareWidthCm),
-    footBareBallCm: numberOrNull(draft.footBareBallCm),
-    footBareInstepCm: numberOrNull(draft.footBareInstepCm),
-  }
-}
-
-function dateLabel(date: string) {
-  const [year, month, day] = date.split('-')
-  return `${year}/${month}/${day}`
 }
 
 function MetricField({
@@ -127,17 +28,21 @@ function MetricField({
   draft,
   setDraft,
   baseline,
+  hideVisualLabel = false,
+  accessibleLabel,
 }: {
   field: MeasurementGroup['fields'][number]
   draft: MeasurementDraft
   setDraft: Dispatch<SetStateAction<MeasurementDraft>>
   baseline?: BodyMeasurement | null
+  hideVisualLabel?: boolean
+  accessibleLabel?: string
 }) {
   const baselineValue = baseline?.[field.key]
   const isChanged = !!baseline && draft[field.key].trim() !== (baselineValue == null ? '' : String(baselineValue))
   return (
     <label className="flex min-w-0 flex-col gap-1.5 text-[13px] text-ink">
-      <span>{field.label}</span>
+      <span className={hideVisualLabel ? 'sr-only' : undefined}>{field.label}</span>
       <span className={`flex h-12 items-center gap-2 rounded-btn border-[1.5px] px-3 focus-within:border-mist-deep ${isChanged ? 'border-oat-edge bg-oat-soft' : 'border-line bg-paper'}`}>
         <input
           type="number"
@@ -147,7 +52,7 @@ function MetricField({
           value={draft[field.key]}
           onChange={(event) => setDraft((current) => ({ ...current, [field.key]: event.target.value }))}
           placeholder="選填"
-          aria-label={`${field.label}（${field.unit}）`}
+          aria-label={accessibleLabel ?? `${field.label}（${field.unit}）`}
           className="h-full min-w-0 flex-1 bg-transparent text-right font-num text-lg font-bold text-ink outline-none placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:text-ink-3"
         />
         <span className="w-7 flex-none text-right font-num text-[13px] text-ink-2">{field.unit}</span>
@@ -157,16 +62,39 @@ function MetricField({
   )
 }
 
+function FixedMetricField({ field, draft, setDraft, baseline }: {
+  field: { key: FixedKey; label: string; hint?: string }
+  draft: FixedDraft
+  setDraft: Dispatch<SetStateAction<FixedDraft>>
+  baseline: BodyProfile
+}) {
+  const isChanged = draft[field.key] !== (baseline[field.key]?.toString() ?? '')
+  return (
+    <label className="flex min-w-0 flex-col gap-1.5 text-[13px] text-ink">
+      <span>{field.label}</span>
+      <span className={`flex h-12 items-center gap-2 rounded-btn border-[1.5px] px-3 focus-within:border-mist-deep ${isChanged ? 'border-oat-edge bg-oat-soft' : 'border-line bg-paper'}`}>
+        <input type="number" min="0" step="0.1" inputMode="decimal" value={draft[field.key]} onChange={(event) => setDraft((current) => ({ ...current, [field.key]: event.target.value }))} placeholder="選填" aria-label={`${field.label}（cm）`} className="h-full min-w-0 flex-1 bg-transparent text-right font-num text-lg font-bold text-ink outline-none placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:text-ink-3" />
+        <span className="w-7 flex-none text-right font-num text-[13px] text-ink-2">cm</span>
+        {isChanged && <span className="whitespace-nowrap rounded-full bg-oat px-2 py-0.5 text-[10px] font-medium text-oat-ink">已修改</span>}
+      </span>
+      {field.hint && <span className="text-[11px] leading-5 text-mist-deep">{field.hint}</span>}
+    </label>
+  )
+}
+
 export function ProfilePage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [profile, setProfile] = useState<ProfilePreferences>(SAMPLE_PROFILE)
   const [measurements, setMeasurements] = useState<BodyMeasurement[]>([])
+  const [bodyProfile, setBodyProfile] = useState<BodyProfile>(SAMPLE_BODY_PROFILE)
+  const [fixedDraft, setFixedDraft] = useState<FixedDraft>(() => fixedProfileToDraft(SAMPLE_BODY_PROFILE))
   const [draft, setDraft] = useState<MeasurementDraft>(blankDraft)
   const [editingId, setEditingId] = useState<string | undefined>()
   const [baseline, setBaseline] = useState<BodyMeasurement | null>(null)
   const [feetTab, setFeetTab] = useState<(typeof FOOT_TABS)[number]['id']>('toe')
   const [loading, setLoading] = useState(true)
   const [savingMeasurements, setSavingMeasurements] = useState(false)
+  const [savingBodyProfile, setSavingBodyProfile] = useState(false)
   const [savingProfile, setSavingProfile] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState<ToastMessage | null>(null)
@@ -179,10 +107,12 @@ export function ProfilePage() {
   useEffect(() => {
     let alive = true
     fetchProfileData()
-      .then(({ profile: nextProfile, measurements: nextMeasurements }) => {
+      .then(({ profile: nextProfile, measurements: nextMeasurements, bodyProfile: nextBodyProfile }) => {
         if (!alive) return
         setProfile(nextProfile)
         setMeasurements(nextMeasurements)
+        setBodyProfile(nextBodyProfile)
+        setFixedDraft(fixedProfileToDraft(nextBodyProfile))
         const editing = editId ? nextMeasurements.find((measurement) => measurement.id === editId) : undefined
         if (editing) {
           const editIndex = nextMeasurements.findIndex((measurement) => measurement.id === editing.id)
@@ -206,8 +136,16 @@ export function ProfilePage() {
   }, [editId])
 
   const filledCount = useMemo(() => METRIC_KEYS.filter((key) => draft[key].trim() !== '').length, [draft])
-  const progress = Math.round((filledCount / METRIC_KEYS.length) * 100)
-  const completedGroups = GROUPS.filter((group) => group.fields.every(({ key }) => draft[key].trim() !== '')).length
+  const fixedMetricValues = fixedDraftValues(fixedDraft)
+  const fixedFilledCount = fixedMetricValues.filter((value) => value.trim() !== '').length
+  const progress = Math.round(((filledCount + fixedFilledCount) / (METRIC_KEYS.length + fixedMetricValues.length)) * 100)
+  const progressGroups = [
+    ...GROUPS.map((group) => group.fields.map(({ key }) => draft[key])),
+    FOOT_FIELDS.map(({ key }) => draft[key]),
+    fixedMetricValues,
+  ]
+  const completedGroups = progressGroups.filter((values) => values.length > 0 && values.every((value) => value.trim() !== '')).length
+  const fixedChangedCount = (Object.keys(bodyProfile) as (keyof BodyProfile)[]).filter((key) => key !== 'updatedAt' && fixedDraft[key as FixedKey] !== (bodyProfile[key]?.toString() ?? '')).length
 
   function updateProfile<K extends keyof ProfilePreferences>(key: K, value: ProfilePreferences[K]) {
     setProfile((current) => ({ ...current, [key]: value }))
@@ -269,6 +207,24 @@ export function ProfilePage() {
     }
   }
 
+  async function handleSaveBodyProfile() {
+    if (fixedMetricValues.some((value) => value.trim() && (!Number.isFinite(Number(value)) || Number(value) <= 0))) {
+      setToast({ tone: 'error', text: '固定資料請輸入大於 0 的數字。' })
+      return
+    }
+    setSavingBodyProfile(true)
+    try {
+      const result = await saveBodyProfile(toBodyProfileInput(fixedDraft))
+      setBodyProfile(result.bodyProfile)
+      setFixedDraft(fixedProfileToDraft(result.bodyProfile))
+      setToast({ tone: 'success', text: result.demo ? '固定資料已套用在本次示範工作階段。' : '固定資料已更新，不會新增量測紀錄。' })
+    } catch (cause) {
+      setToast({ tone: 'error', text: cause instanceof Error ? cause.message : '固定資料儲存失敗。' })
+    } finally {
+      setSavingBodyProfile(false)
+    }
+  }
+
   function startNewMeasurement() {
     setEditingId(undefined)
     setBaseline(measurements[0] ?? null)
@@ -323,6 +279,22 @@ export function ProfilePage() {
         </section>
 
         <form ref={measurementFormRef} onSubmit={handleSaveMeasurement} className="space-y-3 scroll-mt-6">
+          <section aria-label="這次量測設定" className="relative flex flex-wrap items-end gap-3 overflow-hidden rounded-card bg-oat-soft p-4 sm:gap-4 sm:px-5">
+            <WashBlob accent="mist" className="-right-4 -top-5 size-20 rounded-block" tilt={12} />
+            <DatePicker label="這次量測日期" value={draft.measuredOn || null} onChange={(value) => setDraft((current) => ({ ...current, measuredOn: value ?? '' }))} max={todayISO()} required className="relative w-full sm:max-w-[300px]" />
+            <fieldset className="relative m-0 min-w-0 border-0 p-0">
+              <legend className="mb-1.5 p-0 text-[13px] font-medium text-ink">量測時段</legend>
+              <div role="radiogroup" aria-label="量測時段" className="flex flex-wrap gap-1.5">
+                {([
+                  ['morning_fasting', '早上空腹'],
+                  ['afternoon_evening', '下午・晚上'],
+                  ['other', '其他'],
+                ] as const).map(([value, label]) => <button key={value} type="button" role="radio" aria-checked={draft.timeOfDay === value} onClick={() => setDraft((current) => ({ ...current, timeOfDay: value }))} className={`min-h-11 rounded-full border-[1.5px] px-3 text-xs ${draft.timeOfDay === value ? 'border-ink bg-ink text-paper' : 'border-line-strong bg-card text-ink'}`}>{label}</button>)}
+              </div>
+            </fieldset>
+            <p className="relative m-0 w-full text-xs leading-5 text-oat-ink">圍度建議固定在早上空腹量，腳建議下午或晚上量（一天中較腫時）。時段只是紀錄，不影響計算。</p>
+            {baseline && !editingId && <p className="relative m-0 w-full text-xs leading-5 text-ink-2">欄位已帶入上次（{baseline.measuredOn.slice(5).replace('-', '/')}）的數字；儲存會新增快照，舊紀錄會保留。</p>}
+          </section>
           {GROUPS.map((group) => {
             const groupFilled = group.fields.filter(({ key }) => draft[key].trim()).length
             return (
@@ -336,30 +308,73 @@ export function ProfilePage() {
                   <Icon name="down" size={18} className="relative ml-auto flex-none text-ink-2 transition-transform group-open:rotate-180" />
                 </summary>
                 <div className="grid grid-cols-2 gap-3 px-5 pb-5 pt-1 sm:grid-cols-3">
-                  {group.title === '基本' && (
-                    <DatePicker
-                      label="量測日期"
-                      value={draft.measuredOn || null}
-                      onChange={(value) => setDraft((current) => ({ ...current, measuredOn: value ?? '' }))}
-                      max={todayISO()}
-                      required
-                      className="col-span-2 sm:col-span-1"
-                    />
-                  )}
-                  {group.title === '腳' ? (
-                    <div className="col-span-2 space-y-3 sm:col-span-3">
-                      <div role="tablist" aria-label="腳部量測狀態" className="grid grid-cols-3 gap-1 rounded-btn bg-tile p-1">
-                        {FOOT_TABS.map((tab) => <button key={tab.id} type="button" role="tab" aria-selected={feetTab === tab.id} onClick={() => setFeetTab(tab.id)} className={`min-h-10 rounded-sm px-1 text-xs sm:text-sm ${feetTab === tab.id ? 'bg-card font-medium text-ink shadow-paper' : 'text-ink-2'}`}>{tab.label}</button>)}
-                      </div>
-                      <div role="tabpanel" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                        {group.fields.filter((field) => field.key.startsWith(FOOT_TABS.find((tab) => tab.id === feetTab)!.prefix)).map((field) => <MetricField key={field.key} field={field} draft={draft} setDraft={setDraft} baseline={baseline} />)}
-                      </div>
-                    </div>
-                  ) : group.fields.map((field) => <MetricField key={field.key} field={field} draft={draft} setDraft={setDraft} baseline={baseline} />)}
+                  {group.fields.map((field) => <MetricField key={field.key} field={field} draft={draft} setDraft={setDraft} baseline={baseline} />)}
                 </div>
               </details>
             )
           })}
+          <details open className="group overflow-hidden rounded-block bg-card shadow-paper">
+            <summary className="relative flex min-h-[62px] cursor-pointer list-none items-center gap-3 px-5 py-3 [&::-webkit-details-marker]:hidden">
+              <WashBlob accent="rose" className="-right-4 -top-5 size-[70px] rounded-block" tilt={14} />
+              <span className="relative font-hd text-xl text-ink">腳</span>
+              <span className="relative text-xs text-ink-2">3 種狀態・各 4 項</span>
+              <Icon name="down" size={18} className="relative ml-auto flex-none text-ink-2 transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="space-y-3 px-4 pb-5 sm:px-5">
+              <p className="m-0 text-xs leading-5 text-ink-2">襪子厚度會影響尺寸，所以分開記。請量比較大的那隻腳，建議下午或晚上量；左右腳寬差異和腳跟寬記在固定資料。</p>
+              <div role="table" aria-label="腳的尺寸（公分），量比較大的那隻腳" className="hidden items-center gap-x-2 md:grid md:grid-cols-[100px_repeat(4,minmax(0,1fr))] md:gap-x-3">
+                <span role="columnheader" className="py-2 text-xs text-ink-3">狀態</span>
+                {['腳長', '腳寬', '前掌圍', '腳背圍'].map((label) => <span key={label} role="columnheader" className="py-2 text-[13px]">{label}</span>)}
+                {FOOT_TABS.map((tab) => <div key={tab.id} role="row" className="contents">
+                  <span role="rowheader" className="flex min-h-12 items-center gap-1.5 border-t border-dashed border-line text-xs font-medium"><span className={`size-2.5 rounded-[3px] ${tab.accent === 'oat' ? 'bg-oat' : tab.accent === 'mist' ? 'bg-mist' : 'bg-rose'}`} />{tab.label}</span>
+                  {FOOT_FIELDS.filter((field) => field.key.startsWith(tab.prefix)).map((field) => <span key={field.key} role="cell" className="border-t border-dashed border-line py-1"><MetricField field={{ ...field, unit: 'cm' }} draft={draft} setDraft={setDraft} baseline={baseline} hideVisualLabel accessibleLabel={`${tab.label}・${field.label}（cm）`} /></span>)}
+                </div>)}
+              </div>
+              <div className="space-y-3 md:hidden">
+                <div role="tablist" aria-label="腳部量測狀態" className="grid grid-cols-3 gap-1 rounded-btn bg-tile p-1">
+                  {FOOT_TABS.map((tab) => <button key={tab.id} type="button" role="tab" aria-selected={feetTab === tab.id} onClick={() => setFeetTab(tab.id)} className={`min-h-11 rounded-sm px-1 text-xs ${feetTab === tab.id ? 'bg-card font-medium text-ink shadow-paper' : 'text-ink-2'}`}>{tab.label}</button>)}
+                </div>
+                <div role="tabpanel" className="grid grid-cols-2 gap-3">
+                  {FOOT_FIELDS.filter((field) => field.key.startsWith(FOOT_TABS.find((tab) => tab.id === feetTab)!.prefix)).map((field) => <MetricField key={field.key} field={{ ...field, unit: 'cm' }} draft={draft} setDraft={setDraft} baseline={baseline} />)}
+                </div>
+              </div>
+            </div>
+          </details>
+          <section aria-labelledby="fixed-profile-title" className="space-y-4 rounded-block border-[1.5px] border-oat-edge bg-card p-4 shadow-paper sm:p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 id="fixed-profile-title" className="m-0 font-hd text-xl">固定資料</h2>
+              <span className="rounded-full bg-oat-soft px-2.5 py-1 text-[11px] text-oat-ink">不太會變・不跟著每次紀錄</span>
+              {bodyProfile.updatedAt && <span className="ml-auto text-[11px] text-ink-3">更新於 {dateLabel(bodyProfile.updatedAt.slice(0, 10))}</span>}
+            </div>
+            <p className="m-0 text-xs leading-5 text-ink-2">骨架長度和腳型，記一次就好。改了會直接更新，不會產生新的量測紀錄；尺寸對照會使用最新資料。</p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {([
+                { key: 'heightCm', label: '身高', hint: '赤腳站直' },
+                { key: 'armLengthCm', label: '手臂長', hint: '肩峰到手腕' },
+                { key: 'inseamCm', label: '腿長（內側）', hint: '褲長參考' },
+                { key: 'seatedRiseCm', label: '坐姿股上', hint: '坐硬椅，腰側到椅面；比褲子的股上' },
+              ] as const).map((field) => <FixedMetricField key={field.key} field={field} draft={fixedDraft} setDraft={setFixedDraft} baseline={bodyProfile} />)}
+            </div>
+            <div className="space-y-3 border-t border-dashed border-line pt-3">
+              <label className="flex min-h-11 items-center gap-2 text-[13px] font-medium text-ink">
+                <span>裸腳腳寬</span>
+                <span className="ml-auto text-xs font-normal text-ink-2">左右不同</span>
+                <input type="checkbox" checked={fixedDraft.footWidthsDiffer} onChange={(event) => setFixedDraft((current) => ({ ...current, footWidthsDiffer: event.target.checked, footWidthRightCm: event.target.checked ? (current.footWidthRightCm === current.footWidthLeftCm ? '' : current.footWidthRightCm) : current.footWidthLeftCm }))} className="size-5 accent-[var(--color-sage-deep)]" />
+              </label>
+              <div className={`grid gap-3 ${fixedDraft.footWidthsDiffer ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'}`}>
+                {fixedDraft.footWidthsDiffer ? <>
+                  <FixedMetricField field={{ key: 'footWidthLeftCm', label: '左腳' }} draft={fixedDraft} setDraft={setFixedDraft} baseline={bodyProfile} />
+                  <FixedMetricField field={{ key: 'footWidthRightCm', label: '右腳' }} draft={fixedDraft} setDraft={setFixedDraft} baseline={bodyProfile} />
+                </> : <FixedMetricField field={{ key: 'footWidthLeftCm', label: '左右腳寬' }} draft={fixedDraft} setDraft={setFixedDraft} baseline={bodyProfile} />}
+                <FixedMetricField field={{ key: 'heelWidthCm', label: '腳跟寬' }} draft={fixedDraft} setDraft={setFixedDraft} baseline={bodyProfile} />
+              </div>
+              {(fixedDraft.footWidthLeftCm || fixedDraft.footWidthRightCm) && <p className="m-0 text-xs leading-5 text-sage-ink">選鞋對照會採用較寬的腳：{(() => { const left = Number(fixedDraft.footWidthLeftCm) || 0; const right = Number(fixedDraft.footWidthsDiffer ? fixedDraft.footWidthRightCm : fixedDraft.footWidthLeftCm) || 0; return `${left >= right ? '左腳' : '右腳'} ${Math.max(left, right)} cm` })()}。</p>}
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-[11px] text-ink-3">固定資料修改 {fixedChangedCount} 項</span>
+                <Button type="button" variant="secondary" disabled={savingBodyProfile} onClick={() => void handleSaveBodyProfile()}><Icon name="check" size={16} />{savingBodyProfile ? '儲存中…' : '儲存固定資料'}</Button>
+              </div>
+            </div>
+          </section>
           <label className="flex flex-col gap-1.5 text-[13px] text-ink">
             這次量測備註 <span className="text-xs text-ink-3">選填</span>
             <MarkdownNoteField id="measurement-note" value={draft.note} onChange={(value) => setDraft((current) => ({ ...current, note: value }))} rows={2} placeholder="例如：更新腰圍、腿長" className="w-full resize-y rounded-btn border-[1.5px] border-line bg-paper px-3 py-2.5 text-sm outline-none placeholder:text-ink-3 focus:border-mist-deep" />

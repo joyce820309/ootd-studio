@@ -94,6 +94,16 @@
   --color-note-rule: rgb(62 98 112 / 0.22);
   --color-note-grid: rgb(150 186 198 / 0.22);
 
+  /* 彈性尺寸（B20／BM17） */
+  --color-stretch-field: #FFF9EE;
+  --color-stretch-cell: #FFF6E2;
+  --color-stretch-ring: #EBD3A0;
+  --color-stretch-num: #9A6B2A;
+  --color-stretch-line: #C9962F;
+  --color-size-band: #C5D8BE;
+  --color-field-ok: #A7C09E;
+  --color-field-error: #C98A7C;
+
   /* 狀態標籤（底色 / 文字） */
   --color-status-ok-bg: #DCE7D8;
   --color-status-ok-fg: #3F5A3B;

@@ -21,6 +21,7 @@ import {
   fetchClosetItems,
   fetchCompareGroups,
   fetchWishlist,
+  fetchLessonRules,
   markWishlistBought,
   saveOutfit,
   setWishlistGroup,
@@ -31,7 +32,9 @@ import {
 import { todayISO } from '@/lib/date'
 import { isWearable, REQUIRED_SLOTS, SLOT_META, SLOTS, STATUS_LABEL } from '@/lib/slots'
 import { colorsGoTogether, formatNT, OVERLAP_LABEL, totalPrice, WISH_STATUS, wishInsights, type WishInsights } from '@/lib/wishlist'
-import type { ClosetItem, CompareGroup, CompareGroupInput, OutfitPick, Slot, WishlistInput, WishlistItem } from '@/types'
+import type { ClosetItem, CompareGroup, CompareGroupInput, LessonRule, OutfitPick, Slot, WishlistInput, WishlistItem } from '@/types'
+import { FLAT_LABELS, matchWishlistLessonRules } from '@/lib/review'
+import { formatStretch, SIZING } from '@/lib/stretch'
 
 type BoardPick = { kind: 'closet'; id: string } | { kind: 'wish'; id: string }
 
@@ -59,6 +62,39 @@ interface Candidate {
   overBudget: boolean
   cheapest: boolean
   mostMatch: boolean
+  /** 平放尺寸摘要，例：胸寬 40 ↔ 60・衣長 56 */
+  flatText: string | null
+  /** 挑選規則結果（只標不符合或「有彈性，可能可以」） */
+  ruleTag: { tone: 'mismatch' | 'stretch'; label: string } | null
+}
+
+/** 平放尺寸摘要：依部位欄位順序，有拉伸值時顯示「40 ↔ 60」 */
+function flatSummary(slot: Slot, flat?: Record<string, number | null>, stretch?: Record<string, number>): string | null {
+  const entries = Object.entries(flat ?? {}).filter((entry): entry is [string, number] => typeof entry[1] === 'number')
+  if (!entries.length) return null
+  const order = SIZING[slot].map((field) => field.key)
+  entries.sort(([a], [b]) => (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) - (order.indexOf(b) === -1 ? 99 : order.indexOf(b)))
+  return entries.map(([key, value]) => `${FLAT_LABELS[key] ?? key} ${formatStretch(value, stretch?.[key])}`).join('・')
+}
+
+/** 比較台只顯示規則結果，不記錄提醒時間 */
+function ruleTagFor(item: WishlistItem, rules: LessonRule[]): Candidate['ruleTag'] {
+  if (!rules.length) return null
+  const matches = matchWishlistLessonRules(rules, {
+    brand: item.brand,
+    shop: item.shop,
+    slot: item.slot,
+    size: item.size,
+    sizeNote: item.sizeNote,
+    material: item.material,
+    materialComposition: item.materialComposition,
+    materialPercentages: item.materialPercentages,
+    flatMeasurements: item.flatMeasurements,
+    flatStretch: item.flatStretch,
+  })
+  if (matches.some((match) => match.mismatch)) return { tone: 'mismatch', label: '不符合挑選規則' }
+  if (matches.some((match) => match.stretchOk)) return { tone: 'stretch', label: '有彈性，可能可以' }
+  return null
 }
 
 const demoSuffix = (demo: boolean) => (demo ? '（示範模式，重新整理後會還原）' : '')
@@ -79,11 +115,11 @@ function overlapText(insights: WishInsights) {
 }
 
 /** 只有在候選之間真的有差別時才標「最省」「最多」。 */
-function buildCandidates(items: WishlistItem[], closet: ClosetItem[], closetItemIds: string[], budget?: number): Candidate[] {
+function buildCandidates(items: WishlistItem[], closet: ClosetItem[], closetItemIds: string[], budget?: number, rules: LessonRule[] = []): Candidate[] {
   const base = items.map((item) => {
     const size = sizeInfo(item)
     const total = totalPrice(item)
-    return { item, source: 'wishlist' as const, key: `wish:${item.id}`, total, insights: wishInsights(item, closet), sizeText: size.text, sizeTone: size.tone, overBudget: budget !== undefined && total > budget }
+    return { item, source: 'wishlist' as const, key: `wish:${item.id}`, total, insights: wishInsights(item, closet), sizeText: size.text, sizeTone: size.tone, overBudget: budget !== undefined && total > budget, flatText: flatSummary(item.slot, item.flatMeasurements, item.flatStretch), ruleTag: ruleTagFor(item, rules) }
   })
   const closetCandidates = closet.filter((item) => closetItemIds.includes(item.id)).map((closetItem) => {
     const item: WishlistItem = {
@@ -113,6 +149,8 @@ function buildCandidates(items: WishlistItem[], closet: ClosetItem[], closetItem
       sizeText: size.text,
       sizeTone: size.tone,
       overBudget: false,
+      flatText: flatSummary(closetItem.slot, closetItem.flatMeasurements, closetItem.flatStretch),
+      ruleTag: null,
     }
   })
   const all = [...base, ...closetCandidates]
@@ -150,6 +188,7 @@ export function ComparePage() {
   const [groups, setGroups] = useState<CompareGroup[] | null>(null)
   const [wishes, setWishes] = useState<WishlistItem[]>([])
   const [closet, setCloset] = useState<ClosetItem[]>([])
+  const [lessonRules, setLessonRules] = useState<LessonRule[]>([])
   const [closetCandidateIdsByGroup, setClosetCandidateIdsByGroup] = useState<Record<string, string[]>>({})
   const [loadError, setLoadError] = useState<Error | null>(null)
   const [tryIdByGroup, setTryIdByGroup] = useState<Record<string, string>>({})
@@ -161,8 +200,9 @@ export function ComparePage() {
   const closeToast = useCallback(() => setToast(null), [])
 
   const load = useCallback(() => {
-    Promise.all([fetchCompareGroups(), fetchWishlist(), fetchClosetItems(), fetchCompareClosetItems()])
-      .then(([g, w, c, closetGroupItems]) => {
+    Promise.all([fetchCompareGroups(), fetchWishlist(), fetchClosetItems(), fetchCompareClosetItems(), fetchLessonRules().catch(() => [] as LessonRule[])])
+      .then(([g, w, c, closetGroupItems, rules]) => {
+        setLessonRules(rules.filter((rule) => rule.active))
         setGroups(g)
         setWishes(w)
         setCloset(c)
@@ -192,7 +232,7 @@ export function ComparePage() {
 
   const groupItems = useMemo(() => (group ? wishes.filter((w) => w.compareGroupId === group.id) : []), [wishes, group])
   const groupClosetItemIds = group ? closetCandidateIdsByGroup[group.id] ?? EMPTY_CLOSET_CANDIDATE_IDS : EMPTY_CLOSET_CANDIDATE_IDS
-  const candidates = useMemo(() => buildCandidates(groupItems, closet, groupClosetItemIds, group?.budget), [groupItems, closet, groupClosetItemIds, group?.budget])
+  const candidates = useMemo(() => buildCandidates(groupItems, closet, groupClosetItemIds, group?.budget, lessonRules), [groupItems, closet, groupClosetItemIds, group?.budget, lessonRules])
   const tryCand = candidates.find((c) => c.key === (group ? tryIdByGroup[group.id] : undefined)) ?? candidates[0] ?? null
   const tryItem = tryCand?.item ?? null
   const notes = useMemo(() => compareNotes(candidates), [candidates])
@@ -637,6 +677,7 @@ function CandidateCard({ c, on, compact = false, busy, onTry, onEliminate }: { c
       </div>
       <div className="flex flex-col gap-0.5">
         <span className={`font-medium leading-[1.4] ${compact ? 'text-xs' : 'text-sm'}`}>{item.name}</span>
+        {c.ruleTag && <span className={`inline-flex h-[22px] items-center self-start rounded-full px-2 text-[11px] font-medium ${c.ruleTag.tone === 'mismatch' ? 'bg-rose-soft text-status-repair-fg' : 'bg-oat-soft text-oat-ink'}`}>{c.ruleTag.label}</span>}
         {!compact && <span className={`font-num text-xl font-bold tabular ${c.source === 'closet' ? 'text-ink-2' : ''}`}>{priceLabel}</span>}
         {compact && (
           <span className="font-num text-[17px] font-bold tabular">
@@ -655,6 +696,7 @@ function CandidateCard({ c, on, compact = false, busy, onTry, onEliminate }: { c
         )}
         {!compact && <Row label="材質">{item.material ?? '—'}</Row>}
         <Row label="你的尺寸"><span className={`font-medium ${SIZE_CLASS[c.sizeTone]}`}>{c.sizeText}</span></Row>
+        {c.flatText && <Row label="平放尺寸"><span className="font-num text-[13px] tabular">{c.flatText}</span></Row>}
         {!compact && <Row label="退換">{item.returnPolicy ?? '—'}</Row>}
         <Row label="衣櫃可搭">
           <span className="font-num font-bold tabular">{c.insights.matchCount} 件</span>

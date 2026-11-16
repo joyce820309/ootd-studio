@@ -62,6 +62,8 @@ export interface NewGarmentInput {
   productUrl?: string
   note?: string
   flatMeasurements: Record<string, number | null>
+  /** 可拉伸到的平放量（只有有彈性的欄位），例：{ chest: 60 } */
+  flatStretch?: Record<string, number>
   destination: AddItemDestination
   closetStatus?: Extract<ItemStatus, 'ok' | 'not_arrived'>
   useCutout: boolean
@@ -101,6 +103,8 @@ export interface ClosetItem {
   productUrl?: string
   note?: string
   flatMeasurements?: Record<string, number | null>
+  /** 可拉伸到的平放量，例：{ chest: 60 } */
+  flatStretch?: Record<string, number>
   status: ItemStatus
   isFavorite?: boolean
   cutoutUrl?: string
@@ -156,6 +160,8 @@ export interface WishlistItem {
   material?: string
   materialComposition?: string
   materialPercentages?: MaterialPercentages
+  flatMeasurements?: Record<string, number | null>
+  flatStretch?: Record<string, number>
   returnPolicy?: string
   boughtItemId?: string
   createdAt?: string
@@ -183,6 +189,8 @@ export interface WishlistInput {
   material?: string
   materialComposition?: string
   materialPercentages?: MaterialPercentages
+  flatMeasurements?: Record<string, number | null>
+  flatStretch?: Record<string, number>
   returnPolicy?: string
   status: Exclude<WishStatus, 'bought'>
   /** undefined＝不變更所屬群組；null＝移出群組 */
@@ -267,16 +275,16 @@ export interface ProfilePreferences {
 export interface BodyMeasurement {
   id: string
   measuredOn: string
-  heightCm: number | null
   weightKg: number | null
   shoulderCm: number | null
   upperBustCm: number | null
   underBustCm: number | null
+  highWaistCm: number | null
   waistCm: number | null
+  waistSittingCm: number | null
   navelCm: number | null
+  navelSittingCm: number | null
   hipCm: number | null
-  armCm: number | null
-  inseamCm: number | null
   thighCm: number | null
   footToeLengthCm: number | null
   footToeWidthCm: number | null
@@ -290,12 +298,27 @@ export interface BodyMeasurement {
   footBareWidthCm: number | null
   footBareBallCm: number | null
   footBareInstepCm: number | null
+  timeOfDay: 'morning_fasting' | 'afternoon_evening' | 'other'
   note: string
   createdAt: string
   updatedAt?: string
 }
 
 export type BodyMeasurementInput = Omit<BodyMeasurement, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }
+
+/** 不隨每次量測建立快照的固定身體資料。 */
+export interface BodyProfile {
+  heightCm: number | null
+  armLengthCm: number | null
+  inseamCm: number | null
+  seatedRiseCm: number | null
+  footWidthLeftCm: number | null
+  footWidthRightCm: number | null
+  heelWidthCm: number | null
+  updatedAt?: string
+}
+
+export type BodyProfileInput = Omit<BodyProfile, 'updatedAt'>
 
 export interface StudioCanvasItem {
   key: string
@@ -366,6 +389,7 @@ export interface LessonRule {
   why: string
   active: boolean
   createdAt: string
+  lastNotifiedAt?: string
   sourceReviewId?: string
 }
 

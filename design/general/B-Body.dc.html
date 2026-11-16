@@ -39,7 +39,7 @@ summary::-webkit-details-marker{display:none}
 a{color:#3E6270}
 </style>
 </helmet>
-<div style="width:100%;min-height:2160px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+<div style="width:100%;min-height:2740px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
 
   <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
     <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
@@ -76,6 +76,11 @@ a{color:#3E6270}
             <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="margin-left:auto;width:18px;height:18px;color:#74624F"><path d="M6 9l6 6 6-6"></path></svg>
           </button>
         </div>
+        <div class="fld" role="radiogroup" aria-label="量測時段" style="flex:0 1 auto;position:relative">
+          <span style="font-weight:500">量測時段</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="chip on" type="button" role="radio" aria-checked="true">早上空腹</button><button class="chip" type="button" role="radio" aria-checked="false">下午・晚上</button><button class="chip" type="button" role="radio" aria-checked="false">其他</button></div>
+        </div>
+        <p style="flex:1 1 100%;margin:0;font-size:12px;line-height:1.7;color:#5A3F12;position:relative">圍度建議固定在早上空腹量，前後才比得出變化；腳建議下午或晚上量（一天中最腫的時候）。時段只是記錄，不影響計算。</p>
         <p style="flex:1 1 260px;margin:0 0 4px;font-size:13px;line-height:1.75;color:#5A4A3C;position:relative">欄位已帶入<b style="font-weight:500;color:#3B2F25">上次（10/02）</b>的數字，只改有變的就好。儲存後會多一筆新的量測紀錄，舊紀錄都會保留。</p>
       </section>
 
@@ -84,7 +89,7 @@ a{color:#3E6270}
           <summary><span class="wash" aria-hidden="true" style="background:{{g.wash}}"></span><span class="hd" style="font-size:19px;font-weight:700">{{g.t}}</span><span style="font-size:12px;color:{{g.stColor}};position:relative">{{g.st}}</span><svg class="ic" viewBox="0 0 24 24" style="margin-left:auto;position:relative" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></summary>
           <div style="padding:0 20px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
             <sc-for list="{{g.f}}" as="f" hint-placeholder-count="3">
-              <div class="fld"><label for="{{f.id}}">{{f.k}}<sc-if value="{{f.ch}}" hint-placeholder-val="{{ false }}"><span style="margin-left:6px;font-size:11px;padding:1px 7px;border-radius:999px;background:#F6E7C6;color:#5A3F12">已修改</span></sc-if></label><div class="mi" style="border-style:{{f.bs}};border-color:{{f.bc}};background:{{f.bg}}"><input id="{{f.id}}" value="{{f.v}}" placeholder="選填"><span>{{f.u}}</span></div><span style="font-size:11px;color:#74624F">{{f.prev}}</span></div>
+              <div class="fld"><label for="{{f.id}}">{{f.k}}<sc-if value="{{f.ch}}" hint-placeholder-val="{{ false }}"><span style="margin-left:6px;font-size:11px;padding:1px 7px;border-radius:999px;background:#F6E7C6;color:#5A3F12">已修改</span></sc-if></label><div class="mi" style="border-style:{{f.bs}};border-color:{{f.bc}};background:{{f.bg}}"><input id="{{f.id}}" value="{{f.v}}" placeholder="選填"><span>{{f.u}}</span></div><span style="font-size:11px;color:#74624F">{{f.prev}}</span><sc-if value="{{f.hint}}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;line-height:1.5;color:#3E6270">{{f.hint}}</span></sc-if></div>
             </sc-for>
           </div>
         </details>
@@ -93,7 +98,7 @@ a{color:#3E6270}
       <details open>
         <summary><span class="wash" aria-hidden="true" style="background:rgba(222,166,152,.5)"></span><span class="hd" style="font-size:19px;font-weight:700">腳</span><span style="font-size:12px;color:#5A4A3C;position:relative">3 種狀態・各 4 項</span><svg class="ic" viewBox="0 0 24 24" style="margin-left:auto;position:relative" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></summary>
         <div style="padding:0 20px 20px;display:flex;flex-direction:column;gap:12px">
-          <p style="margin:0;font-size:12px;line-height:1.7;color:#5A4A3C">襪子厚度會影響尺寸，所以分開記。買鞋時可以選要用哪一組來比對，例如五指襪配運動鞋、裸腳配涼鞋。</p>
+          <p style="margin:0;font-size:12px;line-height:1.7;color:#5A4A3C">襪子厚度會影響尺寸，所以分開記。<b style="font-weight:500;color:#3B2F25">量比較大的那隻腳</b>，建議下午或晚上量。左右腳寬不同、腳跟寬，記在下面的「固定資料」。</p>
           <div role="table" aria-label="腳的尺寸（公分）" style="display:grid;grid-template-columns:92px repeat(4,minmax(0,1fr));gap:8px 10px;align-items:center">
             <span role="columnheader" style="font-size:12px;color:#74624F">狀態</span>
             <span role="columnheader" style="font-size:13px">腳長</span>
@@ -109,6 +114,32 @@ a{color:#3E6270}
           </div>
         </div>
       </details>
+
+      <section aria-labelledby="fx-t" style="position:relative;border-radius:16px;background:#FFFCF6;box-shadow:inset 0 0 0 1.5px #EBD3A0;padding:18px 20px 20px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <h2 id="fx-t" class="hd" style="margin:0;font-size:19px">固定資料</h2>
+          <span style="font-size:11px;padding:2px 9px;border-radius:999px;background:#F6E7C6;color:#5A3F12">不太會變・不跟著每次紀錄</span>
+          <span class="num" style="margin-left:auto;font-size:12px;color:#74624F">更新於 2026/11/16</span>
+        </div>
+        <p style="margin:0;font-size:12px;line-height:1.7;color:#5A4A3C">骨架長度和腳型，記一次就好。改了會直接更新，不會產生新的量測紀錄；尺寸對照一律用這裡最新的數字。</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+          <sc-for list="{{fixed}}" as="x" hint-placeholder-count="4">
+            <div class="fld"><label for="{{x.id}}">{{x.k}}</label><div class="mi" style="border-style:{{x.bs}};border-color:#E2D2B8;background:#FBF4E8"><input id="{{x.id}}" value="{{x.v}}" placeholder="選填"><span>cm</span></div><span style="font-size:11px;line-height:1.5;color:#3E6270">{{x.hint}}</span></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;padding-top:14px;border-top:1.5px dashed #EADCC6">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span style="font-size:13px;font-weight:500">裸腳腳寬</span>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;min-height:44px;cursor:pointer;margin-left:auto">左右不同<span style="width:42px;height:24px;border-radius:999px;background:#4A6245;position:relative;flex:none"><span style="position:absolute;right:2px;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6"></span></span><input type="checkbox" checked style="position:absolute;opacity:0;width:1px;height:1px"></label>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:end">
+            <div class="fld"><label for="fwl">左腳</label><div class="mi"><input id="fwl" value="8.5"><span>cm</span></div></div>
+            <div class="fld"><label for="fwr">右腳</label><div class="mi" style="border-color:#A7C09E;background:#F4F8F2"><input id="fwr" value="9.0"><span>cm</span></div></div>
+            <div class="fld"><label for="fhe">腳跟寬</label><div class="mi"><input id="fhe" value="5.5"><span>cm</span></div></div>
+          </div>
+          <span style="font-size:12px;line-height:1.6;color:#2E3F2B">選鞋配大的那隻：右腳 9.0 cm。上面「腳」表格量的也是右腳。</span>
+        </div>
+      </section>
 
       <details open>
         <summary><span class="wash" aria-hidden="true" style="background:rgba(222,166,152,.5)"></span><span class="hd" style="font-size:19px;font-weight:700">鞋碼對照</span><span style="font-size:12px;color:#4A6245;position:relative">已填寫</span><svg class="ic" viewBox="0 0 24 24" style="margin-left:auto;position:relative" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></summary>
@@ -166,20 +197,21 @@ a{color:#3E6270}
   </main>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2160}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2740}}'>
 class Component extends DCLogic {
   renderVals() {
     // prev：上次量到的日期與數值；ch：這次和上次不同（已修改）
-    const f = (id,k,v,u,prev,ch) => ({id,k,v,u,ch:!!ch,prev: prev || '還沒量過',
+    const f = (id,k,v,u,prev,ch,hint) => ({id,k,v,u,ch:!!ch,hint:hint||'',prev: prev || '還沒量過',
       bs: v ? 'solid' : 'dashed', bc: ch ? '#E2B866' : '#E2D2B8', bg: ch ? '#FFF6E2' : '#FBF4E8'});
     const c = (k,v,ch) => ({k,v, bs: v ? 'solid' : 'dashed', bc: ch ? '#E2B866' : '#E2D2B8', bg: ch ? '#FFF6E2' : '#FBF4E8'});
     return {
       prog: ['#B7CBB0','#B7CBB0','#B7CBB0','#B7CBB0','#E2D2B8'],
       groups: [
-        {t:'基本', st:'已填寫', stColor:'#4A6245', wash:'rgba(240,196,118,.55)', f:[f('h','身高','162','cm','上次 162'), f('w','體重','52.0','kg','上次 52.5',true)]},
-        {t:'上半身', st:'已填寫', stColor:'#4A6245', wash:'rgba(150,186,198,.5)', f:[f('sh','肩寬','38','cm','上次 38'), f('ub','上胸圍','84','cm','上次 84'), f('lb','下胸圍','70','cm','上次 71',true), f('ar','手臂長','55','cm','上次 55')]},
-        {t:'下半身', st:'4 / 5', stColor:'#5A4A3C', wash:'rgba(167,192,158,.55)', f:[f('wa','腰圍','65','cm','上次 66',true), f('na','肚臍圍','73','cm','上次 73'), f('hi','臀圍','91','cm','上次 91'), f('le','腿長（內側）','74','cm','上次 74'), f('th','大腿圍','','cm','')]}
+        {t:'基本', st:'已填寫', stColor:'#4A6245', wash:'rgba(240,196,118,.55)', f:[f('w','體重','52.0','kg','上次 52.5',true)]},
+        {t:'上半身', st:'已填寫', stColor:'#4A6245', wash:'rgba(150,186,198,.5)', f:[f('sh','肩寬','38','cm','上次 38'), f('ub','上胸圍','84','cm','上次 84'), f('lb','下胸圍','70','cm','上次 71',true)]},
+        {t:'下半身', st:'5 / 6', stColor:'#5A4A3C', wash:'rgba(167,192,158,.55)', f:[f('hw','高腰圍','64','cm','','', '肚臍上方，高腰褲頭的位置'), f('wa','腰圍','65','cm','上次 66',true,'最細處'), f('na','肚臍圍・站著','73','cm','上次 73','','中腰褲頭的位置'), f('ns','肚臍圍・坐著','81','cm','','','坐在椅子上量；中腰褲頭用這個比'), f('hi','臀圍','91','cm','上次 91','','最寬處'), f('th','大腿圍','','cm','','','大腿最粗處')]}
       ],
+      fixed: [['fh','身高','162','赤腳站直'],['far','手臂長','55','肩峰到手腕'],['fle','腿長（內側）','74','褲長看這個'],['fri','坐姿股上','','坐硬椅，從腰側量到椅面；比對褲子的股上']].map(([id,k,v,hint]) => ({id,k,v,hint,bs: v ? 'solid' : 'dashed'})),
       feet: [
         {t:'穿五指襪', c:'#F2CF8E', v:[c('腳長',''),c('腳寬',''),c('前掌圍',''),c('腳背圍','')]},
         {t:'穿一般襪', c:'#A9C6CF', v:[c('腳長','23.5'),c('腳寬','9.1'),c('前掌圍','22.0'),c('腳背圍','22.8')]},
@@ -191,8 +223,8 @@ class Component extends DCLogic {
         {t:'靴子', eu:'38', us:'7', uk:'5', jp:'24'}
       ],
       history: [
-        {date:'2026/10/02', tag:'最新', note:'體重有變・新記：肚臍圍、裸腳 3 項', c:'#B7CBB0'},
-        {date:'2026/04/18', tag:'', note:'肩寬、上胸圍、臀圍有變・新記：一般襪 4 項', c:'#A9C6CF'},
+        {date:'2026/10/02', tag:'最新', note:'早上空腹・體重有變・新記：肚臍圍、裸腳 3 項', c:'#B7CBB0'},
+        {date:'2026/04/18', tag:'', note:'晚上・肩寬、上胸圍、臀圍有變・新記：一般襪 4 項', c:'#A9C6CF'},
         {date:'2025/11/05', tag:'', note:'第一次記錄', c:'#F2CF8E'}
       ]
     };

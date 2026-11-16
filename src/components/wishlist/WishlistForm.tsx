@@ -1,16 +1,19 @@
-import { useEffect, useId, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Chip } from '@/components/ui/Chip'
 import { Combobox } from '@/components/ui/Combobox'
 import { Icon } from '@/components/ui/Icon'
 import { MarkdownNoteField } from '@/components/ui/MarkdownNote'
+import { FlatMeasureField } from '@/components/closet/FlatMeasureField'
+import { fetchLessonRules, fetchManagedList, markLessonRulesNotified, useLatestBody } from '@/lib/data'
+import { FLAT_LABELS, isLessonRuleReminderDue, matchWishlistLessonRules } from '@/lib/review'
+import { collectMeasures, SIZING, toFieldValue, type FlatFieldValue, type MeasureField } from '@/lib/stretch'
 import { SLOTS } from '@/lib/slots'
 import { PRIORITY_LABEL, shopFromUrl, WISH_STATUS } from '@/lib/wishlist'
-import { fetchManagedList } from '@/lib/data'
 import { materialNames, parsePercentages } from '@/lib/materials'
 import type { ManagedListSummary } from '@/types'
-import type { WishlistInput, WishlistItem, WishPriority } from '@/types'
+import type { LessonRule, WishlistInput, WishlistItem, WishPriority } from '@/types'
 
 type EditableStatus = WishlistInput['status']
 const STATUS_OPTIONS: EditableStatus[] = ['considering', 'waiting', 'ready', 'dropped']
@@ -36,6 +39,8 @@ interface Draft {
   material: string
   materialComposition: string
   materialPercentages: Record<string, string>
+  /** 平放尺寸（可含「40-60」範圍） */
+  flat: Record<string, FlatFieldValue>
   reason: string
 }
 
@@ -66,11 +71,20 @@ function toDraft(item?: WishlistItem, defaults?: WishlistFormDefaults): Draft {
     material: item?.material ?? '',
     materialComposition: item?.materialComposition ?? '',
     materialPercentages: Object.fromEntries(Object.entries(item?.materialPercentages ?? {}).map(([name, value]) => [name, String(value)])),
+    flat: Object.fromEntries(Object.entries(item?.flatMeasurements ?? {}).map(([key, value]) => [key, toFieldValue(value, item?.flatStretch?.[key])])),
     reason: item?.reason ?? '',
   }
 }
 
-type Errors = Partial<Record<'name' | 'slot' | 'price' | 'shipping' | 'targetPrice' | 'url' | 'necklineSize' | 'materialPercentages', string>>
+/** 這個部位的平放尺寸欄位，加上這件已存但不在預設清單裡的欄位（例如洋裝的下擺寬） */
+function measureFields(slot: Draft['slot'], flat: Record<string, FlatFieldValue>): MeasureField[] {
+  if (!slot) return []
+  const base = SIZING[slot]
+  const extra = Object.keys(flat).filter((key) => !base.some((field) => field.key === key) && flat[key]?.text.trim())
+  return [...base, ...extra.map((key) => ({ key, label: FLAT_LABELS[key] ?? key }))]
+}
+
+type Errors = Partial<Record<'name' | 'slot' | 'price' | 'shipping' | 'targetPrice' | 'url' | 'necklineSize' | 'materialPercentages' | 'flat', string>>
 
 function parseAmount(value: string): number | null | 'invalid' {
   const trimmed = value.replace(/[,\s]/g, '')
@@ -94,6 +108,8 @@ function validate(draft: Draft): { errors: Errors; input?: WishlistInput } {
   if (necklineSize !== null && (!Number.isFinite(necklineSize) || necklineSize < 0)) errors.necklineSize = '領口尺寸請填 0 以上的數字。'
   if (Object.entries(draft.materialPercentages).some(([name, value]) => materialNames(draft.material).includes(name) && value.trim() && (!Number.isFinite(Number(value)) || Number(value) < 0 || Number(value) > 100))) errors.materialPercentages = '材質比例請填 0 到 100 之間的數字。'
   if (draft.url.trim() && !shopFromUrl(draft.url)) errors.url = '網址格式看起來不對，請確認是否以 https:// 開頭。'
+  const measures = collectMeasures(measureFields(draft.slot, draft.flat), draft.flat)
+  if (measures.error) errors.flat = `平放尺寸「${measures.error.field.label}」：${measures.error.message}`
   if (Object.keys(errors).length) return { errors }
   return {
     errors,
@@ -116,6 +132,8 @@ function validate(draft: Draft): { errors: Errors; input?: WishlistInput } {
       material: draft.material,
       materialComposition: draft.materialComposition,
       materialPercentages: parsePercentages(draft.materialPercentages),
+      flatMeasurements: measures.flat,
+      flatStretch: measures.stretch,
       returnPolicy: draft.returnPolicy,
       status: draft.status,
     },
@@ -171,7 +189,26 @@ export function WishlistForm({
   const [errors, setErrors] = useState<Errors>({})
   const [shopSuggestions, setShopSuggestions] = useState<string[]>([])
   const [materials, setMaterials] = useState<ManagedListSummary[]>([])
+  const [lessonRules, setLessonRules] = useState<LessonRule[]>([])
+  const [shownRuleIds, setShownRuleIds] = useState<string[]>([])
+  const shownRuleIdsRef = useRef(new Set<string>())
   const editing = !!item
+
+  const body = useLatestBody()
+  const fields = useMemo(() => measureFields(draft.slot, draft.flat), [draft.slot, draft.flat])
+  const measures = useMemo(() => collectMeasures(fields, draft.flat), [fields, draft.flat])
+  const matchedRuleAlerts = useMemo(() => matchWishlistLessonRules(lessonRules, {
+    brand: draft.brand,
+    shop: draft.shop,
+    slot: draft.slot,
+    size: draft.size,
+    sizeNote: draft.sizeNote,
+    material: draft.material,
+    materialComposition: draft.materialComposition,
+    materialPercentages: parsePercentages(draft.materialPercentages),
+    flatMeasurements: measures.flat,
+    flatStretch: measures.stretch,
+  }).filter(({ rule }) => !rule.lastNotifiedAt || shownRuleIds.includes(rule.id)), [draft.brand, draft.material, draft.materialComposition, draft.materialPercentages, draft.shop, draft.size, draft.sizeNote, draft.slot, lessonRules, measures, shownRuleIds])
 
   useEffect(() => {
     const previous = document.body.style.overflow
@@ -190,8 +227,24 @@ export function WishlistForm({
       const extras = current.filter((name) => !materialList.entries.some((entry) => entry.name === name)).map((name) => ({ name, aliases: [], sortOrder: 1000, isDefault: false, isHidden: false, closetCount: 0, wishCount: 0, lastUsed: null }))
       setMaterials([...materialList.entries.filter((entry) => !entry.isHidden), ...extras])
     }).catch(() => undefined)
+    void fetchLessonRules().then((rules) => active && setLessonRules(rules.filter((rule) => rule.active && isLessonRuleReminderDue(rule)))).catch(() => undefined)
     return () => { active = false }
   }, [item?.id, item?.material])
+
+  useEffect(() => {
+    const newAlerts = matchedRuleAlerts.filter(({ rule }) => !shownRuleIdsRef.current.has(rule.id))
+    if (!newAlerts.length) return
+    const ids = newAlerts.map(({ rule }) => rule.id)
+    ids.forEach((ruleId) => shownRuleIdsRef.current.add(ruleId))
+    void markLessonRulesNotified(ids).then((markedIds) => {
+      const notifiedAt = new Date().toISOString()
+      setShownRuleIds((current) => [...new Set([...current, ...ids])])
+      if (markedIds.length) setLessonRules((current) => current.map((rule) => markedIds.includes(rule.id) ? { ...rule, lastNotifiedAt: notifiedAt } : rule))
+    }).catch(() => {
+      // 提醒已在畫面顯示；記錄失敗不阻擋新增商品。
+      setShownRuleIds((current) => [...new Set([...current, ...ids])])
+    })
+  }, [matchedRuleAlerts])
 
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) => setDraft((d) => ({ ...d, [key]: value }))
 
@@ -218,7 +271,8 @@ export function WishlistForm({
     setErrors(result.errors)
     if (!result.input) {
       const first = Object.keys(result.errors)[0]
-      document.getElementById(id(first))?.focus()
+      if (first === 'flat') document.getElementById(id('flat'))?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      else document.getElementById(id(first))?.focus()
       return
     }
     onSubmit(result.input)
@@ -315,6 +369,29 @@ export function WishlistForm({
               <MarkdownNoteField id={id('sizeNote')} value={draft.sizeNote} onChange={(value) => set('sizeNote', value)} rows={2} placeholder="例：36 有貨、只剩 L、肩寬 39 cm" className="w-full min-w-0 rounded-btn border-[1.5px] border-line bg-card px-3 py-2.5 text-sm leading-6 text-ink placeholder:text-ink-3" />
             </Field>
           </div>
+
+          {fields.length > 0 && <section id={id('flat')} aria-labelledby={id('flat-title')} className="space-y-2.5">
+            <div className="flex flex-wrap items-baseline gap-x-2">
+              <h3 id={id('flat-title')} className="m-0 text-[13px] font-medium text-ink">平放尺寸</h3>
+              <span className="text-xs text-ink-2">單位 cm・選填・網拍寫「胸寬 40-60」可以直接貼上</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {fields.map((field) => <FlatMeasureField key={field.key} field={field} body={body} value={draft.flat[field.key] ?? { text: '' }} onChange={(value) => set('flat', { ...draft.flat, [field.key]: value })} />)}
+            </div>
+            {errors.flat && <p id={`${id('flat')}-error`} role="alert" className="m-0 text-xs text-rose-deep">{errors.flat}</p>}
+          </section>}
+
+          {matchedRuleAlerts.length > 0 && <section role="status" aria-live="polite" aria-label="覆盤規則提醒" className="space-y-2 rounded-tile border-[1.5px] border-dashed border-oat-edge bg-oat-soft p-3.5 text-ink">
+            <h3 className="m-0 flex items-center gap-2 text-sm font-bold"><Icon name="alert" size={17} />你之前記下的挑選提醒</h3>
+            <ul className="m-0 space-y-2 p-0">
+              {matchedRuleAlerts.map(({ rule, detail, mismatch, stretchOk }) => <li key={rule.id} className={`list-none rounded-sm px-3 py-2 text-[13px] leading-5 ${mismatch ? 'bg-rose-soft text-rose-ink' : stretchOk ? 'bg-card text-oat-ink' : 'bg-card/80 text-ink-2'}`}>
+                {stretchOk && <span className="block text-sm font-bold text-oat-ink">有彈性，可能可以</span>}
+                <span className="font-medium text-ink">{rule.scope}・{rule.text}</span>
+                <span className="mt-0.5 block">{detail ?? rule.why}</span>
+              </li>)}
+            </ul>
+            <p className="m-0 text-[11px] leading-5 text-ink-2">只提醒、不會阻擋加入；同一條規則 7 天內最多提醒一次。</p>
+          </section>}
 
           <div className="grid grid-cols-[auto_1fr] items-end gap-3">
             <div className="flex flex-col gap-1.5">

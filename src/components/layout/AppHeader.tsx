@@ -1,6 +1,7 @@
 import { Link, NavLink } from 'react-router-dom'
 import { Icon } from '@/components/ui/Icon'
 import { LogoSticker } from '@/components/ui/Paper'
+import { ProfileAvatarLink } from './ProfileAvatarLink'
 
 const NAV = [
   { to: '/home', label: '首頁' },
@@ -38,9 +39,7 @@ export function AppHeader() {
         <button type="button" aria-label="通知" className="inline-flex size-11 items-center justify-center rounded-btn text-ink-2 hover:bg-tile">
           <Icon name="bell" />
         </button>
-        <Link to="/me" aria-label="個人資料" className="flex size-11 items-center justify-center no-underline">
-          <span className="flex size-[34px] items-center justify-center rounded-full border-[1.5px] border-ink bg-card font-logo text-sm font-semibold text-ink">J</span>
-        </Link>
+        <ProfileAvatarLink />
       </div>
     </header>
   )

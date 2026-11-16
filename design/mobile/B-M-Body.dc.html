@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機新增量測</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.mi{display:flex;align-items:center;height:48px;border:1.5px solid #E2D2B8;border-radius:12px;background:#FBF4E8;padding:0 12px;gap:6px}
+.mi input{flex:1;min-width:0;width:100%;border:0;background:transparent;font:700 17px Nunito,'Chiron GoRound TC';color:#3B2F25;text-align:right;outline:none}
+.mi span{font-size:12px;color:#74624F}
+.fl{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:500;min-width:0}
+.sub{font-size:11px;font-weight:400;line-height:1.5}
+.seg3 button{height:40px;border:0;border-radius:8px;background:transparent;font:500 13px 'Chiron GoRound TC';color:#5A4A3C}
+.seg3 button[aria-checked="true"]{background:#FFFCF6;color:#3B2F25;font-weight:700;box-shadow:0 1px 2px rgba(59,47,37,.1)}
+</style>
+</helmet>
+<div style="width:390px;height:1820px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden">
+  <header style="display:flex;align-items:center;gap:4px;padding:8px 8px 8px 4px;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-M-Lists.dc.html" aria-label="返回我的" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <h1 class="hd" style="margin:0;font-size:20px">新增量測</h1>
+    <span class="num" style="margin-left:8px;font-size:11px;color:#74624F">/me/measurements/new</span>
+  </header>
+
+  <main style="padding:14px 12px 130px;display:flex;flex-direction:column;gap:14px">
+    <section aria-label="這次量測" style="padding:14px;border-radius:16px;background:#F6E7C6;display:flex;flex-direction:column;gap:12px">
+      <div class="fl">這次量測日期 <button type="button" aria-haspopup="dialog" style="display:flex;align-items:center;gap:10px;height:48px;padding:0 12px;border-radius:12px;border:1.5px solid #D9C7AC;background:#FFFCF6;font:400 15px 'Chiron GoRound TC';color:#3B2F25;text-align:left"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px;color:#5A4A3C"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4"></path></svg>2026 年 11 月 16 日（一）</button></div>
+      <div class="fl">量測時段
+        <div class="seg3" role="radiogroup" aria-label="量測時段" style="display:grid;grid-template-columns:repeat(3,1fr);padding:3px;border-radius:10px;background:rgba(255,252,246,.55)"><button type="button" role="radio" aria-checked="true">早上空腹</button><button type="button" role="radio" aria-checked="false">下午・晚上</button><button type="button" role="radio" aria-checked="false">其他</button></div>
+      </div>
+      <span style="font-size:12px;line-height:1.6;color:#5A3F12">已帶入上次（11/12）的數字，只改有變的就好。圍度建議早上空腹量；腳建議下午或晚上量。</span>
+    </section>
+
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+      <section class="paper" aria-label="{{g.t}}" style="padding:14px;display:flex;flex-direction:column;gap:12px">
+        <h2 style="margin:0;display:flex;align-items:center;gap:8px"><span aria-hidden="true" style="width:12px;height:12px;border-radius:4px;background:{{g.c}}"></span><span class="hd" style="font-size:19px">{{g.t}}</span><span style="font-size:12px;font-weight:400;color:#5A4A3C">{{g.st}}</span></h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <sc-for list="{{g.f}}" as="f" hint-placeholder-count="3">
+            <label class="fl">{{f.k}}
+              <span class="mi" style="border-style:{{f.bs}};border-color:{{f.bc}};background:{{f.bg}}"><input value="{{f.v}}" placeholder="選填" inputmode="decimal"><span>{{f.u}}</span></span>
+              <span class="sub" style="color:#74624F">{{f.prev}}</span>
+              <sc-if value="{{f.hint}}" hint-placeholder-val="{{ false }}"><span class="sub" style="color:#3E6270">{{f.hint}}</span></sc-if>
+            </label>
+          </sc-for>
+        </div>
+      </section>
+    </sc-for>
+
+    <section class="paper" aria-labelledby="mft" style="padding:14px;display:flex;flex-direction:column;gap:12px">
+      <h2 style="margin:0;display:flex;align-items:center;gap:8px"><span aria-hidden="true" style="width:12px;height:12px;border-radius:4px;background:#E2B4A8"></span><span id="mft" class="hd" style="font-size:19px">腳</span><span style="font-size:12px;font-weight:400;color:#5A4A3C">量比較大的那隻</span></h2>
+      <div role="tablist" aria-label="襪子" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+        <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3"><button type="button" role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}" style="height:40px;border-radius:999px;border:1.5px solid {{t.bd}};background:{{t.bg}};color:{{t.fg}};font:500 13px 'Chiron GoRound TC'">{{t.t}}</button></sc-for>
+      </div>
+      <div role="tabpanel" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <sc-for list="{{feet}}" as="f" hint-placeholder-count="4">
+          <label class="fl">{{f.k}}<span class="mi" style="border-style:{{f.bs}}"><input value="{{f.v}}" placeholder="選填" inputmode="decimal"><span>cm</span></span></label>
+        </sc-for>
+      </div>
+      <span style="font-size:11px;line-height:1.6;color:#5A4A3C">左右腳寬不同、腳跟寬，記在「我的 › 固定資料」。</span>
+    </section>
+
+    <label class="fl" style="padding:0 2px">這次量測備註 <span class="sub" style="color:#74624F">選填</span>
+      <textarea rows="2" style="resize:none;border:1.5px solid #E2D2B8;border-radius:12px;background:#FFFCF6;padding:10px 12px;font:400 14px/1.7 'Chiron GoRound TC';color:#3B2F25">早上起床後量，穿薄內衣</textarea>
+    </label>
+  </main>
+
+  <footer style="position:absolute;left:0;right:0;bottom:0;padding:10px 12px 28px;background:#FBF4E8;border-top:1.5px dashed #D9C7AC;display:flex;flex-direction:column;gap:6px">
+    <span style="font-size:12px;color:#5A4A3C;text-align:center">改了 <b class="num" style="color:#3B2F25">3</b> 項・新記 <b class="num" style="color:#3B2F25">2</b> 項</span>
+    <a class="btn btn-p" href="B-M-History.dc.html" style="height:52px;font-size:15px">儲存為 11/16 的紀錄</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1820}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { foot: 'so' }; }
+  renderVals() {
+    const f = (k, v, u, prev, ch, hint) => ({ k, v, u, hint: hint || '', prev: prev || '還沒量過', bs: v ? 'solid' : 'dashed', bc: ch ? '#E2B866' : '#E2D2B8', bg: ch ? '#FFF6E2' : '#FBF4E8' });
+    const FEET = { t5: ['', '', '', ''], so: ['23.5', '9.1', '22.0', '22.8'], ba: ['23.3', '9.0', '21.8', '22.4'] };
+    const st = this.state;
+    return {
+      groups: [
+        { t: '基本', st: '', c: '#F2CF8E', f: [f('體重', '51.8', 'kg', '上次 52.0', true)] },
+        { t: '上半身', st: '', c: '#A9C6CF', f: [f('肩寬', '38', 'cm', '上次 38'), f('上胸圍', '84', 'cm', '上次 84'), f('下胸圍', '70', 'cm', '上次 70')] },
+        { t: '下半身', st: '6 項', c: '#B7CBB0', f: [
+          f('高腰圍', '73', 'cm', '上次 64', true, '肚臍上方，高腰褲頭的位置'), f('腰圍', '74', 'cm', '上次 65', true, '最細處'),
+          f('肚臍圍・站著', '78', 'cm', '上次 73', true, '中腰褲頭的位置'), f('肚臍圍・坐著', '88', 'cm', '上次 81', true, '坐在椅子上量'),
+          f('臀圍', '91', 'cm', '上次 91', false, '最寬處'), f('大腿圍', '', 'cm', '', false, '大腿最粗處')] }
+      ],
+      tabs: [['t5', '五指襪'], ['so', '一般襪'], ['ba', '裸腳']].map(([id, t]) => ({ t, on: st.foot === id ? 'true' : 'false', bd: st.foot === id ? '#3B2F25' : '#E2D2B8', bg: st.foot === id ? '#3B2F25' : '#FFFCF6', fg: st.foot === id ? '#FBF4E8' : '#3B2F25', pick: () => this.setState({ foot: id }) })),
+      feet: ['腳長', '腳寬', '前掌圍', '腳背圍'].map((k, i) => ({ k, v: FEET[st.foot][i], bs: FEET[st.foot][i] ? 'solid' : 'dashed' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

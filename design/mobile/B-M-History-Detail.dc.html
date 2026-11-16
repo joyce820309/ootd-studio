@@ -60,7 +60,7 @@ body{margin:0;background:#FBF4E8}
 
   <footer style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:#FBF4E8;border-top:1.5px dashed #D9C7AC;display:grid;grid-template-columns:1fr 2fr;gap:8px">
     <button type="button" style="height:50px;border-radius:12px;border:1.5px solid #D9C7AC;background:#FFFCF6;color:#8E4A3E;font:500 14px 'Chiron GoRound TC'">刪除</button>
-    <a href="B-Body.dc.html" style="display:flex;align-items:center;justify-content:center;height:50px;border-radius:12px;background:#3B2F25;color:#FBF4E8;font:500 14px 'Chiron GoRound TC';text-decoration:none">編輯這筆紀錄</a>
+    <a href="B-M-Body.dc.html" style="display:flex;align-items:center;justify-content:center;height:50px;border-radius:12px;background:#3B2F25;color:#FBF4E8;font:500 14px 'Chiron GoRound TC';text-decoration:none">編輯這筆紀錄</a>
   </footer>
 </div>
 </x-dc>
@@ -68,12 +68,12 @@ body{margin:0;background:#FBF4E8}
 class Component extends DCLogic {
   renderVals() {
     const GROUPS = [
-      { g: '基本', c: '#F2CF8E', f: [['h', '身高', 'cm'], ['w', '體重', 'kg']] },
-      { g: '上半身', c: '#A9C6CF', f: [['sh', '肩寬', 'cm'], ['ub', '上胸圍', 'cm'], ['lb', '下胸圍', 'cm'], ['ar', '手臂長', 'cm']] },
-      { g: '下半身', c: '#B7CBB0', f: [['wa', '腰圍', 'cm'], ['na', '肚臍圍', 'cm'], ['hi', '臀圍', 'cm'], ['le', '腿長（內側）', 'cm'], ['th', '大腿圍', 'cm']] }
+      { g: '基本', c: '#F2CF8E', f: [['w', '體重', 'kg']] },
+      { g: '上半身', c: '#A9C6CF', f: [['sh', '肩寬', 'cm'], ['ub', '上胸圍', 'cm'], ['lb', '下胸圍', 'cm']] },
+      { g: '下半身', c: '#B7CBB0', f: [['hw', '高腰圍', 'cm'], ['wa', '腰圍', 'cm'], ['na', '肚臍圍・站', 'cm'], ['ns', '肚臍圍・坐', 'cm'], ['hi', '臀圍', 'cm'], ['th', '大腿圍', 'cm']] }
     ];
     const base = { h: '162', sh: '38', ub: '84', ar: '55', hi: '91', le: '74', soL: '23.5', soW: '9.1', soB: '22.0', soI: '22.8', baL: '23.3' };
-    const cur = Object.assign({}, base, { w: '52.0', lb: '70', wa: '65', na: '73', baW: '9.0', baB: '21.8', baI: '22.4' });
+    const cur = Object.assign({}, base, { w: '52.0', lb: '70', hw: '64', wa: '65', na: '73', ns: '81', baW: '9.0', baB: '21.8', baI: '22.4' });
     const prev = Object.assign({}, base, { w: '52.5', lb: '71', wa: '66', na: '73', baW: '9.0', baB: '21.8', baI: '22.4' });
     const diff = (k) => {
       const a = cur[k], b = prev[k];

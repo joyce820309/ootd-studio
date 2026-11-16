@@ -7,6 +7,7 @@ import { HomePage } from "@/pages/HomePage";
 import { ItemDetailPage } from "@/pages/ItemDetailPage";
 import { LandingPage } from "@/pages/LandingPage";
 import { LoginPage } from "@/pages/LoginPage";
+import { MeasurementFormPage } from "@/pages/MeasurementFormPage";
 import { MeasurementHistoryPage } from "@/pages/MeasurementHistoryPage";
 import { OutfitPage } from "@/pages/OutfitPage";
 import { ProfilePage } from "@/pages/ProfilePage";
@@ -67,6 +68,8 @@ const router = createBrowserRouter([
         children: [
           { path: "/me", element: <ProfilePage /> },
           { path: "/me/measurements", element: <MeasurementHistoryPage /> },
+          { path: "/me/measurements/new", element: <MeasurementFormPage /> },
+          { path: "/me/measurements/:id/edit", element: <MeasurementFormPage /> },
           { path: "/me/measurements/:id", element: <MeasurementHistoryPage /> },
           { path: "/me/brands", element: <BrandsPage /> },
           { path: "/me/shops", element: <ShopsPage /> },

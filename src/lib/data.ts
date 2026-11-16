@@ -1,9 +1,10 @@
 import { todayISO } from './date'
 import { useEffect, useState } from 'react'
-import { SAMPLE_BODY_MEASUREMENTS, SAMPLE_CATEGORIES, SAMPLE_COMPARE_GROUPS, SAMPLE_DIARY, SAMPLE_ITEMS, SAMPLE_PROFILE, SAMPLE_WISHLIST } from '@/data/sample'
-import type { AddItemDestination, BodyMeasurement, BodyMeasurementInput, BrandChange, BrandSummary, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, CutoutRegion, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, GarmentShape, ItemStatus, LessonRule, LessonRuleInput, LessonStatus, ManagedEntryChange, ManagedListSummary, NewGarmentInput, Outfit, ProfilePreferences, ReviewDecision, ReviewRecord, ReviewRecordInput, ShopKind, Slot, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, StudioCanvasItem, WishlistInput, WishlistItem, WishStatus } from '@/types'
+import { SAMPLE_BODY_MEASUREMENTS, SAMPLE_BODY_PROFILE, SAMPLE_CATEGORIES, SAMPLE_COMPARE_GROUPS, SAMPLE_DIARY, SAMPLE_ITEMS, SAMPLE_PROFILE, SAMPLE_WISHLIST } from '@/data/sample'
+import type { AddItemDestination, BodyMeasurement, BodyMeasurementInput, BodyProfile, BodyProfileInput, BrandChange, BrandSummary, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, CutoutRegion, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, GarmentShape, ItemStatus, LessonRule, LessonRuleInput, LessonStatus, ManagedEntryChange, ManagedListSummary, NewGarmentInput, Outfit, ProfilePreferences, ReviewDecision, ReviewRecord, ReviewRecordInput, ShopKind, Slot, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, StudioCanvasItem, WishlistInput, WishlistItem, WishStatus } from '@/types'
 import { toUploadableImage } from '@/lib/image'
 import { MATERIAL_DEFAULTS, materialNames } from '@/lib/materials'
+import { cleanStretch } from '@/lib/stretch'
 import { supabase } from './supabase'
 import { isInCloset, isLessonStatus } from './slots'
 
@@ -13,6 +14,7 @@ const demoClosetPhotos = new Map<string, ClosetPhoto[]>()
 
 let demoProfile: ProfilePreferences = cloneProfile(SAMPLE_PROFILE)
 let demoMeasurements: BodyMeasurement[] = SAMPLE_BODY_MEASUREMENTS.map((measurement) => ({ ...measurement }))
+let demoBodyProfile: BodyProfile = { ...SAMPLE_BODY_PROFILE }
 let demoClosetItems: ClosetItem[] = [...SAMPLE_ITEMS]
 let demoWishlistItems: WishlistItem[] = [...SAMPLE_WISHLIST]
 let demoCompareGroups: CompareGroup[] = SAMPLE_COMPARE_GROUPS.map((group) => ({ ...group }))
@@ -38,17 +40,17 @@ function mapMeasurement(row: Record<string, unknown>): BodyMeasurement {
   return {
     id: String(row.id),
     measuredOn: String(row.measured_on),
-    heightCm: numberOrNull(row.height_cm),
     weightKg: numberOrNull(row.weight_kg),
     shoulderCm: numberOrNull(row.shoulder_cm),
     // 舊資料的單一胸圍視為上胸圍，避免 migration 前的紀錄消失。
     upperBustCm: numberOrNull(row.upper_bust_cm) ?? numberOrNull(row.bust_cm),
     underBustCm: numberOrNull(row.under_bust_cm),
+    highWaistCm: numberOrNull(row.high_waist_cm),
     waistCm: numberOrNull(row.waist_cm),
+    waistSittingCm: numberOrNull(row.waist_sitting_cm),
     navelCm: numberOrNull(row.navel_cm),
+    navelSittingCm: numberOrNull(row.navel_sitting_cm),
     hipCm: numberOrNull(row.hip_cm),
-    armCm: numberOrNull(row.arm_cm),
-    inseamCm: numberOrNull(row.inseam_cm),
     thighCm: numberOrNull(row.thigh_cm),
     footToeLengthCm: numberOrNull(row.foot_toe_length_cm),
     footToeWidthCm: numberOrNull(row.foot_toe_width_cm),
@@ -62,6 +64,7 @@ function mapMeasurement(row: Record<string, unknown>): BodyMeasurement {
     footBareWidthCm: numberOrNull(row.foot_bare_width_cm),
     footBareBallCm: numberOrNull(row.foot_bare_ball_cm),
     footBareInstepCm: numberOrNull(row.foot_bare_instep_cm),
+    timeOfDay: row.time_of_day === 'afternoon_evening' || row.time_of_day === 'other' ? row.time_of_day : 'morning_fasting',
     note: typeof row.note === 'string' ? row.note : '',
     createdAt: String(row.created_at ?? ''),
     updatedAt: typeof row.updated_at === 'string' ? row.updated_at : undefined,
@@ -71,16 +74,16 @@ function mapMeasurement(row: Record<string, unknown>): BodyMeasurement {
 function measurementPayload(input: BodyMeasurementInput) {
   return {
     measured_on: input.measuredOn,
-    height_cm: input.heightCm,
     weight_kg: input.weightKg,
     shoulder_cm: input.shoulderCm,
     upper_bust_cm: input.upperBustCm,
     under_bust_cm: input.underBustCm,
+    high_waist_cm: input.highWaistCm,
     waist_cm: input.waistCm,
+    waist_sitting_cm: input.waistSittingCm,
     navel_cm: input.navelCm,
+    navel_sitting_cm: input.navelSittingCm,
     hip_cm: input.hipCm,
-    arm_cm: input.armCm,
-    inseam_cm: input.inseamCm,
     thigh_cm: input.thighCm,
     foot_toe_length_cm: input.footToeLengthCm,
     foot_toe_width_cm: input.footToeWidthCm,
@@ -94,7 +97,34 @@ function measurementPayload(input: BodyMeasurementInput) {
     foot_bare_width_cm: input.footBareWidthCm,
     foot_bare_ball_cm: input.footBareBallCm,
     foot_bare_instep_cm: input.footBareInstepCm,
+    time_of_day: input.timeOfDay,
     note: input.note || null,
+  }
+}
+
+function bodyProfileFromRow(row: Record<string, unknown> | null | undefined): BodyProfile {
+  const numberOrNull = (value: unknown) => value === null || value === undefined || value === '' ? null : Number(value)
+  return {
+    heightCm: numberOrNull(row?.height_cm),
+    armLengthCm: numberOrNull(row?.arm_length_cm),
+    inseamCm: numberOrNull(row?.inseam_cm),
+    seatedRiseCm: numberOrNull(row?.seated_rise_cm),
+    footWidthLeftCm: numberOrNull(row?.foot_width_left_cm),
+    footWidthRightCm: numberOrNull(row?.foot_width_right_cm),
+    heelWidthCm: numberOrNull(row?.heel_width_cm),
+    updatedAt: typeof row?.updated_at === 'string' ? row.updated_at : undefined,
+  }
+}
+
+function bodyProfilePayload(input: BodyProfileInput) {
+  return {
+    height_cm: input.heightCm,
+    arm_length_cm: input.armLengthCm,
+    inseam_cm: input.inseamCm,
+    seated_rise_cm: input.seatedRiseCm,
+    foot_width_left_cm: input.footWidthLeftCm,
+    foot_width_right_cm: input.footWidthRightCm,
+    heel_width_cm: input.heelWidthCm,
   }
 }
 
@@ -120,6 +150,7 @@ interface ItemRow {
   product_url?: string | null
   note?: string | null
   flat_measurements?: Record<string, number | null> | null
+  flat_stretch?: Record<string, number> | null
   status: ItemStatus
   is_favorite: boolean
   image_original_path: string | null
@@ -164,6 +195,7 @@ function itemFromRow(row: ItemRow, urls: Record<string, string>, photos?: Closet
     productUrl: row.product_url ?? undefined,
     note: row.note ?? undefined,
     flatMeasurements: row.flat_measurements ?? {},
+    flatStretch: row.flat_stretch ?? {},
     status: row.status,
     isFavorite: row.is_favorite,
     cutoutUrl: imagePath ? urls[imagePath] : undefined,
@@ -187,7 +219,7 @@ export async function fetchClosetItems(): Promise<ClosetItem[]> {
   if (!supabase) return demoClosetItems.filter((item) => isInCloset(item.status)).map((item) => ({ ...item }))
   const { data, error } = await supabase
     .from('items')
-    .select('id,name,category_id,color_name,color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(name,slot)')
+    .select('id,name,category_id,color_name,color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,flat_stretch,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(name,slot)')
     .not('status', 'in', '(retired,returned,exchanged,unworn,given_away)')
     .eq('is_draft', false)
     .order('created_at', { ascending: false })
@@ -223,7 +255,7 @@ export async function fetchClosetItemDetail(id: string): Promise<ClosetItem | nu
     return { ...item, categoryId: category?.id ?? item.categoryId, categoryName: category?.name ?? item.categoryId, categorySlot: category ? category.slot : item.categorySlot ?? item.slot, seasons: item.seasons ?? [], flatMeasurements: item.flatMeasurements ?? {}, photos: [...(demoClosetPhotos.get(id) ?? [])] }
   }
   const { data, error } = await supabase.from('items')
-    .select('id,name,category_id,color_name,color_hex,second_color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(id,name,slot,sort),item_photos(id,storage_path,sort_order,is_cover)')
+    .select('id,name,category_id,color_name,color_hex,second_color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,flat_stretch,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(id,name,slot,sort),item_photos(id,storage_path,sort_order,is_cover)')
     .eq('id', id)
     .eq('is_draft', false)
     .maybeSingle()
@@ -258,7 +290,7 @@ function closetItemPayload(input: Partial<ClosetItem> & { categoryId?: string })
     ['secondColorHex', 'second_color_hex'], ['brand', 'brand'], ['size', 'size'], ['necklineSize', 'neckline_size'], ['fit', 'fit'],
     ['material', 'material'], ['materialComposition', 'material_composition'], ['materialPercentages', 'material_percentages'], ['seasons', 'seasons'],
     ['occasions', 'occasions'], ['purchaseDate', 'purchase_date'], ['purchasePrice', 'purchase_price'],
-    ['store', 'store'], ['productUrl', 'product_url'], ['note', 'note'], ['flatMeasurements', 'flat_measurements'],
+    ['store', 'store'], ['productUrl', 'product_url'], ['note', 'note'], ['flatMeasurements', 'flat_measurements'], ['flatStretch', 'flat_stretch'],
   ]
   for (const [source, target] of fields) {
     if (!(source in input)) continue
@@ -415,7 +447,7 @@ export async function deleteClosetItem(id: string): Promise<{ demo: boolean; cle
 }
 
 const ACTIVE_WISH_STATUSES: WishStatus[] = ['considering', 'waiting', 'ready']
-const WISHLIST_COLUMNS = 'id,name,slot,color_hex,color_name,shop,price,shipping,target_price,url,size,size_note,neckline_size,brand,material,material_composition,material_percentages,return_policy,reason,priority,status,compare_group_id,image_cutout_path,image_original_path,bought_item_id,created_at'
+const WISHLIST_COLUMNS = 'id,name,slot,color_hex,color_name,shop,price,shipping,target_price,url,size,size_note,neckline_size,brand,material,material_composition,material_percentages,flat_measurements,flat_stretch,return_policy,reason,priority,status,compare_group_id,image_cutout_path,image_original_path,bought_item_id,created_at'
 
 interface WishlistRow {
   id: string
@@ -435,6 +467,8 @@ interface WishlistRow {
   material: string | null
   material_composition: string | null
   material_percentages: Record<string, number> | null
+  flat_measurements: Record<string, number | null> | null
+  flat_stretch: Record<string, number> | null
   return_policy: string | null
   reason: string | null
   priority: number | null
@@ -469,6 +503,8 @@ async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
       material: r.material ?? undefined,
       materialComposition: r.material_composition ?? undefined,
       materialPercentages: r.material_percentages ?? undefined,
+      flatMeasurements: r.flat_measurements ?? {},
+      flatStretch: r.flat_stretch ?? {},
       returnPolicy: r.return_policy ?? undefined,
       reason: r.reason ?? undefined,
       priority: r.priority === 1 || r.priority === 2 || r.priority === 3 ? r.priority : undefined,
@@ -507,6 +543,16 @@ export async function fetchAllWishlist(): Promise<WishlistItem[]> {
 
 const blankToNull = (value?: string) => value?.trim() || null
 
+/** 平放尺寸去掉空值；拉伸值只留有平放值且較大的欄位 */
+function cleanFlat(flat: Record<string, number | null>) {
+  return Object.fromEntries(Object.entries(flat).filter(([, value]) => value !== null && Number.isFinite(value))) as Record<string, number>
+}
+
+function flatPayload(flat: Record<string, number | null>, stretch?: Record<string, number>) {
+  const flatMeasurements = cleanFlat(flat)
+  return { flat_measurements: flatMeasurements, flat_stretch: cleanStretch(flatMeasurements, stretch) }
+}
+
 function wishlistPayload(input: WishlistInput) {
   return {
     name: input.name.trim(),
@@ -527,6 +573,7 @@ function wishlistPayload(input: WishlistInput) {
     material: blankToNull(input.material),
     material_composition: blankToNull(input.materialComposition),
     material_percentages: input.materialPercentages ?? {},
+    ...(input.flatMeasurements !== undefined ? flatPayload(input.flatMeasurements, input.flatStretch) : {}),
     return_policy: blankToNull(input.returnPolicy),
     status: input.status,
     ...(input.compareGroupId !== undefined ? { compare_group_id: input.compareGroupId } : {}),
@@ -556,6 +603,7 @@ function demoWishFromInput(id: string, input: WishlistInput, base?: WishlistItem
     material: optional(input.material),
     materialComposition: optional(input.materialComposition),
     materialPercentages: input.materialPercentages ? { ...input.materialPercentages } : undefined,
+    ...(input.flatMeasurements !== undefined ? { flatMeasurements: cleanFlat(input.flatMeasurements), flatStretch: cleanStretch(input.flatMeasurements, input.flatStretch) } : {}),
     returnPolicy: optional(input.returnPolicy),
     status: input.status,
     compareGroupId: input.compareGroupId === undefined ? base?.compareGroupId : (input.compareGroupId ?? undefined),
@@ -626,6 +674,8 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
       brand: wish.brand,
       size: wish.size,
       necklineSize: wish.necklineSize,
+      flatMeasurements: { ...wish.flatMeasurements },
+      flatStretch: { ...wish.flatStretch },
       status: 'ok',
       cutoutUrl: wish.cutoutUrl,
       shape: wish.shape,
@@ -638,7 +688,7 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
   const client = supabase
   const { data, error } = await client
     .from('wishlist_items')
-    .select('id,name,slot,category_id,color_hex,color_name,second_color_hex,brand,size,size_note,neckline_size,seasons,material,material_composition,material_percentages,flat_measurements,shop,url,reason,status,image_original_path,image_cutout_path')
+    .select('id,name,slot,category_id,color_hex,color_name,second_color_hex,brand,size,size_note,neckline_size,seasons,material,material_composition,material_percentages,flat_measurements,flat_stretch,shop,url,reason,status,image_original_path,image_cutout_path')
     .eq('id', id)
     .single()
   if (error) throw error
@@ -682,6 +732,7 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
       material_composition: data.material_composition,
       material_percentages: data.material_percentages ?? {},
       flat_measurements: data.flat_measurements ?? {},
+      flat_stretch: data.flat_stretch ?? {},
       purchase_date: purchase.purchaseDate,
       purchase_price: purchase.paidPrice,
       store: data.shop,
@@ -850,16 +901,16 @@ function fileExtension(file: File) {
 
 /** 儲存衣物或選購候選及其照片。去背可在資料列與原圖上傳後呼叫 Edge Function。 */
 export async function createGarment(input: NewGarmentInput, files: File[]): Promise<{ id: string; destination: AddItemDestination; demo: boolean }> {
-  if (files.length === 0) throw new Error('請至少選擇一張衣物照片。')
   if (files.length > 8) throw new Error('最多可以加入 8 張照片。')
   const uploadFiles = await Promise.all(files.map(toUploadableImage))
+  const useCutout = input.useCutout && uploadFiles.length > 0
   const category = (await fetchCategories()).find((entry) => entry.id === input.categoryId)
   if (!category) throw new Error('找不到選擇的衣物分類，請重新選擇。')
   if (input.destination === 'wishlist' && !category.slot) throw new Error('「其他」分類不能加入選購清單，請選擇有搭配部位的類型。')
 
   if (!supabase) {
     const id = `demo-new-${Date.now()}`
-    const imageUrl = URL.createObjectURL(uploadFiles[0])
+    const imageUrl = uploadFiles[0] ? URL.createObjectURL(uploadFiles[0]) : undefined
     const shape = fallbackShape(category.slot)
     if (input.destination === 'closet') {
       demoClosetItems = [{
@@ -886,7 +937,8 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         productUrl: input.productUrl || undefined,
         note: input.note || undefined,
         flatMeasurements: { ...input.flatMeasurements },
-        cutoutUrl: imageUrl,
+        flatStretch: cleanStretch(input.flatMeasurements, input.flatStretch),
+        ...(imageUrl ? { cutoutUrl: imageUrl } : {}),
         shape,
       }, ...demoClosetItems]
     } else {
@@ -903,8 +955,10 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         material: input.material || undefined,
         materialComposition: input.materialComposition || undefined,
         materialPercentages: input.materialPercentages ? { ...input.materialPercentages } : undefined,
+        flatMeasurements: cleanFlat(input.flatMeasurements),
+        flatStretch: cleanStretch(input.flatMeasurements, input.flatStretch),
         status: 'considering',
-        cutoutUrl: imageUrl,
+        ...(imageUrl ? { cutoutUrl: imageUrl } : {}),
         shape,
       }, ...demoWishlistItems]
     }
@@ -916,7 +970,7 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
   if (!user) throw new Error('請重新登入後再新增衣物。')
 
   const id = crypto.randomUUID()
-  const coverPath = `${user.id}/${id}/original.${fileExtension(uploadFiles[0])}`
+  const coverPath = uploadFiles[0] ? `${user.id}/${id}/original.${fileExtension(uploadFiles[0])}` : null
   const flatMeasurements = Object.fromEntries(Object.entries(input.flatMeasurements).filter(([, value]) => value !== null))
   const uploadedPaths: string[] = []
 
@@ -940,8 +994,9 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
     product_url: input.productUrl?.trim() || null,
     note: input.note?.trim() || null,
     flat_measurements: flatMeasurements,
+    flat_stretch: cleanStretch(flatMeasurements, input.flatStretch),
     image_original_path: coverPath,
-    cutout_status: input.useCutout ? 'pending' : 'skipped',
+    cutout_status: useCutout ? 'pending' : 'skipped',
   }
 
   try {
@@ -968,16 +1023,17 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         price: input.purchasePrice ?? 0,
         url: input.productUrl?.trim() || null,
         size_note: input.size?.trim() || null,
+        ...flatPayload(input.flatMeasurements, input.flatStretch),
         status: 'considering',
         image_original_path: coverPath,
-        cutout_status: input.useCutout ? 'pending' : 'skipped',
+        cutout_status: useCutout ? 'pending' : 'skipped',
       })
       if (error) throw error
     }
 
     const photoRows = []
     for (const [index, file] of uploadFiles.entries()) {
-      const path = index === 0 ? coverPath : `${user.id}/${id}/photos/${crypto.randomUUID()}.${fileExtension(file)}`
+      const path = index === 0 ? coverPath! : `${user.id}/${id}/photos/${crypto.randomUUID()}.${fileExtension(file)}`
       const { error } = await supabase.storage.from(CUTOUT_BUCKET).upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: false })
       if (error) throw error
       uploadedPaths.push(path)
@@ -990,8 +1046,10 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         is_cover: index === 0,
       })
     }
-    const { error: photosError } = await supabase.from('item_photos').insert(photoRows)
-    if (photosError) throw photosError
+    if (photoRows.length) {
+      const { error: photosError } = await supabase.from('item_photos').insert(photoRows)
+      if (photosError) throw photosError
+    }
     return { id, destination: input.destination, demo: false }
   } catch (error) {
     if (uploadedPaths.length) await supabase.storage.from(CUTOUT_BUCKET).remove(uploadedPaths)
@@ -1003,8 +1061,9 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
 
 /** 建立隱藏中的衣物草稿、上傳最多 8 張照片；供照片／去背步驟使用。 */
 export async function createGarmentDraft(categoryId: string, files: File[], useCutout: boolean): Promise<{ id: string; demo: boolean }> {
-  if (files.length === 0 || files.length > 8) throw new Error('請選擇 1 到 8 張照片。')
+  if (files.length > 8) throw new Error('最多可以加入 8 張照片。')
   const uploadFiles = await Promise.all(files.map(toUploadableImage))
+  const draftUseCutout = useCutout && uploadFiles.length > 0
   if (!supabase) {
     const id = `demo-draft-${Date.now()}`
     demoGarmentDraftFiles.set(id, uploadFiles)
@@ -1015,7 +1074,7 @@ export async function createGarmentDraft(categoryId: string, files: File[], useC
   if (!user) throw new Error('請重新登入後再新增衣物。')
 
   const draftId = crypto.randomUUID()
-  const coverPath = `${user.id}/${draftId}/original.${fileExtension(uploadFiles[0])}`
+  const coverPath = uploadFiles[0] ? `${user.id}/${draftId}/original.${fileExtension(uploadFiles[0])}` : null
   const uploadedPaths: string[] = []
   try {
     const { error } = await supabase.from('items').insert({
@@ -1028,20 +1087,22 @@ export async function createGarmentDraft(categoryId: string, files: File[], useC
       status: 'retired',
       is_draft: true,
       image_original_path: coverPath,
-      cutout_status: useCutout ? 'pending' : 'skipped',
+      cutout_status: draftUseCutout ? 'pending' : 'skipped',
     })
     if (error) throw error
 
     const photoRows = []
     for (const [index, file] of uploadFiles.entries()) {
-      const path = index === 0 ? coverPath : `${user.id}/${draftId}/photos/${crypto.randomUUID()}.${fileExtension(file)}`
+      const path = index === 0 ? coverPath! : `${user.id}/${draftId}/photos/${crypto.randomUUID()}.${fileExtension(file)}`
       const { error: uploadError } = await supabase.storage.from(CUTOUT_BUCKET).upload(path, file, { contentType: file.type || 'application/octet-stream' })
       if (uploadError) throw uploadError
       uploadedPaths.push(path)
       photoRows.push({ owner_id: user.id, item_id: draftId, storage_path: path, sort_order: index, is_cover: index === 0 })
     }
-    const { error: photosError } = await supabase.from('item_photos').insert(photoRows)
-    if (photosError) throw photosError
+    if (photoRows.length) {
+      const { error: photosError } = await supabase.from('item_photos').insert(photoRows)
+      if (photosError) throw photosError
+    }
     return { id: draftId, demo: false }
   } catch (error) {
     if (uploadedPaths.length) await supabase.storage.from(CUTOUT_BUCKET).remove(uploadedPaths)
@@ -1073,7 +1134,7 @@ export async function updateGarmentDraft(id: string, input: NewGarmentInput): Pr
     store: input.store?.trim() || null,
     product_url: input.productUrl?.trim() || null,
     note: input.note?.trim() || null,
-    flat_measurements: Object.fromEntries(Object.entries(input.flatMeasurements).filter(([, value]) => value !== null)),
+    ...flatPayload(input.flatMeasurements, input.flatStretch),
     ...(!input.useCutout ? { image_cutout_path: null, cutout_status: 'skipped' } : {}),
   }).eq('id', id).eq('is_draft', true)
   if (error) throw error
@@ -1117,7 +1178,7 @@ export async function finalizeGarmentDraft(id: string, input: NewGarmentInput): 
     material: input.material?.trim() || null,
     material_composition: input.materialComposition?.trim() || null,
     material_percentages: input.materialPercentages ?? {},
-    flat_measurements: Object.fromEntries(Object.entries(input.flatMeasurements).filter(([, value]) => value !== null)),
+    ...flatPayload(input.flatMeasurements, input.flatStretch),
     reason: input.note?.trim() || null,
     status: 'considering',
     image_original_path: draft.image_original_path,
@@ -1255,21 +1316,45 @@ export function useAsync<T>(load: () => Promise<T>) {
   return state
 }
 
+/** 最近一次身體量測（彈性尺寸的一圈量提示用）；讀不到時回傳 null，不擋表單 */
+export async function fetchLatestBodyMeasurement(): Promise<BodyMeasurement | null> {
+  try {
+    const { measurements } = await fetchProfileData()
+    return [...measurements].sort((a, b) => b.measuredOn.localeCompare(a.measuredOn))[0] ?? null
+  } catch {
+    return null
+  }
+}
+
+/** 最近一次身體量測的 hook */
+export function useLatestBody() {
+  const [body, setBody] = useState<BodyMeasurement | null>(null)
+  useEffect(() => {
+    let alive = true
+    void fetchLatestBodyMeasurement().then((value) => alive && setBody(value))
+    return () => { alive = false }
+  }, [])
+  return body
+}
+
 /** 讀取個人偏好與量測紀錄；示範模式使用記憶體中的範例資料。 */
-export async function fetchProfileData(): Promise<{ profile: ProfilePreferences; measurements: BodyMeasurement[] }> {
+export async function fetchProfileData(): Promise<{ profile: ProfilePreferences; measurements: BodyMeasurement[]; bodyProfile: BodyProfile }> {
   if (!supabase) {
     return {
       profile: cloneProfile(demoProfile),
       measurements: demoMeasurements.map((measurement) => ({ ...measurement })),
+      bodyProfile: { ...demoBodyProfile },
     }
   }
 
-  const [profileResult, measurementsResult] = await Promise.all([
+  const [profileResult, measurementsResult, bodyProfileResult] = await Promise.all([
     supabase.from('profiles').select('ai_use_body_data,shoe_sizes,frequent_sizes,fit_preferences,highlight_areas,proportion_notes,disliked_cuts').maybeSingle(),
     supabase.from('body_measurements').select('*').order('measured_on', { ascending: false }).order('created_at', { ascending: false }),
+    supabase.from('body_profile').select('*').maybeSingle(),
   ])
   if (profileResult.error) throw profileResult.error
   if (measurementsResult.error) throw measurementsResult.error
+  if (bodyProfileResult.error) throw bodyProfileResult.error
 
   const row = profileResult.data
   const profile: ProfilePreferences = row ? {
@@ -1285,6 +1370,7 @@ export async function fetchProfileData(): Promise<{ profile: ProfilePreferences;
   return {
     profile,
     measurements: (measurementsResult.data ?? []).map((measurement) => mapMeasurement(measurement as Record<string, unknown>)),
+    bodyProfile: bodyProfileFromRow(bodyProfileResult.data as Record<string, unknown> | null),
   }
 }
 
@@ -1335,6 +1421,25 @@ export async function saveBodyMeasurement(input: BodyMeasurementInput): Promise<
     : await supabase.from('body_measurements').insert(payload).select('*').single()
   if (result.error) throw result.error
   return { measurement: mapMeasurement(result.data as Record<string, unknown>), demo: false }
+}
+
+/** 儲存固定身體資料；更新 body_profile，不新增量測快照。 */
+export async function saveBodyProfile(input: BodyProfileInput): Promise<{ bodyProfile: BodyProfile; demo: boolean }> {
+  if (!supabase) {
+    demoBodyProfile = { ...input, updatedAt: new Date().toISOString() }
+    return { bodyProfile: { ...demoBodyProfile }, demo: true }
+  }
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError) throw userError
+  if (!user) throw new Error('請重新登入後再儲存固定資料。')
+
+  const { data, error } = await supabase.from('body_profile')
+    .upsert({ owner_id: user.id, ...bodyProfilePayload(input) }, { onConflict: 'owner_id' })
+    .select('*')
+    .single()
+  if (error) throw error
+  return { bodyProfile: bodyProfileFromRow(data as Record<string, unknown>), demo: false }
 }
 
 /** 刪除一筆量測紀錄。 */
@@ -1972,6 +2077,8 @@ export interface CopyItemInput {
   productUrl?: string
   note?: string
   flatMeasurements: Record<string, number | null>
+  /** 換尺寸時清空；同尺寸沿用 */
+  flatStretch?: Record<string, number>
   receivedOn?: string
   exchangedFrom?: string
   /** 換貨還沒收到時為 not_arrived */
@@ -2012,6 +2119,7 @@ export async function copyClosetItem(source: ClosetItem, input: CopyItemInput): 
       productUrl: input.productUrl || undefined,
       note: input.note || undefined,
       flatMeasurements,
+      flatStretch: cleanStretch(flatMeasurements, input.flatStretch),
       status: input.status,
       cutoutUrl: keepImage ? source.cutoutUrl : undefined,
       shape: source.shape,
@@ -2048,6 +2156,7 @@ export async function copyClosetItem(source: ClosetItem, input: CopyItemInput): 
     product_url: input.productUrl?.trim() || null,
     note: input.note?.trim() || null,
     flat_measurements: flatMeasurements,
+    flat_stretch: cleanStretch(flatMeasurements, input.flatStretch),
     status: input.status,
     cutout_status: 'skipped',
   }
@@ -2115,7 +2224,7 @@ export async function fetchLessonItems(): Promise<ClosetItem[]> {
   if (!supabase) return demoClosetItems.filter((item) => isLessonStatus(item.status)).map((item) => ({ ...item }))
   const { data, error } = await supabase
     .from('items')
-    .select('id,name,category_id,color_name,color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(name,slot)')
+    .select('id,name,category_id,color_name,color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,flat_stretch,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(name,slot)')
     .in('status', ['returned', 'exchanged', 'unworn', 'given_away'])
     .eq('is_draft', false)
   if (error) throw error
@@ -2134,6 +2243,7 @@ interface LessonRuleRow {
   active: boolean
   source_review_id: string | null
   created_at: string
+  last_notified_at?: string | null
 }
 
 function ruleFromRow(row: LessonRuleRow): LessonRule {
@@ -2147,6 +2257,7 @@ function ruleFromRow(row: LessonRuleRow): LessonRule {
     active: row.active,
     sourceReviewId: row.source_review_id ?? undefined,
     createdAt: row.created_at,
+    lastNotifiedAt: row.last_notified_at ?? undefined,
   }
 }
 
@@ -2175,13 +2286,45 @@ export async function saveLessonRule(input: LessonRuleInput): Promise<{ rule: Le
     source_review_id: input.sourceReviewId ?? null,
   }
   // 0016 才有 check_kind；只有「可自動檢查」需要特別記
-  if (input.checkKind === 'auto') payload.check_kind = 'auto'
+  payload.check_kind = input.checkKind
   const query = input.id
     ? supabase.from('lesson_rules').update(payload).eq('id', input.id)
     : supabase.from('lesson_rules').insert(payload)
   const { data, error } = await query.select('*').single()
   if (error) throw error
   return { rule: ruleFromRow(data as LessonRuleRow), demo: false }
+}
+
+/** 記錄選購時已顯示的規則提醒；同一條規則每 7 天最多提醒一次。 */
+export async function markLessonRulesNotified(ids: string[]): Promise<string[]> {
+  const uniqueIds = [...new Set(ids)]
+  if (!uniqueIds.length) return []
+  const now = new Date()
+  const notifiedAt = now.toISOString()
+  const cooldownBefore = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
+  if (!supabase) {
+    const marked: string[] = []
+    demoLessonRules = demoLessonRules.map((rule) => {
+      const lastNotified = rule.lastNotifiedAt ? Date.parse(rule.lastNotifiedAt) : 0
+      if (uniqueIds.includes(rule.id) && rule.active && (!lastNotified || lastNotified <= Date.parse(cooldownBefore))) {
+        marked.push(rule.id)
+        return { ...rule, lastNotifiedAt: notifiedAt }
+      }
+      return rule
+    })
+    return marked
+  }
+
+  const { data, error } = await supabase
+    .from('lesson_rules')
+    .update({ last_notified_at: notifiedAt })
+    .in('id', uniqueIds)
+    .eq('active', true)
+    .or(`last_notified_at.is.null,last_notified_at.lte.${cooldownBefore}`)
+    .select('id')
+  if (error) throw error
+  return (data ?? []).map((row) => row.id)
 }
 
 export async function deleteLessonRule(id: string): Promise<{ demo: boolean }> {
@@ -2442,4 +2585,12 @@ export async function markManagedEntriesDistinct(kind: ManagedListKind, groupKey
   const table = kind === 'shops' ? 'shop_distinct_groups' : 'material_distinct_groups'
   const { error } = await supabase.from(table).upsert({ group_key: groupKey }, { onConflict: 'owner_id,group_key', ignoreDuplicates: true })
   if (error) throw error
+}
+
+/** 登出；示範模式沒有登入狀態 */
+export async function signOut(): Promise<{ demo: boolean }> {
+  if (!supabase) return { demo: true }
+  const { error } = await supabase.auth.signOut()
+  if (error) throw error
+  return { demo: false }
 }

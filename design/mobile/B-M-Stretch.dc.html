@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機彈性尺寸</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.fbox{display:flex;min-width:0;align-items:center;height:48px;border:1.5px solid #E2D2B8;border-radius:12px;background:#FFFCF6;padding:0 12px;gap:6px}
+.fbox input{flex:1;min-width:0;width:100%;border:0;background:transparent;font:700 18px Nunito,'Chiron GoRound TC';color:#3B2F25;text-align:right;outline:none}
+.unit{font-size:12px;color:#74624F}
+.stc{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:999px;background:#F6E7C6;color:#5A3F12;font-size:11px;font-weight:500}
+.sec{font-size:12px;font-weight:700;color:#5A4A3C;letter-spacing:.06em}
+</style>
+</helmet>
+<div style="width:390px;height:1640px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden">
+  <header style="display:flex;align-items:center;gap:6px;padding:12px 16px;border-bottom:1.5px dashed #D9C7AC">
+    <span class="lbl" style="background:#F2CF8E;transform:rotate(-2deg);font-size:17px">規格 v2</span>
+    <h1 class="hd" style="margin:0 0 0 6px;font-size:20px">手機・彈性尺寸</h1>
+  </header>
+  <main style="padding:16px 12px 40px;display:flex;flex-direction:column;gap:16px">
+    <span class="sec">A・輸入（BM8.2、手機新增選購）</span>
+    <section class="paper" aria-label="輸入狀態" style="padding:14px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:13px;font-weight:500">胸寬</span>
+        <span class="fbox" style="border-color:#A7C09E"><input aria-label="胸寬" value="40-60"><span class="unit">cm</span></span>
+        <span style="font-size:12px;color:#2E3F2B">✓ 已辨識：平放 <b class="num">40</b>・可拉到 <b class="num">60</b> cm</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;padding-top:14px;border-top:1.5px dashed #EADCC6">
+        <span style="font-size:13px;font-weight:500">腰寬 <span class="stc">彈性</span></span>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px;align-items:end">
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:#5A4A3C">平放<span class="fbox"><input aria-label="腰寬平放" value="34"><span class="unit">cm</span></span></label>
+          <span aria-hidden="true" style="padding-bottom:14px;color:#74624F">↔</span>
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:#5A4A3C">拉開後<span class="fbox" style="border-color:#E2B866;background:#FFF9EE"><input aria-label="腰寬拉開後" value="45"><span class="unit">cm</span></span></label>
+        </div>
+        <span style="font-size:12px;color:#5A3F12">拉開後也量平放，不是一整圈</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;padding-top:14px;border-top:1.5px dashed #EADCC6">
+        <span style="font-size:13px;font-weight:500">臀寬</span>
+        <span class="fbox" style="border-color:#E2B866"><input aria-label="臀寬" value="96"><span class="unit">cm</span></span>
+        <div role="alert" style="padding:10px 12px;border-radius:10px;background:#F6E7C6;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:13px;line-height:1.6;color:#5A3F12">這看起來像一整圈。要除以 2，變成 <b class="num">48</b> 嗎？</span>
+          <span style="display:flex;gap:6px"><button type="button" class="btn btn-p" style="height:40px;padding:0 14px;font-size:13px">除以 2</button><button type="button" class="btn btn-g" style="height:40px;padding:0 10px;font-size:13px;color:#5A3F12">不用</button></span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;padding-top:14px;border-top:1.5px dashed #EADCC6">
+        <span style="font-size:13px;font-weight:500">肩寬</span>
+        <span class="fbox" style="border-color:#C98A7C"><input aria-label="肩寬" value="36-40" aria-invalid="true"><span class="unit">cm</span></span>
+        <span style="font-size:12px;color:#8E4A3E">肩寬不會拉伸，請填一個數字</span>
+      </div>
+    </section>
+
+    <span class="sec">B・顯示（BM16 衣物詳細）</span>
+    <section class="paper" aria-label="平放尺寸顯示" style="padding:14px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap"><span class="hd" style="font-size:19px">平放尺寸</span><span style="font-size:12px;color:#74624F">cm</span><span class="stc">材質有彈性・6%</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+        <sc-for list="{{flat}}" as="f" hint-placeholder-count="5">
+          <div style="display:flex;flex-direction:column;gap:2px;padding:8px;border-radius:10px;background:{{f.bg}};box-shadow:{{f.ring}}"><span style="font-size:11px;color:#5A4A3C">{{f.k}}</span><span style="display:flex;align-items:baseline;gap:3px;white-space:nowrap"><span class="num" style="font-size:18px;font-weight:700">{{f.v}}</span><sc-if value="{{f.s}}" hint-placeholder-val="{{ false }}"><span class="num" style="font-size:13px;font-weight:700;color:#9A6B2A">↔ {{f.s}}</span></sc-if></span></div>
+        </sc-for>
+      </div>
+    </section>
+
+    <span class="sec">C・尺寸對照（BM14.1 覆盤）</span>
+    <section class="paper" aria-label="尺寸對照狀態" style="padding:12px 14px 4px;display:flex;flex-direction:column">
+      <span style="display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:#5A4A3C;margin-bottom:6px"><span style="display:inline-flex;align-items:center;gap:4px"><span style="width:16px;height:8px;border-radius:3px;background:#C5D8BE"></span>常穿</span><span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:#3B2F25"></span>平放</span><span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;transform:rotate(45deg);background:#C9962F"></span>舒適拉伸</span><span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;box-shadow:inset 0 0 0 2px #3B2F25"></span>最大</span></span>
+      <sc-for list="{{cases}}" as="c" hint-placeholder-count="5">
+        <div style="padding:10px 0 12px;border-top:1.5px dashed #EADCC6;display:flex;flex-direction:column;gap:6px">
+          <span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:14px;font-weight:700">胸寬</span><span class="num" style="font-size:12px;color:#5A4A3C;flex:1">{{c.fs}}・差 {{c.diff}}</span><span class="tag" style="height:22px;font-size:11px;background:{{c.jbg}};color:{{c.fg}}">{{c.judge}}</span><sc-if value="{{c.note}}" hint-placeholder-val="{{ false }}"><span class="stc">{{c.note}}</span></sc-if></span>
+          <span style="position:relative;display:block;height:24px;opacity:{{c.mop}}">
+            <span style="position:absolute;left:0;right:0;top:11px;height:2px;background:#EADCC6"></span>
+            <span style="position:absolute;left:{{c.bl}}%;width:{{c.bw}}%;top:5px;height:12px;border-radius:4px;background:#C5D8BE"></span>
+            <span style="position:absolute;left:{{c.zl}}%;top:0;width:2px;height:24px;background:#3B2F25"></span>
+            <span style="position:absolute;left:{{c.fl}}%;width:{{c.lw}}%;top:11px;height:2px;background:#C9962F"></span>
+            <span style="position:absolute;left:{{c.cl}}%;top:7px;width:9px;height:9px;margin-left:-4.5px;transform:rotate(45deg);background:#C9962F"></span>
+            <span style="position:absolute;left:{{c.ml}}%;top:5px;width:13px;height:13px;margin-left:-6.5px;border-radius:50%;background:#FFFCF6;box-shadow:inset 0 0 0 2px #3B2F25"></span>
+            <span style="position:absolute;left:{{c.fl}}%;top:5px;width:13px;height:13px;margin-left:-6.5px;border-radius:50%;background:#3B2F25;box-shadow:0 0 0 2px #FFFCF6"></span>
+          </span>
+          <sc-if value="{{c.nob}}" hint-placeholder-val="{{ false }}"><span style="margin-top:-22px;font-size:12px;color:#5A4A3C">還沒有身體量測，不畫對照</span></sc-if>
+        </div>
+      </sc-for>
+    </section>
+
+    <span class="sec">D・規則提醒（手機新增選購、比較）</span>
+    <div role="note" style="padding:12px 14px;border-radius:12px;background:#F6E7C6;display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:14px;font-weight:700;color:#5A3F12">有彈性，可能可以</span>
+      <span style="font-size:13px;line-height:1.6;color:#5A3F12">規則「平放胸寬 ≥ 47」：平放 <b class="num">42</b> 未達；可拉到 <b class="num">58</b>，舒適拉伸約 <b class="num">51.6</b>。穿起來會比較貼身。</span>
+    </div>
+    <span style="font-size:12px;line-height:1.7;color:#5A4A3C">判定公式、欄位範圍、一圈量門檻都和桌機 B20 相同。</span>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1640}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const B = 84, U = [9, 15], D = [-20, 40], K = 0.6;
+    const pct = v => Math.max(0, Math.min(100, Math.round((v - D[0]) / (D[1] - D[0]) * 1000) / 10));
+    const T = { ok: ['#E6EEE2', '#2E3F2B'], tight: ['#F4DDD6', '#7E3F34'], snug: ['#F6E7C6', '#5A3F12'], none: ['#F3E7D4', '#5A4A3C'] };
+    const C = [[48, 58, 1, '剛好', 'ok', '有彈性'], [44, 56, 1, '偏緊', 'tight', '有彈性'], [40, 60, 1, '有彈性・會貼身', 'snug', ''], [36, 44, 1, '太緊', 'tight', ''], [40, 60, 0, '—', 'none', '有彈性，可拉到 60']];
+    return {
+      flat: [['肩寬', '38'], ['胸寬', '40', '60'], ['腰寬', '36', '48'], ['衣長', '56'], ['袖長', '60']].map(([k, v, s]) => ({ k, v, s: s || '', bg: s ? '#FFF6E2' : '#FBF4E8', ring: s ? 'inset 0 0 0 1.5px #EBD3A0' : 'none' })),
+      cases: C.map(([F, S, hasB, judge, tone, note]) => {
+        const f = F * 2 - B, c = (F + (S - F) * K) * 2 - B, m = S * 2 - B;
+        return { fs: F + ' ↔ ' + S, diff: hasB ? (f > 0 ? '+' : '') + f : '—', judge, note, jbg: T[tone][0], fg: T[tone][1],
+          mop: hasB ? 1 : 0, nob: !hasB, bl: pct(U[0]), bw: pct(U[1]) - pct(U[0]), zl: pct(0), fl: pct(f), lw: pct(m) - pct(f), cl: pct(c), ml: pct(m) };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

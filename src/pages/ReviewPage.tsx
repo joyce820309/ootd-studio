@@ -29,7 +29,7 @@ import {
   type RuleDraft,
   type SizeRow,
 } from '@/lib/review'
-import type { BodyMeasurement, ClosetItem, LessonRule, LessonRuleInput, ReviewRecord } from '@/types'
+import type { BodyMeasurement, BodyProfile, ClosetItem, LessonRule, LessonRuleInput, ReviewRecord } from '@/types'
 import { toISODate } from '@/lib/date'
 
 const slash = (iso?: string) => (iso ? iso.replace(/-/g, '/') : '')
@@ -47,6 +47,7 @@ interface PageData {
   record: ReviewRecord | null
   closet: ClosetItem[]
   measurements: BodyMeasurement[]
+  bodyProfile: BodyProfile
   rules: LessonRule[]
   /** 判斷規則能不能自動檢查用的品牌與類別名稱 */
   known: KnownNames
@@ -55,15 +56,48 @@ interface PageData {
 }
 
 const judgeTone = (row: SizeRow) =>
-  row.judge === 'small' || row.judge === 'big'
+  row.judge === 'small' || row.judge === 'big' || row.judge === 'tight'
     ? { tag: 'bg-rose-soft text-status-repair-fg', text: 'text-rose-deep', marker: 'bg-rose-deep' }
     : row.judge === 'ok'
       ? { tag: 'bg-sage-soft text-sage-ink', text: 'text-sage-deep', marker: 'bg-sage-deep' }
-      : { tag: 'bg-tile text-ink-2', text: 'text-ink-2', marker: 'bg-ink-3' }
+      : row.judge === 'snug'
+        ? { tag: 'bg-oat-soft text-oat-ink', text: 'text-oat-ink', marker: 'bg-ink' }
+        : { tag: 'bg-tile text-ink-2', text: 'text-ink-2', marker: 'bg-ink-3' }
+
+/** 「有彈性」小註（B20 C） */
+function StretchNote({ row }: { row: SizeRow }) {
+  if (!row.note) return null
+  return <span className="inline-flex h-[22px] items-center rounded-full bg-oat-soft px-2 text-[11px] font-medium whitespace-nowrap text-oat-ink">{row.note}</span>
+}
+
+/** 這件：有彈性時顯示「80～120」（圍度 ×2 後） */
+const itemText = (row: SizeRow) => (row.stretch != null ? `${formatCm(row.item)}～${formatCm(row.stretch)}` : formatCm(row.item))
+
+/** 有彈性的範圍條：常穿範圍、身體（0）、平放、舒適拉伸 60%、拉到最大 */
+function StretchBar({ row, pos }: { row: SizeRow; pos: NonNullable<ReturnType<typeof rangeBarPositions>> }) {
+  const s = pos.stretch!
+  return (
+    <span className="relative block h-[30px] w-full min-w-0" aria-hidden="true">
+      <span className="absolute inset-x-0 top-[9px] h-0.5 rounded-full bg-line" />
+      {pos.band && <span className="absolute top-1 h-3 rounded-[4px] bg-size-band" style={{ left: `${pos.band.left}%`, width: `${pos.band.width}%` }} />}
+      <span className="absolute top-0 h-[22px] w-0.5 -translate-x-1/2 bg-ink" style={{ left: `${s.zero}%` }} />
+      <span className="absolute top-[9px] h-0.5 bg-stretch-line" style={{ left: `${pos.marker}%`, width: `${Math.max(0, s.max - pos.marker)}%` }} />
+      <span className="absolute top-[5px] size-2.5 -translate-x-1/2 rotate-45 bg-stretch-line" style={{ left: `${s.comfort}%` }} />
+      <span className="absolute top-[3px] size-3.5 -translate-x-1/2 rounded-full border-2 border-ink bg-card" style={{ left: `${s.max}%` }} />
+      <span className="absolute top-[3px] size-3.5 -translate-x-1/2 rounded-full bg-ink ring-2 ring-card" style={{ left: `${pos.marker}%` }} />
+      {pos.band && (
+        <span className="absolute bottom-0 font-num text-xs whitespace-nowrap text-sage-deep tabular" style={{ left: `${pos.band.left}%` }}>
+          {bandLabel(row)}
+        </span>
+      )}
+    </span>
+  )
+}
 
 function RangeBar({ row }: { row: SizeRow }) {
   const pos = rangeBarPositions(row)
-  if (!pos) return <span className="text-xs text-ink-2">{row.missingBody ? '缺身體量測' : '—'}</span>
+  if (!pos) return <span className="text-xs text-ink-2">{row.stretch != null && row.missingBody ? '還沒有身體量測，不畫對照；量過之後就會出現' : row.missingBody ? '缺身體量測' : '—'}</span>
+  if (pos.stretch) return <StretchBar row={row} pos={pos} />
   const tone = judgeTone(row)
   return (
     <span className="relative block h-[30px] w-full min-w-0" aria-hidden="true">
@@ -79,8 +113,12 @@ function RangeBar({ row }: { row: SizeRow }) {
   )
 }
 
-function SizeTable({ rows, item, body, beforePurchase, comfortCount }: { rows: SizeRow[]; item: ClosetItem; body: BodyMeasurement | null; beforePurchase: boolean; comfortCount: number }) {
-  const caption = body ? `身體：${slash(body.measuredOn)} 的量測（${beforePurchase ? '購買前最近一次' : '最近一次'}）・衣服：平放尺寸，圍度 ×2` : '身體：還沒有量測紀錄・衣服：平放尺寸，圍度 ×2'
+function SizeTable({ rows, item, body, bodyProfile, beforePurchase, comfortCount }: { rows: SizeRow[]; item: ClosetItem; body: BodyMeasurement | null; bodyProfile: BodyProfile; beforePurchase: boolean; comfortCount: number }) {
+  const hasStretch = rows.some((row) => row.stretch != null)
+  const cols = hasStretch ? 'grid-cols-[64px_84px_96px_64px_minmax(160px,1fr)_132px]' : 'grid-cols-[64px_52px_96px_64px_minmax(160px,1fr)_70px]'
+  const hasFixedBody = [bodyProfile.heightCm, bodyProfile.armLengthCm, bodyProfile.inseamCm, bodyProfile.seatedRiseCm, bodyProfile.footWidthLeftCm, bodyProfile.footWidthRightCm, bodyProfile.heelWidthCm].some((value) => value !== null)
+  const fixedCaption = hasFixedBody ? '＋固定資料' : ''
+  const caption = body ? `身體：${slash(body.measuredOn)} 的量測（${beforePurchase ? '購買前最近一次' : '最近一次'}）${fixedCaption}・衣服：平放尺寸，圍度 ×2` : `${hasFixedBody ? '身體：固定資料' : '身體：還沒有量測紀錄'}・衣服：平放尺寸，圍度 ×2`
   return (
     <PaperCard className="flex flex-col gap-3 p-4 md:px-[22px] md:py-5">
       <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1">
@@ -95,7 +133,23 @@ function SizeTable({ rows, item, body, beforePurchase, comfortCount }: { rows: S
             <span className="size-3 rounded-full bg-rose-deep" />
             這件
           </span>
+          {hasStretch && (
+            <>
+              <span className="inline-flex items-center gap-1.5"><span className="h-3.5 w-0.5 bg-ink" />身體（0）</span>
+              <span className="inline-flex items-center gap-1.5"><span className="size-3 rounded-full bg-ink" />平放</span>
+              <span className="inline-flex items-center gap-1.5"><span className="size-2.5 rotate-45 bg-stretch-line" />舒適拉伸 60%</span>
+              <span className="inline-flex items-center gap-1.5"><span className="size-3 rounded-full border-2 border-ink bg-card" />拉到最大</span>
+            </>
+          )}
         </span>
+        {hasStretch && (
+          <span className="flex w-full flex-wrap gap-2.5 text-[11px] text-ink-2 md:hidden">
+            <span className="inline-flex items-center gap-1"><span className="h-2 w-4 rounded-[3px] bg-size-band" />常穿</span>
+            <span className="inline-flex items-center gap-1"><span className="size-2.5 rounded-full bg-ink" />平放</span>
+            <span className="inline-flex items-center gap-1"><span className="size-2 rotate-45 bg-stretch-line" />舒適拉伸</span>
+            <span className="inline-flex items-center gap-1"><span className="size-2.5 rounded-full border-2 border-ink" />最大</span>
+          </span>
+        )}
       </div>
 
       {!hasSizeComparison(item.slot) ? (
@@ -110,7 +164,7 @@ function SizeTable({ rows, item, body, beforePurchase, comfortCount }: { rows: S
         <>
           {/* 桌面：表格 */}
           <div role="table" aria-label="尺寸對照" className="hidden md:block">
-            <div role="row" className="grid grid-cols-[64px_52px_96px_64px_minmax(160px,1fr)_70px] items-center gap-2.5 pb-2 text-xs text-ink-2">
+            <div role="row" className={`grid ${cols} items-center gap-2.5 pb-2 text-xs text-ink-2`}>
               <span role="columnheader">部位</span>
               <span role="columnheader" className="text-right">這件</span>
               <span role="columnheader" className="text-right">我的身體</span>
@@ -121,9 +175,9 @@ function SizeTable({ rows, item, body, beforePurchase, comfortCount }: { rows: S
             {rows.map((row) => {
               const tone = judgeTone(row)
               return (
-                <div key={row.part.label} role="row" className="grid min-h-[52px] grid-cols-[64px_52px_96px_64px_minmax(160px,1fr)_70px] items-center gap-2.5 border-t-[1.5px] border-dashed border-line text-sm">
+                <div key={row.part.label} role="row" className={`grid min-h-[52px] ${cols} items-center gap-2.5 border-t-[1.5px] border-dashed border-line text-sm`}>
                   <span role="cell" className="font-medium">{row.part.label}</span>
-                  <span role="cell" className="text-right font-num tabular">{formatCm(row.item)}</span>
+                  <span role="cell" className="text-right font-num whitespace-nowrap tabular">{itemText(row)}</span>
                   <span role="cell" className="text-right font-num text-ink-2 tabular">
                     {row.body != null ? `${row.part.bodyLabel ? `${row.part.bodyLabel} ` : ''}${formatCm(row.body)}` : '—'}
                   </span>
@@ -133,8 +187,9 @@ function SizeTable({ rows, item, body, beforePurchase, comfortCount }: { rows: S
                   <span role="cell" className="pl-2">
                     <RangeBar row={row} />
                   </span>
-                  <span role="cell">
-                    <span className={`inline-flex h-[26px] items-center rounded-full px-2.5 text-xs font-medium ${tone.tag}`}>{judgeLabel(row)}</span>
+                  <span role="cell" className="flex flex-wrap gap-1">
+                    <span className={`inline-flex h-[26px] items-center rounded-full px-2.5 text-xs font-medium whitespace-nowrap ${tone.tag}`}>{judgeLabel(row)}</span>
+                    <StretchNote row={row} />
                   </span>
                 </div>
               )
@@ -150,11 +205,12 @@ function SizeTable({ rows, item, body, beforePurchase, comfortCount }: { rows: S
                   <span className="flex items-center gap-2">
                     <span className="w-12 flex-none text-sm font-bold">{row.part.label}</span>
                     <span className="min-w-0 flex-1 truncate font-num text-xs text-ink-2 tabular">
-                      這件 {formatCm(row.item)}・身體 {row.body != null ? formatCm(row.body) : '—'}
+                      這件 {itemText(row)}・身體 {row.body != null ? formatCm(row.body) : '—'}
                     </span>
                     <span className={`font-num text-sm font-bold tabular ${tone.text}`}>{row.part.body && row.metric != null ? formatSigned(row.metric) : ''}</span>
-                    <span className={`inline-flex h-6 items-center rounded-full px-2 text-xs font-medium ${tone.tag}`}>{judgeLabel(row)}</span>
+                    <span className={`inline-flex h-6 items-center rounded-full px-2 text-xs font-medium whitespace-nowrap ${tone.tag}`}>{judgeLabel(row)}</span>
                   </span>
+                  {row.note && <span className="flex justify-end"><StretchNote row={row} /></span>}
                   <RangeBar row={row} />
                 </li>
               )
@@ -167,6 +223,7 @@ function SizeTable({ rows, item, body, beforePurchase, comfortCount }: { rows: S
         {comfortCount
           ? `「常穿的範圍」來自你留下且穿過 5 次以上的 ${comfortCount} 件${item.categoryName ?? '同類衣物'}；差多少＝這件 − 身體。`
           : `還沒有穿過 5 次以上的${item.categoryName ?? '同類衣物'}，所以沒有「常穿的範圍」可比；差多少＝這件 − 身體。`}
+        {comfortCount > 0 && '常穿範圍以部位計算：該部位有彈性的衣物不算進去，剩下少於 3 件就不顯示。'}
       </p>
     </PaperCard>
   )
@@ -185,7 +242,7 @@ async function fetchReviewPageData(id: string): Promise<PageData | null> {
   ])
   if (!item) return null
   const brands = [...new Set([...closet, ...lessonItems].map((entry) => entry.brand?.trim()).filter((brand): brand is string => !!brand))]
-  return { item, record, closet, measurements: profile.measurements, rules, known: { brands, categories: categories.map((category) => category.name) }, exchangedTo }
+  return { item, record, closet, measurements: profile.measurements, bodyProfile: profile.bodyProfile, rules, known: { brands, categories: categories.map((category) => category.name) }, exchangedTo }
 }
 
 export function ReviewPage() {
@@ -230,8 +287,8 @@ export function ReviewPage() {
     if (!data) return null
     const { measurement, beforePurchase } = pickBodySnapshot(data.measurements, data.item.purchaseDate)
     const comfort = comfortItems(data.item, data.closet)
-    const rows = buildSizeRows(data.item, measurement, comfort)
-    return { item: data.item, rows, body: measurement, comfortCount: comfort.length, beforePurchase }
+    const rows = buildSizeRows(data.item, measurement, comfort, data.bodyProfile)
+    return { item: data.item, rows, body: measurement, bodyProfile: data.bodyProfile, comfortCount: comfort.length, beforePurchase }
   }, [data])
 
   if (loading) {
@@ -480,7 +537,7 @@ export function ReviewPage() {
               )}
             </PaperCard>
 
-            <SizeTable rows={context.rows} item={item} body={context.body} beforePurchase={context.beforePurchase} comfortCount={context.comfortCount} />
+            <SizeTable rows={context.rows} item={item} body={context.body} bodyProfile={context.bodyProfile} beforePurchase={context.beforePurchase} comfortCount={context.comfortCount} />
 
             <div className="grid items-start gap-6 pt-2 md:grid-cols-2">
               <StickyNote
@@ -587,7 +644,7 @@ export function ReviewPage() {
       )}
       {aiTab && record && (
         <AiReviewDialog
-          context={{ item, record, rows: context.rows, body: context.body, comfortCount: context.comfortCount }}
+          context={{ item, record, rows: context.rows, body: context.body, bodyProfile: context.bodyProfile, comfortCount: context.comfortCount }}
           known={data.known}
           initialTab={aiTab}
           onCancel={() => setAiTab(null)}

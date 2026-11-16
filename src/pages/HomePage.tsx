@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import { ItemTile } from '@/components/closet/ItemTile'
+import { ProfileAvatarLink } from '@/components/layout/ProfileAvatarLink'
+import { Icon } from '@/components/ui/Icon'
 import { ButtonLink } from '@/components/ui/Button'
-import { PaperCard, Tape, TiltLabel, WashBlob } from '@/components/ui/Paper'
+import { LogoSticker, PaperCard, Tape, TiltLabel, WashBlob } from '@/components/ui/Paper'
 import { LoadingState, PageState } from '@/components/ui/PageState'
 import { fetchClosetItems, useAsync } from '@/lib/data'
 import { APP_VERSION } from '@/lib/version'
@@ -12,6 +14,13 @@ const dateLabel = () =>
 export function HomePage() {
   const { data: items, loading, error } = useAsync(fetchClosetItems)
   return (
+    <>
+    {/* 手機頂部（B-M-Home）：頭像進入「我的」 */}
+    <header className="flex items-center border-b-[1.5px] border-dashed border-line-strong bg-paper py-2.5 pl-4 pr-2 md:hidden">
+      <LogoSticker size="sm" />
+      <button type="button" aria-label="通知" className="ml-auto flex size-11 items-center justify-center rounded-btn text-ink-2"><Icon name="bell" /></button>
+      <ProfileAvatarLink />
+    </header>
     <main className="mx-auto flex max-w-[1200px] flex-col gap-10 px-[clamp(16px,4vw,48px)] pt-10 pb-16">
       <section className="flex flex-wrap items-stretch gap-8">
         <div className="flex flex-[1_1_380px] flex-col justify-center gap-4">
@@ -26,14 +35,16 @@ export function HomePage() {
             </ButtonLink>
           </div>
         </div>
-        <PaperCard className="relative flex flex-[1_1_380px] flex-col gap-3 overflow-hidden p-5">
-          <Tape accent="mist" />
-          <WashBlob accent="rose" className="-right-10 -bottom-10 size-40" />
-          <span className="relative font-hd text-xl">網拍還在猶豫？</span>
-          <p className="relative m-0 text-sm leading-relaxed text-ink-2">
+        <PaperCard className="relative flex flex-[1_1_380px] flex-col gap-3 p-5">
+          <span aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-card">
+            <WashBlob accent="rose" className="-right-10 -bottom-10 size-40" />
+          </span>
+          <Tape accent="mist" className="z-20" />
+          <span className="relative z-10 font-hd text-xl">網拍還在猶豫？</span>
+          <p className="relative z-10 m-0 text-sm leading-relaxed text-ink-2">
             把不同網站的類似商品放進比較試搭台，並排比價，再和衣櫃裡的衣服混搭看看。
           </p>
-          <ButtonLink to="/wishlist/compare" variant="secondary" className="relative self-start">
+          <ButtonLink to="/wishlist/compare" variant="secondary" className="relative z-10 self-start">
             打開比較試搭台
           </ButtonLink>
         </PaperCard>
@@ -57,5 +68,6 @@ export function HomePage() {
         版本 {APP_VERSION}
       </footer>
     </main>
+    </>
   )
 }

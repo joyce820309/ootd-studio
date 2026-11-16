@@ -78,7 +78,7 @@ body{margin:0;background:#FBF4E8}
             <li>
               <a href="#{{r.id}}" aria-current="{{r.cur}}" style="background:{{r.bg}};box-shadow:{{r.sh}}">
                 <span aria-hidden="true" style="position:absolute;left:14px;top:19px;width:15px;height:15px;border-radius:5px;background:{{r.dot}};transform:rotate({{r.rot}}deg);box-shadow:0 0 0 3px #FBF4E8"></span>
-                <span style="display:flex;align-items:center;gap:8px"><span class="num" style="font-size:17px;font-weight:700">{{r.date}}</span><span style="font-size:12px;color:#74624F">（{{r.wd}}）</span><sc-if value="{{r.latest}}" hint-placeholder-val="{{ false }}"><span class="chip" style="margin-left:auto;background:#E6EEE2;color:#2E3F2B">最新</span></sc-if></span>
+                <span style="display:flex;align-items:center;gap:8px"><span class="num" style="font-size:17px;font-weight:700">{{r.date}}</span><span style="font-size:12px;color:#74624F">（{{r.wd}}）</span><span style="font-size:11px;padding:1px 7px;border-radius:999px;background:#F3E7D4;color:#5A4A3C;white-space:nowrap">{{r.tm}}</span><sc-if value="{{r.latest}}" hint-placeholder-val="{{ false }}"><span class="chip" style="margin-left:auto;background:#E6EEE2;color:#2E3F2B">最新</span></sc-if></span>
                 <span style="font-size:12px;color:#5A4A3C">{{r.sum}}</span>
               </a>
             </li>
@@ -152,18 +152,18 @@ class Component extends DCLogic {
   renderVals() {
     // ---- 示範資料：每筆紀錄是「當天的完整快照」，空白代表當時沒記 ----
     const GROUPS = [
-      { g: '基本', c: '#F2CF8E', f: [['h', '身高', 'cm'], ['w', '體重', 'kg']] },
-      { g: '上半身', c: '#A9C6CF', f: [['sh', '肩寬', 'cm'], ['ub', '上胸圍', 'cm'], ['lb', '下胸圍', 'cm'], ['ar', '手臂長', 'cm']] },
-      { g: '下半身', c: '#B7CBB0', f: [['wa', '腰圍', 'cm'], ['na', '肚臍圍', 'cm'], ['hi', '臀圍', 'cm'], ['le', '腿長（內側）', 'cm'], ['th', '大腿圍', 'cm']] }
+      { g: '基本', c: '#F2CF8E', f: [['w', '體重', 'kg']] },
+      { g: '上半身', c: '#A9C6CF', f: [['sh', '肩寬', 'cm'], ['ub', '上胸圍', 'cm'], ['lb', '下胸圍', 'cm']] },
+      { g: '下半身', c: '#B7CBB0', f: [['hw', '高腰圍', 'cm'], ['wa', '腰圍', 'cm'], ['na', '肚臍圍・站', 'cm'], ['ns', '肚臍圍・坐', 'cm'], ['hi', '臀圍', 'cm'], ['th', '大腿圍', 'cm']] }
     ];
     const FC = [['t5', '穿五指襪', '#F2CF8E'], ['so', '穿一般襪', '#A9C6CF'], ['ba', '裸腳', '#E2B4A8']];
     const FM = [['L', '腳長'], ['W', '腳寬'], ['B', '前掌圍'], ['I', '腳背圍']];
     const base = { h: '162', sh: '38', ub: '84', ar: '55', hi: '91', le: '74', soL: '23.5', soW: '9.1', soB: '22.0', soI: '22.8', baL: '23.3' };
     const REC = [
-      { id: 'r1', date: '2026/11/12', wd: '四', v: Object.assign({}, base, { w: '52.0', lb: '70', wa: '65', na: '73', baW: '9.0', baB: '21.8', baI: '22.4' }) },
-      { id: 'r2', date: '2026/10/02', wd: '五', v: Object.assign({}, base, { w: '52.5', lb: '71', wa: '66', na: '73', baW: '9.0', baB: '21.8', baI: '22.4' }) },
-      { id: 'r3', date: '2026/04/18', wd: '六', v: Object.assign({}, base, { w: '53.0', lb: '71', wa: '66' }) },
-      { id: 'r4', date: '2025/11/05', wd: '三', v: { h: '162', w: '53.0', sh: '37.5', ub: '85', lb: '71', ar: '55', wa: '66', hi: '92', le: '74', baL: '23.3' } }
+      { id: 'r1', date: '2026/11/12', tm: '早上空腹', wd: '四', v: Object.assign({}, base, { w: '52.0', lb: '70', hw: '64', wa: '65', na: '73', ns: '81', baW: '9.0', baB: '21.8', baI: '22.4' }) },
+      { id: 'r2', date: '2026/10/02', tm: '早上空腹', wd: '五', v: Object.assign({}, base, { w: '52.5', lb: '71', wa: '66', na: '73', baW: '9.0', baB: '21.8', baI: '22.4' }) },
+      { id: 'r3', date: '2026/04/18', tm: '晚上', wd: '六', v: Object.assign({}, base, { w: '53.0', lb: '71', wa: '66' }) },
+      { id: 'r4', date: '2025/11/05', tm: '沒記時段', wd: '三', v: { h: '162', w: '53.0', sh: '37.5', ub: '85', lb: '71', ar: '55', wa: '66', hi: '92', le: '74', baL: '23.3' } }
     ];
     const KEYS = GROUPS.flatMap(g => g.f.map(f => f[0])).concat(FC.flatMap(c => FM.map(m => c[0] + m[0])));
     const diff = (i, k) => {
@@ -190,7 +190,7 @@ class Component extends DCLogic {
     const sel = 0;
     const DOT = ['#B7CBB0', '#A9C6CF', '#E2B4A8', '#F2CF8E'];
     const list = REC.map((r, i) => ({
-      id: r.id, date: r.date, wd: r.wd, sum: summary(i), latest: i === 0,
+      id: r.id, date: r.date, wd: r.wd, tm: r.tm, sum: summary(i), latest: i === 0,
       cur: i === sel ? 'page' : 'false',
       bg: i === sel ? '#FFFCF6' : 'transparent',
       sh: i === sel ? '0 1px 0 rgba(59,47,37,.05),0 12px 24px -16px rgba(59,47,37,.3),inset 4px 0 0 #F2CF8E' : 'none',

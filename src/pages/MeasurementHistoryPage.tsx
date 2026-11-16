@@ -11,15 +11,15 @@ import { deleteBodyMeasurement, fetchProfileData } from '@/lib/data'
 import { formatLongDate, parseISODate } from '@/lib/date'
 import type { BodyMeasurement } from '@/types'
 
-type MetricKey = Exclude<keyof BodyMeasurement, 'id' | 'measuredOn' | 'note' | 'createdAt' | 'updatedAt'>
+type MetricKey = 'weightKg' | 'shoulderCm' | 'upperBustCm' | 'underBustCm' | 'highWaistCm' | 'waistCm' | 'waistSittingCm' | 'navelCm' | 'navelSittingCm' | 'hipCm' | 'thighCm' | 'footToeLengthCm' | 'footToeWidthCm' | 'footToeBallCm' | 'footToeInstepCm' | 'footSockLengthCm' | 'footSockWidthCm' | 'footSockBallCm' | 'footSockInstepCm' | 'footBareLengthCm' | 'footBareWidthCm' | 'footBareBallCm' | 'footBareInstepCm'
 type DiffKind = 'missing' | 'first' | 'new' | 'same' | 'changed'
 type Metric = { key: MetricKey; label: string; unit: string }
 type MeasurementGroup = { label: string; color: string; metrics: Metric[] }
 
 const GROUPS: MeasurementGroup[] = [
-  { label: '基本', color: 'bg-oat', metrics: [{ key: 'heightCm', label: '身高', unit: 'cm' }, { key: 'weightKg', label: '體重', unit: 'kg' }] },
-  { label: '上半身', color: 'bg-mist', metrics: [{ key: 'shoulderCm', label: '肩寬', unit: 'cm' }, { key: 'upperBustCm', label: '上胸圍', unit: 'cm' }, { key: 'underBustCm', label: '下胸圍', unit: 'cm' }, { key: 'armCm', label: '手臂長', unit: 'cm' }] },
-  { label: '下半身', color: 'bg-sage', metrics: [{ key: 'waistCm', label: '腰圍', unit: 'cm' }, { key: 'navelCm', label: '肚臍圍', unit: 'cm' }, { key: 'hipCm', label: '臀圍', unit: 'cm' }, { key: 'inseamCm', label: '腿長（內側）', unit: 'cm' }, { key: 'thighCm', label: '大腿圍', unit: 'cm' }] },
+  { label: '基本', color: 'bg-oat', metrics: [{ key: 'weightKg', label: '體重', unit: 'kg' }] },
+  { label: '上半身', color: 'bg-mist', metrics: [{ key: 'shoulderCm', label: '肩寬', unit: 'cm' }, { key: 'upperBustCm', label: '上胸圍', unit: 'cm' }, { key: 'underBustCm', label: '下胸圍', unit: 'cm' }] },
+  { label: '下半身', color: 'bg-sage', metrics: [{ key: 'highWaistCm', label: '高腰圍', unit: 'cm' }, { key: 'waistCm', label: '腰圍・站著', unit: 'cm' }, { key: 'waistSittingCm', label: '腰圍・坐著', unit: 'cm' }, { key: 'navelCm', label: '肚臍圍・站著', unit: 'cm' }, { key: 'navelSittingCm', label: '肚臍圍・坐著', unit: 'cm' }, { key: 'hipCm', label: '臀圍', unit: 'cm' }, { key: 'thighCm', label: '大腿圍', unit: 'cm' }] },
 ]
 const FEET = [
   { id: 'toe', label: '穿五指襪', color: 'bg-oat', keys: ['footToeLengthCm', 'footToeWidthCm', 'footToeBallCm', 'footToeInstepCm'] as MetricKey[] },
@@ -59,6 +59,10 @@ function formatDate(date: string) {
 function dateLabel(date: string) {
   const parsed = parseISODate(date)
   return parsed ? `${parsed.getFullYear()}/${String(parsed.getMonth() + 1).padStart(2, '0')}/${String(parsed.getDate()).padStart(2, '0')}` : date
+}
+
+function timeOfDayLabel(value: BodyMeasurement['timeOfDay']) {
+  return value === 'morning_fasting' ? '早上空腹' : value === 'afternoon_evening' ? '下午・晚上' : '其他／未記'
 }
 
 function countRecorded(record: BodyMeasurement) {
@@ -152,15 +156,22 @@ export function MeasurementHistoryPage() {
 
   return (
     <main className="mx-auto flex max-w-[1200px] flex-col gap-5 px-4 py-6 pb-28 sm:px-6 md:px-8 md:py-8 md:pb-12">
-      <div className={isMobileDetail ? 'hidden md:block' : ''}><MeasurementPageHeader view={view} setView={setView} /></div>
+      {!isMobileDetail && (
+        <header className="-mx-4 -mt-6 flex items-center gap-1 border-b-[1.5px] border-dashed border-line-strong py-2 pl-1 pr-2 md:hidden">
+          <Link to="/me" aria-label="返回我的" className="flex size-11 items-center justify-center text-ink"><Icon name="back" size={22} /></Link>
+          <h1 className="m-0 font-hd text-xl">量測紀錄</h1>
+          <span className="ml-1.5 font-num text-xs text-ink-3 tabular">{records.length} 筆</span>
+        </header>
+      )}
+      <div className="hidden md:block"><MeasurementPageHeader view={view} setView={setView} /></div>
       {records.length === 0 ? (
-        <PageState icon="diary" tone="mist" title="還沒有量測紀錄" description="每次儲存一筆尺寸，就會在這裡留下日期快照。" action={<ButtonLink to="/me" variant="primary"><Icon name="plus" size={17} />新增量測</ButtonLink>} />
+        <PageState icon="diary" tone="mist" title="還沒有量測紀錄" description="每次儲存一筆尺寸，就會在這裡留下日期快照。" action={<ButtonLink to="/me/measurements/new" variant="primary"><Icon name="plus" size={17} />新增量測</ButtonLink>} />
       ) : view === 'table' && !isMobileDetail ? (
         <ComparisonTable records={records} onSelect={(recordId) => navigate(`/me/measurements/${recordId}`)} />
       ) : (
         selected ? <>
           <div className="md:hidden">
-            {isMobileDetail && selected ? <MobileDetail record={selected} previous={previous} onDelete={() => void handleDelete(selected.id)} /> : <MobileRecordList records={records} onAdd={() => navigate('/me')} />}
+            {isMobileDetail && selected ? <MobileDetail record={selected} previous={previous} onDelete={() => void handleDelete(selected.id)} /> : <MobileRecordList records={records} onAdd={() => navigate('/me/measurements/new')} />}
           </div>
           <div className="hidden items-start gap-6 md:grid md:grid-cols-[280px_minmax(0,1fr)]">
             <Timeline records={records} selectedId={selected?.id ?? null} />
@@ -182,7 +193,7 @@ function Timeline({ records, selectedId }: { records: BodyMeasurement[]; selecte
           <li key={record.id}>
             <Link to={`/me/measurements/${record.id}`} aria-current={record.id === selectedId ? 'page' : undefined} className={`relative flex flex-col gap-1 rounded-tile py-3.5 pl-10 pr-3 no-underline ${record.id === selectedId ? 'bg-card shadow-paper before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-oat' : 'text-ink hover:bg-card/70'}`}>
               <span aria-hidden="true" className={`absolute left-3 top-5 size-3.5 rotate-[-8deg] rounded-tag shadow-sticker ${index % 3 === 0 ? 'bg-sage' : index % 3 === 1 ? 'bg-mist' : 'bg-rose'} ring-[3px] ring-paper`} />
-              <span className="flex items-center gap-1.5"><span className="font-num text-base font-bold text-ink">{dateLabel(record.measuredOn)}</span>{index === 0 && <span className="ml-auto rounded-full bg-sage-soft px-2 py-0.5 text-[11px] text-sage-ink">最新</span>}</span>
+              <span className="flex flex-wrap items-center gap-1.5"><span className="font-num text-base font-bold text-ink">{dateLabel(record.measuredOn)}</span><span className="rounded-full bg-tile px-2 py-0.5 text-[10px] text-ink-2">{timeOfDayLabel(record.timeOfDay)}</span>{index === 0 && <span className="ml-auto rounded-full bg-sage-soft px-2 py-0.5 text-[11px] text-sage-ink">最新</span>}</span>
               <span className="text-xs text-ink-2">{changeSummary(record, records[index + 1])}・記了 {countRecorded(record)} 項</span>
             </Link>
           </li>
@@ -207,7 +218,7 @@ function MobileRecordList({ records, onAdd }: { records: BodyMeasurement[]; onAd
             <li key={record.id} className="relative pl-8">
               <span aria-hidden="true" className={`absolute left-[6px] top-5 size-3.5 rotate-[-8deg] rounded-tag ${index % 3 === 0 ? 'bg-sage' : index % 3 === 1 ? 'bg-mist' : 'bg-rose'} ring-[3px] ring-paper`} />
               <Link to={`/me/measurements/${record.id}`} className="flex flex-col gap-2 rounded-card bg-card p-3.5 text-ink no-underline shadow-paper">
-                <span className="flex items-center gap-1.5"><span className="font-num text-base font-bold">{dateLabel(record.measuredOn)}</span><span className="text-xs text-ink-3">（{parseISODate(record.measuredOn)?.toLocaleDateString('zh-TW', { weekday: 'short' }).replace('週', '')}）</span>{index === 0 && <span className="rounded-full bg-sage-soft px-2 py-0.5 text-[10px] text-sage-ink">最新</span>}<Icon name="next" size={17} className="ml-auto text-ink-3" /></span>
+                <span className="flex items-center gap-1.5"><span className="font-num text-base font-bold">{dateLabel(record.measuredOn)}</span><span className="text-xs text-ink-3">（{parseISODate(record.measuredOn)?.toLocaleDateString('zh-TW', { weekday: 'short' }).replace('週', '')}）</span><span className="whitespace-nowrap rounded-full bg-tile px-2 py-0.5 text-[11px] text-ink-2">{timeOfDayLabel(record.timeOfDay)}</span>{index === 0 && <span className="rounded-full bg-sage-soft px-2 py-0.5 text-[10px] text-sage-ink">最新</span>}<Icon name="next" size={17} className="ml-auto text-ink-3" /></span>
                 <span className="text-xs text-ink-2">{changeSummary(record, previous)}・共記了 {countRecorded(record)} 項</span>
                 {(changedTags.length > 0 || newlyRecorded > 0) && <span className="flex flex-wrap gap-1.5">{changedTags.slice(0, 4).map(({ metric, diff }) => <span key={metric.key} className="rounded-full bg-oat-soft px-1.5 py-0.5 font-num text-[10px] text-oat-ink">{metric.label} {diff.delta === null ? '' : formatDelta(diff.delta)}</span>)}{newlyRecorded > 0 && <span className="rounded-full bg-mist-soft px-1.5 py-0.5 text-[10px] text-mist-ink">新記 {newlyRecorded} 項</span>}{changedTags.length > 4 && <span className="rounded-full bg-oat-soft px-1.5 py-0.5 text-[10px] text-oat-ink">另有 {changedTags.length - 4} 項改變</span>}</span>}
               </Link>
@@ -231,7 +242,7 @@ function MeasurementDetail({ record, previous, onDelete, hideActions = false, hi
     <article aria-labelledby="measurement-detail-title" className="relative min-w-0 overflow-hidden rounded-block bg-card p-4 shadow-paper sm:p-6">
       <WashBlob accent="oat" className="-right-8 -top-8 size-32" tilt={14} />
       {!hideHeader && <header className="relative flex flex-wrap items-start gap-3">
-        <div className="mr-auto min-w-0"><h2 id="measurement-detail-title" className="m-0 font-hd text-2xl text-ink sm:text-[28px]">{formatDate(record.measuredOn)}</h2><p className="mb-0 mt-1 text-[13px] text-ink-2">{previous ? `和上次（${previousDate}）比，改了 ${changedCount} 項` : '第一次記錄'}・共記了 {countRecorded(record)} 項</p></div>
+        <div className="mr-auto min-w-0"><h2 id="measurement-detail-title" className="m-0 font-hd text-2xl text-ink sm:text-[28px]">{formatDate(record.measuredOn)}</h2><p className="mb-0 mt-1 text-[13px] text-ink-2">{timeOfDayLabel(record.timeOfDay)}・{previous ? `和上次（${previousDate}）比，改了 ${changedCount} 項` : '第一次記錄'}・共記了 {countRecorded(record)} 項</p></div>
         {!hideActions && <><ButtonLink to={`/me?edit=${encodeURIComponent(record.id)}`} variant="secondary" className="h-10 px-3 text-xs"><Icon name="reset" size={16} />編輯</ButtonLink><Button variant="ghost" className="h-10 px-2 text-xs text-rose-deep" onClick={() => setConfirmDelete(true)}><Icon name="x" size={16} />刪除</Button></>}
       </header>}
       {record.note && <div className="relative mt-5 flex gap-2 rounded-tile bg-sage-soft px-3.5 py-3 text-[13px] leading-5 text-sage-ink"><Icon name="diary" size={17} className="mt-0.5" /><div className="min-w-0 flex-1"><b className="font-medium">備註</b><MarkdownNote value={record.note} className="mt-1" /></div></div>}
@@ -293,10 +304,10 @@ function ComparisonTable({ records, onSelect }: { records: BodyMeasurement[]; on
   const rows = [...GROUPS.map((group) => ({ group: group.label, color: group.color, metrics: group.metrics })), ...FEET.map((foot) => ({ group: `腳・${foot.label}`, color: foot.color, metrics: foot.keys.map((key, index) => ({ key, label: FOOT_LABELS[index], unit: 'cm' })) }))]
   return (
     <>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-ink-2"><span className="flex items-center gap-1.5"><DiffBadge kind="changed" delta={-0.5} compact />和前一次不同</span><span className="flex items-center gap-1.5"><DiffBadge kind="new" delta={null} compact />這一次第一次記</span><span>— 當時沒記</span><label className="ml-auto flex min-h-10 cursor-pointer items-center gap-2"><input type="checkbox" checked={changedOnly} onChange={(event) => setChangedOnly(event.target.checked)} className="size-4 accent-[var(--color-sage-deep)]" />只看有改過的項目</label></div>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-ink-2"><span className="flex items-center gap-1.5"><DiffBadge kind="changed" delta={-0.5} compact />和前一次不同</span><span className="flex items-center gap-1.5"><DiffBadge kind="new" delta={null} compact />這一次第一次記</span><span>— 當時沒記</span><button type="button" role="switch" aria-checked={changedOnly} onClick={() => setChangedOnly((current) => !current)} className="ml-auto flex min-h-11 items-center gap-2 rounded-sm text-left text-xs text-ink"><span>只看有改過的項目</span><span aria-hidden="true" className={`relative h-6 w-[42px] flex-none rounded-full transition-colors ${changedOnly ? 'bg-sage-deep' : 'bg-line-strong'}`}><span className={`absolute top-0.5 size-5 rounded-full bg-card shadow-sticker transition-transform ${changedOnly ? 'translate-x-[21px]' : 'translate-x-0.5'}`} /></span></button></div>
       <div role="region" aria-label="量測對照表，可左右捲動" tabIndex={0} className="overflow-auto rounded-block bg-card shadow-paper focus-visible:outline-mist-deep">
         <div role="table" aria-label="各次量測數值對照，體重為公斤，其餘為公分" className="min-w-max">
-          <div role="row" className="grid border-b border-ink" style={{ gridTemplateColumns: `190px repeat(${records.length}, minmax(150px, 1fr))` }}><span role="columnheader" className="sticky left-0 z-10 flex items-end bg-card px-4 pb-3 text-xs text-ink-3">項目</span>{records.map((record, index) => <button key={record.id} type="button" role="columnheader" onClick={() => onSelect(record.id)} className="flex min-h-20 flex-col items-end justify-end px-3 py-3 text-right hover:bg-paper"><span className="flex items-center gap-1.5 font-num text-sm font-bold text-ink">{index === 0 && <span className="rounded-full bg-sage-soft px-2 py-0.5 font-sans text-[10px] text-sage-ink">最新</span>}{dateLabel(record.measuredOn)}</span><span className="mt-1 text-[10px] text-ink-3">{changeSummary(record, records[index + 1])}</span></button>)}</div>
+          <div role="row" className="grid border-b border-ink" style={{ gridTemplateColumns: `190px repeat(${records.length}, minmax(150px, 1fr))` }}><span role="columnheader" className="sticky left-0 z-10 flex items-end bg-card px-4 pb-3 text-xs text-ink-3">項目</span>{records.map((record, index) => <button key={record.id} type="button" role="columnheader" onClick={() => onSelect(record.id)} className="flex min-h-20 flex-col items-end justify-end px-3 py-3 text-right hover:bg-paper"><span className="flex items-center gap-1.5 font-num text-sm font-bold text-ink">{index === 0 && <span className="rounded-full bg-sage-soft px-2 py-0.5 font-sans text-[10px] text-sage-ink">最新</span>}{dateLabel(record.measuredOn)}</span><span className="mt-1 rounded-full bg-tile px-2 py-0.5 text-[10px] text-ink-2">{timeOfDayLabel(record.timeOfDay)}</span><span className="mt-1 text-[10px] text-ink-3">{changeSummary(record, records[index + 1])}</span></button>)}</div>
           {rows.map((group) => {
             const visibleMetrics = group.metrics.filter((metric) => !changedOnly || records.some((record, index) => { const diff = compareValue(record, records[index + 1], metric.key); return diff.kind === 'changed' || diff.kind === 'new' }))
             if (!visibleMetrics.length) return null
@@ -314,5 +325,5 @@ function ComparisonTable({ records, onSelect }: { records: BodyMeasurement[]; on
 
 function MobileDetail({ record, previous, onDelete }: { record: BodyMeasurement; previous?: BodyMeasurement; onDelete: () => void }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
-  return <div className="md:hidden"><div className="-mx-4 -mt-6 mb-3 flex items-center gap-2 border-b border-dashed border-line-strong px-2 py-2.5"><Link to="/me/measurements" aria-label="返回量測紀錄" className="flex size-11 items-center justify-center text-ink"><Icon name="back" /></Link><div className="min-w-0"><h1 className="m-0 truncate font-hd text-lg">{formatDate(record.measuredOn)}</h1><p className="m-0 text-[11px] text-ink-3">{previous ? `和上次比，改了 ${ALL_METRICS.filter((metric) => compareValue(record, previous, metric.key).kind === 'changed').length} 項` : '第一次記錄'}</p></div><button type="button" aria-label="更多動作" onClick={() => setConfirmDelete(true)} className="ml-auto flex size-11 items-center justify-center rounded-btn"><Icon name="more" /></button></div><MeasurementDetail record={record} previous={previous} onDelete={onDelete} hideActions hideHeader /><div className="fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-20 grid grid-cols-[1fr_2fr] gap-2 border-t border-dashed border-line-strong bg-paper p-3"><Button variant="secondary" className="text-rose-deep" onClick={() => setConfirmDelete(true)}>刪除</Button><ButtonLink to={`/me?edit=${encodeURIComponent(record.id)}`} variant="primary">編輯這筆紀錄</ButtonLink></div>{confirmDelete && <div className="fixed inset-0 z-50 flex items-center justify-center bg-scrim p-4"><section role="alertdialog" aria-modal="true" className="w-full max-w-sm space-y-3 rounded-block bg-card p-5 shadow-float"><h2 className="m-0 font-hd text-xl">刪除這筆紀錄？</h2><p className="m-0 text-sm text-ink-2">刪除後無法復原。</p><div className="flex justify-end gap-2"><Button variant="secondary" onClick={() => setConfirmDelete(false)}>取消</Button><Button variant="danger" onClick={onDelete}>永久刪除</Button></div></section></div>}</div>
+  return <div className="md:hidden"><div className="-mx-4 -mt-6 mb-3 flex items-center gap-2 border-b border-dashed border-line-strong px-2 py-2.5"><Link to="/me/measurements" aria-label="返回量測紀錄" className="flex size-11 items-center justify-center text-ink"><Icon name="back" /></Link><div className="min-w-0"><h1 className="m-0 truncate font-hd text-lg">{formatDate(record.measuredOn)}</h1><p className="m-0 text-[11px] text-ink-3">{timeOfDayLabel(record.timeOfDay)}・{previous ? `和上次比，改了 ${ALL_METRICS.filter((metric) => compareValue(record, previous, metric.key).kind === 'changed').length} 項` : '第一次記錄'}</p></div><button type="button" aria-label="更多動作" onClick={() => setConfirmDelete(true)} className="ml-auto flex size-11 items-center justify-center rounded-btn"><Icon name="more" /></button></div><MeasurementDetail record={record} previous={previous} onDelete={onDelete} hideActions hideHeader /><div className="fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-20 grid grid-cols-[1fr_2fr] gap-2 border-t border-dashed border-line-strong bg-paper p-3"><Button variant="secondary" className="text-rose-deep" onClick={() => setConfirmDelete(true)}>刪除</Button><ButtonLink to={`/me/measurements/${encodeURIComponent(record.id)}/edit`} variant="primary">編輯這筆紀錄</ButtonLink></div>{confirmDelete && <div className="fixed inset-0 z-50 flex items-center justify-center bg-scrim p-4"><section role="alertdialog" aria-modal="true" className="w-full max-w-sm space-y-3 rounded-block bg-card p-5 shadow-float"><h2 className="m-0 font-hd text-xl">刪除這筆紀錄？</h2><p className="m-0 text-sm text-ink-2">刪除後無法復原。</p><div className="flex justify-end gap-2"><Button variant="secondary" onClick={() => setConfirmDelete(false)}>取消</Button><Button variant="danger" onClick={onDelete}>永久刪除</Button></div></section></div>}</div>
 }

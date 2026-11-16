@@ -8,9 +8,11 @@ import { Icon } from '@/components/ui/Icon'
 import { MarkdownNoteField } from '@/components/ui/MarkdownNote'
 import { ImageUploadProgressState, CutoutFailureState, CutoutProcessingState } from '@/components/ui/B10States'
 import { CutoutRegionDialog } from '@/components/closet/CutoutRegionDialog'
+import { FlatMeasureField } from '@/components/closet/FlatMeasureField'
+import { collectMeasures, SIZING, type FlatFieldValue, type MeasureField } from '@/lib/stretch'
 import { PaperCard, Tape, TiltLabel, WashBlob } from '@/components/ui/Paper'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
-import { fetchCategories, fetchClosetBrands, fetchManagedList, createManagedEntry, createGarmentDraft, updateGarmentDraft, finalizeGarmentDraft, discardGarmentDraft, removeItemBackground, getGarmentPhotoUrl } from '@/lib/data'
+import { fetchCategories, fetchClosetBrands, fetchManagedList, createManagedEntry, createGarmentDraft, updateGarmentDraft, finalizeGarmentDraft, discardGarmentDraft, removeItemBackground, getGarmentPhotoUrl, useLatestBody } from '@/lib/data'
 import { materialNames, parsePercentages } from '@/lib/materials'
 import { toUploadableImage } from '@/lib/image'
 import { GARMENT_COLORS } from '@/lib/colors'
@@ -19,11 +21,10 @@ import type { AddItemDestination, Category, CutoutRegion, ManagedListSummary, Ne
 type Step = 1 | 2 | 3 | 4
 type CutoutState = 'idle' | 'processing' | 'done' | 'failed' | 'demo'
 type Photo = { id: string; file: File; url: string }
-type MeasureField = { key: string; label: string }
 
 type FormState = Omit<NewGarmentInput, 'flatMeasurements' | 'seasons' | 'destination' | 'useCutout' | 'purchaseDate' | 'necklineSize' | 'materialPercentages'> & {
   seasons: string[]
-  flatMeasurements: Record<string, string>
+  flatMeasurements: Record<string, FlatFieldValue>
   purchaseDate: string | null
   necklineSize: string
   materialPercentages: Record<string, string>
@@ -34,14 +35,6 @@ const STEP_LABELS = ['照片', '去背', '資料', '確認']
 const SEASONS = ['春', '夏', '秋', '冬']
 const COLORS = GARMENT_COLORS
 const INPUT_CLASS = 'h-12 w-full rounded-btn border-[1.5px] border-line bg-card px-3 text-sm text-ink outline-none focus:border-mist-deep'
-const SIZING: Record<string, MeasureField[]> = {
-  top: [{ key: 'shoulder', label: '肩寬' }, { key: 'sleeve', label: '袖長' }, { key: 'chest', label: '胸寬' }, { key: 'length', label: '衣長' }],
-  outer: [{ key: 'shoulder', label: '肩寬' }, { key: 'sleeve', label: '袖長' }, { key: 'chest', label: '胸寬' }, { key: 'cuff', label: '袖口' }, { key: 'length', label: '衣長' }],
-  bottom: [{ key: 'waist', label: '腰寬' }, { key: 'rise', label: '褲檔' }, { key: 'hip', label: '臀寬' }, { key: 'thigh', label: '大腿寬' }, { key: 'length', label: '褲長' }, { key: 'hem', label: '褲口寬' }],
-  shoes: [{ key: 'innerLength', label: '鞋內長' }, { key: 'heelHeight', label: '跟高' }],
-  bag: [{ key: 'width', label: '寬' }, { key: 'height', label: '高' }, { key: 'depth', label: '側寬' }],
-  acc: [{ key: 'length', label: '平放長度' }, { key: 'width', label: '平放寬度' }],
-}
 const BASE_FORM: FormState = {
   name: '', categoryId: '', colorName: '燕麥', colorHex: '#D9CBB3', secondColorHex: '', brand: '', size: '',
   seasons: [], necklineSize: '', material: '', materialComposition: '', materialPercentages: {}, purchasePrice: null, purchaseDate: null, store: '', productUrl: '', note: '', flatMeasurements: {},
@@ -114,6 +107,7 @@ export function AddItemPage() {
 
   const selectedCategory = categories.find((category) => category.id === form.categoryId)
   const measurements = useMemo(() => slotSizing(selectedCategory), [selectedCategory])
+  const body = useLatestBody()
   const selectedMaterials = useMemo(() => materialNames(form.material), [form.material])
   const materialPercentageValues = useMemo(() => parsePercentages(form.materialPercentages), [form.materialPercentages])
   const materialPercentageTotal = Object.values(materialPercentageValues).reduce((sum, value) => sum + value, 0)
@@ -214,13 +208,20 @@ export function AddItemPage() {
   async function beginMediaStep() {
     setError(null)
     if (loadingCategories || !categories.length) return setError('目前沒有可用衣物分類，請先建立分類後再新增。')
-    if (!photos.length) return setError('至少加入一張照片再繼續。')
     setUploading(true)
     try {
-      const result = await createGarmentDraft(form.categoryId || categories[0].id, photos.map((photo) => photo.file), useCutout)
+      const hasPhotos = photos.length > 0
+      const result = await createGarmentDraft(form.categoryId || categories[0].id, photos.map((photo) => photo.file), hasPhotos && useCutout)
       setDraftId(result.id)
       draftIdRef.current = result.id
       setDraftDemo(result.demo)
+      if (!hasPhotos) {
+        setUseCutout(false)
+        setCutoutState('idle')
+        setCutoutUrl(null)
+        setStep(3)
+        return
+      }
       if (!useCutout) {
         setStep(3)
         return
@@ -237,7 +238,7 @@ export function AddItemPage() {
       }
       await processCutout(result.id, cutoutPhotoIndex, activeRegion)
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : '照片上傳失敗，請重試。')
+      setError(cause instanceof Error ? cause.message : photos.length ? '照片上傳失敗，請重試。' : '衣物草稿建立失敗，請重試。')
     } finally {
       setUploading(false)
     }
@@ -272,6 +273,12 @@ export function AddItemPage() {
       setError('必填只有品名和類型，請完成這兩項。')
       return
     }
+    const measureError = collectMeasures(measurements, form.flatMeasurements).error
+    if (measureError) {
+      setError(`平放尺寸「${measureError.field.label}」：${measureError.message}`)
+      document.getElementById('section-平放尺寸')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      return
+    }
     if (form.purchasePrice != null && form.purchasePrice < 0) {
       setError('價格不能小於 0。')
       return
@@ -302,6 +309,7 @@ export function AddItemPage() {
   }
 
   function toInput(): NewGarmentInput {
+    const measures = collectMeasures(measurements, form.flatMeasurements)
     return {
       ...form,
       necklineSize: selectedCategory?.slot === 'top' ? fieldNumber(form.necklineSize) : null,
@@ -309,7 +317,8 @@ export function AddItemPage() {
       destination,
       closetStatus,
       useCutout,
-      flatMeasurements: Object.fromEntries(measurements.map(({ key }) => [key, fieldNumber(form.flatMeasurements[key] ?? '')])),
+      flatMeasurements: measures.flat,
+      flatStretch: measures.stretch,
     }
   }
 
@@ -460,7 +469,7 @@ export function AddItemPage() {
   }
 
   const footerHint = step === 1
-    ? useCutout ? '下一步會上傳照片並開始去背' : '略過去背，直接保留原始照片'
+    ? photos.length ? useCutout ? '下一步會上傳照片並開始去背' : '略過去背，直接保留原始照片' : '照片可以略過，之後也能在衣物詳細頁補上'
     : step === 2 ? cutoutState === 'done' ? '去背圖會用在搭配板，原照片仍會保留' : '去背失敗仍可用原始照片繼續'
       : step === 3 ? '必填只有品名和類型，其他想到再補' : '確認後就會儲存這件衣物'
   const necklineField = selectedCategory?.slot === 'top' ? <Field label="領口尺寸" hint="cm・選填"><span className="garment-sizing__neckline-control flex h-12 items-center gap-2 rounded-btn border-[1.5px] border-line bg-card px-3 focus-within:border-mist-deep"><input type="number" min="0" step="0.1" inputMode="decimal" value={form.necklineSize} onChange={(event) => updateForm('necklineSize', event.target.value)} placeholder="選填" className="min-w-0 flex-1 bg-transparent text-right font-num text-lg outline-none" /><span className="font-num text-xs text-ink-2">cm</span></span></Field> : null
@@ -486,7 +495,8 @@ export function AddItemPage() {
         {error && <div role="alert" className="flex items-start gap-2 rounded-tile border-[1.5px] border-rose bg-rose-soft px-4 py-3 text-sm text-rose-ink"><Icon name="alert" size={18} className="mt-0.5 flex-none" /><span className="flex-1">{error}</span><button type="button" aria-label="關閉錯誤訊息" onClick={() => setError(null)} className="flex size-8 flex-none items-center justify-center"><Icon name="x" size={16} /></button></div>}
 
         {step === 1 && <section className="space-y-6" onDragOver={(event: DragEvent) => { event.preventDefault(); setDragging(true) }} onDragLeave={() => setDragging(false)} onDrop={(event: DragEvent) => { event.preventDefault(); setDragging(false); appendFiles(event.dataTransfer.files) }}>
-          <div><h1 className="m-0 font-hd text-3xl">放上照片</h1><p className="mb-0 mt-2 text-sm leading-6 text-ink-2">可以放好幾張：自己拍的平拍照、網拍穿搭照、標籤或細節照都行。</p></div>
+          <div><h1 className="m-0 font-hd text-3xl">放上照片<span className="ml-2 align-middle font-sans text-sm font-normal text-ink-2">選填</span></h1><p className="mb-0 mt-2 text-sm leading-6 text-ink-2">可以放好幾張：自己拍的平拍照、網拍穿搭照、標籤或細節照都行；也可以先略過，之後再補。</p></div>
+          {photos.length === 0 && <p className="m-0 -mt-3 text-xs leading-5 text-ink-2">照片可以稍後再補：先填衣物資料，儲存後到衣物詳細頁新增照片即可。</p>}
           {photos.length > 0 && <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-5">
             {photos.map((photo, index) => <figure key={photo.id} className="m-0 flex min-w-0 flex-col gap-1.5">
               <div className={`relative aspect-[4/5] overflow-hidden rounded-tile bg-tile ${index === 0 ? 'ring-2 ring-inset ring-sage-deep' : ''}`}>
@@ -537,7 +547,7 @@ export function AddItemPage() {
 
         {step === 3 && <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_250px]">
           <form id="garment-info-form" onSubmit={(event) => void goToReview(event)} className="order-2 space-y-5 lg:order-1">
-            <div className="flex items-center gap-3"><PhotoPreview photo={photos[0]} title="封面預覽" compact /><div><h1 className="m-0 font-hd text-3xl">衣物資料</h1><p className="mb-0 mt-2 text-sm text-ink-2">必填只有品名和類型，其他想到再補。</p></div></div>
+            <div className="flex items-center gap-3"><PhotoPreview photo={photos[0]} title="封面預覽" compact /><div><h1 className="m-0 font-hd text-3xl">衣物資料</h1><p className="mb-0 mt-2 text-sm text-ink-2">必填只有品名和類型，其他想到再補。照片也可以之後再新增。</p></div></div>
             <FormSection title="基本" accent="oat">
               <Field label="品名" required><input value={form.name} onChange={(event) => updateForm('name', event.target.value)} required placeholder="例如：燕麥色羊毛圓領針織衫" className={INPUT_CLASS} /></Field>
               <fieldset className="space-y-2 border-0 p-0"><legend className="text-[13px] font-medium text-ink">類型<span className="ml-1 text-rose-deep">必填</span><small className="ml-2 text-ink-3">依你的衣櫃分類</small></legend><div className="flex flex-wrap gap-2" role="radiogroup" aria-label="衣物類型">{categories.map((category) => <Chip key={category.id} selected={form.categoryId === category.id} onClick={() => updateForm('categoryId', category.id)} dotColor={category.slot ? undefined : 'var(--color-line-strong)'}>{category.name}</Chip>)}</div></fieldset>
@@ -545,8 +555,8 @@ export function AddItemPage() {
               <Field label="季節" hint="可複選"><div className="flex flex-wrap gap-2">{SEASONS.map((season) => <Chip key={season} selected={form.seasons.includes(season)} onClick={() => toggleSeason(season)}>{season}</Chip>)}</div></Field>
             </FormSection>
             <FormSection title="平放尺寸" accent="mist" hint="單位 cm・選填">
-              <div className="garment-sizing__guide rounded-tile bg-apricot p-3 text-xs leading-5 text-ink-2">平放在桌面量，不要拉扯布料；網拍尺寸表通常也是平放量。誤差 1–2 cm 屬於正常。</div>
-              {measurements.length > 0 ? <div className="garment-sizing__fields grid grid-cols-3 gap-3">{measurements.map((field) => <Fragment key={field.key}><Field label={field.label}><span className="flex h-12 items-center rounded-btn border-[1.5px] border-line bg-card px-2.5 focus-within:border-mist-deep sm:px-3"><input type="number" min="0" step="0.1" inputMode="decimal" value={form.flatMeasurements[field.key] ?? ''} onChange={(event) => updateForm('flatMeasurements', { ...form.flatMeasurements, [field.key]: event.target.value })} placeholder="選填" className="min-w-0 flex-1 bg-transparent text-right font-num text-lg font-bold outline-none" /><span className="ml-1 font-num text-xs text-ink-2">cm</span></span></Field>{field.key === 'length' && necklineField && <div className="garment-sizing__neckline">{necklineField}</div>}</Fragment>)}{necklineField && !measurements.some((field) => field.key === 'length') && <div className="garment-sizing__neckline">{necklineField}</div>}</div> : <><p className="m-0 text-sm text-ink-2">這個分類暫無建議的平放尺寸欄位。</p>{necklineField}</>}
+              <div className="garment-sizing__guide rounded-tile bg-apricot p-3 text-xs leading-5 text-ink-2">平放在桌面量，不要拉扯布料；網拍尺寸表通常也是平放量。誤差 1–2 cm 屬於正常。有彈性的可以直接填「40-60」（平放 40，拉開後也量平放 60）。</div>
+              {measurements.length > 0 ? <div className="garment-sizing__fields grid grid-cols-3 gap-3">{measurements.map((field) => <Fragment key={field.key}><FlatMeasureField field={field} value={form.flatMeasurements[field.key] ?? { text: '' }} body={body} onChange={(value) => updateForm('flatMeasurements', { ...form.flatMeasurements, [field.key]: value })} />{field.key === 'length' && necklineField && <div className="garment-sizing__neckline">{necklineField}</div>}</Fragment>)}{necklineField && !measurements.some((field) => field.key === 'length') && <div className="garment-sizing__neckline">{necklineField}</div>}</div> : <><p className="m-0 text-sm text-ink-2">這個分類暫無建議的平放尺寸欄位。</p>{necklineField}</>}
             </FormSection>
             <FormSection title="顏色" accent="rose" hint="選一個色系作篩選">
               <div className="flex flex-wrap gap-2">{COLORS.map((color) => <button key={color.name} type="button" aria-pressed={form.colorHex === color.hex} onClick={() => { updateForm('colorName', color.name); updateForm('colorHex', color.hex) }} className={`flex min-h-11 items-center gap-2 rounded-full border-[1.5px] px-2.5 text-xs ${form.colorHex === color.hex ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink'}`}><span aria-hidden="true" className="size-6 rounded-full border border-ink/15" style={{ background: color.hex }} />{color.name}</button>)}</div>
@@ -574,20 +584,20 @@ export function AddItemPage() {
           </section>}
 
         {step === 4 && <section className="grid gap-6 md:grid-cols-[260px_minmax(0,1fr)]">
-          <PaperCard className="relative space-y-3 p-3"><Tape accent="oat" /><PhotoPreview photo={photos[0]} title="搭配板預覽" /><div><p className="mb-1 font-medium">{form.name}</p><p className="m-0 text-sm text-ink-2">{form.colorName}・{form.brand || '未填品牌'}・{form.size || '未填尺寸'}</p></div><div className="flex flex-wrap gap-1.5"><span className="rounded-full bg-tile px-2.5 py-1 text-xs">{photos.length} 張照片</span><span className="rounded-full bg-sage-soft px-2.5 py-1 text-xs text-sage-ink">{cutoutState === 'done' && useCutout ? '去背圖' : '使用原圖'}</span><span className="rounded-full bg-mist-soft px-2.5 py-1 text-xs text-mist-ink">平放尺寸 {Object.values(form.flatMeasurements).filter(Boolean).length} 項</span></div></PaperCard>
-          <div className="space-y-5"><h1 className="m-0 font-hd text-3xl">要放到哪裡？</h1><div role="radiogroup" aria-label="儲存位置與到貨狀態" className="space-y-3"><ChoiceCard selected={destination === 'closet' && closetStatus === 'ok'} accent="sage" title="我的衣櫃（已購買）" description="可以馬上用在今日搭配。" onClick={() => { setDestination('closet'); setClosetStatus('ok') }} /><ChoiceCard selected={destination === 'closet' && closetStatus === 'not_arrived'} accent="mist" title="網購未到貨" description="先放進衣櫃管理；到貨前不會出現在可穿與搭配候選中。" onClick={() => { setDestination('closet'); setClosetStatus('not_arrived') }} /><ChoiceCard selected={destination === 'wishlist'} accent="rose" title="選購清單（還在考慮）" description="網拍穿搭照和尺寸表一起留著，方便比較。" disabled={!selectedCategory?.slot} onClick={() => setDestination('wishlist')} /></div><div className="space-y-1 rounded-tile bg-card p-4 text-sm text-ink-2"><p className="m-0">搭配板用圖：<b className="font-medium text-ink">{cutoutState === 'done' && useCutout ? '去背圖' : '封面原圖'}</b></p><p className="m-0">儲存狀態：<b className="font-medium text-ink">{destination === 'wishlist' ? '選購清單・考慮中' : closetStatus === 'not_arrived' ? '衣櫃・未到貨' : '衣櫃・可穿'}</b></p><p className="m-0">平放尺寸：<b className="font-medium text-ink">已填 {Object.values(form.flatMeasurements).filter(Boolean).length} 項</b></p></div><label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={continueAdding} onChange={(event) => setContinueAdding(event.target.checked)} className="size-5 accent-[var(--color-ink)]" />存好後繼續新增下一件</label></div>
+          <PaperCard className="relative space-y-3 p-3"><Tape accent="oat" /><PhotoPreview photo={photos[0]} title="搭配板預覽" /><div><p className="mb-1 font-medium">{form.name}</p><p className="m-0 text-sm text-ink-2">{form.colorName}・{form.brand || '未填品牌'}・{form.size || '未填尺寸'}</p></div><div className="flex flex-wrap gap-1.5"><span className="rounded-full bg-tile px-2.5 py-1 text-xs">{photos.length ? `${photos.length} 張照片` : '尚未上傳照片'}</span><span className="rounded-full bg-sage-soft px-2.5 py-1 text-xs text-sage-ink">{!photos.length ? '之後可補照片' : cutoutState === 'done' && useCutout ? '去背圖' : '使用原圖'}</span><span className="rounded-full bg-mist-soft px-2.5 py-1 text-xs text-mist-ink">平放尺寸 {Object.values(form.flatMeasurements).filter((value) => value.text.trim()).length} 項</span></div></PaperCard>
+          <div className="space-y-5"><h1 className="m-0 font-hd text-3xl">要放到哪裡？</h1><div role="radiogroup" aria-label="儲存位置與到貨狀態" className="space-y-3"><ChoiceCard selected={destination === 'closet' && closetStatus === 'ok'} accent="sage" title="我的衣櫃（已購買）" description="可以馬上用在今日搭配。" onClick={() => { setDestination('closet'); setClosetStatus('ok') }} /><ChoiceCard selected={destination === 'closet' && closetStatus === 'not_arrived'} accent="mist" title="網購未到貨" description="先放進衣櫃管理；到貨前不會出現在可穿與搭配候選中。" onClick={() => { setDestination('closet'); setClosetStatus('not_arrived') }} /><ChoiceCard selected={destination === 'wishlist'} accent="rose" title="選購清單（還在考慮）" description="網拍穿搭照和尺寸表一起留著，方便比較。" disabled={!selectedCategory?.slot} onClick={() => setDestination('wishlist')} /></div><div className="space-y-1 rounded-tile bg-card p-4 text-sm text-ink-2"><p className="m-0">搭配板用圖：<b className="font-medium text-ink">{cutoutState === 'done' && useCutout ? '去背圖' : '封面原圖'}</b></p><p className="m-0">儲存狀態：<b className="font-medium text-ink">{destination === 'wishlist' ? '選購清單・考慮中' : closetStatus === 'not_arrived' ? '衣櫃・未到貨' : '衣櫃・可穿'}</b></p><p className="m-0">平放尺寸：<b className="font-medium text-ink">已填 {Object.values(form.flatMeasurements).filter((value) => value.text.trim()).length} 項</b></p></div><label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={continueAdding} onChange={(event) => setContinueAdding(event.target.checked)} className="size-5 accent-[var(--color-ink)]" />存好後繼續新增下一件</label></div>
         </section>}
       </div>
 
       <footer className="fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-20 flex items-center gap-2 border-t-[1.5px] border-dashed border-line-strong bg-card/95 px-4 py-3 backdrop-blur md:bottom-0 md:px-8">
         {step > 1 && <Button variant="ghost" onClick={goBack} disabled={uploading || saving}><Icon name="back" />上一步</Button>}
         <span className="hidden min-w-0 flex-1 truncate text-sm text-ink-2 sm:block">{footerHint}</span>
-        {step === 1 && <Button variant="primary" className="ml-auto" disabled={uploading || convertingPhotos || photos.length === 0} onClick={() => void beginMediaStep()}>{convertingPhotos ? 'HEIC 轉檔中…' : uploading ? '照片上傳中…' : '下一步'}<Icon name="next" /></Button>}
+        {step === 1 && <Button variant="primary" className="ml-auto" disabled={uploading || convertingPhotos} onClick={() => void beginMediaStep()}>{convertingPhotos ? 'HEIC 轉檔中…' : uploading ? photos.length ? '照片上傳中…' : '準備中…' : photos.length ? '下一步' : '略過照片，先填資料'}<Icon name="next" /></Button>}
         {step === 2 && <Button variant="primary" className="ml-auto" disabled={cutoutState === 'processing'} onClick={() => { if (cutoutState === 'failed' || cutoutState === 'demo') continueWithOriginal(); else setStep(3) }}>下一步<Icon name="next" /></Button>}
         {step === 3 && <Button variant="primary" className="ml-auto" disabled={uploading} type="submit" form="garment-info-form">{uploading ? '儲存草稿中…' : '確認'}<Icon name="next" /></Button>}
         {step === 4 && <Button variant="oat" className="ml-auto" disabled={saving} onClick={() => void finish()}><Icon name="check" />{saving ? '儲存中…' : destination === 'wishlist' ? '加入選購清單' : closetStatus === 'not_arrived' ? '標記為未到貨' : '放進衣櫃'}</Button>}
       </footer>
-      {uploading && <div className="fixed inset-0 z-30 flex items-center justify-center bg-scrim p-5"><div className="w-full max-w-md"><ImageUploadProgressState title="正在上傳照片" files={photos.map((photo, index) => ({ id: photo.id, name: photo.file.name, progress: 0, status: index === 0 ? '封面・上傳中' : '上傳中' }))} backgroundNote="照片完成後會保留在私人衣櫃空間。" /></div></div>}
+      {uploading && <div className="fixed inset-0 z-30 flex items-center justify-center bg-scrim p-5"><div className="w-full max-w-md">{photos.length ? <ImageUploadProgressState title="正在上傳照片" files={photos.map((photo, index) => ({ id: photo.id, name: photo.file.name, progress: 0, status: index === 0 ? '封面・上傳中' : '上傳中' }))} backgroundNote="照片完成後會保留在私人衣櫃空間。" /> : <PaperCard aria-busy="true" className="p-6 text-center"><span className="mx-auto mb-3 block size-8 animate-pulse rounded-full bg-sage" /><p className="m-0 font-hd text-xl">正在準備衣物資料</p><p className="mb-0 mt-2 text-sm text-ink-2">照片可以稍後再補上。</p></PaperCard>}</div></div>}
       {regionDialog && cutoutPhoto && <CutoutRegionDialog
         imageUrl={cutoutPhoto.url}
         initialRegion={activeRegion}
@@ -600,7 +610,7 @@ export function AddItemPage() {
           if (mode === 'retry') void processCutout(draftIdRef.current, cutoutPhotoIndex, region)
         }}
       />}
-      {saving && <div className="fixed inset-0 z-40 flex items-center justify-center bg-scrim p-5"><div className="w-full max-w-sm">{useCutout && cutoutState !== 'done' ? <CutoutProcessingState /> : <PaperCard aria-busy="true" className="p-6 text-center"><span className="mx-auto mb-3 block size-8 animate-pulse rounded-full bg-sage" /><p className="m-0 font-hd text-xl">正在儲存衣物</p><p className="mb-0 mt-2 text-sm text-ink-2">照片和資料都會一併整理好。</p></PaperCard>}</div></div>}
+      {saving && <div className="fixed inset-0 z-40 flex items-center justify-center bg-scrim p-5"><div className="w-full max-w-sm">{useCutout && photos.length > 0 && cutoutState !== 'done' ? <CutoutProcessingState /> : <PaperCard aria-busy="true" className="p-6 text-center"><span className="mx-auto mb-3 block size-8 animate-pulse rounded-full bg-sage" /><p className="m-0 font-hd text-xl">正在儲存衣物</p><p className="mb-0 mt-2 text-sm text-ink-2">{photos.length ? '照片和資料都會一併整理好。' : '衣物資料儲存完成後，可以再補上照片。'}</p></PaperCard>}</div></div>}
       <Toast message={toast} onClose={() => setToast(null)} />
     </main>
   )

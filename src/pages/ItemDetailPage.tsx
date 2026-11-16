@@ -7,6 +7,8 @@ import {
 } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CutoutRegionDialog } from "@/components/closet/CutoutRegionDialog";
+import { FlatMeasureField } from "@/components/closet/FlatMeasureField";
+import { collectMeasures, elasticFiberPercent, toFieldValue, type FlatFieldValue, type MeasureField } from "@/lib/stretch";
 import { ItemImage } from "@/components/closet/ItemImage";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Chip, StatusTag } from "@/components/ui/Chip";
@@ -32,6 +34,7 @@ import {
   setClosetPhotoCover,
   updateClosetItem,
   updateClosetItemStatus,
+  useLatestBody,
 } from "@/lib/data";
 import { isLessonStatus, isWearable, STATUS_LABEL } from "@/lib/slots";
 import { ReviewMarkDialog } from "@/components/review/ReviewMarkDialog";
@@ -45,7 +48,7 @@ const MEASURE_LABELS: Record<string, string> = {
   length: "衣長",
   cuff: "袖口",
   waist: "腰寬",
-  rise: "褲檔",
+  rise: "股上",
   hip: "臀寬",
   thigh: "大腿寬",
   hem: "褲口寬",
@@ -107,6 +110,17 @@ function editableFields(item: ClosetItem): EditableFields {
   };
 }
 
+/** 編輯時的平放尺寸欄位：沿用這件已有的欄位 */
+function measureFieldList(item: ClosetItem): MeasureField[] {
+  return Object.keys(item.flatMeasurements ?? {}).map((key) => ({ key, label: item.categorySlot === 'shoes' && key === 'width' ? '鞋寬' : MEASURE_LABELS[key] ?? key }));
+}
+
+function toMeasureFields(item: ClosetItem): Record<string, FlatFieldValue> {
+  return Object.fromEntries(
+    Object.entries(item.flatMeasurements ?? {}).map(([key, value]) => [key, toFieldValue(value, item.flatStretch?.[key])]),
+  );
+}
+
 function formatDate(value?: string) {
   if (!value) return "尚未記錄";
   return new Intl.DateTimeFormat("zh-TW", {
@@ -130,6 +144,8 @@ export function ItemDetailPage() {
   const [brandSuggestions, setBrandSuggestions] = useState<string[]>([]);
   const [shopSuggestions, setShopSuggestions] = useState<string[]>([]);
   const [form, setForm] = useState<EditableFields | null>(null);
+  const [measureFields, setMeasureFields] = useState<Record<string, FlatFieldValue>>({});
+  const body = useLatestBody();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [markOpen, setMarkOpen] = useState(false);
@@ -206,10 +222,14 @@ export function ItemDetailPage() {
     event.preventDefault();
     if (!item || !form) return;
     if (!form.name.trim()) return setError("品名不能空白。");
+    const measures = collectMeasures(measureFieldList(item), measureFields);
+    if (measures.error) return setError(`平放尺寸「${measures.error.field.label}」：${measures.error.message}`);
     setSaving(true);
     try {
       await updateClosetItem(item.id, {
         ...form,
+        flatMeasurements: measures.flat,
+        flatStretch: measures.stretch,
         name: form.name.trim(),
         categoryName: undefined,
         status: undefined,
@@ -946,33 +966,24 @@ export function ItemDetailPage() {
                 {Object.keys(item.flatMeasurements ?? {}).length > 0 && (
                   <div className="space-y-2">
                     <h3 className="m-0 font-hd text-lg">平放尺寸</h3>
+                    <p className="m-0 text-xs text-ink-2">
+                      有彈性的可以直接填「40-60」，或點「＋ 有彈性」分開填；清掉平放值時拉伸值會一起刪除。
+                    </p>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                      {Object.entries(form?.flatMeasurements ?? {}).map(
-                        ([key, value]) => (
-                          <label
-                            key={key}
-                            className="flex flex-col gap-1 text-xs"
-                          >
-                            {MEASURE_LABELS[key] ?? key}
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.1"
-                              value={value ?? ""}
-                              onChange={(event) =>
-                                updateForm("flatMeasurements", {
-                                  ...form?.flatMeasurements,
-                                  [key]:
-                                    event.target.value === ""
-                                      ? null
-                                      : Number(event.target.value),
-                                })
-                              }
-                              className={INPUT}
-                            />
-                          </label>
-                        ),
-                      )}
+                      {measureFieldList(item).map((field) => (
+                        <FlatMeasureField
+                          key={field.key}
+                          field={field}
+                          body={body}
+                          value={measureFields[field.key] ?? { text: "" }}
+                          onChange={(value) =>
+                            setMeasureFields((current) => ({
+                              ...current,
+                              [field.key]: value,
+                            }))
+                          }
+                        />
+                      ))}
                     </div>
                   </div>
                 )}
@@ -999,6 +1010,7 @@ export function ItemDetailPage() {
                   variant="secondary"
                   onClick={() => {
                     setForm(editableFields(item));
+                    setMeasureFields(toMeasureFields(item));
                     setEditing(true);
                   }}
                 >
@@ -1141,25 +1153,41 @@ export function ItemDetailPage() {
                       className="h-9 px-2 text-xs"
                       onClick={() => {
                         setForm(editableFields(item));
+                        setMeasureFields(toMeasureFields(item));
                         setEditing(true);
                       }}
                     >
                       編輯尺寸
                     </Button>
                   </div>
-                  <p className="m-0 text-xs text-ink-2">
+                  <p className="m-0 flex flex-wrap items-center gap-1.5 text-xs text-ink-2">
                     單位 cm・平放測量，不拉扯布料
-                  </p>
-                  <div className="grid grid-cols-2 gap-x-4">
-                    {Object.entries(item.flatMeasurements ?? {}).map(
-                      ([key, value]) => (
-                        <InfoRow
-                          key={key}
-                          label={MEASURE_LABELS[key] ?? key}
-                          value={value == null ? undefined : `${value} cm`}
-                        />
-                      ),
+                    {elasticFiberPercent(item.materialPercentages, item.materialComposition) != null && (
+                      <span className="inline-flex h-[22px] items-center rounded-full bg-oat-soft px-2 text-[11px] font-medium text-oat-ink">
+                        材質有彈性・彈性纖維 {elasticFiberPercent(item.materialPercentages, item.materialComposition)}%
+                      </span>
                     )}
+                  </p>
+                  <div className="grid grid-cols-3 gap-1.5 sm:gap-2 xl:grid-cols-5">
+                    {Object.entries(item.flatMeasurements ?? {})
+                      .filter(([, value]) => value != null)
+                      .map(([key, value]) => {
+                        const stretch = item.flatStretch?.[key];
+                        const elastic = typeof stretch === "number" && stretch > (value as number);
+                        return (
+                          <div
+                            key={key}
+                            className={`flex min-w-0 flex-col gap-0.5 rounded-btn px-2 py-2 sm:px-2.5 ${elastic ? "bg-stretch-cell ring-[1.5px] ring-inset ring-stretch-ring" : "bg-paper"}`}
+                          >
+                            <span className="text-[11px] text-ink-2 sm:text-xs">{item.categorySlot === 'shoes' && key === 'width' ? '鞋寬' : MEASURE_LABELS[key] ?? key}</span>
+                            <span className="flex items-baseline gap-1 whitespace-nowrap">
+                              <span className="font-num text-lg font-bold tabular">{value}</span>
+                              {elastic && <span className="font-num text-[13px] font-bold text-stretch-num tabular sm:text-sm">↔ {stretch}</span>}
+                            </span>
+                            {elastic && <span className="text-[10px] text-oat-ink">彈性</span>}
+                          </div>
+                        );
+                      })}
                   </div>
                 </PaperCard>
               )}
