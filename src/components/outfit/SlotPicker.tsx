@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom'
 import { ItemImage } from '@/components/closet/ItemImage'
 import { Icon } from '@/components/ui/Icon'
 import { isWearable, STATUS_LABEL, type SlotMeta } from '@/lib/slots'
-import type { ClosetItem } from '@/types'
+import type { ClosetItem, ItemStatus } from '@/types'
+
+export type SlotPickerItem = Pick<ClosetItem, 'id' | 'name' | 'colorHex' | 'shape' | 'cutoutUrl'> & { status?: ItemStatus; isWishlist?: boolean }
 
 interface Props {
   meta: SlotMeta
-  items: ClosetItem[]
+  items: SlotPickerItem[]
   selectedId: string | null
   onSelect: (id: string | null) => void
 }
@@ -33,14 +35,14 @@ export function SlotPicker({ meta, items, selectedId, onSelect }: Props) {
           </OptionCard>
         )}
         {items.map((item) => {
-          const wearable = isWearable(item.status)
+          const wearable = item.status ? isWearable(item.status) : true
           return (
             <OptionCard
               key={item.id}
               selected={selectedId === item.id}
               onClick={() => onSelect(item.id)}
               caption={item.name}
-              badge={wearable ? undefined : STATUS_LABEL[item.status]}
+              badge={item.isWishlist ? '想買' : item.status && !wearable ? STATUS_LABEL[item.status] : undefined}
             >
               <ItemImage name={item.name} colorHex={item.colorHex} cutoutUrl={item.cutoutUrl} shape={item.shape} className="size-[76%]" />
             </OptionCard>

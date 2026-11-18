@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機量測趨勢</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;padding:3px;border-radius:10px;background:#F3E7D4}
+.seg a,.seg button{display:flex;align-items:center;justify-content:center;height:40px;border:0;border-radius:8px;background:transparent;font:500 14px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+.seg [aria-current="page"],.seg [aria-pressed="true"]{background:#FFFCF6;color:#3B2F25;font-weight:700;box-shadow:0 1px 2px rgba(59,47,37,.1)}
+.mchip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FBF4E8;font:500 13px 'Chiron GoRound TC';color:#3B2F25;white-space:nowrap;flex:none}
+.tick{position:absolute;left:0;right:0;height:1px;background:#EFE4D2}
+.tl{position:absolute;left:-30px;width:24px;text-align:right;font:600 10px Nunito;color:#74624F;transform:translateY(-50%)}
+.xl{position:absolute;top:100%;margin-top:6px;font:600 10px Nunito;color:#74624F;transform:translateX(-50%);white-space:nowrap}
+.pt{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%}
+.sm{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;background:#FFFCF6;color:#3B2F25;text-decoration:none}
+</style>
+</helmet>
+<div style="width:390px;height:1290px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden">
+  <header style="display:flex;align-items:center;gap:4px;padding:8px 8px 8px 4px;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-M-Lists.dc.html" aria-label="返回我的" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <h1 class="hd" style="margin:0;font-size:20px">量測紀錄</h1><span class="num" style="margin-left:6px;font-size:12px;color:#74624F">4 筆</span>
+  </header>
+  <main style="padding:14px 12px 40px;display:flex;flex-direction:column;gap:12px">
+    <nav class="seg" aria-label="檢視方式"><a href="B-M-History.dc.html">依日期</a><a href="B-History-Table.dc.html">對照表</a><a href="B-M-History-Trend.dc.html" aria-current="page">趨勢</a></nav>
+
+    <section aria-labelledby="mct" class="paper" style="padding:14px 12px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:baseline;gap:8px"><h2 id="mct" class="hd" style="margin:0;font-size:20px">腰圍</h2><span style="font-size:11px;color:#5A4A3C">cm・一年・4 筆</span>
+        <div class="seg" role="group" aria-label="時間範圍" style="margin-left:auto;padding:2px"><button type="button" aria-pressed="false" style="height:32px;padding:0 8px;font-size:12px">半年</button><button type="button" aria-pressed="true" style="height:32px;padding:0 8px;font-size:12px">一年</button><button type="button" aria-pressed="false" style="height:32px;padding:0 8px;font-size:12px">全部</button></div></div>
+      <div role="group" aria-label="選擇部位" style="display:flex;gap:6px;overflow-x:auto;margin:0 -12px;padding:0 12px">
+        <sc-for list="{{chips}}" as="c" hint-placeholder-count="8"><button type="button" class="mchip" aria-pressed="{{c.on}}" disabled="{{c.dis}}" style="border-color:{{c.bd}};background:{{c.bg}};opacity:{{c.op}}"><span style="width:9px;height:9px;border-radius:50%;background:{{c.dot}}"></span>{{c.k}}</button></sc-for>
+      </div>
+      <figure style="margin:0;padding:6px 44px 26px 32px">
+        <div role="img" aria-label="腰圍從 66 到 65 cm，2025/11 到 2026/11 共 4 筆" style="position:relative;height:200px">
+          <sc-for list="{{ticks}}" as="t" hint-placeholder-count="5"><span class="tick" style="top:{{t.y}}%"></span><span class="tl" style="top:{{t.y}}%">{{t.v}}</span></sc-for>
+          <svg viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible"><path d="{{s1}}" fill="none" stroke="#2A72A0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg>
+          <span aria-hidden="true" style="position:absolute;left:{{hx}}%;top:0;bottom:0;width:1px;background:#3B2F25;opacity:.35"></span>
+          <sc-for list="{{pts}}" as="p" hint-placeholder-count="4"><span class="pt" style="left:{{p.x}}%;top:{{p.y}}%;background:{{p.bg}};box-shadow:{{p.sh}}"></span></sc-for>
+          <sc-for list="{{xl}}" as="x" hint-placeholder-count="2"><span class="xl" style="left:{{x.x}}%">{{x.t}}</span></sc-for>
+          <span class="num" style="position:absolute;left:100%;top:{{e1}}%;margin-left:8px;transform:translateY(-50%);font-size:12px;font-weight:700">65</span>
+        </div>
+      </figure>
+      <div role="status" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:#3B2F25;color:#FBF4E8;font-size:12px"><b class="num" style="font-size:13px">2026/11/12</b>早上空腹<span style="margin-left:auto">腰圍 <b class="num">65</b> cm <span style="opacity:.75">（上次 66）</span></span></div>
+      <span style="font-size:11px;line-height:1.6;color:#5A4A3C">點圖上的點，下方顯示那天的數字。空心點是其他時段量的。Y 軸至少 10 cm。</span>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;min-height:44px;cursor:pointer;border-top:1.5px dashed #EADCC6;padding-top:6px"><span style="flex:1">只看「早上空腹」的紀錄</span><span class="sw" aria-hidden="true" style="background:#D9C7AC"><span style="left:2px"></span></span><input type="checkbox" style="position:absolute;opacity:0;width:1px;height:1px"></label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;min-height:44px;cursor:pointer"><span style="flex:1">顯示體重</span><span class="sw" aria-hidden="true" style="background:#4A6245"><span style="left:20px"></span></span><input type="checkbox" checked style="position:absolute;opacity:0;width:1px;height:1px"></label>
+    </section>
+
+    <h2 class="hd" style="margin:4px 2px 0;font-size:19px">所有部位</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <sc-for list="{{cards}}" as="c" hint-placeholder-count="10">
+        <a href="#mct" class="sm" style="box-shadow:{{c.ring}}">
+          <span style="display:flex;align-items:center;gap:4px"><span style="font-size:12px;font-weight:500">{{c.k}}</span><span class="num" style="margin-left:auto;font-size:11px;color:#5A4A3C">{{c.chg}}</span></span>
+          <span style="display:flex;align-items:baseline;gap:3px"><span class="num" style="font-size:19px;font-weight:700">{{c.v}}</span><span style="font-size:11px;color:#74624F">{{c.u}}</span></span>
+          <sc-if value="{{c.line}}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true" style="width:100%;height:24px;overflow:visible"><path d="{{c.d}}" fill="none" stroke="{{c.stroke}}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path></svg></sc-if>
+          <sc-if value="{{c.few}}" hint-placeholder-val="{{ false }}"><span style="height:24px;display:flex;align-items:center;font-size:10px;color:#74624F">{{c.fewt}}</span></sc-if>
+        </a>
+      </sc-for>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1290}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const D = ['2025-11-05', '2026-04-18', '2026-10-02', '2026-11-12'], TM = ['none', 'evening', 'morning', 'morning'];
+    const M = [
+      ['w', '體重', 'kg', [53.0, 53.0, 52.5, 52.0], 3], ['sh', '肩寬', 'cm', [37.5, 38, 38, 38], 10],
+      ['ub', '上胸圍', 'cm', [85, 84, 84, 84], 10], ['lb', '下胸圍', 'cm', [71, 71, 71, 70], 10],
+      ['hw', '高腰圍', 'cm', [null, null, null, 64], 10], ['wa', '腰圍', 'cm', [66, 66, 66, 65], 10],
+      ['na', '肚臍圍・站', 'cm', [null, null, 73, 73], 10], ['ns', '肚臍圍・坐', 'cm', [null, null, null, 81], 10],
+      ['hi', '臀圍', 'cm', [92, 91, 91, 91], 10], ['th', '大腿圍', 'cm', [null, null, null, null], 10]
+    ];
+    const t0 = Date.parse('2025-11-01'), t1 = Date.parse('2026-11-30');
+    const xp = d => Math.round((Date.parse(d) - t0) / (t1 - t0) * 1000) / 10;
+    const wa = M.find(m => m[0] === 'wa')[3], lo = 60.5, hi = 70.5;
+    const yp = v => Math.round((1 - (v - lo) / (hi - lo)) * 1000) / 10;
+    const spark = (arr, span) => {
+      const xs = arr.map((v, i) => v == null ? null : [xp(D[i]), v]).filter(Boolean);
+      if (xs.length < 2) return null;
+      let a = Math.min(...xs.map(p => p[1])), b = Math.max(...xs.map(p => p[1]));
+      if (b - a < span) { const c = (a + b) / 2; a = c - span / 2; b = c + span / 2; }
+      return xs.map((p, i) => (i ? 'L' : 'M') + p[0] + ' ' + Math.round((1 - (p[1] - a) / (b - a)) * 300) / 10).join(' ');
+    };
+    return {
+      s1: wa.map((v, i) => (i ? 'L' : 'M') + xp(D[i]) * 10 + ' ' + yp(v) * 3).join(' '),
+      pts: wa.map((v, i) => { const m = TM[i] === 'morning'; return { x: xp(D[i]), y: yp(v), bg: m ? '#2A72A0' : '#FFFCF6', sh: m ? '0 0 0 2px #FFFCF6' : 'inset 0 0 0 2.5px #2A72A0,0 0 0 2px #FFFCF6' }; }),
+      ticks: [62, 64, 66, 68, 70].map(v => ({ v, y: yp(v) })), hx: xp(D[3]), e1: yp(65),
+      xl: [{ x: xp(D[0]), t: '2025/11' }, { x: xp(D[3]), t: '2026/11' }],
+      chips: M.map(([k, n, u, arr]) => { const on = k === 'wa', cnt = arr.filter(v => v != null).length, dis = cnt < 2; return { k: n, on: on ? 'true' : 'false', dis, dot: on ? '#2A72A0' : '#D9C7AC', bd: on ? '#2A72A0' : '#E2D2B8', bg: on ? '#FFFCF6' : '#FBF4E8', op: dis ? .5 : 1 }; }),
+      cards: M.map(([k, n, u, arr, span]) => {
+        const got = arr.filter(v => v != null), d = spark(arr, span), last = got[got.length - 1];
+        const diff = got.length > 1 ? Math.round((last - got[0]) * 10) / 10 : null;
+        return { k: n, u: got.length ? u : '', v: got.length ? last : '沒記', d: d || '', line: !!d, few: !d, fewt: got.length ? '只有 1 筆' : '還沒量過',
+          chg: diff == null ? '' : (diff === 0 ? '沒變' : (diff > 0 ? '+' : '−') + Math.abs(diff)),
+          stroke: k === 'wa' ? '#2A72A0' : '#5A4A3C', ring: k === 'wa' ? 'inset 0 0 0 2px #2A72A0' : 'none' };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

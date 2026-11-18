@@ -1,8 +1,11 @@
 import { todayISO } from './date'
 import { useEffect, useState } from 'react'
 import { SAMPLE_BODY_MEASUREMENTS, SAMPLE_BODY_PROFILE, SAMPLE_CATEGORIES, SAMPLE_COMPARE_GROUPS, SAMPLE_DIARY, SAMPLE_ITEMS, SAMPLE_PROFILE, SAMPLE_WISHLIST } from '@/data/sample'
-import type { AddItemDestination, BodyMeasurement, BodyMeasurementInput, BodyProfile, BodyProfileInput, BrandChange, BrandSummary, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, CutoutRegion, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, GarmentShape, ItemStatus, LessonRule, LessonRuleInput, LessonStatus, ManagedEntryChange, ManagedListSummary, NewGarmentInput, Outfit, ProfilePreferences, ReviewDecision, ReviewRecord, ReviewRecordInput, ShopKind, Slot, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, StudioCanvasItem, WishlistInput, WishlistItem, WishStatus } from '@/types'
+import type { MeasurementTrendPrefs } from '@/types'
+import { DEFAULT_TREND_PREFS, normalizeTrendPrefs } from '@/lib/measurementTrend'
+import type { AddItemDestination, BodyMeasurement, BodyMeasurementInput, BodyProfile, BodyProfileInput, BrandChange, BrandSummary, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, CutoutRegion, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, GarmentShape, ItemStatus, LessonRule, LessonRuleInput, LessonStatus, ManagedEntryChange, ManagedListSummary, NewGarmentInput, Outfit, ProfilePreferences, ReviewDecision, ReviewRecord, ReviewRecordInput, ShopKind, Slot, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, StudioCanvasItem, WishlistColor, WishlistInput, WishlistItem, WishlistPhotoUpload, WishStatus } from '@/types'
 import { toUploadableImage } from '@/lib/image'
+import { GARMENT_COLORS } from '@/lib/colors'
 import { MATERIAL_DEFAULTS, materialNames } from '@/lib/materials'
 import { cleanStretch } from '@/lib/stretch'
 import { supabase } from './supabase'
@@ -15,6 +18,7 @@ const demoClosetPhotos = new Map<string, ClosetPhoto[]>()
 let demoProfile: ProfilePreferences = cloneProfile(SAMPLE_PROFILE)
 let demoMeasurements: BodyMeasurement[] = SAMPLE_BODY_MEASUREMENTS.map((measurement) => ({ ...measurement }))
 let demoBodyProfile: BodyProfile = { ...SAMPLE_BODY_PROFILE }
+let demoTrendPrefs: MeasurementTrendPrefs | null = null
 let demoClosetItems: ClosetItem[] = [...SAMPLE_ITEMS]
 let demoWishlistItems: WishlistItem[] = [...SAMPLE_WISHLIST]
 let demoCompareGroups: CompareGroup[] = SAMPLE_COMPARE_GROUPS.map((group) => ({ ...group }))
@@ -166,6 +170,7 @@ interface ItemPhotoRow {
   storage_path: string
   sort_order: number
   is_cover: boolean
+  color_family?: string | null
 }
 
 function itemFromRow(row: ItemRow, urls: Record<string, string>, photos?: ClosetPhoto[]): ClosetItem {
@@ -233,15 +238,16 @@ export async function fetchClosetItems(): Promise<ClosetItem[]> {
 /** 過去衣物使用過的品牌，供新增衣物品牌欄位建議；仍可手動輸入新品牌。 */
 export async function fetchClosetBrands(): Promise<string[]> {
   // 品牌管理頁手動新增的品牌也列進建議
-  if (!supabase) return [...new Set([...demoClosetItems.map((item) => item.brand?.trim()), ...demoBrands].filter((brand): brand is string => !!brand))].sort((a, b) => a.localeCompare(b, 'zh-TW'))
-  const [{ data, error }, manual] = await Promise.all([
+  if (!supabase) return [...new Set([...demoClosetItems.map((item) => item.brand?.trim()), ...demoWishlistItems.map((item) => item.brand?.trim()), ...demoBrands].filter((brand): brand is string => !!brand))].sort((a, b) => a.localeCompare(b, 'zh-TW'))
+  const [{ data, error }, wishes, manual] = await Promise.all([
     supabase.from('items').select('brand').eq('is_draft', false).not('brand', 'is', null),
+    supabase.from('wishlist_items').select('brand').not('brand', 'is', null),
     supabase.from('brands').select('name'),
   ])
   if (error) throw error
   // brands 表在 0011 之前不存在，讀不到時只用衣物上的品牌
   const extra = manual.error ? [] : (manual.data ?? []).map((row) => row.name as string)
-  return [...new Set([...(data ?? []).map((row) => row.brand?.trim()), ...extra].filter((brand): brand is string => !!brand))].sort((a, b) => a.localeCompare(b, 'zh-TW'))
+  return [...new Set([...(data ?? []).map((row) => row.brand?.trim()), ...(wishes.data ?? []).map((row) => row.brand?.trim()), ...extra].filter((brand): brand is string => !!brand))].sort((a, b) => a.localeCompare(b, 'zh-TW'))
 }
 
 /** 讀取單件衣物完整資料、多張照片、原圖與去背圖（若有）。 */
@@ -255,7 +261,7 @@ export async function fetchClosetItemDetail(id: string): Promise<ClosetItem | nu
     return { ...item, categoryId: category?.id ?? item.categoryId, categoryName: category?.name ?? item.categoryId, categorySlot: category ? category.slot : item.categorySlot ?? item.slot, seasons: item.seasons ?? [], flatMeasurements: item.flatMeasurements ?? {}, photos: [...(demoClosetPhotos.get(id) ?? [])] }
   }
   const { data, error } = await supabase.from('items')
-    .select('id,name,category_id,color_name,color_hex,second_color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,flat_stretch,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(id,name,slot,sort),item_photos(id,storage_path,sort_order,is_cover)')
+    .select('id,name,category_id,color_name,color_hex,second_color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,flat_stretch,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(id,name,slot,sort),item_photos(id,storage_path,sort_order,is_cover,color_family)')
     .eq('id', id)
     .eq('is_draft', false)
     .maybeSingle()
@@ -271,6 +277,7 @@ export async function fetchClosetItemDetail(id: string): Promise<ClosetItem | nu
     url: urls[photo.storage_path],
     sortOrder: photo.sort_order,
     isCover: photo.is_cover,
+    colorFamily: photo.color_family ?? undefined,
   }))
   const item = itemFromRow(row, urls, photos)
   item.categoryName = row.categories?.name
@@ -447,12 +454,15 @@ export async function deleteClosetItem(id: string): Promise<{ demo: boolean; cle
 }
 
 const ACTIVE_WISH_STATUSES: WishStatus[] = ['considering', 'waiting', 'ready']
-const WISHLIST_COLUMNS = 'id,name,slot,color_hex,color_name,shop,price,shipping,target_price,url,size,size_note,neckline_size,brand,material,material_composition,material_percentages,flat_measurements,flat_stretch,return_policy,reason,priority,status,compare_group_id,image_cutout_path,image_original_path,bought_item_id,created_at'
+const WISHLIST_COLUMNS = 'id,name,slot,primary_part,also_parts,colors,color_hex,color_name,shop,price,shipping,target_price,url,size,size_note,neckline_size,brand,material,material_composition,material_percentages,flat_measurements,flat_stretch,return_policy,reason,priority,status,compare_group_id,image_cutout_path,image_original_path,bought_item_id,bought_item_ids,created_at'
 
 interface WishlistRow {
   id: string
   name: string
   slot: Slot
+  primary_part: Slot
+  also_parts: Slot[]
+  colors: WishlistColor[] | null
   color_hex: string
   color_name: string | null
   shop: string
@@ -477,20 +487,42 @@ interface WishlistRow {
   image_cutout_path: string | null
   image_original_path: string | null
   bought_item_id: string | null
+  bought_item_ids: string[] | null
   created_at: string
 }
 
 async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
   const imagePath = (r: WishlistRow) => r.image_cutout_path ?? r.image_original_path
-  const urls = await signed(rows.map(imagePath).filter((p): p is string => !!p))
+  const { data: photoRows, error: photoError } = supabase && rows.length
+    ? await supabase.from('item_photos').select('id,wishlist_item_id,storage_path,sort_order,is_cover,color_family').in('wishlist_item_id', rows.map((row) => row.id)).order('sort_order')
+    : { data: [], error: null }
+  if (photoError) throw photoError
+  const photosByWish = new Map<string, ClosetPhoto[]>()
+  for (const photo of photoRows ?? []) {
+    const wishId = photo.wishlist_item_id
+    const photos = photosByWish.get(wishId) ?? []
+    photos.push({ id: photo.id, path: photo.storage_path, sortOrder: photo.sort_order, isCover: photo.is_cover, colorFamily: photo.color_family ?? undefined })
+    photosByWish.set(wishId, photos)
+  }
+  const photoPaths = [...(photoRows ?? []).map((photo) => photo.storage_path), ...rows.flatMap((row) => [row.image_cutout_path, row.image_original_path].filter((path): path is string => !!path))]
+  const urls = await signed(photoPaths)
   return rows.map((r) => {
     const path = imagePath(r)
+    const colors = Array.isArray(r.colors) ? r.colors : [{ family: r.color_name || '其他', hex: r.color_hex }]
+    const primaryColor = colors[0]
+    const photos = photosByWish.get(r.id) ?? []
+    const completePhotos = photos.length
+      ? photos.map((photo) => ({ ...photo, url: urls[photo.path] }))
+      : path ? [{ id: `legacy-cover-${r.id}`, path, url: urls[path], sortOrder: 0, isCover: true }] : []
     return {
       id: r.id,
       name: r.name,
       slot: r.slot,
-      colorHex: r.color_hex,
-      colorName: r.color_name ?? undefined,
+      primaryPart: r.primary_part ?? r.slot,
+      alsoParts: r.also_parts ?? [],
+      colors,
+      colorHex: primaryColor?.hex ?? GARMENT_COLORS.find((color) => color.name === primaryColor?.family)?.hex ?? r.color_hex,
+      colorName: primaryColor?.family ?? r.color_name ?? undefined,
       shop: r.shop,
       price: r.price,
       shipping: r.shipping ?? undefined,
@@ -511,8 +543,10 @@ async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
       status: r.status,
       compareGroupId: r.compare_group_id ?? undefined,
       cutoutUrl: path ? urls[path] : undefined,
+      photos: completePhotos,
       shape: fallbackShape(r.slot),
       boughtItemId: r.bought_item_id ?? undefined,
+      boughtItemIds: r.bought_item_ids ?? (r.bought_item_id ? [r.bought_item_id] : []),
       createdAt: r.created_at,
     }
   })
@@ -554,16 +588,22 @@ function flatPayload(flat: Record<string, number | null>, stretch?: Record<strin
 }
 
 function wishlistPayload(input: WishlistInput) {
+  const primaryPart = input.primaryPart ?? input.slot
+  const colors = input.colors !== undefined ? input.colors : [{ family: input.colorName || '其他', hex: input.colorHex }]
+  const primaryColor = colors[0]
   return {
     name: input.name.trim(),
-    slot: input.slot,
-    color_hex: input.colorHex,
-    color_name: blankToNull(input.colorName),
+    slot: primaryPart,
+    primary_part: primaryPart,
+    also_parts: [...new Set((input.alsoParts ?? []).filter((part) => part !== primaryPart))],
+    colors,
+    color_hex: primaryColor?.hex ?? GARMENT_COLORS.find((color) => color.name === primaryColor?.family)?.hex ?? input.colorHex,
+    color_name: blankToNull(primaryColor?.family ?? (input.colors === undefined ? input.colorName : undefined)),
     shop: input.shop.trim() || '尚未決定',
     url: blankToNull(input.url),
     price: input.price,
     shipping: input.shipping,
-    target_price: input.targetPrice,
+    ...(input.targetPrice !== undefined ? { target_price: input.targetPrice } : {}),
     brand: blankToNull(input.brand),
     size: blankToNull(input.size),
     size_note: blankToNull(input.sizeNote),
@@ -582,18 +622,38 @@ function wishlistPayload(input: WishlistInput) {
 
 function demoWishFromInput(id: string, input: WishlistInput, base?: WishlistItem): WishlistItem {
   const optional = (value?: string) => value?.trim() || undefined
+  const primaryPart = input.primaryPart ?? input.slot
+  const colors = input.colors !== undefined ? input.colors : [{ family: input.colorName || '其他', hex: input.colorHex }]
+  const primaryColor = colors[0]
+  const colorHex = primaryColor?.hex ?? GARMENT_COLORS.find((color) => color.name === primaryColor?.family)?.hex ?? input.colorHex
+  const photoChanges = !!input.photosToAdd?.length || !!input.photoIdsToRemove?.length || !!input.photoColorAssignments?.length
+  const removedIds = new Set(input.photoIdsToRemove ?? [])
+  const photos = photoChanges
+    ? [...(base?.photos ?? []).filter((photo) => !removedIds.has(photo.id)).map((photo) => {
+      const assignment = input.photoColorAssignments?.find((entry) => entry.photoId === photo.id)
+      return { ...photo, colorFamily: assignment ? (assignment.colorFamily ?? undefined) : photo.colorFamily }
+    }), ...(input.photosToAdd ?? []).map(({ file, colorFamily }, index) => {
+      const url = URL.createObjectURL(file)
+      return { id: `demo-wish-photo-${Date.now()}-${index}`, path: url, url, sortOrder: (base?.photos?.length ?? 0) + index, isCover: false, colorFamily: colorFamily ?? undefined }
+    })].map((photo, index) => ({ ...photo, sortOrder: index, isCover: index === 0 }))
+    : base?.photos
+  if (photoChanges) for (const photo of base?.photos ?? []) if (removedIds.has(photo.id) && photo.url?.startsWith('blob:')) URL.revokeObjectURL(photo.url)
+  const coverPhoto = photos?.find((photo) => photo.isCover) ?? photos?.[0]
   return {
     ...base,
     id,
     name: input.name.trim(),
-    slot: input.slot,
-    colorHex: input.colorHex,
-    colorName: optional(input.colorName),
+    slot: primaryPart,
+    primaryPart,
+    alsoParts: [...new Set((input.alsoParts ?? []).filter((part) => part !== primaryPart))],
+    colors,
+    colorHex,
+    colorName: optional(primaryColor?.family ?? (input.colors === undefined ? input.colorName : undefined)),
     shop: input.shop.trim() || '尚未決定',
     url: optional(input.url),
     price: input.price,
     shipping: input.shipping ?? undefined,
-    targetPrice: input.targetPrice ?? undefined,
+    targetPrice: input.targetPrice ?? base?.targetPrice,
     brand: optional(input.brand),
     size: optional(input.size),
     necklineSize: input.necklineSize ?? base?.necklineSize,
@@ -608,11 +668,100 @@ function demoWishFromInput(id: string, input: WishlistInput, base?: WishlistItem
     status: input.status,
     compareGroupId: input.compareGroupId === undefined ? base?.compareGroupId : (input.compareGroupId ?? undefined),
     shape: base && base.slot === input.slot ? base.shape : fallbackShape(input.slot),
+    photos,
+    ...(photoChanges ? { cutoutUrl: coverPhoto?.url } : {}),
     createdAt: base?.createdAt ?? new Date().toISOString(),
   }
 }
 
-/** 新增一筆選購候選（不含照片；要加照片請走 /closet/new 流程）。 */
+/** 儲存選購候選的多張原始照片；第一張會作為封面。 */
+async function saveWishlistPhotos(id: string, photosToAdd: WishlistPhotoUpload[], removeIds: string[], colorAssignments: WishlistInput['photoColorAssignments'] = []) {
+  if (!supabase || (!photosToAdd.length && !removeIds.length && !colorAssignments?.length)) return
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError) throw authError
+  if (!user) throw new Error('請重新登入後再儲存商品照片。')
+
+  const [{ data: existingRows, error: photoError }, { data: wish, error: wishError }] = await Promise.all([
+    supabase.from('item_photos').select('id,storage_path,sort_order,is_cover,color_family').eq('wishlist_item_id', id).order('sort_order'),
+    supabase.from('wishlist_items').select('image_original_path,image_cutout_path').eq('id', id).single(),
+  ])
+  if (photoError) throw photoError
+  if (wishError) throw wishError
+  const rows = existingRows ?? []
+  const removed = rows.filter((photo) => removeIds.includes(photo.id))
+  const kept = rows.filter((photo) => !removeIds.includes(photo.id))
+  const legacyPath = rows.length ? null : wish.image_cutout_path ?? wish.image_original_path
+  const legacyRemoved = !!legacyPath && removeIds.includes(`legacy-cover-${id}`)
+  let keptLegacy: { id: string; storage_path: string; sort_order: number; is_cover: boolean; color_family: string | null }[] = legacyPath && !legacyRemoved
+    ? [{ id: `legacy-cover-${id}`, storage_path: legacyPath, sort_order: 0, is_cover: true, color_family: null }]
+    : []
+  const legacyColor = colorAssignments?.find((assignment) => assignment.photoId === `legacy-cover-${id}`)?.colorFamily ?? null
+  const removedMainPhoto = !!(legacyRemoved || removed.some((photo) => photo.storage_path === (wish.image_cutout_path ?? wish.image_original_path)))
+  const removedPaths = [...removed.map((photo) => photo.storage_path), ...(removedMainPhoto ? [wish.image_original_path, wish.image_cutout_path].filter((path): path is string => !!path) : [])]
+  const uploadedPaths: string[] = []
+  const insertedPhotoIds: string[] = []
+  let photoChangesSaved = false
+  try {
+    if (keptLegacy.length) {
+      const { data, error } = await supabase.from('item_photos').insert({ owner_id: user.id, wishlist_item_id: id, storage_path: keptLegacy[0].storage_path, sort_order: 0, is_cover: true, color_family: legacyColor }).select('id,storage_path,sort_order,is_cover,color_family').single()
+      if (error) throw error
+      keptLegacy = [data]
+      insertedPhotoIds.push(data.id)
+    }
+    const newRows: { id: string; storage_path: string; sort_order: number; is_cover: boolean; color_family: string | null }[] = []
+    for (const photo of photosToAdd) {
+      const file = await toUploadableImage(photo.file)
+      if (file.size > 10 * 1024 * 1024) throw new Error(`「${file.name}」超過 10 MB。`)
+      const path = `${user.id}/${id}/photos/${crypto.randomUUID()}.${fileExtension(file)}`
+      const { error } = await supabase.storage.from(CUTOUT_BUCKET).upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: false })
+      if (error) throw error
+      uploadedPaths.push(path)
+      newRows.push({ id: '', storage_path: path, sort_order: 0, is_cover: false, color_family: photo.colorFamily ?? null })
+    }
+    if (newRows.length) {
+      const { data, error } = await supabase.from('item_photos').insert(newRows.map((photo) => ({ owner_id: user.id, wishlist_item_id: id, storage_path: photo.storage_path, sort_order: 0, is_cover: false, color_family: photo.color_family }))).select('id,storage_path,sort_order,is_cover,color_family')
+      if (error) throw error
+      newRows.splice(0, newRows.length, ...(data ?? []))
+      insertedPhotoIds.push(...newRows.map((photo) => photo.id))
+    }
+
+    const assigned = new Map((colorAssignments ?? []).map(({ photoId, colorFamily }) => [photoId, colorFamily]))
+    const finalRows = [...keptLegacy, ...kept.map((photo) => ({ ...photo, color_family: assigned.has(photo.id) ? assigned.get(photo.id) : photo.color_family })), ...newRows]
+    const cover = finalRows[0]
+    const coverUnchanged = cover?.storage_path === (wish.image_cutout_path ?? wish.image_original_path)
+    const { error: clearError } = await supabase.from('item_photos').update({ is_cover: false }).eq('wishlist_item_id', id)
+    if (clearError) throw clearError
+    for (const [index, photo] of finalRows.entries()) {
+      if (photo.id.startsWith('legacy-cover-')) continue
+      const { error } = await supabase.from('item_photos').update({ sort_order: index, is_cover: photo.id === cover?.id, color_family: photo.color_family ?? null }).eq('id', photo.id).eq('wishlist_item_id', id)
+      if (error) throw error
+    }
+    const { error: updateError } = await supabase.from('wishlist_items').update({
+      image_original_path: coverUnchanged ? wish.image_original_path : cover?.storage_path ?? null,
+      image_cutout_path: coverUnchanged ? wish.image_cutout_path : null,
+      cutout_status: coverUnchanged ? undefined : 'skipped',
+    }).eq('id', id)
+    if (updateError) throw updateError
+    photoChangesSaved = true
+    if (removed.length) {
+      const { error } = await supabase.from('item_photos').delete().in('id', removed.map((photo) => photo.id)).eq('wishlist_item_id', id)
+      if (error) throw error
+    }
+    const pathsToRemove = [...new Set(removedPaths.filter((path) => !finalRows.some((photo) => photo.storage_path === path)))]
+    if (pathsToRemove.length) {
+      const { error } = await supabase.storage.from(CUTOUT_BUCKET).remove(pathsToRemove)
+      if (error) throw error
+    }
+  } catch (error) {
+    if (!photoChangesSaved) {
+      if (insertedPhotoIds.length) await supabase.from('item_photos').delete().in('id', insertedPhotoIds).eq('wishlist_item_id', id)
+      if (uploadedPaths.length) await supabase.storage.from(CUTOUT_BUCKET).remove(uploadedPaths)
+    }
+    throw error
+  }
+}
+
+/** 新增一筆選購候選，可附加不限張數的商品圖片。 */
 export async function createWishlistItem(input: WishlistInput): Promise<{ item: WishlistItem; demo: boolean }> {
   if (!supabase) {
     const item = demoWishFromInput(`demo-wish-${Date.now()}`, input)
@@ -621,7 +770,15 @@ export async function createWishlistItem(input: WishlistInput): Promise<{ item: 
   }
   const { data, error } = await supabase.from('wishlist_items').insert(wishlistPayload(input)).select(WISHLIST_COLUMNS).single()
   if (error) throw error
-  const [item] = await mapWishlistRows([data as unknown as WishlistRow])
+  try {
+    await saveWishlistPhotos(data.id, input.photosToAdd ?? [], input.photoIdsToRemove ?? [], input.photoColorAssignments)
+  } catch (cause) {
+    await supabase.from('wishlist_items').delete().eq('id', data.id)
+    throw cause
+  }
+  const { data: saved, error: savedError } = await supabase.from('wishlist_items').select(WISHLIST_COLUMNS).eq('id', data.id).single()
+  if (savedError) throw savedError
+  const [item] = await mapWishlistRows([saved as unknown as WishlistRow])
   return { item, demo: false }
 }
 
@@ -638,7 +795,10 @@ export async function updateWishlistItem(id: string, input: WishlistInput): Prom
   const { data, error } = await supabase.from('wishlist_items').update(wishlistPayload(input)).eq('id', id).neq('status', 'bought').select(WISHLIST_COLUMNS).maybeSingle()
   if (error) throw error
   if (!data) throw new Error('找不到這件商品，或它已移至已購買。')
-  const [item] = await mapWishlistRows([data as unknown as WishlistRow])
+  await saveWishlistPhotos(id, input.photosToAdd ?? [], input.photoIdsToRemove ?? [], input.photoColorAssignments)
+  const { data: saved, error: savedError } = await supabase.from('wishlist_items').select(WISHLIST_COLUMNS).eq('id', id).single()
+  if (savedError) throw savedError
+  const [item] = await mapWishlistRows([saved as unknown as WishlistRow])
   return { item, demo: false }
 }
 
@@ -657,105 +817,138 @@ export async function setWishlistStatus(id: string, status: Exclude<WishStatus, 
  * 移至已購買：建立一件衣櫃衣物（帶入名稱、顏色、品牌、尺寸、圖片），
  * 選購候選保留原資料，狀態改為 bought 並指向新衣物。
  */
-export async function markWishlistBought(id: string, purchase: { purchaseDate: string; paidPrice: number | null }): Promise<{ itemId: string; demo: boolean }> {
+export async function markWishlistBought(id: string, purchase: { purchaseDate: string; paidPrice: number | null; colorFamilies?: string[] }): Promise<{ itemIds: string[]; demo: boolean }> {
   if (!supabase) {
     const wish = demoWishlistItems.find((item) => item.id === id)
     if (!wish) throw new Error('找不到這件商品，可能已被刪除。')
     if (wish.status === 'bought') throw new Error('這件已經移至已購買了。')
-    const category = SAMPLE_CATEGORIES.find((entry) => entry.slot === wish.slot)
-    const itemId = `demo-bought-${Date.now()}`
-    demoClosetItems = [{
-      id: itemId,
-      name: wish.name,
-      categoryId: category?.id ?? SAMPLE_CATEGORIES[0].id,
-      slot: wish.slot,
-      colorName: wish.colorName ?? '',
-      colorHex: wish.colorHex,
-      brand: wish.brand,
-      size: wish.size,
-      necklineSize: wish.necklineSize,
-      flatMeasurements: { ...wish.flatMeasurements },
-      flatStretch: { ...wish.flatStretch },
-      status: 'ok',
-      cutoutUrl: wish.cutoutUrl,
-      shape: wish.shape,
-      wearCount: 0,
-    }, ...demoClosetItems]
-    demoWishlistItems = demoWishlistItems.map((item) => (item.id === id ? { ...item, status: 'bought', boughtItemId: itemId } : item))
-    return { itemId, demo: true }
+    const colors = wish.colors?.length ? wish.colors : [{ family: wish.colorName || '其他', hex: wish.colorHex }]
+    const selected = new Set(purchase.colorFamilies?.length ? purchase.colorFamilies : colors.map((color) => color.family))
+    const selectedColors = colors.filter((color) => selected.has(color.family))
+    if (!selectedColors.length) throw new Error('請至少選擇一個購買顏色。')
+    const itemIds = selectedColors.map((color, index) => {
+      const itemId = `demo-bought-${Date.now()}-${index}`
+      const category = SAMPLE_CATEGORIES.find((entry) => entry.slot === (wish.primaryPart ?? wish.slot))
+      const photoFamily = color.family
+      const photos = (wish.photos ?? []).filter((photo) => !photo.colorFamily || photo.colorFamily === photoFamily)
+      demoClosetItems.unshift({
+        id: itemId,
+        name: wish.name,
+        categoryId: category?.id ?? SAMPLE_CATEGORIES[0].id,
+        slot: wish.primaryPart ?? wish.slot,
+        colorName: color.family,
+        colorHex: color.hex ?? GARMENT_COLORS.find((entry) => entry.name === color.family)?.hex ?? wish.colorHex,
+        brand: wish.brand,
+        size: wish.size,
+        necklineSize: wish.necklineSize,
+        flatMeasurements: { ...wish.flatMeasurements },
+        flatStretch: { ...wish.flatStretch },
+        status: 'ok',
+        cutoutUrl: photos.find((photo) => photo.isCover)?.url ?? wish.cutoutUrl,
+        shape: wish.shape,
+        wearCount: 0,
+      })
+      if (photos.length) demoClosetPhotos.set(itemId, photos.map((photo, photoIndex) => ({ ...photo, sortOrder: photoIndex, isCover: photoIndex === 0 })))
+      return itemId
+    })
+    demoWishlistItems = demoWishlistItems.map((item) => item.id === id ? { ...item, status: 'bought', boughtItemId: itemIds[0], boughtItemIds: itemIds } : item)
+    return { itemIds, demo: true }
   }
 
   const client = supabase
   const { data, error } = await client
     .from('wishlist_items')
-    .select('id,name,slot,category_id,color_hex,color_name,second_color_hex,brand,size,size_note,neckline_size,seasons,material,material_composition,material_percentages,flat_measurements,flat_stretch,shop,url,reason,status,image_original_path,image_cutout_path')
+    .select('id,name,slot,primary_part,also_parts,colors,category_id,color_hex,color_name,second_color_hex,brand,size,size_note,neckline_size,seasons,material,material_composition,material_percentages,flat_measurements,flat_stretch,shop,url,reason,status,image_original_path,image_cutout_path,bought_item_id')
     .eq('id', id)
     .single()
   if (error) throw error
   if (data.status === 'bought') throw new Error('這件已經移至已購買了。')
+  const { data: wishlistPhotos, error: wishlistPhotosError } = await client.from('item_photos').select('storage_path,sort_order,is_cover,color_family').eq('wishlist_item_id', id).order('sort_order')
+  if (wishlistPhotosError) throw wishlistPhotosError
+  const allColors = data.colors?.length ? data.colors as WishlistColor[] : [{ family: data.color_name || '未標色', hex: data.color_hex }]
+  const selectedColorFamilies = new Set(purchase.colorFamilies?.length ? purchase.colorFamilies : allColors.map((color) => color.family))
+  const colors = allColors.filter((color) => selectedColorFamilies.has(color.family))
+  if (!colors.length) throw new Error('請至少選擇一個購買顏色。')
   const categories = await fetchCategories()
-  const category = categories.find((entry) => entry.id === data.category_id) ?? categories.find((entry) => entry.slot === data.slot)
+  const primaryPart = data.primary_part ?? data.slot
+  const category = categories.find((entry) => entry.slot === primaryPart) ?? categories.find((entry) => entry.id === data.category_id)
   if (!category) throw new Error('找不到對應的衣物分類，請先到衣櫃確認分類設定。')
   const { data: { user }, error: userError } = await client.auth.getUser()
   if (userError) throw userError
   if (!user) throw new Error('登入狀態已失效，請重新登入。')
 
-  const itemId = crypto.randomUUID()
-  // 圖片複製一份到新衣物的資料夾，之後刪除選購紀錄也不會影響衣櫃。
   const copied: string[] = []
-  const copyImage = async (path: string | null, name: string) => {
-    if (!path) return null
-    const ext = path.split('.').pop() ?? 'jpg'
-    const target = `${user.id}/${itemId}/${name}.${ext}`
-    const { error: copyError } = await client.storage.from(CUTOUT_BUCKET).copy(path, target)
-    if (copyError) throw copyError
-    copied.push(target)
-    return target
-  }
-
-  let itemInserted = false
+  const insertedItems: string[] = []
+  const outputIds: string[] = []
   try {
-    const originalPath = await copyImage(data.image_original_path, 'original')
-    const cutoutPath = data.image_cutout_path && data.image_cutout_path !== data.image_original_path ? await copyImage(data.image_cutout_path, 'cutout') : null
-    const { error: insertError } = await client.from('items').insert({
-      id: itemId,
-      category_id: category.id,
-      name: data.name,
-      color_name: data.color_name || '未填',
-      color_hex: data.color_hex,
-      second_color_hex: data.second_color_hex,
-      size: data.size || data.size_note || '',
-      neckline_size: data.neckline_size,
-      brand: data.brand,
-      seasons: data.seasons ?? [],
-      material: data.material,
-      material_composition: data.material_composition,
-      material_percentages: data.material_percentages ?? {},
-      flat_measurements: data.flat_measurements ?? {},
-      flat_stretch: data.flat_stretch ?? {},
-      purchase_date: purchase.purchaseDate,
-      purchase_price: purchase.paidPrice,
-      store: data.shop,
-      product_url: data.url,
-      note: data.reason,
-      image_original_path: originalPath,
-      image_cutout_path: cutoutPath ?? originalPath,
-      cutout_status: cutoutPath ? 'done' : 'skipped',
-    })
-    if (insertError) throw insertError
-    itemInserted = true
-    if (originalPath) {
-      const { error: photoError } = await client.from('item_photos').insert({ owner_id: user.id, item_id: itemId, storage_path: originalPath, sort_order: 0, is_cover: true })
-      if (photoError) throw photoError
+    for (const color of colors) {
+      const itemId = crypto.randomUUID()
+      const familyPhotos = (wishlistPhotos ?? []).filter((photo) => !photo.color_family || photo.color_family === color.family)
+      const legacyCover = !(wishlistPhotos?.length) ? data.image_original_path : null
+      const coverSource = familyPhotos.find((photo) => photo.is_cover)?.storage_path ?? familyPhotos[0]?.storage_path ?? legacyCover
+      const copyImage = async (path: string | null | undefined, name: string) => {
+        if (!path) return null
+        const ext = path.split('.').pop() ?? 'jpg'
+        const target = `${user.id}/${itemId}/${name}.${ext}`
+        const { error: copyError } = await client.storage.from(CUTOUT_BUCKET).copy(path, target)
+        if (copyError) throw copyError
+        copied.push(target)
+        return target
+      }
+
+      const originalPath = await copyImage(coverSource, 'original')
+      const cutoutSource = coverSource === data.image_original_path ? data.image_cutout_path : null
+      const cutoutPath = cutoutSource && cutoutSource !== coverSource ? await copyImage(cutoutSource, 'cutout') : null
+      const { error: insertError } = await client.from('items').insert({
+        id: itemId,
+        category_id: category.id,
+        name: data.name,
+        color_name: color.family,
+        color_hex: color.hex ?? GARMENT_COLORS.find((entry) => entry.name === color.family)?.hex ?? data.color_hex,
+        second_color_hex: null,
+        size: data.size || data.size_note || '',
+        neckline_size: data.neckline_size,
+        brand: data.brand,
+        seasons: data.seasons ?? [],
+        material: data.material,
+        material_composition: data.material_composition,
+        material_percentages: data.material_percentages ?? {},
+        flat_measurements: data.flat_measurements ?? {},
+        flat_stretch: data.flat_stretch ?? {},
+        purchase_date: purchase.purchaseDate,
+        purchase_price: purchase.paidPrice,
+        store: data.shop,
+        product_url: data.url,
+        note: data.reason,
+        image_original_path: originalPath,
+        image_cutout_path: cutoutPath ?? originalPath,
+        cutout_status: cutoutPath ? 'done' : 'skipped',
+      })
+      if (insertError) throw insertError
+      insertedItems.push(itemId)
+      outputIds.push(itemId)
+
+      const itemPhotoRows = []
+      for (const [index, photo] of familyPhotos.entries()) {
+        const path = photo.storage_path === coverSource && originalPath ? originalPath : await copyImage(photo.storage_path, `photos/${index}`)
+        if (path) itemPhotoRows.push({ owner_id: user.id, item_id: itemId, storage_path: path, sort_order: index, is_cover: index === 0, color_family: photo.color_family ?? null })
+      }
+      if (itemPhotoRows.length) {
+        const { error: photoError } = await client.from('item_photos').insert(itemPhotoRows)
+        if (photoError) throw photoError
+      } else if (originalPath) {
+        const { error: photoError } = await client.from('item_photos').insert({ owner_id: user.id, item_id: itemId, storage_path: originalPath, sort_order: 0, is_cover: true })
+        if (photoError) throw photoError
+      }
     }
-    const { error: updateError } = await client.from('wishlist_items').update({ status: 'bought', bought_item_id: itemId }).eq('id', id)
+    const { error: updateError } = await client.from('wishlist_items').update({ status: 'bought', bought_item_id: outputIds[0], bought_item_ids: outputIds }).eq('id', id)
     if (updateError) throw updateError
   } catch (err) {
-    if (itemInserted) await client.from('items').delete().eq('id', itemId)
+    if (insertedItems.length) await client.from('items').delete().in('id', insertedItems)
     if (copied.length) await client.storage.from(CUTOUT_BUCKET).remove(copied)
     throw err
   }
-  return { itemId, demo: false }
+  return { itemIds: outputIds, demo: false }
 }
 
 // ---------- 比較群組 ----------
@@ -946,6 +1139,9 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         id,
         name: input.name.trim(),
         slot: category.slot!,
+        primaryPart: category.slot!,
+        alsoParts: [],
+        colors: [{ family: input.colorName || '其他', hex: input.colorHex }],
         colorHex: input.colorHex,
         shop: input.store || '尚未決定',
         brand: input.brand || undefined,
@@ -1009,6 +1205,9 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         name: input.name.trim(),
         category_id: category.id,
         slot: category.slot,
+        primary_part: category.slot,
+        also_parts: [],
+        colors: [{ family: input.colorName || '其他', hex: input.colorHex }],
         color_name: input.colorName,
         color_hex: input.colorHex,
         second_color_hex: input.secondColorHex || null,
@@ -1044,6 +1243,7 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         storage_path: path,
         sort_order: index,
         is_cover: index === 0,
+        ...(input.destination === 'wishlist' ? { color_family: input.colorName || null } : {}),
       })
     }
     if (photoRows.length) {
@@ -1169,6 +1369,9 @@ export async function finalizeGarmentDraft(id: string, input: NewGarmentInput): 
     owner_id: user.id,
     name: input.name.trim(),
     slot: category.slot,
+    primary_part: category.slot,
+    also_parts: [],
+    colors: [{ family: input.colorName || '其他', hex: input.colorHex }],
     color_hex: input.colorHex,
     shop: input.store?.trim() || '尚未決定',
     price: input.purchasePrice ?? 0,
@@ -1186,7 +1389,7 @@ export async function finalizeGarmentDraft(id: string, input: NewGarmentInput): 
     cutout_status: draft.cutout_status,
   })
   if (insertError) throw insertError
-  const { error: photoUpdateError } = await supabase.from('item_photos').update({ item_id: null, wishlist_item_id: id }).eq('item_id', id)
+  const { error: photoUpdateError } = await supabase.from('item_photos').update({ item_id: null, wishlist_item_id: id, color_family: input.colorName || null }).eq('item_id', id)
   if (photoUpdateError) {
     await supabase.from('wishlist_items').delete().eq('id', id)
     throw photoUpdateError
@@ -2593,4 +2796,54 @@ export async function signOut(): Promise<{ demo: boolean }> {
   const { error } = await supabase.auth.signOut()
   if (error) throw error
   return { demo: false }
+}
+
+/* ── 量測趨勢檢視設定（measurement_trend_prefs）────────── */
+
+function trendPrefsFromRow(row: Record<string, unknown> | null | undefined): MeasurementTrendPrefs {
+  if (!row) return { ...DEFAULT_TREND_PREFS }
+  return normalizeTrendPrefs({
+    metrics: Array.isArray(row.metrics) ? (row.metrics as MeasurementTrendPrefs['metrics']) : undefined,
+    range: row.time_range as MeasurementTrendPrefs['range'],
+    morningOnly: row.morning_only === true,
+    showWeight: row.show_weight !== false,
+    updatedAt: typeof row.updated_at === 'string' ? row.updated_at : undefined,
+  })
+}
+
+/** 讀取趨勢設定；還沒存過時回傳預設值（saved = false） */
+export async function fetchTrendPrefs(): Promise<{ prefs: MeasurementTrendPrefs; saved: boolean }> {
+  if (!supabase) return { prefs: demoTrendPrefs ? { ...demoTrendPrefs } : { ...DEFAULT_TREND_PREFS }, saved: Boolean(demoTrendPrefs) }
+  const { data, error } = await supabase.from('measurement_trend_prefs').select('metrics,time_range,morning_only,show_weight,updated_at').maybeSingle()
+  if (error) throw error
+  return { prefs: trendPrefsFromRow(data as Record<string, unknown> | null), saved: Boolean(data) }
+}
+
+/** 新增或更新趨勢設定（每人一筆） */
+export async function saveTrendPrefs(input: MeasurementTrendPrefs): Promise<{ prefs: MeasurementTrendPrefs; demo: boolean }> {
+  const prefs = normalizeTrendPrefs(input)
+  if (!supabase) {
+    demoTrendPrefs = { ...prefs, updatedAt: new Date().toISOString() }
+    return { prefs: { ...demoTrendPrefs }, demo: true }
+  }
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('請先登入再儲存設定。')
+  const { data, error } = await supabase
+    .from('measurement_trend_prefs')
+    .upsert({ owner_id: user.id, metrics: prefs.metrics, time_range: prefs.range, morning_only: prefs.morningOnly, show_weight: prefs.showWeight }, { onConflict: 'owner_id' })
+    .select('metrics,time_range,morning_only,show_weight,updated_at')
+    .single()
+  if (error) throw error
+  return { prefs: trendPrefsFromRow(data as Record<string, unknown>), demo: false }
+}
+
+/** 刪除趨勢設定＝還原預設 */
+export async function resetTrendPrefs(): Promise<{ prefs: MeasurementTrendPrefs; demo: boolean }> {
+  if (!supabase) {
+    demoTrendPrefs = null
+    return { prefs: { ...DEFAULT_TREND_PREFS }, demo: true }
+  }
+  const { error } = await supabase.from('measurement_trend_prefs').delete().not('owner_id', 'is', null)
+  if (error) throw error
+  return { prefs: { ...DEFAULT_TREND_PREFS }, demo: false }
 }

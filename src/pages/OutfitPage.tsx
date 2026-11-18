@@ -2,40 +2,64 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { FreeCanvas } from '@/components/outfit/FreeCanvas'
 import { OutfitBoard, type BoardPiece } from '@/components/outfit/OutfitBoard'
-import { SlotPicker } from '@/components/outfit/SlotPicker'
+import { SlotPicker, type SlotPickerItem } from '@/components/outfit/SlotPicker'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import { PaperCard, Tape, TiltLabel, WashBlob } from '@/components/ui/Paper'
 import { LoadingState, PageState } from '@/components/ui/PageState'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
-import { fetchClosetItems, saveOutfit, useAsync } from '@/lib/data'
+import { fetchClosetItems, fetchWishlist, saveOutfit, useAsync } from '@/lib/data'
 import { bringToFront, defaultLayout, pickLayout, shiftLayer } from '@/lib/freeLayout'
-import { EMPTY_PICKS, groupBySlot, missingRequired, suggestDefaultPicks, type Picks } from '@/lib/outfit'
+import { EMPTY_PICKS, missingRequired, suggestDefaultPicks, type Picks } from '@/lib/outfit'
 import { todayISO } from '@/lib/date'
 import { storeTodayPicks, type RewearState } from '@/lib/diary'
 import { SLOT_META, SLOTS } from '@/lib/slots'
-import type { ClosetItem, FreeLayout, OutfitTemplate, Placement, Slot } from '@/types'
+import { isWearable } from '@/lib/slots'
+import type { ClosetItem, FreeLayout, OutfitTemplate, Placement, Slot, WishlistItem } from '@/types'
+
+type OutfitChoice = { kind: 'closet'; item: ClosetItem } | { kind: 'wish'; item: WishlistItem }
+const wishPickId = (id: string) => `wish:${id}`
+const wishColorHex = (item: WishlistItem) => item.colors?.[0]?.hex ?? item.colorHex
 
 
 export function OutfitPage() {
-  const { data: items, loading, error } = useAsync(fetchClosetItems)
+  const { data: closetItems, loading, error } = useAsync(fetchClosetItems)
 
   if (loading) {
     return (
       <main className="mx-auto max-w-3xl px-5 py-10"><LoadingState label="正在整理你的衣櫃…" /></main>
     )
   }
-  if (error || !items) {
+  if (error || !closetItems) {
     return (
       <main className="mx-auto max-w-3xl px-5 py-10" role="alert"><PageState icon="alert" tone="rose" title="衣櫃暫時打不開" description="衣物資料讀取失敗，沒有任何搭配變更。確認連線後再重試。" action={<Button variant="secondary" onClick={() => window.location.reload()}>重新載入</Button>} /></main>
     )
   }
-  return <OutfitEditor items={items} />
+  return <WishlistOutfitLoader items={closetItems} />
 }
 
-function OutfitEditor({ items }: { items: ClosetItem[] }) {
-  const grouped = useMemo(() => groupBySlot(items), [items])
-  const byId = useMemo(() => new Map(items.map((i) => [i.id, i])), [items])
+function WishlistOutfitLoader({ items }: { items: ClosetItem[] }) {
+  const [wishes, setWishes] = useState<WishlistItem[]>([])
+  useEffect(() => { void fetchWishlist().then(setWishes).catch(() => setWishes([])) }, [])
+  return <OutfitEditor items={items} wishes={wishes} />
+}
+
+function OutfitEditor({ items, wishes }: { items: ClosetItem[]; wishes: WishlistItem[] }) {
+  const grouped = useMemo(() => {
+    const out: Record<Slot, SlotPickerItem[]> = { outer: [], top: [], bottom: [], shoes: [], bag: [], acc: [] }
+    for (const item of items) out[item.slot].push(item)
+    for (const wish of wishes) {
+      const slots = [...new Set([wish.primaryPart ?? wish.slot, ...(wish.alsoParts ?? [])])]
+      for (const slot of slots) out[slot].push({ id: wishPickId(wish.id), name: wish.name, colorHex: wishColorHex(wish), cutoutUrl: wish.cutoutUrl, shape: wish.shape, isWishlist: true })
+    }
+    for (const slot of SLOTS) out[slot.slot].sort((a, b) => Number(Boolean(b.status && isWearable(b.status))) - Number(Boolean(a.status && isWearable(a.status))))
+    return out
+  }, [items, wishes])
+  const choicesById = useMemo(() => new Map<string, OutfitChoice>([
+    ...items.map((item) => [item.id, { kind: 'closet' as const, item }] as const),
+    ...wishes.map((item) => [wishPickId(item.id), { kind: 'wish' as const, item }] as const),
+  ]), [items, wishes])
+  const closetById = useMemo(() => new Map(items.map((item) => [item.id, item])), [items])
 
   const location = useLocation()
   // 從穿搭日記「再穿一次」帶過來：不論衣物狀態都帶回，只有已不在衣櫃的先空著
@@ -45,7 +69,7 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
     const picks: Picks = { ...EMPTY_PICKS }
     const skipped: string[] = []
     for (const [slot, id] of Object.entries(state.picks) as [Slot, string][]) {
-      const item = byId.get(id)
+      const item = closetById.get(id)
       if (item) picks[slot] = id
       else skipped.push(SLOT_META[slot].label)
     }
@@ -67,7 +91,10 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
   const closeToast = useCallback(() => setToast(null), [])
 
   // 記下今天排好的單品，穿搭日記「記一筆」可以直接帶入
-  useEffect(() => storeTodayPicks(picks), [picks])
+  useEffect(() => {
+    const wornPicks = Object.fromEntries(Object.entries(picks).map(([slot, id]) => [slot, id?.startsWith('wish:') ? null : id])) as Picks
+    storeTodayPicks(wornPicks)
+  }, [picks])
 
   const placeOne = useCallback((slot: Slot, p: Placement) => setLayout((l) => ({ ...l, [slot]: p })), [])
 
@@ -82,14 +109,14 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
   const pieces = useMemo(() => {
     const out: Partial<Record<Slot, BoardPiece>> = {}
     for (const s of SLOTS) {
-      const item = picks[s.slot] ? byId.get(picks[s.slot]!) : undefined
-      if (item) out[s.slot] = { name: item.name, colorHex: item.colorHex, cutoutUrl: item.cutoutUrl, shape: item.shape }
+      const choice = picks[s.slot] ? choicesById.get(picks[s.slot]!) : undefined
+      if (choice) out[s.slot] = { name: choice.item.name, colorHex: choice.kind === 'wish' ? wishColorHex(choice.item) : choice.item.colorHex, cutoutUrl: choice.item.cutoutUrl, shape: choice.item.shape, ...(choice.kind === 'wish' ? { isWish: true } : {}) }
     }
     return out
-  }, [picks, byId])
+  }, [picks, choicesById])
 
   const missing = missingRequired(picks)
-  const extras = (['outer', 'bag', 'acc'] as Slot[]).filter((s) => picks[s]).map((s) => byId.get(picks[s]!)!.name)
+  const extras = (['outer', 'bag', 'acc'] as Slot[]).filter((s) => picks[s]).map((s) => choicesById.get(picks[s]!)!.item.name)
 
   async function handleSave() {
     if (missing.length) {
@@ -98,11 +125,12 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
     }
     setSaving(true)
     try {
-      const picksOut = Object.fromEntries(
-        Object.entries(picks)
-          .filter(([, id]) => id)
-          .map(([slot, id]) => [slot, { kind: 'closet' as const, itemId: id! }]),
-      )
+      const picksOut = Object.fromEntries(Object.entries(picks).flatMap(([slot, id]) => {
+        if (!id) return []
+        const choice = choicesById.get(id)
+        if (!choice) return []
+        return [[slot, choice.kind === 'closet' ? { kind: 'closet' as const, itemId: choice.item.id } : { kind: 'wish' as const, wishId: choice.item.id }]]
+      }))
       const pickedSlots = (Object.keys(picksOut) as Slot[])
       const res = await saveOutfit({
         name: name.trim() || '今天的穿搭',
@@ -229,7 +257,7 @@ function OutfitEditor({ items }: { items: ClosetItem[] }) {
             <ul className="m-0 flex list-none flex-wrap gap-x-[18px] gap-y-1.5 border-t-[1.5px] border-dashed border-line p-0 pt-3 text-[13px]">
               {SLOTS.filter((s) => picks[s.slot]).map((s) => (
                 <li key={s.slot}>
-                  <span className="text-ink-3">{s.label}</span>　{byId.get(picks[s.slot]!)!.name}
+                  <span className="text-ink-3">{s.label}</span>　{choicesById.get(picks[s.slot]!)!.item.name}
                 </li>
               ))}
             </ul>

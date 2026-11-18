@@ -36,31 +36,41 @@ export function formatAddedDate(iso?: string) {
   return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
-const SHOP_NAMES: [RegExp, string][] = [
-  [/shopee\./, '蝦皮'],
-  [/momoshop\./, 'momo'],
-  [/pchome\./, 'PChome'],
-  [/uniqlo\./, 'UNIQLO 線上'],
-  [/gu-global\.|\.gu\./, 'GU 線上'],
-  [/cos\.com|cosstores\./, 'COS 官網'],
-  [/arket\./, 'Arket 官網'],
-  [/zara\./, 'ZARA 官網'],
-  [/massimodutti\./, 'Massimo Dutti'],
-  [/hm\.com/, 'H&M 官網'],
-  [/muji\./, 'MUJI 線上'],
-  [/zalora\./, 'ZALORA'],
-  [/pinkoi\./, 'Pinkoi'],
+const SHOP_DOMAINS: [string[], string][] = [
+  [['shopee.tw', 'shopee.com.tw', 'shopee.sg', 'shopee.com'], '蝦皮'],
+  [['momoshop.com.tw'], 'momo'],
+  [['pchome.com.tw'], 'PChome'],
+  [['uniqlo.com', 'uniqlo.com.tw'], 'UNIQLO 線上'],
+  [['gu-global.com', 'gu.com'], 'GU 線上'],
+  [['cos.com', 'cosstores.com'], 'COS 官網'],
+  [['arket.com'], 'Arket 官網'],
+  [['zara.com'], 'ZARA 官網'],
+  [['massimodutti.com'], 'Massimo Dutti'],
+  [['hm.com'], 'H&M 官網'],
+  [['muji.com', 'muji.com.tw'], 'MUJI 線上'],
+  [['zalora.com', 'zalora.com.tw'], 'ZALORA'],
+  [['pinkoi.com'], 'Pinkoi'],
 ]
 
-/** 從商品網址推測店家名稱；無法解析時回傳 null。 */
+/** 僅依 URL 網域推測已知店家，不連線讀取網頁；未知網域回傳 null。 */
 export function shopFromUrl(url: string): string | null {
-  let host: string
   try {
-    host = new URL(url.trim()).hostname.replace(/^www\./, '')
+    const parsed = new URL(url.trim())
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, '')
+    return SHOP_DOMAINS.find(([domains]) => domains.some((domain) => host === domain || host.endsWith(`.${domain}`)))?.[1] ?? null
   } catch {
     return null
   }
-  return SHOP_NAMES.find(([pattern]) => pattern.test(host))?.[1] ?? host
+}
+
+export function isValidProductUrl(url: string) {
+  try {
+    const parsed = new URL(url.trim())
+    return (parsed.protocol === 'https:' || parsed.protocol === 'http:') && !!parsed.hostname
+  } catch {
+    return false
+  }
 }
 
 function hexToRgb(hex: string) {

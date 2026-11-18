@@ -103,6 +103,12 @@
   --color-size-band: #C5D8BE;
   --color-field-ok: #A7C09E;
   --color-field-error: #C98A7C;
+  /* 量測趨勢：兩條系列色已驗證色盲與對比；上升下降同色，不用紅綠評價 */
+  --color-trend-1: #2A72A0;
+  --color-trend-2: #B0703A;
+  --color-trend-1-light: #7FB2D6;
+  --color-trend-2-light: #E0A577;
+  --color-chart-grid: #EFE4D2;
 
   /* 狀態標籤（底色 / 文字） */
   --color-status-ok-bg: #DCE7D8;

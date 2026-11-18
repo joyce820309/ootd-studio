@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ProfileBreadcrumb } from '@/components/layout/ProfileNav'
+import { MeasurementTrend } from '@/components/profile/MeasurementTrend'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import { MarkdownNote } from '@/components/ui/MarkdownNote'
@@ -90,7 +91,9 @@ function DiffBadge({ kind, delta, compact = false }: { kind: DiffKind; delta: nu
   return <span className={`inline-flex items-center rounded-full px-2 py-1 font-num text-xs ${colorByKind(kind)} ${compact ? 'px-1.5 py-0.5 text-[10px]' : ''}`}>{text}</span>
 }
 
-function MeasurementPageHeader({ view, setView }: { view: 'date' | 'table'; setView: (view: 'date' | 'table') => void }) {
+type HistoryView = 'date' | 'table' | 'trend'
+
+function MeasurementPageHeader({ view, setView }: { view: HistoryView; setView: (view: HistoryView) => void }) {
   return (
     <>
       <ProfileBreadcrumb current="量測紀錄" className="-mt-2 mb-3" />
@@ -98,11 +101,12 @@ function MeasurementPageHeader({ view, setView }: { view: 'date' | 'table'; setV
         <div className="mr-auto flex flex-col gap-3">
           <TiltLabel accent="mist">尺寸筆記本</TiltLabel>
           <h1 className="m-0 font-hd text-3xl text-ink sm:text-[34px]">量測紀錄</h1>
-          <p className="m-0 max-w-2xl text-sm leading-6 text-ink-2">每次儲存尺寸都會留下一頁。這裡只列數字和「跟上次差多少」，不畫趨勢圖、不評價變化。</p>
+          <p className="m-0 max-w-2xl text-sm leading-6 text-ink-2">{view === 'trend' ? '把同一個部位的數字連成線，看它怎麼變。不設目標、不分好壞，上升下降都用同一個顏色。' : view === 'table' ? '可以逐次查看、並排對照或看趨勢；不設目標、不評價變化。' : '每次儲存尺寸都會留下一頁。這裡列出數字和「跟上次差多少」；想看變化切到「趨勢」。不設目標、不評價變化。'}</p>
         </div>
-        <nav aria-label="檢視方式" className="grid grid-cols-2 rounded-btn bg-tile p-1">
+        <nav aria-label="檢視方式" className="grid grid-cols-3 rounded-btn bg-tile p-1">
           <button type="button" aria-current={view === 'date' ? 'page' : undefined} onClick={() => setView('date')} className={`flex h-10 items-center justify-center gap-1.5 rounded-sm px-3 text-sm ${view === 'date' ? 'bg-card font-medium text-ink shadow-paper' : 'text-ink-2'}`}><Icon name="diary" size={17} />依日期</button>
           <button type="button" aria-current={view === 'table' ? 'page' : undefined} onClick={() => setView('table')} className={`flex h-10 items-center justify-center gap-1.5 rounded-sm px-3 text-sm ${view === 'table' ? 'bg-card font-medium text-ink shadow-paper' : 'text-ink-2'}`}><Icon name="outfit" size={17} />對照表</button>
+          <button type="button" aria-current={view === 'trend' ? 'page' : undefined} onClick={() => setView('trend')} className={`flex h-10 items-center justify-center gap-1.5 rounded-sm px-3 text-sm ${view === 'trend' ? 'bg-card font-medium text-ink shadow-paper' : 'text-ink-2'}`}><Icon name="trend" size={17} />趨勢</button>
         </nav>
         <ButtonLink to="/me" variant="primary"><Icon name="plus" size={18} />新增量測</ButtonLink>
       </div>
@@ -114,7 +118,8 @@ export function MeasurementHistoryPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const view = searchParams.get('view') === 'table' ? 'table' : 'date'
+  const viewParam = searchParams.get('view')
+  const view: HistoryView = viewParam === 'table' || viewParam === 'trend' ? viewParam : 'date'
   const [records, setRecords] = useState<BodyMeasurement[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -133,8 +138,8 @@ export function MeasurementHistoryPage() {
   const previous = selected ? records[records.indexOf(selected) + 1] : undefined
   const isMobileDetail = Boolean(id)
 
-  function setView(next: 'date' | 'table') {
-    setSearchParams(next === 'date' ? {} : { view: 'table' }, { replace: true })
+  function setView(next: HistoryView) {
+    setSearchParams(next === 'date' ? {} : { view: next }, { replace: true })
   }
 
   async function handleDelete(recordId: string) {
@@ -164,8 +169,17 @@ export function MeasurementHistoryPage() {
         </header>
       )}
       <div className="hidden md:block"><MeasurementPageHeader view={view} setView={setView} /></div>
+      {!isMobileDetail && records.length > 0 && (
+        <nav aria-label="檢視方式" className="grid grid-cols-3 rounded-btn bg-tile p-[3px] md:hidden">
+          {([['date', '依日期'], ['table', '對照表'], ['trend', '趨勢']] as const).map(([value, label]) => (
+            <button key={value} type="button" aria-current={view === value ? 'page' : undefined} onClick={() => setView(value)} className={`flex min-h-11 items-center justify-center rounded-sm text-sm ${view === value ? 'bg-card font-bold text-ink shadow-paper' : 'font-medium text-ink-2'}`}>{label}</button>
+          ))}
+        </nav>
+      )}
       {records.length === 0 ? (
         <PageState icon="diary" tone="mist" title="還沒有量測紀錄" description="每次儲存一筆尺寸，就會在這裡留下日期快照。" action={<ButtonLink to="/me/measurements/new" variant="primary"><Icon name="plus" size={17} />新增量測</ButtonLink>} />
+      ) : view === 'trend' && !isMobileDetail ? (
+        <MeasurementTrend records={records} />
       ) : view === 'table' && !isMobileDetail ? (
         <ComparisonTable records={records} onSelect={(recordId) => navigate(`/me/measurements/${recordId}`)} />
       ) : (
@@ -206,7 +220,7 @@ function Timeline({ records, selectedId }: { records: BodyMeasurement[]; selecte
 function MobileRecordList({ records, onAdd }: { records: BodyMeasurement[]; onAdd: () => void }) {
   return (
     <div className="space-y-3">
-      <p className="m-0 text-xs leading-5 text-ink-2">每次儲存尺寸都會留下一頁。只列數字，不畫趨勢圖、不評價變化。</p>
+      <p className="m-0 text-xs leading-5 text-ink-2">每次儲存尺寸都會留下一頁。想看變化可以切到「趨勢」；不設目標、不評價變化。</p>
       <ol className="relative m-0 list-none space-y-2.5 pb-3 pl-0">
         <span aria-hidden="true" className="absolute bottom-3 left-[13px] top-5 border-l-[1.5px] border-dashed border-line-strong" />
         {records.map((record, index) => {

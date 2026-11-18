@@ -376,13 +376,13 @@ export function ComparePage() {
       setToast({ tone: 'success', text: `已刪除群組，候選商品仍在選購清單${demoSuffix(demo)}` })
     })
 
-  const onBought = (item: WishlistItem, purchase: { purchaseDate: string; paidPrice: number | null }) =>
+  const onBought = (item: WishlistItem, purchase: { purchaseDate: string; paidPrice: number | null; colorFamilies: string[] }) =>
     run(async () => {
-      const { demo } = await markWishlistBought(item.id, purchase)
+      const { itemIds, demo } = await markWishlistBought(item.id, purchase)
       setWishes((list) => list.filter((w) => w.id !== item.id))
       setCloset((await fetchClosetItems().catch(() => null)) ?? closet)
       setDialog(null)
-      setToast({ tone: 'success', text: `「${item.name}」已放進衣櫃；其他候選仍保留，不需要的可以淘汰${demoSuffix(demo)}` })
+      setToast({ tone: 'success', text: `「${item.name}」已建立 ${itemIds.length} 件衣物；其他候選仍保留${demoSuffix(demo)}` })
     })
 
   const onSaveOutfit = () =>
@@ -632,7 +632,7 @@ export function ComparePage() {
           onConfirm={() => void onDeleteGroup(dialog.group)}
         />
       )}
-      {dialog?.kind === 'bought' && <BoughtDialog item={dialog.item} saving={saving} onCancel={() => setDialog(null)} onConfirm={(purchase) => void onBought(dialog.item, purchase)} />}
+      {dialog?.kind === 'bought' && <BoughtDialog key={dialog.item.id} item={dialog.item} saving={saving} onCancel={() => setDialog(null)} onConfirm={(purchase) => void onBought(dialog.item, purchase)} />}
       {dialog?.kind === 'mix' && tryItem && group && (
         <BottomSheet title="換單品" onClose={() => setDialog(null)}>
           <MixSources tryItem={tryItem} trySource={tryCand?.source ?? 'wishlist'} closet={closet} wishes={wishes} groupId={group.id} picks={picks} onPick={setPick} />

@@ -129,6 +129,17 @@ export interface ClosetPhoto {
   url?: string
   sortOrder: number
   isCover: boolean
+  colorFamily?: string
+}
+
+export interface WishlistColor {
+  family: string
+  hex?: string
+}
+
+export interface WishlistPhotoUpload {
+  file: File
+  colorFamily?: string | null
 }
 
 export type WishStatus = 'considering' | 'waiting' | 'ready' | 'bought' | 'dropped'
@@ -136,7 +147,11 @@ export type WishStatus = 'considering' | 'waiting' | 'ready' | 'bought' | 'dropp
 export interface WishlistItem {
   id: string
   name: string
+  /** 主要部位；slot 保留為舊資料相容欄位。 */
+  primaryPart?: Slot
+  alsoParts?: Slot[]
   slot: Slot
+  colors?: WishlistColor[]
   colorHex: string
   shop: string
   price: number
@@ -146,6 +161,7 @@ export interface WishlistItem {
   status: WishStatus
   compareGroupId?: string
   cutoutUrl?: string
+  photos?: ClosetPhoto[]
   shape?: GarmentShape
   colorName?: string
   brand?: string
@@ -164,6 +180,7 @@ export interface WishlistItem {
   flatStretch?: Record<string, number>
   returnPolicy?: string
   boughtItemId?: string
+  boughtItemIds?: string[]
   createdAt?: string
 }
 
@@ -172,14 +189,17 @@ export type WishPriority = 1 | 2 | 3
 /** 選購清單新增／編輯表單的內容 */
 export interface WishlistInput {
   name: string
+  primaryPart?: Slot
+  alsoParts?: Slot[]
   slot: Slot
+  colors?: WishlistColor[]
   colorHex: string
   colorName?: string
   shop: string
   url?: string
   price: number
   shipping: number | null
-  targetPrice: number | null
+  targetPrice?: number | null
   brand?: string
   size?: string
   sizeNote?: string
@@ -195,6 +215,10 @@ export interface WishlistInput {
   status: Exclude<WishStatus, 'bought'>
   /** undefined＝不變更所屬群組；null＝移出群組 */
   compareGroupId?: string | null
+  /** 表單暫存的新增圖片與待刪照片 ID；不會直接寫入商品資料列。 */
+  photosToAdd?: WishlistPhotoUpload[]
+  photoIdsToRemove?: string[]
+  photoColorAssignments?: { photoId: string; colorFamily: string | null }[]
 }
 
 /** 比較群組：同一個需求的多個候選，例如「冬天想要一條寬褲」。 */
@@ -305,6 +329,19 @@ export interface BodyMeasurement {
 }
 
 export type BodyMeasurementInput = Omit<BodyMeasurement, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }
+
+/** 量測趨勢可畫的部位（腳的尺寸不畫） */
+export type TrendMetricKey = 'weightKg' | 'shoulderCm' | 'upperBustCm' | 'underBustCm' | 'highWaistCm' | 'waistCm' | 'waistSittingCm' | 'navelCm' | 'navelSittingCm' | 'hipCm' | 'thighCm'
+export type TrendRange = 'half' | 'year' | 'all'
+
+/** 量測趨勢頁的檢視設定（measurement_trend_prefs，每人一筆） */
+export interface MeasurementTrendPrefs {
+  metrics: TrendMetricKey[]
+  range: TrendRange
+  morningOnly: boolean
+  showWeight: boolean
+  updatedAt?: string
+}
 
 /** 不隨每次量測建立快照的固定身體資料。 */
 export interface BodyProfile {

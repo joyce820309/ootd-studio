@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>量測紀錄・趨勢</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.seg{display:inline-grid;grid-auto-flow:column;padding:3px;border-radius:10px;background:#F3E7D4}
+.seg a,.seg button{display:flex;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 16px;border:0;border-radius:8px;background:transparent;font:500 14px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none;cursor:pointer}
+.seg [aria-current="page"],.seg [aria-pressed="true"]{background:#FFFCF6;color:#3B2F25;font-weight:700;box-shadow:0 1px 2px rgba(59,47,37,.1)}
+.mchip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.tick{position:absolute;left:0;right:0;height:1px;background:#EFE4D2}
+.tl{position:absolute;left:-44px;width:36px;text-align:right;font:600 11px Nunito;color:#74624F;transform:translateY(-50%)}
+.xl{position:absolute;top:100%;margin-top:8px;font:600 11px Nunito;color:#74624F;transform:translateX(-50%);white-space:nowrap}
+.pt{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;box-shadow:0 0 0 2px #FFFCF6}
+.sm{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:14px;background:#FFFCF6;color:#3B2F25;text-decoration:none;box-shadow:0 1px 0 rgba(59,47,37,.05),0 10px 20px -16px rgba(59,47,37,.3)}
+</style>
+</helmet>
+<div style="width:100%;min-height:1320px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
+      <a class="nav-a" href="B-Home.dc.html">首頁</a>
+      <a class="nav-a" href="B-Closet.dc.html">我的衣櫃</a>
+      <a class="nav-a" href="B-Outfit.dc.html">今日搭配</a>
+      <a class="nav-a" href="#diary">穿搭日記</a>
+      <a class="nav-a" href="B-Wishlist.dc.html">選購清單</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:4px;padding-bottom:10px">
+      <button class="ibtn" type="button" aria-label="通知" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"></path></svg></button>
+      <a href="B-Body.dc.html" aria-label="個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#FFFCF6;border:1.5px solid #3B2F25;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span></a>
+    </div>
+  </header>
+  <main style="max-width:1200px;margin:0 auto;padding:28px clamp(16px,4vw,48px) 64px;display:flex;flex-direction:column;gap:22px">
+    <nav aria-label="麵包屑" style="font-size:13px;color:#5A4A3C;display:flex;align-items:center;gap:6px"><a href="B-Body.dc.html" style="color:#3E6270">個人資料</a><span aria-hidden="true">›</span><span aria-current="page">量測紀錄</span></nav>
+
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-right:auto">
+        <span class="lbl" style="align-self:flex-start;background:#A9C6CF;transform:rotate(-2deg)">尺寸筆記本</span>
+        <h1 class="hd" style="margin:0;font-size:34px">量測紀錄</h1>
+        <p style="margin:0;font-size:14px;line-height:1.8;color:#5A4A3C">把同一個部位的數字連成線，看它怎麼變。不設目標、不分好壞，上升下降都用同一個顏色。</p>
+      </div>
+      <nav class="seg" aria-label="檢視方式">
+        <a href="B-History.dc.html">依日期</a>
+        <a href="B-History-Table.dc.html">對照表</a>
+        <a href="B-History-Trend.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M4 18l5-6 4 3 7-9"></path></svg>趨勢</a>
+      </nav>
+      <a class="btn btn-p" href="B-Body.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"></path></svg>新增量測</a>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div class="seg" role="group" aria-label="時間範圍"><button type="button" aria-pressed="false">半年</button><button type="button" aria-pressed="true">一年</button><button type="button" aria-pressed="false">全部</button></div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;min-height:44px;cursor:pointer"><span class="sw" aria-hidden="true" style="background:#D9C7AC"><span style="left:2px"></span></span><input type="checkbox" style="position:absolute;opacity:0;width:1px;height:1px">只看「早上空腹」的紀錄</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;min-height:44px;cursor:pointer"><span class="sw" aria-hidden="true" style="background:#4A6245"><span style="left:20px"></span></span><input type="checkbox" checked style="position:absolute;opacity:0;width:1px;height:1px">顯示體重</label>
+    </div>
+
+    <section aria-labelledby="ct" class="paper" style="padding:20px 22px 22px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+        <h2 id="ct" class="hd" style="margin:0;font-size:22px">腰圍、下胸圍</h2>
+        <span style="font-size:12px;color:#5A4A3C">cm・2025/11 – 2026/11・4 筆</span>
+        <span style="margin-left:auto;display:flex;gap:14px;font-size:12px;color:#5A4A3C;align-items:center;flex-wrap:wrap">
+          <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:2px;background:#2A72A0"></span>腰圍</span>
+          <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:2px;background:#B0703A"></span>下胸圍</span>
+          <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#5A4A3C"></span>早上空腹</span>
+          <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;box-shadow:inset 0 0 0 2px #5A4A3C"></span>其他時段</span>
+        </span>
+      </div>
+
+      <div role="group" aria-label="選擇部位（最多 2 項，單位相同）" style="display:flex;gap:6px;flex-wrap:wrap">
+        <sc-for list="{{chips}}" as="c" hint-placeholder-count="10">
+          <button type="button" class="mchip" aria-pressed="{{c.on}}" disabled="{{c.dis}}" style="border-color:{{c.bd}};background:{{c.bg}};opacity:{{c.op}}"><span style="width:10px;height:10px;border-radius:50%;background:{{c.dot}}"></span>{{c.k}}</button>
+        </sc-for>
+        <span style="font-size:12px;color:#74624F;align-self:center;margin-left:4px">最多同時看 2 項；體重單位不同，要單獨看</span>
+      </div>
+
+      <figure style="margin:0;padding:10px 96px 34px 52px">
+        <div role="img" aria-label="{{aria}}" style="position:relative;height:300px">
+          <sc-for list="{{ticks}}" as="t" hint-placeholder-count="5">
+            <span class="tick" style="top:{{t.y}}%"></span><span class="tl" style="top:{{t.y}}%">{{t.v}}</span>
+          </sc-for>
+          <svg viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">
+            <path d="{{s1.d}}" fill="none" stroke="#2A72A0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+            <path d="{{s2.d}}" fill="none" stroke="#B0703A" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+          </svg>
+          <span aria-hidden="true" style="position:absolute;left:{{hx}}%;top:0;bottom:0;width:1px;background:#3B2F25;opacity:.35"></span>
+          <sc-for list="{{pts}}" as="p" hint-placeholder-count="8">
+            <span class="pt" style="left:{{p.x}}%;top:{{p.y}}%;background:{{p.bg}};box-shadow:{{p.sh}}"></span>
+          </sc-for>
+          <sc-for list="{{xl}}" as="x" hint-placeholder-count="4"><span class="xl" style="left:{{x.x}}%">{{x.t}}</span></sc-for>
+          <span class="num" style="position:absolute;left:100%;top:{{e1}}%;margin-left:10px;transform:translateY(-50%);font-size:12px;font-weight:700;white-space:nowrap">腰圍 65</span>
+          <span class="num" style="position:absolute;left:100%;top:{{e2}}%;margin-left:10px;transform:translateY(-50%);font-size:12px;font-weight:700;white-space:nowrap">下胸圍 70</span>
+          <div role="tooltip" style="position:absolute;left:{{hx}}%;top:30%;transform:translateX(-108%);min-width:190px;padding:10px 12px;border-radius:12px;background:#3B2F25;color:#FBF4E8;font-size:12px;line-height:1.7;box-shadow:0 10px 20px -10px rgba(59,47,37,.5)">
+            <b class="num" style="font-size:13px">2026/11/12</b>・早上空腹<br>
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#7FB2D6;margin-right:6px"></span>腰圍 <b class="num">65</b> cm <span style="opacity:.75">（上次 66）</span><br>
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#E0A577;margin-right:6px"></span>下胸圍 <b class="num">70</b> cm <span style="opacity:.75">（上次 71）</span>
+          </div>
+        </div>
+        <figcaption style="margin-top:42px;font-size:12px;line-height:1.7;color:#5A4A3C">滑過或點一個日期，顯示那天的數字。Y 軸至少涵蓋 10 cm（體重至少 3 kg），1 公分的差異不會被畫得很誇張。空心點是不同時段量的，比較時要留意。想看精確數字，切到「對照表」。</figcaption>
+      </figure>
+    </section>
+
+    <section aria-labelledby="smt" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:baseline;gap:10px"><h2 id="smt" class="hd" style="margin:0;font-size:20px">所有部位</h2><span style="font-size:12px;color:#5A4A3C">點一格放到上面的大圖。每格的比例尺一樣，小線只看方向。</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px">
+        <sc-for list="{{cards}}" as="c" hint-placeholder-count="10">
+          <a href="#ct" class="sm" style="box-shadow:{{c.ring}}">
+            <span style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:500">{{c.k}}</span><sc-if value="{{c.dot}}" hint-placeholder-val="{{ false }}"><span style="width:8px;height:8px;border-radius:50%;background:{{c.dot}}"></span></sc-if><span style="margin-left:auto;font-size:11px;color:#74624F">{{c.n}} 筆</span></span>
+            <span style="display:flex;align-items:baseline;gap:4px"><span class="num" style="font-size:22px;font-weight:700">{{c.v}}</span><span style="font-size:12px;color:#74624F">{{c.u}}</span><span class="num" style="margin-left:auto;font-size:12px;color:#5A4A3C">{{c.chg}}</span></span>
+            <sc-if value="{{c.line}}" hint-placeholder-val="{{ true }}">
+              <svg viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true" style="width:100%;height:34px;overflow:visible"><path d="{{c.d}}" fill="none" stroke="{{c.stroke}}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg>
+            </sc-if>
+            <sc-if value="{{c.few}}" hint-placeholder-val="{{ false }}"><span style="height:34px;display:flex;align-items:center;font-size:11px;color:#74624F">只有 1 筆，還畫不出線</span></sc-if>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1320}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // 日期（舊→新）、時段、各部位數值（null＝那次沒量）
+    const D = ['2025-11-05', '2026-04-18', '2026-10-02', '2026-11-12'];
+    const TM = ['none', 'evening', 'morning', 'morning'];
+    const M = [
+      ['w', '體重', 'kg', [53.0, 53.0, 52.5, 52.0], 3], ['sh', '肩寬', 'cm', [37.5, 38, 38, 38], 10],
+      ['ub', '上胸圍', 'cm', [85, 84, 84, 84], 10], ['lb', '下胸圍', 'cm', [71, 71, 71, 70], 10],
+      ['hw', '高腰圍', 'cm', [null, null, null, 64], 10], ['wa', '腰圍', 'cm', [66, 66, 66, 65], 10],
+      ['na', '肚臍圍・站', 'cm', [null, null, 73, 73], 10], ['ns', '肚臍圍・坐', 'cm', [null, null, null, 81], 10],
+      ['hi', '臀圍', 'cm', [92, 91, 91, 91], 10], ['th', '大腿圍', 'cm', [null, null, null, null], 10]
+    ];
+    const SEL = { wa: '#2A72A0', lb: '#B0703A' };
+    const t0 = Date.parse('2025-11-01'), t1 = Date.parse('2026-11-30');
+    const xp = d => Math.round((Date.parse(d) - t0) / (t1 - t0) * 1000) / 10;
+    // 主圖 Y 軸：至少 10 cm
+    const vals = [].concat(...M.filter(m => SEL[m[0]]).map(m => m[3].filter(v => v != null)));
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    if (hi - lo < 10) { const c = (hi + lo) / 2; lo = Math.floor(c - 5); hi = lo + 10; }
+    const yp = v => Math.round((1 - (v - lo) / (hi - lo)) * 1000) / 10;
+    const series = k => {
+      const m = M.find(x => x[0] === k), pts = m[3].map((v, i) => v == null ? null : [xp(D[i]) * 10, yp(v) * 3]).filter(Boolean);
+      const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0] + ' ' + p[1]).join(' ');
+      return { d, area: d + ' L' + pts[pts.length - 1][0] + ' 300 L' + pts[0][0] + ' 300 Z', last: m[3][m[3].length - 1] };
+    };
+    const s1 = series('wa'), s2 = series('lb');
+    const pts = [];
+    ['wa', 'lb'].forEach(k => M.find(x => x[0] === k)[3].forEach((v, i) => {
+      if (v == null) return;
+      const morning = TM[i] === 'morning';
+      pts.push({ x: xp(D[i]), y: yp(v), bg: morning ? SEL[k] : '#FFFCF6', sh: morning ? '0 0 0 2px #FFFCF6' : 'inset 0 0 0 2.5px ' + SEL[k] + ',0 0 0 2px #FFFCF6' });
+    }));
+    const ticks = []; for (let v = lo; v <= hi; v += 2) ticks.push({ v, y: yp(v) });
+    const spark = (arr, span) => {
+      const xs = arr.map((v, i) => v == null ? null : [xp(D[i]), v]).filter(Boolean);
+      if (xs.length < 2) return null;
+      let a = Math.min(...xs.map(p => p[1])), b = Math.max(...xs.map(p => p[1]));
+      if (b - a < span) { const c = (a + b) / 2; a = c - span / 2; b = c + span / 2; }
+      return xs.map((p, i) => (i ? 'L' : 'M') + p[0] + ' ' + Math.round((1 - (p[1] - a) / (b - a)) * 300) / 10).join(' ');
+    };
+    return {
+      s1, s2, pts, ticks, hx: xp(D[3]), e1: yp(65), e2: yp(70),
+      aria: '腰圍從 66 到 65 cm，下胸圍從 71 到 70 cm，2025/11 到 2026/11 共 4 筆',
+      xl: D.map(d => ({ x: xp(d), t: d.slice(0, 7).replace('-', '/') })),
+      chips: M.map(([k, n, u, arr]) => {
+        const on = !!SEL[k], cnt = arr.filter(v => v != null).length, dis = !on && (u !== 'cm' || cnt < 2);
+        return { k: n, on: on ? 'true' : 'false', dis, dot: on ? SEL[k] : '#D9C7AC', bd: on ? SEL[k] : '#E2D2B8', bg: on ? '#FFFCF6' : '#FBF4E8', op: dis ? .5 : 1 };
+      }),
+      cards: M.map(([k, n, u, arr, span]) => {
+        const got = arr.filter(v => v != null), d = spark(arr, span), last = got[got.length - 1];
+        const diff = got.length > 1 ? Math.round((last - got[0]) * 10) / 10 : null;
+        return { k: n, u: got.length ? u : '', v: got.length ? last : '沒記', n: got.length, d: d || '', line: !!d, few: got.length === 1,
+          chg: diff == null ? '' : (diff === 0 ? '沒變' : (diff > 0 ? '+' : '−') + Math.abs(diff) + ' ' + u),
+          dot: SEL[k] || '', stroke: SEL[k] || '#5A4A3C', ring: SEL[k] ? 'inset 0 0 0 2px ' + SEL[k] : '0 1px 0 rgba(59,47,37,.05),0 10px 20px -16px rgba(59,47,37,.3)' };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

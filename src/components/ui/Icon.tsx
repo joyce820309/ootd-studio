@@ -23,6 +23,7 @@ const PATHS = {
   layerDown: 'M12 5v14M5 12l7 7 7-7',
   rotateLeft: 'M4 11a8 8 0 1 1 2 6M4 5v6h6',
   rotateRight: 'M20 11a8 8 0 1 0-2 6M20 5v6h-6',
+  trend: 'M4 18l5-6 4 3 7-9',
   reset: 'M3 12a9 9 0 1 0 3-6.7M3 4v5h5',
   calendar: 'M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8.5 3v4M15.5 3v4',
   more: 'M5 12h.01M12 12h.01M19 12h.01',

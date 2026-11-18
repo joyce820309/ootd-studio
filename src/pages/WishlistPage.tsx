@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ItemImage } from '@/components/closet/ItemImage'
 import { DestructiveActionDialog } from '@/components/ui/B10States'
@@ -21,7 +21,9 @@ import {
   setWishlistStatus,
   updateWishlistItem,
 } from '@/lib/data'
-import { SLOT_META } from '@/lib/slots'
+import { SLOT_META, SLOTS } from '@/lib/slots'
+import { FLAT_LABELS } from '@/lib/review'
+import { formatStretch, SIZING } from '@/lib/stretch'
 import {
   ACTIVE_STATUSES,
   formatAddedDate,
@@ -45,6 +47,17 @@ const demoSuffix = (demo: boolean) => (demo ? '（示範模式，重新整理後
 const isTabKey = (value: string | null): value is TabKey => !!value && WISH_TABS.some((t) => t.key === value)
 
 const matchesTab = (item: WishlistItem, tab: TabKey) => (tab === 'all' ? item.status !== 'bought' : item.status === tab)
+
+function flatMeasurementEntries(item: WishlistItem) {
+  const entries = Object.entries(item.flatMeasurements ?? {}).filter((entry): entry is [string, number] => typeof entry[1] === 'number')
+  const order = SIZING[item.primaryPart ?? item.slot].map((field) => field.key)
+  return entries.sort(([a], [b]) => (order.indexOf(a) < 0 ? 99 : order.indexOf(a)) - (order.indexOf(b) < 0 ? 99 : order.indexOf(b)))
+}
+
+function flatMeasurementText(item: WishlistItem) {
+  const entries = flatMeasurementEntries(item)
+  return entries.length ? entries.map(([key, value]) => `${FLAT_LABELS[key] ?? key} ${formatStretch(value, item.flatStretch?.[key])}`).join('・') : null
+}
 
 export function WishlistPage() {
   const [params, setParams] = useSearchParams()
@@ -143,13 +156,13 @@ export function WishlistPage() {
       setToast({ tone: 'success', text: `「${item.name}」改為${WISH_STATUS[status].label}${demoSuffix(demo)}` })
     })
 
-  const onBought = (item: WishlistItem, purchase: { purchaseDate: string; paidPrice: number | null }) =>
+  const onBought = (item: WishlistItem, purchase: { purchaseDate: string; paidPrice: number | null; colorFamilies: string[] }) =>
     run(async () => {
-      const { itemId, demo } = await markWishlistBought(item.id, purchase)
-      replaceItem({ ...item, status: 'bought', boughtItemId: itemId })
+      const { itemIds, demo } = await markWishlistBought(item.id, purchase)
+      replaceItem({ ...item, status: 'bought', boughtItemId: itemIds[0], boughtItemIds: itemIds })
       setDialog(null)
       setCloset((await fetchClosetItems().catch(() => null)) ?? closet)
-      setToast({ tone: 'success', text: `已放進衣櫃，選購紀錄保留在「已購買」${demoSuffix(demo)}` })
+      setToast({ tone: 'success', text: `已建立 ${itemIds.length} 件衣物，選購紀錄保留在「已購買」${demoSuffix(demo)}` })
     })
 
   const onDelete = (item: WishlistItem) =>
@@ -260,7 +273,7 @@ export function WishlistPage() {
           onDelete={dialog.kind === 'edit' ? () => setDialog({ kind: 'delete', item: dialog.item }) : undefined}
         />
       )}
-      {dialog?.kind === 'bought' && <BoughtDialog item={dialog.item} saving={saving} onCancel={() => setDialog(null)} onConfirm={(purchase) => void onBought(dialog.item, purchase)} />}
+      {dialog?.kind === 'bought' && <BoughtDialog key={dialog.item.id} item={dialog.item} saving={saving} onCancel={() => setDialog(null)} onConfirm={(purchase) => void onBought(dialog.item, purchase)} />}
       {dialog?.kind === 'delete' && (
         <DestructiveActionDialog
           title={`永久刪除「${dialog.item.name}」？`}
@@ -282,7 +295,10 @@ export function WishlistPage() {
 
 function WishCard({ item, current, similar, onSelect }: { item: WishlistItem; current: boolean; similar: boolean; onSelect: () => void }) {
   const status = WISH_STATUS[item.status]
-  const meta = [item.brand ?? item.shop, item.size, item.priority ? `優先 ${PRIORITY_LABEL[item.priority]}` : null].filter(Boolean).join(' · ')
+  const colorNames = item.colors?.map((color) => color.family).filter(Boolean).join('、')
+  const meta = [item.brand ?? item.shop, item.size, colorNames ? `顏色 ${colorNames}` : null, item.priority ? `優先 ${PRIORITY_LABEL[item.priority]}` : null].filter(Boolean).join(' · ')
+  const flatText = flatMeasurementText(item)
+  const flatSummary = flatText ? `平放尺寸 ${flatText} cm` : null
   return (
     <button
       type="button"
@@ -302,6 +318,7 @@ function WishCard({ item, current, similar, onSelect }: { item: WishlistItem; cu
           <span className="flex-none font-num text-[15px] font-bold tabular">{formatNT(item.price)}</span>
         </span>
         {meta && <span className="truncate text-xs text-ink-2">{meta}</span>}
+        {flatSummary && <span className="line-clamp-2 text-[11px] leading-5 text-ink-2">{flatSummary}</span>}
         <span className="flex flex-wrap gap-1.5">
           <span className={`inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium ${status.className}`}>
             <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
@@ -335,17 +352,48 @@ function WishDetail({
   onDelete: () => void
   onStatus: (status: WishlistInput['status']) => void
 }) {
+  const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null)
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const lightboxRef = useRef<HTMLDialogElement>(null)
+  const photos = item.photos ?? []
+  const sizeEntries = flatMeasurementEntries(item)
+  const selectedPhoto = photos.find((photo) => photo.id === selectedPhotoId) ?? photos.find((photo) => photo.isCover) ?? photos[0]
+  const displayedImageUrl = selectedPhoto?.url ?? item.cutoutUrl
+  const lightboxSlides = [
+    ...photos.filter((photo) => photo.url).map((photo) => ({ id: photo.id, url: photo.url!, colorFamily: photo.colorFamily })),
+    ...(item.cutoutUrl && !photos.some((photo) => photo.url === item.cutoutUrl) ? [{ id: `cutout-${item.id}`, url: item.cutoutUrl, colorFamily: undefined }] : []),
+  ]
+  const currentLightboxSlide = lightboxIndex === null ? null : lightboxSlides[lightboxIndex] ?? null
+
+  useEffect(() => {
+    const dialog = lightboxRef.current
+    if (lightboxIndex !== null && dialog && !dialog.open) dialog.showModal()
+  }, [lightboxIndex])
+
+  function showLightboxImage(url: string) {
+    const index = lightboxSlides.findIndex((photo) => photo.url === url)
+    if (index >= 0) setLightboxIndex(index)
+  }
+
+  function moveLightboxImage(direction: -1 | 1) {
+    setLightboxIndex((current) => current === null || lightboxSlides.length < 2 ? current : (current + direction + lightboxSlides.length) % lightboxSlides.length)
+  }
+
+  function handleLightboxKeyDown(event: React.KeyboardEvent<HTMLDialogElement>) {
+    if (lightboxIndex === null || lightboxSlides.length < 2) return
+    if (event.key === 'ArrowLeft') { event.preventDefault(); moveLightboxImage(-1) }
+    else if (event.key === 'ArrowRight') { event.preventDefault(); moveLightboxImage(1) }
+  }
   const status = WISH_STATUS[item.status]
   const activeItem = isActiveWish(item)
   const added = formatAddedDate(item.createdAt)
-  const priceGap = item.targetPrice !== undefined ? item.price - item.targetPrice : null
   const facts = [item.brand ?? item.shop, item.size ? `預計尺寸 ${item.size}` : null, added ? `加入於 ${added}` : null].filter(Boolean).join('・')
   const extra = [
     item.shipping !== undefined ? ['運費', item.shipping === 0 ? '免運' : formatNT(item.shipping)] : null,
     item.brand && item.shop !== item.brand ? ['店家', item.shop] : null,
     item.returnPolicy ? ['退換貨', item.returnPolicy] : null,
     item.material ? ['材質', item.material] : null,
-    item.colorName ? ['顏色', item.colorName] : null,
+    (item.colors?.length ? item.colors.map((color) => color.family).join('、') : item.colorName) ? ['顏色', item.colors?.map((color) => color.family).join('、') ?? item.colorName!] : null,
   ].filter((entry): entry is [string, string] => !!entry)
 
   return (
@@ -362,8 +410,11 @@ function WishDetail({
         <span aria-hidden="true" className="absolute -top-2.5 left-10 h-[22px] w-[84px] rounded-[2px] bg-rose-wash mix-blend-multiply" style={{ rotate: '-4deg' }} />
 
         <div className="flex flex-wrap gap-[22px]">
-          <div className="mx-auto flex aspect-[4/5] w-[200px] flex-none items-center justify-center rounded-card border-[1.5px] border-dashed border-rose-edge bg-rose-soft sm:mx-0">
-            <ItemImage name={item.name} cutoutUrl={item.cutoutUrl} shape={item.shape} colorHex={item.colorHex} className="h-[74%] w-[74%]" />
+          <div className="mx-auto w-[200px] flex-none sm:mx-0">
+            <div className="flex aspect-[4/5] items-center justify-center rounded-card border-[1.5px] border-dashed border-rose-edge bg-rose-soft">
+              {displayedImageUrl ? <button type="button" onClick={() => showLightboxImage(displayedImageUrl)} aria-label="放大查看商品圖片" className="flex size-full cursor-zoom-in items-center justify-center rounded-card bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-mist-deep"><img src={displayedImageUrl} alt={`${item.name}商品圖片，點擊放大`} className="size-full rounded-card object-contain" /></button> : <ItemImage name={item.name} shape={item.shape} colorHex={item.colorHex} className="h-[74%] w-[74%]" />}
+            </div>
+            {photos.length > 1 && <div role="group" aria-label="商品圖片" className="mt-2 flex flex-wrap gap-2">{photos.map((photo, index) => <button key={photo.id} type="button" aria-label={`查看第 ${index + 1} 張商品圖片${photo.colorFamily ? `，${photo.colorFamily}色` : ''}`} aria-pressed={selectedPhoto?.id === photo.id} onClick={() => setSelectedPhotoId(photo.id)} className={`relative size-12 overflow-hidden rounded-sm border-[1.5px] bg-paper ${selectedPhoto?.id === photo.id ? 'border-ink' : 'border-line'}`}>{photo.url && <img src={photo.url} alt="" className="size-full object-cover" loading="lazy" />}{photo.colorFamily && <span className="absolute inset-x-0 bottom-0 truncate bg-card/90 px-0.5 text-[8px]">{photo.colorFamily}</span>}</button>)}</div>}
           </div>
           <div className="flex min-w-0 flex-[1_1_240px] flex-col gap-2.5">
             <span className={`inline-flex h-6 items-center gap-1.5 self-start rounded-full px-2.5 text-xs font-medium ${status.className}`}>
@@ -373,11 +424,6 @@ function WishDetail({
             <h2 className="m-0 font-hd text-[28px] leading-[1.3]">{item.name}</h2>
             <div className="flex flex-wrap items-baseline gap-3">
               <span className="font-num text-[26px] font-bold tabular">{formatNT(item.price)}</span>
-              {item.targetPrice !== undefined && priceGap !== null && (
-                <span className="font-num text-[13px] text-ink-2 tabular">
-                  目標 {formatNT(item.targetPrice)}・{priceGap > 0 ? `差 ${formatNT(priceGap)}` : '已到目標價'}
-                </span>
-              )}
             </div>
             {facts && <span className="text-[13px] text-ink-2">{facts}</span>}
             {item.url && (
@@ -388,6 +434,15 @@ function WishDetail({
               </a>
             )}
             {item.sizeNote && <div className="rounded-btn bg-mist-soft px-3.5 py-2.5 text-sm leading-[1.7] text-ink"><span className="mb-1 block text-xs font-medium text-ink-2">尺寸備註</span><MarkdownNote value={item.sizeNote} /></div>}
+            {sizeEntries.length > 0 && <section aria-label="平放尺寸" className="space-y-2 rounded-btn bg-sage-soft p-3 text-sage-ink">
+              <h3 className="m-0 text-xs font-medium">平放尺寸 <span className="font-normal">・cm・{SLOTS.find((slot) => slot.slot === (item.primaryPart ?? item.slot))?.label}</span></h3>
+              <dl className="m-0 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {sizeEntries.map(([key, value]) => <div key={key} className="min-w-0 rounded-sm bg-card/75 px-2.5 py-2">
+                  <dt className="truncate text-[11px] text-ink-2">{FLAT_LABELS[key] ?? key}</dt>
+                  <dd className="m-0 font-num text-sm font-bold tabular text-ink">{formatStretch(value, item.flatStretch?.[key])}<span className="ml-1 text-[10px] font-normal text-ink-3">cm</span></dd>
+                </div>)}
+              </dl>
+            </section>}
             {item.reason && <div className="mt-1 rounded-btn bg-paper px-3.5 py-2.5 text-sm leading-[1.7] text-ink"><MarkdownNote value={item.reason} /></div>}
             {extra.length > 0 && (
               <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[13px]">
@@ -401,6 +456,24 @@ function WishDetail({
             )}
           </div>
         </div>
+
+        <dialog
+          ref={lightboxRef}
+          aria-label="商品圖片放大檢視"
+          onClose={() => setLightboxIndex(null)}
+          onKeyDown={handleLightboxKeyDown}
+          className="fixed inset-0 m-0 hidden h-dvh max-h-none w-screen max-w-none items-center justify-center border-0 bg-transparent p-4 open:flex backdrop:bg-scrim"
+        >
+          {currentLightboxSlide && <div className="relative flex max-h-full max-w-full items-center justify-center">
+            <img src={currentLightboxSlide.url} alt={`${item.name}${currentLightboxSlide.colorFamily ? `・${currentLightboxSlide.colorFamily}` : ''}商品圖片`} className="max-h-[calc(100dvh-5rem)] max-w-[calc(100vw-2rem)] object-contain" />
+            {lightboxSlides.length > 1 && <>
+              <button type="button" aria-label="上一張圖片" onClick={() => moveLightboxImage(-1)} className="absolute left-2 top-1/2 flex size-12 -translate-y-1/2 items-center justify-center rounded-full bg-card/95 text-ink shadow-float sm:-left-16"><Icon name="back" size={24} /></button>
+              <button type="button" aria-label="下一張圖片" onClick={() => moveLightboxImage(1)} className="absolute right-2 top-1/2 flex size-12 -translate-y-1/2 items-center justify-center rounded-full bg-card/95 text-ink shadow-float sm:-right-16"><Icon name="next" size={24} /></button>
+              <p aria-live="polite" className="absolute -bottom-12 left-1/2 m-0 -translate-x-1/2 rounded-full bg-card/95 px-3 py-1 text-sm text-ink">第 {lightboxIndex! + 1} 張／共 {lightboxSlides.length} 張</p>
+            </>}
+            <button type="button" autoFocus aria-label="關閉圖片放大檢視" onClick={() => lightboxRef.current?.close()} className="absolute -right-2 -top-2 flex size-11 items-center justify-center rounded-full bg-card text-ink shadow-float"><Icon name="x" /></button>
+          </div>}
+        </dialog>
 
         {activeItem && (
           <div role="group" aria-label="變更狀態" className="flex flex-wrap items-center gap-2">

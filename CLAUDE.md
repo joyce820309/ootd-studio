@@ -59,20 +59,21 @@ src/
     stretch.ts           彈性尺寸：平放尺寸欄位（SIZING）、範圍輸入解析、一圈量提示、舒適拉伸（60%）、彈性纖維提示
     bodyMeasurement.ts   量測快照／固定資料的表單欄位、草稿轉換、檢查、和上一筆比較
     profileIdentity.ts   頭像與「我的」顯示名稱（useProfileIdentity）
+    measurementTrend.ts  量測趨勢：可畫部位、時間範圍、Y 軸最小範圍、小線圖、部位切換規則、設定正規化
     useIsMobile.ts       與 md 斷點一致的手機判斷（只在手機與桌面要渲染不同元件時使用）
   data/sample.ts         示範資料（繁中）
   components/
     ui/                  Button、Chip/StatusTag、Icon、Select、Combobox、DatePicker、Paper（PaperCard、TiltLabel、Tape、WashBlob、LogoSticker）、StickyNote、Toast
     layout/              AppHeader、MobileTabBar、AppLayout、PageStub、ProfileNav（`/me` 底下共用外框 ProfileLayout：xl 以上左側子導覽，以下用 ProfileBreadcrumb 麵包屑）、ProfileAvatarLink（頁首頭像 → `/me`；桌面 header、手機首頁與日記頂部）
     closet/              GarmentArt（示範剪影）、ItemImage、ItemTile、CutoutRegionDialog（框選去背範圍）、FlatMeasureField（平放尺寸欄位，可填範圍／有彈性）
-    profile/             MobileProfileHub（手機「我的」：體態與尺寸、固定資料底部面板、清單管理、踩雷筆記本、設定與登出）
+    profile/             MeasurementTrend（量測趨勢主圖＋所有部位小線圖）、MobileProfileHub（手機「我的」：體態與尺寸、固定資料底部面板、清單管理、踩雷筆記本、設定與登出）
     outfit/              OutfitBoard（固定板型）、SlotPicker、FreeCanvas（自由擺放）
                          StudioCanvas、StudioBackgroundPicker、StudioBackgroundSurface（搭配工作台背景）
     diary/               DiaryParts（評分、場合／感受標籤、月曆小拼貼）、DiaryEntryDialog（記一筆／編輯）
     wishlist/            WishlistTabs、WishlistForm（新增／編輯）、BoughtDialog（移至已購買）、CompareGroupDialog
     review/              ReviewMarkDialog（標記踩雷／換貨）、AiReviewDialog（複製給 AI／貼上回覆）、LessonRules（規則列、表單、開關）
   pages/                 Landing、Login、Home、Closet、AddItem、ItemDetail、Outfit、Studio、Wishlist、Compare、Diary、Profile、MeasurementHistory、MeasurementForm、Brands、ManagedLists
-supabase/migrations/     0001_init.sql … 0020_waist_sitting_measurement.sql（依序執行）
+supabase/migrations/     0001_init.sql … 0022_wishlist_parts_colors_unlimited_photos.sql（依序執行）
 ```
 
 ## 路由與進度
@@ -94,7 +95,7 @@ supabase/migrations/     0001_init.sql … 0020_waist_sitting_measurement.sql（
 | `/wishlist/compare`             | **比較試搭台**（主要功能；群組 CRUD、加入／淘汰候選、混搭試穿、決定買；`?group=`） | 完成 → B-Compare、B-M-Compare                  |
 | `/me`                           | 桌面：個人資料・新增量測（儲存為新快照）；手機：「我的」總覽（首頁、日記頂部頭像進入） | 完成 → B-Body、B-M-Lists                       |
 | `/me/measurements/new`、`/me/measurements/:id/edit` | 新增量測／編輯單筆（手機主要入口；桌面也可用）                       | 完成 → B-M-Body                                |
-| `/me/measurements`              | 量測紀錄・依日期／對照表（`?view=table`）                                          | 完成 → B-History、B-History-Table、B-M-History |
+| `/me/measurements`              | 量測紀錄・依日期／對照表／趨勢（`?view=table`、`?view=trend`）                     | 完成 → B-History、B-History-Table、B-History-Trend、B-M-History、B-M-History-Trend |
 | `/me/measurements/:id`          | 單次紀錄（手機獨立頁；桌面在列表右側）                                             | 完成 → B-M-History-Detail                      |
 | `/me/brands`                    | 品牌管理（新增／改名／合併／刪除＋10 秒復原、可能重複提示；`/me` 頁首有入口）      | 完成 → B-Brands、B-M-Brands-\*                 |
 | `/me/shops`                     | 購買通路管理（新增／改名／合併／刪除，含網路／實體類型與網址）                     | 完成 → B-Shops、B-M-Shops                      |
@@ -173,12 +174,14 @@ supabase/migrations/     0001_init.sql … 0020_waist_sitting_measurement.sql（
 
 ## Supabase
 
-- 體態量測：`/me` 每次儲存都新增一筆 `body_measurements`「當天完整快照」，以最近一筆預填，不覆蓋舊紀錄；編輯歷史紀錄則更新指定快照。歷史頁用相鄰兩筆比較：不同→燕麥底顯示差值、上一筆沒有→霧藍「第一次記」、相同→「—」。只列數字，**不畫趨勢圖、不用紅綠色評價增減**。欄位 migration 已整併至 `0005_split_body_circumferences.sql`：上胸圍／下胸圍、肚臍圍，以及五指襪／一般襪／裸腳各自的腳長／腳寬／前掌圍／腳背圍。
-- 資料表：`profiles`、`categories`、`items`、`item_photos`、`wishlist_items`、`compare_groups`、`outfits`、`outfit_items`、`body_measurements`、`body_profile`、`brands`、`brand_distinct_groups`。
+- 體態量測：`/me` 每次儲存都新增一筆 `body_measurements`「當天完整快照」，以最近一筆預填，不覆蓋舊紀錄；編輯歷史紀錄則更新指定快照。歷史頁用相鄰兩筆比較：不同→燕麥底顯示差值、上一筆沒有→霧藍「第一次記」、相同→「—」。依日期與對照表只列數字；趨勢圖見下方「量測趨勢」，**不設目標、不用紅綠色評價增減**。欄位 migration 已整併至 `0005_split_body_circumferences.sql`：上胸圍／下胸圍、肚臍圍，以及五指襪／一般襪／裸腳各自的腳長／腳寬／前掌圍／腳背圍。
+- 資料表：`profiles`、`categories`、`items`、`item_photos`、`wishlist_items`、`compare_groups`、`outfits`、`outfit_items`、`body_measurements`、`body_profile`、`measurement_trend_prefs`、`brands`、`brand_distinct_groups`。
 - 品牌名稱仍存在 `items.brand`／`wishlist_items.brand` 文字欄位；`brands` 只放手動新增的品牌，`brand_distinct_groups` 記「不是同一個」。改名、合併、刪除一律走 `replace_brands` RPC（衣物與選購一起更新），復原用 `restore_brand`。
 - 每張表都有 `owner_id default auth.uid()` 並啟用 RLS，只有本人能讀寫。新增資料表時照同樣模式。
 - 新使用者註冊時由 `handle_new_user` trigger 建立 profile 與預設分類；分類不要寫死在 UI。
 - 彈性尺寸：`items`／`wishlist_items` 的 `flat_stretch` jsonb（migration 0018）存「拉開後的平放值」，key 與 `flat_measurements` 相同、只限胸寬／腰寬／臀寬／大腿寬／袖口／褲口；沒有平放值的拉伸值不存。判定與規則見 `src/lib/stretch.ts`、`src/lib/review.ts`（設計稿 B20／BM17）。
+- 選購候選（migration 0022）：`primary_part` 單選為分類與尺寸欄位依據，`also_parts` 可複選並讓今日搭配在多個部位找到；`colors` 為 `{ family, hex? }[]`，圖片可用 `item_photos.color_family` 標記色系，圖片張數不限（每張仍小於 10 MB）。移至已購買時每個勾選顏色建立一件衣物，購買記錄保留所有衣物 ID。
+- 選購商品網址只存連結；店家推測只解析 URL 網域，不抓取網頁，只有店家欄空白才自動填入。
 - 圖片放私人 bucket `closet-images`，路徑第一層必須是使用者 id：`{uid}/...`；衣物原圖為 `{uid}/{item_id}/original.ext`，多圖索引在 `item_photos`，讀取用 signed URL。未完成新增會以 `items.is_draft = true` 隱藏。
 - 穿搭日記＝`outfits` 中 `worn_on` 有值且 `is_hypothetical = false` 的穿搭（今日搭配「存進穿搭日記」也會出現）。場合可複選（`occasions`）、感受 `feel`、天氣與氣溫、照片 `{uid}/outfits/{outfit_id}/...`。衣物的 `wear_count`／`last_worn_at` 由 `0007` 的 trigger 依 `outfit_items` 增減，前端不要另外加減。
 - Schema 變更：新增 `supabase/migrations/000N_xxx.sql`，**不要改舊的 migration**；同步更新 `src/types.ts`。
@@ -231,6 +234,17 @@ supabase/migrations/     0001_init.sql … 0020_waist_sitting_measurement.sql（
 - 時段只是紀錄，不影響計算
 - 腰圍另以 migration 0020 新增 `waist_sitting_cm`；腰圍欄位分站姿與坐姿，褲腰尺寸比對取兩者較大值（已有肚臍圍站／坐時，非高腰無彈性褲仍依肚臍圍規則）。
 
+
+### 量測趨勢（design/B-History-Trend.dc.html、B-M-History-Trend.dc.html）
+- 量測紀錄三種檢視：依日期／對照表／趨勢（`/me/measurements?view=trend`）
+- 主圖一次 1～2 個部位，單位相同才能一起看（體重只能單獨看）；手機一次 1 個
+- Y 軸最小範圍：cm 類 10 cm、體重 3 kg，避免小變化被放大
+- 不分好壞：上升下降同色，不畫目標線、不寫評價字眼
+- 點：早上空腹＝實心，其他時段或沒記時段＝空心
+- 選項：時間範圍（半年／一年／全部）、只看早上空腹、顯示體重（關掉時整頁不出現體重）
+- 只有 1 筆的部位不畫線，顯示「只有 1 筆，還畫不出線」
+- 系列色：`trend-1`（#2A72A0）、`trend-2`（#B0703A），已驗證色盲與對比；格線 `chart-grid`
+- 趨勢直接用 `body_measurements` 計算；檢視設定存在 `measurement_trend_prefs`（migration 0021，每人一筆：metrics、time_range、morning_only、show_weight），切換時自動儲存，刪除＝還原預設。邏輯在 `src/lib/measurementTrend.ts`，畫面在 `components/profile/MeasurementTrend.tsx`
 ### 設計稿對照表（`design/`）
 
 | 編號  | 畫面                           | 設計檔                    | 尺寸 | 對應路由／程式                               |
@@ -246,9 +260,11 @@ supabase/migrations/     0001_init.sql … 0020_waist_sitting_measurement.sql（
 | B6    | 新增衣物流程                   | `B-Add.dc.html`           | 1440 | `/closet/new`                                |
 | B7    | 選購清單                       | `B-Wishlist.dc.html`      | 1440 | `/wishlist`                                  |
 | B7+   | 比較試搭台（主要功能）         | `B-Compare.dc.html`       | 1440 | `/wishlist/compare`                          |
+| B7.1  | 加入選購清單（Dialog）         | `B-Wishlist-Add.dc.html`      | 760  | 選購清單 › 加入（無獨立路徑）               |
 | B8    | 個人體態資料・新增量測・固定資料 | `B-Body.dc.html`              | 1440 | `/me`                                       |
 | B8.1  | 量測紀錄・依日期               | `B-History.dc.html`           | 1440 | `/me/measurements`                          |
 | B8.2  | 量測紀錄・對照表               | `B-History-Table.dc.html`     | 1440 | `/me/measurements`（對照表檢視）            |
+| B8.3  | 量測紀錄・趨勢                 | `B-History-Trend.dc.html`     | 1440 | `/me/measurements?view=trend`               |
 | B9    | 自由畫布（進階版，後續）       | `B-Studio.dc.html`        | 1440 | `/outfit` 的「自由擺放」tab（`FreeCanvas`）  |
 | B10   | 空狀態・載入・錯誤             | `B-States.dc.html`        | 1440 | 各頁共用                                     |
 | B11   | 元件：日期選擇器               | `B-DatePicker.dc.html`    | 1440 | `components/ui/DatePicker.tsx`               |
@@ -279,6 +295,7 @@ supabase/migrations/     0001_init.sql … 0020_waist_sitting_measurement.sql（
 | BM5.1 | 手機畫布背景主題（Bottom sheet）| `B-M-Studio-Bg.dc.html` | 390 | 自由畫布 › 背景（無獨立路徑） |
 | BM6   | 手機量測紀錄                   | `B-M-History.dc.html`         | 390  | `/me/measurements`                          |
 | BM6.1 | 手機單次紀錄                   | `B-M-History-Detail.dc.html`  | 390  | `/me/measurements/:id`                      |
+| BM6.2 | 手機量測趨勢                   | `B-M-History-Trend.dc.html`   | 390  | `/me/measurements?view=trend`               |
 | BM7 | 手機穿搭日記 | `B-M-Diary.dc.html` | 390 | `/diary` |
 | BM7.1 | 手機單日紀錄 | `B-M-Diary-Day.dc.html` | 390 | `/diary/:id` |
 | BM7.2 | 手機記一筆 | `B-M-Diary-New.dc.html` | 390 | `/diary/new`（bottom sheet） |
@@ -302,6 +319,7 @@ supabase/migrations/     0001_init.sql … 0020_waist_sitting_measurement.sql（
 | BM16 | 手機衣物詳細 | `B-M-Detail.dc.html` | 390 | `/closet/:id`
 | BM17  | 手機彈性尺寸                   | `B-M-Stretch.dc.html`     | 390  | —（共用狀態）                               |
 | BM18  | 手機新增量測                   | `B-M-Body.dc.html`            | 390  | `/me/measurements/new`、`/me/measurements/:id/edit` |
+| BM19  | 手機加入選購清單               | `B-M-Wishlist-Add.dc.html`    | 390  | 選購清單 › 加入（全螢幕）                   |
 
 沒有手機版設計稿的頁面（衣櫃、衣物詳細、新增衣物、選購清單、個人資料），比照 BM 開頭的版面規則自行延伸：單欄排列、底部固定主要按鈕、選擇類操作改用 bottom sheet。
 

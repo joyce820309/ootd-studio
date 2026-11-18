@@ -15,7 +15,7 @@ export interface MeasureField {
 
 /** 各部位的平放尺寸欄位（新增衣物、選購清單共用） */
 export const SIZING: Record<Slot, MeasureField[]> = {
-  top: [{ key: 'shoulder', label: '肩寬' }, { key: 'sleeve', label: '袖長' }, { key: 'chest', label: '胸寬' }, { key: 'length', label: '衣長' }],
+  top: [{ key: 'shoulder', label: '肩寬' }, { key: 'sleeve', label: '袖長' }, { key: 'chest', label: '胸寬' }, { key: 'waist', label: '腰寬' }, { key: 'length', label: '衣長' }],
   outer: [{ key: 'shoulder', label: '肩寬' }, { key: 'sleeve', label: '袖長' }, { key: 'chest', label: '胸寬' }, { key: 'cuff', label: '袖口' }, { key: 'length', label: '衣長' }],
   bottom: [{ key: 'waist', label: '腰寬' }, { key: 'rise', label: '股上' }, { key: 'hip', label: '臀寬' }, { key: 'thigh', label: '大腿寬' }, { key: 'length', label: '褲長' }, { key: 'hem', label: '褲口寬' }],
   shoes: [{ key: 'innerLength', label: '鞋內長' }, { key: 'width', label: '鞋寬' }, { key: 'heelHeight', label: '跟高' }],
