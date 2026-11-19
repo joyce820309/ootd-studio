@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>比較・快速預覽</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.g{display:grid;grid-template-columns:110px repeat(4,minmax(0,1fr));column-gap:12px}
+.nm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;font-weight:700;line-height:1.45;color:#3B2F25;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;cursor:pointer;background:none;border:0;padding:0;text-align:left;font-family:inherit}
+.nm:hover{text-decoration-color:#3E6270}
+.col{border-radius:12px;padding:8px;transition:box-shadow .15s}
+.rw{padding:10px 0;border-top:1.5px dashed #EADCC6;font-size:13px}
+.tb{position:relative;width:52px;height:60px;border-radius:10px;flex:none;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.cap{margin:0;font-size:12.5px;line-height:1.75;color:#5A4A3C}
+.box{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:14px;background:#FFFCF6;box-shadow:inset 0 0 0 1.5px #EADCC6}
+.kbd{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 5px;border-radius:5px;background:#F3E7D4;box-shadow:inset 0 -2px 0 #E2D2B8;font:600 11px Nunito;color:#3B2F25}
+</style>
+</helmet>
+<div style="width:1440px;height:900px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden">
+  <div style="padding:20px 40px 0;display:flex;align-items:center;gap:10px">
+    <span class="hd" style="font-size:24px">冬天的寬褲</span><span style="font-size:12px;color:#5A4A3C">4 件</span>
+  </div>
+  <div class="paper" style="position:absolute;left:40px;top:70px;width:840px;padding:10px 16px 16px">
+    <div class="g" style="padding-bottom:10px;border-bottom:2px solid #3B2F25">
+      <span style="font-size:11.5px;line-height:1.6;color:#5A4A3C;align-self:end">點名稱或圖片 → 右邊預覽</span>
+      <sc-for list="{{items}}" as="it" hint-placeholder-count="4">
+        <div class="col" style="box-shadow:{{it.ring}};background:{{it.cbg}}">
+          <button type="button" onClick="{{it.go}}" aria-label="預覽 {{it.short}}" style="width:100%;height:96px;border:0;border-radius:10px;background:{{it.bg}};display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0"><svg viewBox="0 0 100 100" style="width:56%;height:84%" aria-hidden="true"><path d="M30 8H70L80 92H56L50 36L44 92H20Z" fill="{{it.hex}}" stroke="rgba(59,47,37,.3)" stroke-width="1.2"></path></svg></button>
+          <button type="button" class="nm" onClick="{{it.go}}" style="margin-top:6px;min-height:38px">{{it.name}}</button>
+          <b class="num" style="font-size:14px">{{it.price}}</b>
+          <sc-if value="{{it.on}}" hint-placeholder-val="{{ false }}"><span class="tag" style="display:flex;width:max-content;margin-top:4px;height:20px;font-size:10.5px;background:#3B2F25;color:#FBF4E8">預覽中</span></sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div class="g rw"><span style="color:#5A4A3C">售價</span><sc-for list="{{items}}" as="it" hint-placeholder-count="4"><span class="num" style="padding-left:8px">{{it.price}}</span></sc-for></div>
+    <div class="g rw"><span style="color:#5A4A3C">商品頁尺寸表</span><sc-for list="{{items}}" as="it" hint-placeholder-count="4"><span style="margin-left:8px;padding:6px 8px;border-radius:8px;background:#EEF4F6;font-size:11.5px;line-height:1.6;white-space:pre-line">{{it.chart}}</span></sc-for></div>
+    <div class="g rw"><span style="color:#5A4A3C">顏色</span><sc-for list="{{items}}" as="it" hint-placeholder-count="4"><span style="padding-left:8px">{{it.colors}}</span></sc-for></div>
+    <p class="cap" style="margin-top:10px">比較表照常可以捲、可以點。預覽抽屜<b>不蓋灰底</b>，所以直接點另一欄的名稱，抽屜內容就換過去；正在預覽的那欄加深色框。</p>
+  </div>
+
+  <aside role="complementary" aria-labelledby="pv-t" style="position:absolute;right:0;top:0;bottom:0;width:520px;background:#FFFCF6;box-shadow:-18px 0 36px -20px rgba(59,47,37,.45),-1.5px 0 0 #EADCC6;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;gap:6px;padding:10px 10px 10px 16px;border-bottom:1.5px dashed #D9C7AC">
+      <span style="font-size:12px;color:#5A4A3C">預覽</span>
+      <button type="button" class="ibtn" onClick="{{prev}}" aria-label="上一件" style="color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+      <span class="num" style="font-size:14px;font-weight:700">{{pos}}</span>
+      <button type="button" class="ibtn" onClick="{{next}}" aria-label="下一件" style="color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+      <a class="btn btn-g" href="B-Wishlist.dc.html" style="margin-left:auto;height:40px;padding:0 10px;color:#3E6270;font-size:13px">開完整頁面<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M14 5h5v5M19 5l-8 8M18 14v5H5V6h5"></path></svg></a>
+      <button type="button" class="btn btn-s" style="height:40px;padding:0 12px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"></path></svg>編輯</button>
+      <button type="button" class="ibtn" aria-label="關閉預覽" style="color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+    <div role="tablist" aria-label="切換商品" style="display:flex;gap:8px;padding:10px 16px;background:#FBF4E8">
+      <sc-for list="{{items}}" as="it" hint-placeholder-count="4"><button type="button" role="tab" aria-selected="{{it.sel}}" aria-label="{{it.short}}" class="tb" onClick="{{it.go}}" style="background:{{it.bg}};box-shadow:{{it.tring}};opacity:{{it.op}}"><svg viewBox="0 0 100 100" style="width:62%;height:80%" aria-hidden="true"><path d="M30 8H70L80 92H56L50 36L44 92H20Z" fill="{{it.hex}}" stroke="rgba(59,47,37,.3)" stroke-width="2"></path></svg></button></sc-for>
+      <span style="margin-left:auto;align-self:center;font-size:11px;color:#74624F;text-align:right;line-height:1.6">鍵盤 <span class="kbd">←</span> <span class="kbd">→</span> 切換<br><span class="kbd">Esc</span> 關閉</span>
+    </div>
+    <div style="flex:1;overflow:hidden;padding:16px 18px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:6px;flex:none">
+          <span style="width:190px;height:220px;border-radius:12px;background:{{cur.bg}};display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 100 100" style="width:60%;height:82%" aria-hidden="true"><path d="M30 8H70L80 92H56L50 36L44 92H20Z" fill="{{cur.hex}}" stroke="rgba(59,47,37,.3)" stroke-width="1"></path></svg></span>
+          <span style="display:flex;gap:6px"><span style="width:44px;height:44px;border-radius:8px;background:{{cur.bg}};box-shadow:inset 0 0 0 2px #3B2F25"></span><span style="width:44px;height:44px;border-radius:8px;background:#EDE3D3"></span><span style="width:44px;height:44px;border-radius:8px;background:#E8DED0"></span><span style="width:44px;height:44px;border-radius:8px;background:#EFE6D8"></span></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+          <span class="tag" style="align-self:flex-start;height:22px;font-size:11px;background:#F3E7D4;color:#5A4A3C">● 考慮中</span>
+          <h2 id="pv-t" class="hd" style="margin:0;font-size:22px;line-height:1.35">{{cur.name}}</h2>
+          <b class="num" style="font-size:24px">{{cur.price}}</b>
+          <span style="font-size:12.5px;color:#5A4A3C">{{cur.shop}}・加入於 11/19</span>
+          <span style="font-size:12.5px;color:#5A4A3C">顏色：{{cur.colors}}</span>
+        </div>
+      </div>
+      <div style="padding:10px 12px;border-radius:12px;background:#EEF4F6"><span style="font-size:12px;color:#24424D">商品頁尺寸表</span><div style="margin-top:4px;font-size:13px;line-height:1.75;white-space:pre-line">{{cur.chart}}</div></div>
+      <div style="padding:10px 12px;border-radius:12px;background:#E6EEE2"><span style="font-size:12px;color:#3F5A3B">平放尺寸（{{cur.size}}）</span><div class="num" style="margin-top:4px;font-size:13px;line-height:1.75">{{cur.flat}}</div></div>
+      <div class="sticky" style="padding:16px 18px 14px;background:#DCE8EC;transform:rotate(-0.6deg)"><span class="tape" aria-hidden="true"></span><span class="fold" aria-hidden="true" style="background:linear-gradient(225deg,#FFFCF6 50%,#C5D8DE 50%)"></span><ul class="bn"><sc-for list="{{cur.notes}}" as="t" hint-placeholder-count="2"><li><span>{{t}}</span></li></sc-for></ul></div>
+    </div>
+    <div style="display:flex;gap:8px;padding:12px 16px;border-top:1.5px dashed #D9C7AC">
+      <button type="button" class="btn btn-g" style="color:#8E4A3E">從這個比較移除</button>
+      <button type="button" class="btn btn-s" style="margin-left:auto">拿去試搭</button>
+      <button type="button" class="btn btn-p">就買這件</button>
+    </div>
+  </aside>
+
+  <div style="position:absolute;left:40px;top:540px;width:840px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="box"><b style="font-size:14px">打開與切換</b><p class="cap">點欄頂的名稱或圖片打開，不換頁。抽屜裡用 ‹ ›、上方縮圖、或鍵盤 ← → 切換，順序跟比較表的欄位一樣；到最後一件再按 › 回到第一件。</p><p class="cap">網址加 <span class="num">?preview=:id</span>：重新整理還在、瀏覽器「上一頁」會先關掉預覽，不會跳離比較頁。</p></div>
+    <div class="box"><b style="font-size:14px">跟完整頁面的差別</b><p class="cap">預覽只放比較時會想回頭看的：照片、價格、店家、顏色、尺寸表、平放尺寸、我的筆記。完整頁面（<span class="num">/wishlist/:id</span>）用新分頁開，比較頁不會被換掉。</p><p class="cap">「編輯」在預覽裡直接開編輯對話框（B7.1），存好後表格和預覽一起更新。</p></div>
+    <div class="box"><b style="font-size:14px">版面</b><p class="cap">桌機寬 520 px，貼右邊、全高、不蓋灰底，表格維持可操作。視窗小於 1200 px 時改成蓋住右半邊並加淡灰底。</p></div>
+    <div class="box"><b style="font-size:14px">欄上的小鉛筆</b><p class="cap">目前每欄縮圖上有編輯鉛筆，有了預覽之後可以拿掉，縮圖上只留 ⋮⋮ 和 ×，比較乾淨。編輯從預覽進。</p></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { i: 1 }; }
+  renderVals() {
+    const I = [
+      { short: '毛呢寬褲', name: '#802559 後鬆緊高腰厚磅親膚毛呢內磨毛超顯瘦寬褲', price: 'NT$690', shop: '尚未決定', hex: '#D9CBB3', bg: '#F1E4E2', colors: '杏', size: 'S', chart: 'S 腰30-34 臀58 長97\nM 腰32-36 臀60 長97\nL 腰34-38 臀62 長98', flat: '腰 30 ↔ 34・臀 58・褲長 97・檔 35', notes: ['內磨毛很暖，怕太厚', '杏色比較百搭'] },
+      { short: '撞色毛呢褲', name: '#802556 超顯瘦必買撞色收邊後鬆緊質感毛呢褲', price: 'NT$590', shop: 'LINE', hex: '#2B2724', bg: '#F6E7C6', colors: '杏、咖', size: 'M', chart: 'S 腰31-38 臀60 長94\nM 腰33-40 臀62 長95\nL 腰35-42 臀64 長96', flat: '腰 33 ↔ 40・臀 62・褲長 95・檔 37', notes: ['撞色收邊很可愛', '毛呢會不會起毛球？'] },
+      { short: '彈力直筒褲', name: '#770552 本檔必收爆瘦褲 高彈寬鬆緊直筒褲', price: 'NT$590', shop: '尚未決定', hex: '#5E5E60', bg: '#E8E2DA', colors: '灰', size: 'S', chart: '灰／黑\nS 腰33 臀52 長102\nM 腰35 臀54 長102', flat: '腰 33・臀 52・褲長 102・大腿 32', notes: ['高彈，坐著應該舒服', '長度可能要改'] },
+      { short: '羊絨直筒褲', name: '#66936 全鬆緊抽繩羊絨顯瘦車線直筒褲', price: 'NT$590', shop: '尚未決定', hex: '#3A332E', bg: '#E6EEE2', colors: '深咖', size: 'M', chart: '不透杏／深咖／深灰\nM 腰32-47 臀56 長102\nL 腰34-49 臀58 長102', flat: '腰 32 ↔ 47・臀 56・褲長 102', notes: ['全鬆緊抽繩，懶人褲', '車線讓腿看起來比較直'] }
+    ];
+    const i = this.state.i, N = I.length;
+    return {
+      items: I.map((it, k) => Object.assign({}, it, {
+        on: k === i, sel: k === i ? 'true' : 'false', go: () => this.setState({ i: k }),
+        ring: k === i ? 'inset 0 0 0 2px #3B2F25' : 'none', cbg: k === i ? '#FFF9EE' : 'transparent',
+        tring: k === i ? '0 0 0 2.5px #3B2F25' : 'none', op: k === i ? 1 : 0.7
+      })),
+      cur: I[i], pos: `${i + 1} / ${N}`,
+      prev: () => this.setState({ i: (i - 1 + N) % N }), next: () => this.setState({ i: (i + 1) % N })
+    };
+  }
+}
+</script>
+</body>
+</html>

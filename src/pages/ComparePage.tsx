@@ -15,6 +15,7 @@ import { WishlistForm } from '@/components/wishlist/WishlistForm'
 import { WishlistTabs } from '@/components/wishlist/WishlistTabs'
 import { CompareBuyDialog } from '@/components/wishlist/CompareBuyDialog'
 import { ComparePickerDialog } from '@/components/wishlist/ComparePickerDialog'
+import { ComparePreview } from '@/components/wishlist/ComparePreview'
 import {
   addWishlistItemsToCompare,
   createCompareGroup,
@@ -293,7 +294,10 @@ const EMPTY_STATUS: ToastMessage = { tone: 'error', text: '操作沒有完成，
 export function ComparePage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [params] = useSearchParams()
+  const [params, setParams] = useSearchParams()
+  // 快速預覽（B23.2／BM20.2）：?preview=:id，重新整理還在；從表格打開時推一筆歷史，「上一頁」會先關預覽
+  const previewParam = params.get('preview')
+  const previewPushed = useRef(false)
   const isMobile = useIsMobile()
   const [groups, setGroups] = useState<CompareGroup[] | null>(null)
   const [wishlist, setWishlist] = useState<WishlistItem[]>([])
@@ -376,6 +380,23 @@ export function ComparePage() {
   const hiddenSizeRow = !isMobile && onlyDifferent && sizeChoices.length > 1 && new Set(sizeChoices).size === 1
   const hiddenNames = [...(hiddenSizeRow ? ['比的尺碼'] : []), ...sections.flatMap((section) => section.rows.filter((row) => onlyDifferent && !rowIsDifferent(row, isMobile ? activeIndexes : diffIndexes)).map((row) => row.label || section.title))]
   const hiddenRows = hiddenNames.length
+  const previewItem = previewParam ? candidates.find((candidate) => candidate.item.id === previewParam)?.item ?? null : null
+  const dialogOpen = pickerOpen || !!editingItem || addFormOpen || !!buying || !!deleteGroup || aiOpen
+  const setPreview = (itemId: string | null, push: boolean) => {
+    const next = new URLSearchParams(params)
+    if (itemId) next.set('preview', itemId)
+    else next.delete('preview')
+    setParams(next, { replace: !push })
+  }
+  const openPreview = (item: WishlistItem) => {
+    if (previewParam) return setPreview(item.id, false)
+    previewPushed.current = true
+    setPreview(item.id, true)
+  }
+  const closePreview = () => {
+    if (previewPushed.current) { previewPushed.current = false; navigate(-1) }
+    else setPreview(null, false)
+  }
   const foldSections = (isMobile ? mobileSections : visibleSections).filter((section) => FOLD_SECTION_IDS.has(section.id))
   const unfolded = (list: TableSection[]) => (foldOpen ? list : list.filter((section) => !FOLD_SECTION_IDS.has(section.id)))
   const folded = foldOpen ? [] : foldSections.map((section) => section.title)
@@ -531,7 +552,7 @@ export function ComparePage() {
   const cancelRename = () => { setNameEditing(false); setEditingGroupId(null); setNameDraft(group.name) }
 
   return (
-    <main className="compare-page mx-auto flex max-w-[1360px] flex-col gap-3 px-4 pt-5 pb-[calc(208px+env(safe-area-inset-bottom))] [--float-toggle-bottom:calc(146px+env(safe-area-inset-bottom))] md:px-[clamp(16px,3vw,40px)] md:pt-3.5 md:pb-24">
+    <main className={`compare-page ${previewItem && !isMobile ? 'has-preview' : ''} mx-auto flex max-w-[1360px] flex-col gap-3 px-4 pt-5 pb-[calc(208px+env(safe-area-inset-bottom))] [--float-toggle-bottom:calc(146px+env(safe-area-inset-bottom))] md:px-[clamp(16px,3vw,40px)] md:pt-3.5 md:pb-24`}>
       <div className="compare-page__top flex flex-wrap items-center gap-3 md:hidden">
         <div className="flex w-full items-center gap-1 border-b-[1.5px] border-dashed border-line-strong pb-2">
           <ButtonLink to="/wishlist" variant="ghost" className="-ml-2 h-11 px-2"><Icon name="back" size={18} />回選購清單</ButtonLink>
@@ -567,16 +588,17 @@ export function ComparePage() {
         {!groupLinks.length ? (
           <div className="mt-1 rounded-card bg-card p-8 text-center shadow-paper"><h2 className="m-0 font-hd text-2xl">這個比較還沒有商品</h2><p className="mx-auto my-2 max-w-md text-sm leading-6 text-ink-2">加入選購清單裡的候選，排成比較表。商品可以同時放在多個比較裡。</p><Button variant="oat" onClick={() => setPickerOpen(true)}><Icon name="plus" />加入商品</Button></div>
         ) : isMobile ? (
-          <MobileCompare onEdit={(candidate) => setEditingItem(candidate.item)} columns={mobileCandidates} sections={unfolded(mobileSections)} folded={folded} onUnfold={toggleFold} indexes={mobileIndexes} total={candidates.length} onMove={moveMobile} onBuy={(candidate) => setBuying(candidate.item)} onChooseSize={(candidate, size) => void chooseSize(candidate.item, size)} />
+          <MobileCompare onPreview={(candidate) => openPreview(candidate.item)} columns={mobileCandidates} sections={unfolded(mobileSections)} folded={folded} onUnfold={toggleFold} indexes={mobileIndexes} total={candidates.length} onMove={moveMobile} onBuy={(candidate) => setBuying(candidate.item)} onChooseSize={(candidate, size) => void chooseSize(candidate.item, size)} />
         ) : (
-          <DesktopCompare onEdit={(candidate) => setEditingItem(candidate.item)} candidates={candidates} indexes={pageIndexes} sections={unfolded(visibleSections)} folded={folded} onUnfold={toggleFold} showSizeRow={!hiddenSizeRow} onPage={(direction) => setDeskStart(Math.max(0, pageStart + direction * DESK_PAGE))} onAdd={() => setPickerOpen(true)} onRemove={(candidate) => void removeItem(candidate.item)} onMove={(from, to) => { const next = [...candidates.map((candidate) => candidate.item.id)]; const [moved] = next.splice(from, 1); next.splice(to, 0, moved); void reorderItems(next) }} onBuy={(candidate) => setBuying(candidate.item)} onChooseSize={(candidate, size) => void chooseSize(candidate.item, size)} />
+          <DesktopCompare previewId={previewItem?.id ?? null} onPreview={(candidate) => openPreview(candidate.item)} candidates={candidates} indexes={pageIndexes} sections={unfolded(visibleSections)} folded={folded} onUnfold={toggleFold} showSizeRow={!hiddenSizeRow} onPage={(direction) => setDeskStart(Math.max(0, pageStart + direction * DESK_PAGE))} onAdd={() => setPickerOpen(true)} onRemove={(candidate) => void removeItem(candidate.item)} onMove={(from, to) => { const next = [...candidates.map((candidate) => candidate.item.id)]; const [moved] = next.splice(from, 1); next.splice(to, 0, moved); void reorderItems(next) }} onBuy={(candidate) => setBuying(candidate.item)} onChooseSize={(candidate, size) => void chooseSize(candidate.item, size)} />
         )}
         {onlyDifferent && hiddenRows > 0 && <p className="compare-page__diff-summary mx-1 mt-3 flex flex-wrap items-center rounded-btn bg-oat-soft px-3 py-1.5 text-[13px] leading-5 text-oat-ink">已收起 {hiddenRows} 列看得到的幾件都一樣的：{hiddenNames.join('、')}。<button type="button" onClick={() => setOnlyDifferent(false)} className="min-h-10 px-1.5 text-mist-deep underline">全部顯示</button></p>}
       </section>
 
       {isMobile && <div className="compare-page__mobile-actions fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-20 flex gap-2 border-t-[1.5px] border-dashed border-line-strong bg-card px-3 py-2"><Button variant="oat" className="flex-1" onClick={() => setPickerOpen(true)}><Icon name="plus" size={18} />加入商品</Button><Button variant="secondary" className="flex-1" disabled={!candidates.length} onClick={() => setAiOpen(true)}><Icon name="copy" size={17} />整理給 AI</Button></div>}
 
-      {!!groupLinks.length && !pickerOpen && !editingItem && !addFormOpen && !buying && !deleteGroup && !aiOpen && <FloatToggle open={foldOpen} count={foldSections.length} onToggle={toggleFold} controls="compare-body" compact={isMobile} />}
+      {previewItem && <ComparePreview items={candidates.map((candidate) => candidate.item)} currentId={previewItem.id} mobile={isMobile} keyboard={!dialogOpen} onSelect={(itemId) => setPreview(itemId, false)} onClose={closePreview} onEdit={setEditingItem} onRemove={(item) => { closePreview(); void removeItem(item) }} onBuy={setBuying} studioUrl={studioUrl} />}
+      {!!groupLinks.length && !dialogOpen && !previewItem && <FloatToggle open={foldOpen} count={foldSections.length} onToggle={toggleFold} controls="compare-body" compact={isMobile} />}
       {pickerOpen && <ComparePickerDialog groupId={group.id} groupName={group.name} items={wishlist} groupWishlistIds={groupLinks.map((entry) => entry.wishlistItemId)} memberships={memberships} onClose={() => setPickerOpen(false)} onAdd={(ids) => void addItems(ids)} onAddUrl={() => { setPickerOpen(false); setAddFormOpen(true) }} />}
       {editingItem && <WishlistForm key={`edit-${editingItem.id}`} item={editingItem} saving={saving} onCancel={() => setEditingItem(null)} onSubmit={(input) => void saveEdit(editingItem, input)} />}
       {addFormOpen && <WishlistForm key="compare-add" saving={saving} onCancel={() => setAddFormOpen(false)} onSubmit={(input) => void addFromForm(input)} />}
@@ -653,7 +675,7 @@ function CompareGroupMenu({ current, activeGroups, archivedGroups, links, wishli
   </div>
 }
 
-function DesktopCompare({ onEdit, candidates, indexes, sections, folded, onUnfold, showSizeRow, onPage, onAdd, onRemove, onMove, onBuy, onChooseSize }: { onEdit: (candidate: CompareCandidate) => void; candidates: CompareCandidate[]; indexes: number[]; sections: TableSection[]; folded: string[]; onUnfold: () => void; showSizeRow: boolean; onPage: (direction: -1 | 1) => void; onAdd: () => void; onRemove: (candidate: CompareCandidate) => void; onMove: (from: number, to: number) => void; onBuy: (candidate: CompareCandidate) => void; onChooseSize: (candidate: CompareCandidate, size: string) => void }) {
+function DesktopCompare({ previewId, onPreview, candidates, indexes, sections, folded, onUnfold, showSizeRow, onPage, onAdd, onRemove, onMove, onBuy, onChooseSize }: { previewId: string | null; onPreview: (candidate: CompareCandidate) => void; candidates: CompareCandidate[]; indexes: number[]; sections: TableSection[]; folded: string[]; onUnfold: () => void; showSizeRow: boolean; onPage: (direction: -1 | 1) => void; onAdd: () => void; onRemove: (candidate: CompareCandidate) => void; onMove: (from: number, to: number) => void; onBuy: (candidate: CompareCandidate) => void; onChooseSize: (candidate: CompareCandidate, size: string) => void }) {
   const [dragged, setDragged] = useState<string | null>(null)
   const [announcement, setAnnouncement] = useState('')
   const [compact, setCompact] = useState(false)
@@ -698,10 +720,10 @@ function DesktopCompare({ onEdit, candidates, indexes, sections, folded, onUnfol
     <span className="sr-only" aria-live="polite">{announcement}</span>
     {compact && <div className="compare-compact"><div className="compare-compact__bar">
       <div className="compare-compact__corner">{pager}</div>
-      {shown.map((candidate) => <div key={candidate.item.id} className={`compare-compact__item ${dimmed(candidate) ? 'opacity-55' : ''}`}>
+      {shown.map((candidate) => <button type="button" key={candidate.item.id} onClick={() => onPreview(candidate)} aria-label={`預覽：${candidate.item.name}`} className={`compare-compact__item ${previewId === candidate.item.id ? 'is-previewing' : ''} ${dimmed(candidate) ? 'opacity-55' : ''}`}>
         <span className="compare-compact__thumb" style={{ backgroundColor: candidate.item.colorHex + '26' }}><ItemImage name={candidate.item.name} cutoutUrl={candidate.item.cutoutUrl} shape={candidate.item.shape} colorHex={candidate.item.colorHex} className="h-[80%] w-[78%]" /></span>
         <span className="flex min-w-0 flex-col"><span className="truncate text-[12.5px] font-bold">{candidate.item.name}</span><b className="font-num text-[13px] tabular">{formatNT(candidate.item.price)}<span className="ml-1.5 font-medium text-ink-2">{selectedCompareSize(candidate)}</span></b></span>
-      </div>)}
+      </button>)}
     </div></div>}
 
     <table className="compare-table">
@@ -712,16 +734,17 @@ function DesktopCompare({ onEdit, candidates, indexes, sections, folded, onUnfol
         {shown.map((candidate) => {
           const index = candidates.indexOf(candidate)
           const also = candidate.memberships.filter((name) => name !== candidate.item.name)
-          return <th key={candidate.item.id} scope="col" className={`compare-head ${dimmed(candidate) ? 'opacity-65' : ''} ${dragged === candidate.item.id ? 'is-dragging' : ''}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => dropOn(event, candidate)}>
+          const previewing = previewId === candidate.item.id
+          return <th key={candidate.item.id} scope="col" className={`compare-head ${previewing ? 'is-previewing' : ''} ${dimmed(candidate) ? 'opacity-65' : ''} ${dragged === candidate.item.id ? 'is-dragging' : ''}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => dropOn(event, candidate)}>
             <div className="compare-head__photo" style={{ backgroundColor: candidate.item.colorHex + '26' }}>
-              <ItemImage name={candidate.item.name} cutoutUrl={candidate.item.cutoutUrl} shape={candidate.item.shape} colorHex={candidate.item.colorHex} className="h-[84%] w-[64%]" />
+              <button type="button" onClick={() => onPreview(candidate)} aria-label={`預覽：${candidate.item.name}`} className="compare-head__open"><ItemImage name={candidate.item.name} cutoutUrl={candidate.item.cutoutUrl} shape={candidate.item.shape} colorHex={candidate.item.colorHex} className="h-[84%] w-[64%]" /></button>
               <button type="button" draggable onDragStart={(event) => beginDrag(event, candidate)} onDragEnd={() => setDragged(null)} onKeyDown={(event) => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); changeOrder(index, index + (event.key === 'ArrowLeft' ? -1 : 1)) } }} aria-label={`排序：${candidate.item.name}，第 ${index + 1} 欄，可拖曳或按左右鍵移動`} title="拖曳排序" className="compare-head__drag"><span aria-hidden="true">⋮⋮</span></button>
-              <button type="button" onClick={() => onEdit(candidate)} aria-label={`編輯商品：${candidate.item.name}`} title="編輯商品" className="compare-head__edit"><span><Icon name="edit" size={14} /></span></button>
               <button type="button" onClick={() => onRemove(candidate)} aria-label={`從這個比較移除：${candidate.item.name}`} className="compare-head__remove"><span><Icon name="x" size={14} /></span></button>
               {candidate.link.isDecided && <span className="compare-head__decided">決定買</span>}
             </div>
-            <span className="compare-head__name" title={candidate.item.name}>{candidate.item.name}</span>
+            <button type="button" onClick={() => onPreview(candidate)} aria-expanded={previewing} className="compare-head__name" title={`預覽：${candidate.item.name}`}>{candidate.item.name}</button>
             <span className="compare-head__price"><b className="font-num tabular">{formatNT(candidate.item.price)}</b>{candidate.item.shop && <span>{candidate.item.shop}</span>}{also.length > 0 && <span className="text-mist-ink">・也在「{also.join('、')}」</span>}</span>
+            {previewing && <span className="compare-head__previewing">預覽中</span>}
           </th>
         })}
         {showAdd && <th scope="col" className="compare-head"><button type="button" onClick={onAdd} className="compare-add-card"><Icon name="plus" size={22} /><span>加入商品</span></button></th>}
@@ -783,16 +806,16 @@ function CellContent({ value }: { value: ValueCell }) {
   return <div className="compare-cell">{value.note ? <div className="compare-cell__note w-full min-w-0 rounded-btn bg-mist-soft px-2.5 py-2 text-xs leading-[1.65] text-ink"><span className="mb-1.5 block text-[11px] font-medium text-ink-2">尺寸備註</span>{value.noteSizes ? <div className="grid min-w-0 gap-1">{value.noteSizes.map((row) => <div key={row.size} className="grid min-w-0 grid-cols-[2.25rem_minmax(0,1fr)] items-start gap-1.5 rounded-sm bg-card/75 px-2 py-1.5"><b className="font-num text-ink">{row.size}</b><span className="min-w-0 break-words [overflow-wrap:anywhere]">{row.details}</span></div>)}</div> : <MarkdownNote value={value.note} />}</div> : <span className="compare-cell__main">{value.text}{value.colors?.map((color) => <span key={`${color.name}-${color.hex}`} title={`${color.name}${color.preferred ? '・最想要' : ''}`} aria-label={`${color.name}${color.preferred ? '・最想要' : ''}`} className={`compare-cell__color ${color.preferred ? 'is-preferred' : ''}`} style={{ backgroundColor: color.hex }} />)}</span>}{value.tag && <span className={`compare-cell__tag ${TONE_CLASSES[value.tag.tone]}`}>{value.tag.label}</span>}{value.hint && <small className="compare-cell__hint">{value.hint}</small>}</div>
 }
 
-function MobileCompare({ onEdit, columns, sections, folded, onUnfold, indexes, total, onMove, onBuy, onChooseSize }: { onEdit: (candidate: CompareCandidate) => void; columns: (CompareCandidate | null)[]; sections: TableSection[]; folded: string[]; onUnfold: () => void; indexes: [number, number]; total: number; onMove: (index: number, direction: -1 | 1) => void; onBuy: (candidate: CompareCandidate) => void; onChooseSize: (candidate: CompareCandidate, size: string) => void }) {
+function MobileCompare({ onPreview, columns, sections, folded, onUnfold, indexes, total, onMove, onBuy, onChooseSize }: { onPreview: (candidate: CompareCandidate) => void; columns: (CompareCandidate | null)[]; sections: TableSection[]; folded: string[]; onUnfold: () => void; indexes: [number, number]; total: number; onMove: (index: number, direction: -1 | 1) => void; onBuy: (candidate: CompareCandidate) => void; onChooseSize: (candidate: CompareCandidate, size: string) => void }) {
   const indexedValues = (row: TableRow) => indexes.map((index) => row.cells[index] ?? cell('—'))
   return <div className="compare-mobile mt-1">
     <div className="compare-mobile__products">
       <div className="compare-mobile__product-grid">
         {columns.map((candidate, columnIndex) => <div key={candidate?.item.id ?? `empty-${columnIndex}`} className="compare-mobile__product">
           {candidate ? <>
-            <div className="compare-mobile__photo"><ItemImage name={candidate.item.name} cutoutUrl={candidate.item.cutoutUrl} shape={candidate.item.shape} colorHex={candidate.item.colorHex} className="h-[78%] w-[72%]" /><button type="button" onClick={() => onEdit(candidate)} aria-label={`編輯商品：${candidate.item.name}`} className="compare-head__edit compare-mobile__edit"><span><Icon name="edit" size={14} /></span></button>{candidate.link.isDecided && <span className="absolute bottom-1 left-1 rounded-full bg-ink px-2 py-0.5 text-[10px] text-paper">決定買</span>}</div>
+            <div className="compare-mobile__photo"><button type="button" onClick={() => onPreview(candidate)} aria-label={`預覽：${candidate.item.name}`} className="compare-head__open"><ItemImage name={candidate.item.name} cutoutUrl={candidate.item.cutoutUrl} shape={candidate.item.shape} colorHex={candidate.item.colorHex} className="h-[78%] w-[72%]" /></button>{candidate.link.isDecided && <span className="absolute bottom-1 left-1 rounded-full bg-ink px-2 py-0.5 text-[10px] text-paper">決定買</span>}</div>
             <div className="compare-mobile__pager"><button type="button" disabled={total <= 2} onClick={() => onMove(columnIndex, -1)} aria-label="這欄換上一件"><Icon name="back" size={17} /></button><span className="font-num text-xs tabular">{indexes[columnIndex] + 1} / {total}</span><button type="button" disabled={total <= 2} onClick={() => onMove(columnIndex, 1)} aria-label="這欄換下一件"><Icon name="next" size={17} /></button></div>
-            <span className="compare-mobile__name">{candidate.item.name}</span><span className="compare-mobile__price"><b className="font-num">{formatNT(candidate.item.price)}</b></span>
+            <button type="button" onClick={() => onPreview(candidate)} className="compare-mobile__name">{candidate.item.name}</button><span className="compare-mobile__price"><b className="font-num">{formatNT(candidate.item.price)}</b></span>
             {sizeChoicesFor(candidate.item).length ? <Select label={`${candidate.item.name}要比較的尺碼`} value={selectedCompareSize(candidate)} options={sizeChoicesFor(candidate.item).map((size) => ({ value: size, label: size }))} onChange={(size) => onChooseSize(candidate, size)} triggerClassName="h-9 w-full rounded-btn border-[1.5px] border-line-strong bg-card px-2 text-xs" /> : <span className="text-[11px] text-ink-3">未提供尺碼</span>}
           </> : <div className="compare-mobile__no-column">目前只有 1 件商品</div>}
         </div>)}

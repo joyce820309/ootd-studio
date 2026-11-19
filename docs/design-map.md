@@ -104,6 +104,7 @@
 | B22   | 元件：選色器 ColorPicker         | `B-ColorPicker.dc.html`       | 1440 | `components/ui/ColorPicker.tsx`（元件）      |
 | B23   | 選購比較 | `B-Compare.dc.html` | 1440 | `/wishlist/compare/:id` |
 | B23.1 | 比較・加入商品 | `B-Compare-Picker.dc.html` | 1440 | `/wishlist/compare/:id`（Dialog） |
+| B23.2 | 比較・快速預覽 | `B-Compare-Preview.dc.html` | 1440 | `/wishlist/compare/:id?preview=:itemId` |
 | B24   | 元件：特徵標籤 | `B-Features.dc.html` | 1440 | 元件（用在 B7.1、B6） |
 | B25   | 特徵管理 | `B-Features-Manage.dc.html` | 1440 | `/me/features` |
 | B26   | 元件：懸浮展開鈕 | `B-FloatToggle.dc.html` | 1440 | 元件（用在 B23、BM20） |
@@ -151,8 +152,10 @@
 | BM19.1 | 手機選購清單・選取給 AI      | `B-M-Wishlist-Select.dc.html`  | 390 | `/wishlist`（選取模式）                             |
 | BM20  | 手機選購比較 | `B-M-Compare.dc.html` | 390 | `/wishlist/compare/:id` |
 | BM20.1| 手機比較・加入商品 | `B-M-Compare-Picker.dc.html` | 390 | `/wishlist/compare/:id`（Bottom Sheet） |
+| BM20.2| 手機比較・快速預覽 | `B-M-Compare-Preview.dc.html` | 390 | `/wishlist/compare/:id?preview=:itemId` |
 | BM21  | 手機特徵標籤 | `B-M-Features.dc.html` | 390 | 元件（用在 BM19、BM8.2） |
 | BM22  | 手機特徵管理 | `B-M-Features-Manage.dc.html` | 390 | `/me/features` |
+
 
 
 ## 路徑規則

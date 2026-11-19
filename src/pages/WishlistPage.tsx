@@ -82,6 +82,7 @@ export function WishlistPage() {
   const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
   const tab: TabKey = isTabKey(params.get('status')) ? (params.get('status') as TabKey) : 'all'
+  const searchQuery = params.get('q') ?? ''
   // 部位／類型／長度可多選，網址以逗號分隔：?part=bottom,top&type=bottom:wide&length=short,long
   const facets = useMemo(() => facetsFromParams(params), [params])
   const selectedParam = params.get('item')
@@ -145,6 +146,14 @@ export function WishlistPage() {
     setParams(p, { replace })
   }
 
+  const updateSearch = (value: string) => {
+    const next = new URLSearchParams(params)
+    if (value) next.set('q', value)
+    else next.delete('q')
+    next.delete('item')
+    setParams(next, { replace: true })
+  }
+
   const counts = useMemo(() => {
     const result = Object.fromEntries(WISH_TABS.map((t) => [t.key, 0])) as Record<TabKey, number>
     for (const item of items ?? []) {
@@ -159,7 +168,13 @@ export function WishlistPage() {
 
   // 篩選由上往下縮小：狀態 → 部位 → 類型；每一層的件數都以上一層的結果計算。
   const byStatus = useMemo(() => (items ?? []).filter((item) => matchesTab(item, tab)), [items, tab])
-  const { partCounts, typeCounts, lengthCounts, visible } = useMemo(() => applyWishFacets(byStatus, facets), [byStatus, facets])
+  const searchedItems = useMemo(() => {
+    const query = searchQuery.trim().toLocaleLowerCase()
+    if (!query) return byStatus
+    return byStatus.filter((item) => [item.name, item.shop, item.brand, item.productCode, item.size, item.sizeNote, item.material, item.reason, item.url]
+      .some((value) => value?.toLocaleLowerCase().includes(query)))
+  }, [byStatus, searchQuery])
+  const { partCounts, typeCounts, lengthCounts, visible } = useMemo(() => applyWishFacets(searchedItems, facets), [searchedItems, facets])
 
   const selectedAiItems = useMemo(() => (items ?? []).filter((item) => selectedForAi.has(item.id) && item.status !== 'bought'), [items, selectedForAi])
   const selectedVisibleCount = visible.filter((item) => selectedForAi.has(item.id)).length
@@ -309,6 +324,28 @@ export function WishlistPage() {
             進行中 {active.length} 件・預估合計 {formatNT(activeTotal)}
           </span>
         )}
+        {items && items.length > 0 && (
+          <search aria-label="搜尋選購清單" className="wishlist-page__search order-3 w-full md:order-none md:ml-auto md:w-auto md:flex-1 md:max-w-[360px]">
+            <label htmlFor="wishlist-search" className="sr-only">搜尋商品名稱、店家、品牌、商品編號或備註</label>
+            <span className="flex min-h-11 items-center gap-2 rounded-btn border-[1.5px] border-line-strong bg-card px-3 focus-within:border-mist-deep focus-within:ring-2 focus-within:ring-mist-soft">
+              <Icon name="search" size={18} className="flex-none text-ink-3" />
+              <input
+                id="wishlist-search"
+                type="search"
+                name="q"
+                value={searchQuery}
+                onChange={(event) => updateSearch(event.target.value)}
+                placeholder="搜尋名稱、店家、品牌或編號"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="search"
+                className="min-w-0 flex-1 border-0 bg-transparent text-base text-ink outline-none placeholder:text-ink-3"
+              />
+              {searchQuery && <button type="button" onClick={() => updateSearch('')} aria-label="清除搜尋" className="flex size-8 flex-none items-center justify-center rounded-full text-ink-2 hover:bg-tile"><Icon name="x" size={16} /></button>}
+            </span>
+          </search>
+        )}
         <div className="wishlist-page__actions ml-auto flex items-center gap-2">
           {items && items.length > 0 && (
             <Button variant={selecting ? 'ghost' : 'secondary'} aria-pressed={selecting} className={selecting ? 'md:hidden' : ''} onClick={() => (selecting ? finishSelecting() : startSelecting())}>
@@ -392,7 +429,7 @@ export function WishlistPage() {
         <div className="wishlist-page__body flex flex-wrap items-start gap-6">
           <section aria-label="商品列表" className={`wishlist-page__list ${showDetailOnMobile ? 'hidden md:flex' : 'flex'} min-w-0 flex-[1_1_360px] flex-col gap-3 md:max-w-[500px]`}>
             {visible.length === 0 && (
-              <PageState icon="wish" tone="oat" compact title="沒有符合篩選的商品" description="換個狀態、部位或類型看看，或把新的候選加進來。" action={<Button variant="secondary" onClick={() => setParams(new URLSearchParams(), { replace: true })}>清除篩選</Button>} />
+              <PageState icon="wish" tone="oat" compact title={searchQuery ? '找不到符合的商品' : '沒有符合篩選的商品'} description={searchQuery ? `沒有符合「${searchQuery}」的選購商品，請試試名稱、店家、品牌或商品編號。` : '換個狀態、部位或類型看看，或把新的候選加進來。'} action={<Button variant="secondary" onClick={() => setParams(new URLSearchParams(), { replace: true })}>{searchQuery ? '清除搜尋與篩選' : '清除篩選'}</Button>} />
             )}
             {visible.map((item) => (
               <WishCard

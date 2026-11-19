@@ -11,19 +11,18 @@
 .compare-head.is-dragging { opacity: .6; }
 .compare-head__photo { position: relative; display: flex; height: 124px; align-items: center; justify-content: center; overflow: hidden; border-radius: var(--radius-tile); background: var(--color-rose-soft); }
 .compare-head__drag,
-.compare-head__edit,
 .compare-head__remove { position: absolute; top: 0; display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border: 0; background: transparent; color: var(--color-ink); cursor: pointer; }
 .compare-head__drag { left: 0; cursor: grab; -webkit-user-select: none; user-select: none; touch-action: none; }
 .compare-head__drag:active { cursor: grabbing; }
 .compare-head__remove { right: 0; }
-.compare-head__edit { right: 38px; }
-.compare-mobile__edit { right: 0; }
 .compare-head__drag > span,
-.compare-head__edit > span,
 .compare-head__remove > span { display: inline-flex; width: 30px; height: 30px; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-card); box-shadow: var(--shadow-sticker); }
 .compare-head__drag > span { color: var(--color-ink-2); font: 700 13px var(--font-num); letter-spacing: -2px; }
 .compare-head__drag:focus-visible,
-.compare-head__edit:focus-visible,
+.compare-head__open:focus-visible,
+.compare-head__name:focus-visible,
+.compare-mobile__name:focus-visible,
+.compare-compact__item:focus-visible,
 .compare-head__remove:focus-visible,
 .compare-pager button:focus-visible { outline: 2.5px solid var(--color-mist-deep); outline-offset: 2px; }
 .compare-head__decided { position: absolute; bottom: 8px; left: 8px; border-radius: 999px; padding: 3px 9px; background: var(--color-ink); color: var(--color-paper); font-size: 11px; font-weight: 500; }
@@ -112,3 +111,14 @@
   .compare-table th,
   .compare-table td { border-color: CanvasText; }
 }
+
+/* 快速預覽（B23.2）：點圖片或名稱打開；預覽中的那欄加 2px 深色框 */
+.compare-head__open { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; border: 0; padding: 0; background: transparent; cursor: pointer; }
+.compare-head__name,
+.compare-mobile__name { width: 100%; border: 0; padding: 0; background: transparent; color: inherit; font-family: inherit; text-align: left; cursor: pointer; }
+.compare-head__name:hover,
+.compare-mobile__name:hover { text-decoration: underline; text-decoration-color: var(--color-line-strong); text-underline-offset: 3px; }
+.compare-table__head .compare-head.is-previewing { border-radius: 12px 12px 0 0; background: var(--color-card-selected); box-shadow: inset 0 0 0 2px var(--color-ink); }
+.compare-head__previewing { display: inline-flex; width: max-content; height: 20px; align-items: center; margin-top: 6px; border-radius: 999px; padding: 0 9px; background: var(--color-ink); color: var(--color-paper); font-size: 10.5px; font-weight: 500; }
+.compare-compact__item { border: 0; background: transparent; color: inherit; font-family: inherit; text-align: left; cursor: pointer; }
+.compare-compact__item.is-previewing { border-radius: 10px; box-shadow: inset 0 0 0 2px var(--color-ink); }
