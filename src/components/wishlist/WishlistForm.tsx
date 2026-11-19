@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Chip } from '@/components/ui/Chip'
 import { Combobox } from '@/components/ui/Combobox'
+import { ColorPicker } from '@/components/ui/ColorPicker'
 import { Icon } from '@/components/ui/Icon'
 import { MarkdownNoteField } from '@/components/ui/MarkdownNote'
 import { Select } from '@/components/ui/Select'
@@ -13,19 +14,22 @@ import { collectMeasures, SIZING, toFieldValue, type FlatFieldValue, type Measur
 import { toUploadableImage } from '@/lib/image'
 import { GARMENT_COLORS } from '@/lib/colors'
 import { SLOTS } from '@/lib/slots'
-import { isValidProductUrl, PRIORITY_LABEL, shopFromUrl, WISH_STATUS } from '@/lib/wishlist'
+import { garmentTypeOptions, hasGarmentLength, isValidProductUrl, PRIORITY_LABEL, shopFromUrl, WISH_STATUS } from '@/lib/wishlist'
 import { materialNames, parsePercentages } from '@/lib/materials'
-import type { ManagedListSummary } from '@/types'
+import type { GarmentLength, ManagedListSummary } from '@/types'
 import type { LessonRule, Slot, WishlistColor, WishlistInput, WishlistItem, WishPriority } from '@/types'
 
 type EditableStatus = WishlistInput['status']
-const STATUS_OPTIONS: EditableStatus[] = ['considering', 'waiting', 'ready', 'dropped']
+const STATUS_OPTIONS: EditableStatus[] = ['considering', 'ready', 'dropped']
 const PRIORITY_OPTIONS: WishPriority[] = [3, 2, 1]
 
 interface Draft {
   url: string
   name: string
+  productCode: string
   primaryPart: Slot | ''
+  garmentType: string
+  garmentLength: GarmentLength | ''
   alsoParts: Slot[]
   colors: WishlistColor[]
   shop: string
@@ -33,6 +37,7 @@ interface Draft {
   price: string
   shipping: string
   size: string
+  flatMeasurementsSize: string
   sizeNote: string
   necklineSize: string
   priority: WishPriority | null
@@ -59,7 +64,7 @@ export interface WishlistFormDefaults {
   primaryPart?: Slot
 }
 
-const COLOR_FAMILIES = GARMENT_COLORS.slice(0, 16)
+const COLOR_FAMILIES = GARMENT_COLORS.filter((color) => color.name !== '多色' && color.name !== '其他')
 const fallbackHex = (family?: string) => COLOR_FAMILIES.find((color) => color.name === family)?.hex ?? '#D9CBB3'
 const resolvedColor = (color?: WishlistColor) => color?.hex ?? fallbackHex(color?.family)
 
@@ -70,7 +75,10 @@ function toDraft(item?: WishlistItem, defaults?: WishlistFormDefaults): Draft {
   return {
     url: item?.url ?? defaults?.url ?? '',
     name: item?.name ?? '',
+    productCode: item?.productCode ?? '',
     primaryPart,
+    garmentType: item?.garmentType ?? '',
+    garmentLength: item?.garmentLength ?? '',
     alsoParts: (item?.alsoParts ?? []).filter((part) => part !== primaryPart),
     colors,
     shop: item?.shop === '尚未決定' ? '' : (item?.shop ?? ''),
@@ -78,6 +86,7 @@ function toDraft(item?: WishlistItem, defaults?: WishlistFormDefaults): Draft {
     price: num(item?.price),
     shipping: num(item?.shipping),
     size: item?.size ?? '',
+    flatMeasurementsSize: item?.flatMeasurementsSize ?? '',
     sizeNote: item?.sizeNote ?? '',
     necklineSize: item?.necklineSize == null ? '' : String(item.necklineSize),
     priority: item?.priority ?? null,
@@ -130,8 +139,11 @@ function validate(draft: Draft): { errors: Errors; input?: WishlistInput } {
     errors,
     input: {
       name: draft.name,
+      productCode: draft.productCode,
       slot: draft.primaryPart as Slot,
       primaryPart: draft.primaryPart as Slot,
+      garmentType: garmentTypeOptions(draft.primaryPart || undefined).some((option) => option.id === draft.garmentType) ? draft.garmentType : null,
+      garmentLength: draft.primaryPart === 'bottom' && hasGarmentLength(draft.garmentType) ? draft.garmentLength || null : null,
       alsoParts: draft.alsoParts.filter((part) => part !== draft.primaryPart),
       colors: draft.colors,
       colorHex: resolvedColor(draft.colors[0]),
@@ -142,6 +154,7 @@ function validate(draft: Draft): { errors: Errors; input?: WishlistInput } {
       shipping: shipping as number | null,
       brand: draft.brand,
       size: draft.size,
+      flatMeasurementsSize: draft.flatMeasurementsSize,
       sizeNote: draft.sizeNote,
       necklineSize: draft.primaryPart === 'top' ? necklineSize : null,
       priority: draft.priority,
@@ -295,12 +308,26 @@ export function WishlistForm({
   function toggleColorFamily(family: string) {
     const exists = draft.colors.some((color) => color.family === family)
     if (!exists) {
-      set('colors', [...draft.colors, { family }])
+      set('colors', [...draft.colors.map((color) => ({ ...color })), { family }])
       return
     }
     set('colors', draft.colors.filter((color) => color.family !== family))
     setPendingPhotos((current) => current.map((photo) => photo.colorFamily === family ? { ...photo, colorFamily: null } : photo))
     setPhotoColorById((current) => Object.fromEntries(Object.entries(current).map(([photoId, selected]) => [photoId, selected === family ? null : selected])))
+  }
+
+  function toggleFavoriteColor(index: number) {
+    const removing = !!draft.colors[index]?.favorite
+    set('colors', draft.colors.map((color, colorIndex) => ({ ...color, favorite: !removing && colorIndex === index })))
+  }
+
+  function applyPickedColor(index: number, picked: { name: string; hex: string; source: 'photo' | 'pick' }) {
+    const previousFamily = draft.colors[index]?.family
+    set('colors', draft.colors.map((color, colorIndex) => colorIndex === index ? { ...color, family: picked.name, hex: picked.hex, source: picked.source } : color))
+    if (previousFamily && previousFamily !== picked.name) {
+      setPendingPhotos((current) => current.map((photo) => photo.colorFamily === previousFamily ? { ...photo, colorFamily: picked.name } : photo))
+      setPhotoColorById((current) => Object.fromEntries(Object.entries(current).map(([photoId, family]) => [photoId, family === previousFamily ? picked.name : family])))
+    }
   }
 
   function renameColor(previousFamily: string, nextFamily: string) {
@@ -438,27 +465,55 @@ export function WishlistForm({
           <Field label="商品名稱" htmlFor={id('name')} error={errors.name} required>
             <input id={id('name')} value={draft.name} onChange={(e) => set('name', e.target.value)} placeholder="例：奶油白羊毛混紡寬褲" aria-invalid={!!errors.name} aria-describedby={described('name')} aria-required="true" className={inputClass} maxLength={80} />
           </Field>
+          <Field label="商品編號" htmlFor={id('productCode')} hint="選填；可填賣場編號或自訂識別碼">
+            <input id={id('productCode')} value={draft.productCode} onChange={(event) => set('productCode', event.target.value)} placeholder="例：#1197" className={inputClass} maxLength={80} />
+          </Field>
 
-          <fieldset className="m-0 space-y-2 border-0 border-t-[1.5px] border-dashed border-line py-4">
-            <legend className="px-0 text-[13px] font-medium text-ink">主要部位 <span className="text-rose-deep">*</span><span className="ml-2 font-normal text-ink-2">選最常怎麼穿；分類和統計使用這個</span></legend>
-            <div id={id('primaryPart')} role="radiogroup" aria-label="主要部位" aria-describedby={errors.primaryPart ? `${id('primaryPart')}-error` : undefined} className="flex flex-wrap gap-2">
-              {SLOTS.map((slot) => <label key={slot.slot} className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-[1.5px] px-3 text-sm ${draft.primaryPart === slot.slot ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink'} focus-within:ring-2 focus-within:ring-mist-deep`}>
-                <input type="radio" name={id('primaryPart')} value={slot.slot} checked={draft.primaryPart === slot.slot} onChange={() => { set('primaryPart', slot.slot); set('alsoParts', draft.alsoParts.filter((part) => part !== slot.slot)) }} className="size-4 accent-[var(--color-mist-deep)]" />
-                <span>{slot.label}</span>
-              </label>)}
+          <details open className="group border-t-[1.5px] border-dashed border-line py-3">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 marker:hidden [&::-webkit-details-marker]:hidden">
+              <span className="text-[13px] font-medium text-ink">主要部位 <span className="text-rose-deep">*</span></span>
+              <span className="min-w-0 flex-1 truncate text-xs text-ink-2">{draft.primaryPart ? SLOTS.find((slot) => slot.slot === draft.primaryPart)?.label : '請選擇；分類和統計使用這個'}</span>
+              <Icon name="down" size={17} className="text-ink-2 transition-transform group-open:rotate-180 motion-reduce:transition-none" />
+            </summary>
+            <div className="space-y-2 pt-2">
+              <div id={id('primaryPart')} role="radiogroup" aria-label="主要部位" aria-describedby={errors.primaryPart ? `${id('primaryPart')}-error` : undefined} className="flex flex-wrap gap-2">
+                {SLOTS.map((slot) => <label key={slot.slot} className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-[1.5px] px-3 text-sm ${draft.primaryPart === slot.slot ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink'} focus-within:ring-2 focus-within:ring-mist-deep`}>
+                  <input type="radio" name={id('primaryPart')} value={slot.slot} checked={draft.primaryPart === slot.slot} onChange={() => { set('primaryPart', slot.slot); set('garmentType', ''); set('garmentLength', ''); set('alsoParts', draft.alsoParts.filter((part) => part !== slot.slot)) }} className="size-4 accent-[var(--color-mist-deep)]" />
+                  <span>{slot.label}</span>
+                </label>)}
+              </div>
+              {errors.primaryPart && <p id={`${id('primaryPart')}-error`} className="m-0 text-xs text-rose-deep">{errors.primaryPart}</p>}
+              {garmentTypeOptions(draft.primaryPart || undefined).length > 0 && <div className="space-y-1.5 pt-1">
+                <span id={id('garmentType')} className="text-xs text-ink-2">{SLOTS.find((slot) => slot.slot === draft.primaryPart)?.label}類型・選填，再點一次取消</span>
+                <div role="group" aria-labelledby={id('garmentType')} className="flex flex-wrap gap-2">
+                  {garmentTypeOptions(draft.primaryPart || undefined).map((option) => <button key={option.id} type="button" aria-pressed={draft.garmentType === option.id} onClick={() => { const next = draft.garmentType === option.id ? '' : option.id; set('garmentType', next); if (!hasGarmentLength(next)) set('garmentLength', '') }} className={`inline-flex min-h-11 items-center rounded-full border-[1.5px] px-3.5 text-sm font-medium ${draft.garmentType === option.id ? 'border-mist-deep bg-mist-soft text-mist-ink' : 'border-dashed border-line-strong bg-card text-ink-2'}`}>{option.label}</button>)}
+                </div>
+              </div>}
+                {draft.primaryPart === 'bottom' && hasGarmentLength(draft.garmentType) && <div className="space-y-1.5 pt-1">
+                  <span id={id('garmentLength')} className="text-xs text-ink-2">長度・選填</span>
+                  <div role="group" aria-labelledby={id('garmentLength')} className="flex flex-wrap gap-2">
+                    {([['short', '短'], ['mid', '中'], ['long', '長']] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={draft.garmentLength === value} onClick={() => set('garmentLength', draft.garmentLength === value ? '' : value)} className={`inline-flex min-h-11 items-center rounded-full border-[1.5px] px-3.5 text-sm font-medium ${draft.garmentLength === value ? 'border-mist-deep bg-mist-soft text-mist-ink' : 'border-dashed border-line-strong bg-card text-ink-2'}`}>{label}</button>)}
+                  </div>
+                </div>}
             </div>
-            {errors.primaryPart && <p id={`${id('primaryPart')}-error`} className="m-0 text-xs text-rose-deep">{errors.primaryPart}</p>}
-          </fieldset>
+          </details>
 
-          <fieldset className="m-0 space-y-2 border-0 border-t-[1.5px] border-dashed border-line py-4">
-            <legend className="px-0 text-[13px] font-medium text-ink">也可以當 <span className="ml-2 font-normal text-ink-2">選填・可複選；今日搭配的其他部位也能找到</span></legend>
-            <div className="flex flex-wrap gap-2">
-              {SLOTS.filter((slot) => slot.slot !== draft.primaryPart).map((slot) => <label key={slot.slot} className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-[1.5px] px-3 text-sm ${draft.alsoParts.includes(slot.slot) ? 'border-mist-deep bg-mist-soft text-mist-ink' : 'border-dashed border-line-strong bg-card text-ink'} focus-within:ring-2 focus-within:ring-mist-deep`}>
-                <input type="checkbox" checked={draft.alsoParts.includes(slot.slot)} onChange={(event) => set('alsoParts', event.target.checked ? [...draft.alsoParts, slot.slot] : draft.alsoParts.filter((part) => part !== slot.slot))} className="size-4 accent-[var(--color-mist-deep)]" />
-                <span>{slot.label}</span>
-              </label>)}
+          <details className="group border-t-[1.5px] border-dashed border-line py-3">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 marker:hidden [&::-webkit-details-marker]:hidden">
+              <span className="text-[13px] font-medium text-ink">也可以當</span>
+              <span className="min-w-0 flex-1 truncate text-xs text-ink-2">{draft.alsoParts.length ? `已選 ${draft.alsoParts.map((part) => SLOTS.find((slot) => slot.slot === part)?.label).filter(Boolean).join('、')}` : '選填・可複選'}</span>
+              <Icon name="down" size={17} className="text-ink-2 transition-transform group-open:rotate-180 motion-reduce:transition-none" />
+            </summary>
+            <div className="space-y-2 pt-2">
+              <p className="m-0 text-xs text-ink-2">今日搭配時其他部位也能找到這件。</p>
+              <div className="flex flex-wrap gap-2">
+                {SLOTS.filter((slot) => slot.slot !== draft.primaryPart).map((slot) => <label key={slot.slot} className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-[1.5px] px-3 text-sm ${draft.alsoParts.includes(slot.slot) ? 'border-mist-deep bg-mist-soft text-mist-ink' : 'border-dashed border-line-strong bg-card text-ink'} focus-within:ring-2 focus-within:ring-mist-deep`}>
+                  <input type="checkbox" checked={draft.alsoParts.includes(slot.slot)} onChange={(event) => set('alsoParts', event.target.checked ? [...draft.alsoParts, slot.slot] : draft.alsoParts.filter((part) => part !== slot.slot))} className="size-4 accent-[var(--color-mist-deep)]" />
+                  <span>{slot.label}</span>
+                </label>)}
+              </div>
             </div>
-          </fieldset>
+          </details>
 
           <section aria-labelledby={id('colors-title')} className="space-y-3 border-t-[1.5px] border-dashed border-line py-4">
             <div className="flex items-baseline gap-2"><h3 id={id('colors-title')} className="m-0 font-hd text-lg">考慮中的顏色</h3><span className="text-xs text-ink-2">可複選</span></div>
@@ -466,13 +521,16 @@ export function WishlistForm({
               {draft.colors.map((color, colorIndex) => {
                 const photoCount = visiblePhotos.filter((photo) => (photo.id in photoColorById ? photoColorById[photo.id] : photo.colorFamily ?? null) === color.family).length
                 return <div key={colorIndex} className="flex min-w-0 flex-wrap items-center gap-2 rounded-tile bg-paper p-2">
-                  <label className="relative size-9 flex-none cursor-pointer overflow-hidden rounded-sm border border-ink/15" title={`選擇${color.family || '顏色'}色彩`}>
-                    <span aria-hidden="true" className="absolute inset-0" style={{ background: resolvedColor(color) }} />
-                    <input type="color" value={resolvedColor(color)} onChange={(event) => set('colors', draft.colors.map((entry, index) => index === colorIndex ? { ...entry, hex: event.target.value.toUpperCase() } : entry))} aria-label={`選擇${color.family || '自訂'}顏色`} className="absolute inset-0 size-full cursor-pointer opacity-0" />
-                  </label>
+                  <ColorPicker
+                    value={{ name: color.family || '其他', family: color.family || '其他', hex: resolvedColor(color), source: color.source ?? 'pick' }}
+                    photos={visiblePhotos.flatMap((photo) => photo.url ? [{ id: photo.id, src: photo.url, alt: `${draft.name || '商品'}照片`, label: photo.colorFamily ? `${photo.colorFamily}照片` : undefined }] : [])}
+                    label={`改${color.family || '顏色'}顏色`}
+                    onChange={(picked) => applyPickedColor(colorIndex, picked)}
+                    className="shrink-0"
+                  />
                   {editingColorIndex === colorIndex ? <input autoFocus value={color.family} onChange={(event) => renameColor(color.family, event.target.value)} onBlur={() => setEditingColorIndex(null)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); setEditingColorIndex(null) } else if (event.key === 'Escape') setEditingColorIndex(null) }} aria-label="自訂顏色名稱" placeholder="顏色名稱" className="h-11 w-24 min-w-0 rounded-sm border border-line bg-card px-2 text-sm font-medium text-ink" /> : <button type="button" onClick={() => setEditingColorIndex(colorIndex)} aria-label={`編輯${color.family || '顏色'}名稱`} className="h-11 min-w-12 rounded-sm px-1 text-left text-sm font-medium text-ink hover:bg-card focus-visible:outline-2 focus-visible:outline-mist-deep">{color.family || '命名顏色'}</button>}
-                  <span className="min-w-0 flex-1 text-xs text-ink-2">{photoCount ? `${photoCount} 張圖片` : ''}</span>
-                  <label className="flex items-center gap-1 text-[11px] text-ink-2">HEX<input value={color.hex ?? ''} onChange={(event) => { const hex = event.target.value.trim(); set('colors', draft.colors.map((entry, index) => index === colorIndex ? { ...entry, hex: hex ? hex.toUpperCase() : undefined } : entry)) }} placeholder="選填" aria-label={`${color.family || '自訂'}色碼`} className="h-11 w-24 rounded-sm border border-line bg-card px-2 font-num text-xs" /></label>
+                  <span className="min-w-0 flex-1 text-xs text-ink-2">{color.source === 'photo' ? '照片取色・' : ''}{photoCount ? `${photoCount} 張圖片` : ''}</span>
+                  <button type="button" aria-pressed={!!color.favorite} aria-label={`${color.favorite ? '取消' : '設為'}${color.family}最想要的顏色`} onClick={() => toggleFavoriteColor(colorIndex)} className={`min-h-11 rounded-btn border-[1.5px] px-2 text-[11px] font-medium ${color.favorite ? 'border-oat-edge bg-oat-soft text-oat-ink' : 'border-dashed border-line-strong bg-card text-ink-2'}`}>{color.favorite ? '★ 最想要' : '設為最想要'}</button>
                   <button type="button" aria-label={`移除${color.family}`} onClick={() => toggleColorFamily(color.family)} className="flex size-11 items-center justify-center rounded-btn text-ink-2 hover:bg-tile"><Icon name="x" size={16} /></button>
                 </div>
               })}
@@ -493,8 +551,6 @@ export function WishlistForm({
             <div className="flex min-w-0 flex-col gap-1.5"><span className="text-[13px] font-medium text-ink">店家／網站</span><Combobox label="店家／網站" entityName="通路" value={draft.shop} options={shopSuggestions} onChange={(value) => set('shop', value)} placeholder="選擇或輸入店家／網站" manageHref="/me/shops" /><span id={`${id('shop')}-hint`} className="text-xs text-ink-2">留空會顯示「尚未決定」。</span></div>
             <div className="flex min-w-0 flex-col gap-1.5"><span className="text-[13px] font-medium text-ink">品牌</span><Combobox label="品牌" entityName="品牌" value={draft.brand} options={brandSuggestions} onChange={(value) => set('brand', value)} placeholder="選擇或輸入品牌" manageHref="/me/brands" /></div>
           </div>
-          {draft.primaryPart === 'top' && <Field label="領口尺寸（cm）" htmlFor={id('necklineSize')} error={errors.necklineSize} hint="選填；衣領尺寸或領圍"><input id={id('necklineSize')} type="number" min="0" step="0.1" inputMode="decimal" value={draft.necklineSize} onChange={(event) => set('necklineSize', event.target.value)} placeholder="選填" aria-invalid={!!errors.necklineSize} className={`${inputClass} font-num tabular`} /></Field>}
-
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="價格" htmlFor={id('price')} error={errors.price} required>
               <input id={id('price')} inputMode="numeric" value={draft.price} onChange={(e) => set('price', e.target.value)} placeholder="2990" aria-invalid={!!errors.price} aria-describedby={described('price')} aria-required="true" className={`${inputClass} font-num tabular`} />
@@ -518,6 +574,8 @@ export function WishlistForm({
               <h3 id={id('flat-title')} className="m-0 text-[13px] font-medium text-ink">平放尺寸</h3>
               <span className="text-xs text-ink-2">依「{SLOTS.find((slot) => slot.slot === draft.primaryPart)?.label}」顯示・cm・支援平放／可拉伸範圍</span>
             </div>
+            <Field label="這組尺寸量的是哪個尺碼" htmlFor={id('flatMeasurementsSize')} hint="選填；比較其他尺碼時會只顯示尺寸數字，不套用合身判斷"><input id={id('flatMeasurementsSize')} value={draft.flatMeasurementsSize} onChange={(event) => set('flatMeasurementsSize', event.target.value)} placeholder="例：M、36" className={inputClass} /></Field>
+            {draft.primaryPart === 'top' && <Field label="領口尺寸（cm）" htmlFor={id('necklineSize')} error={errors.necklineSize} hint="選填；衣領尺寸或領圍"><input id={id('necklineSize')} type="number" min="0" step="0.1" inputMode="decimal" value={draft.necklineSize} onChange={(event) => set('necklineSize', event.target.value)} placeholder="選填" aria-invalid={!!errors.necklineSize} className={`${inputClass} font-num tabular`} /></Field>}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {fields.map((field) => <FlatMeasureField key={field.key} field={field} body={body} value={draft.flat[field.key] ?? { text: '' }} onChange={(value) => set('flat', { ...draft.flat, [field.key]: value })} />)}
             </div>

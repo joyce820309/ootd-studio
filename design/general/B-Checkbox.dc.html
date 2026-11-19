@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>元件：勾選框</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.cb{position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;flex:none;cursor:pointer}
+.cb input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.cb .bx{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;transition:transform .12s}
+.cb .bx svg{width:16px;height:16px;fill:none;stroke:#FBF4E8;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.cap{font-size:12px;line-height:1.7;color:#5A4A3C}
+.st{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 10px;border-radius:14px;background:#FFFCF6}
+</style>
+</helmet>
+<div style="width:1440px;height:820px;box-sizing:border-box;padding:56px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:40px">
+  <header style="display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span class="lbl" style="background:#A9C6CF;transform:rotate(-2deg);align-self:flex-start">元件</span>
+      <h1 class="hd" style="margin:0;font-size:36px">勾選框 Checkbox</h1>
+    </div>
+    <p style="margin:0 0 4px auto;max-width:600px;font-size:13px;line-height:1.8;color:#5A4A3C">取代瀏覽器原生的方框。外觀像一張貼紙：沒勾是細框，勾了變成深色、微微歪一點。外層一律是 44 × 44 的點擊區，裡面才是 24 px 的框。檔案：<span class="num">components/ui/Checkbox.tsx</span></p>
+  </header>
+
+  <section aria-labelledby="s1" style="display:flex;flex-direction:column;gap:16px">
+    <h2 id="s1" class="hd" style="margin:0;font-size:24px">狀態</h2>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:14px">
+      <sc-for list="{{states}}" as="s" hint-placeholder-count="7">
+        <div class="st">
+          <label class="cb" style="outline:{{s.ol}};outline-offset:-6px;border-radius:12px"><input type="checkbox" aria-label="{{s.t}}"><span class="bx" style="background:{{s.bg}};box-shadow:{{s.sh}};transform:rotate({{s.r}}deg)"><sc-if value="{{s.check}}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if><sc-if value="{{s.dash}}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"></path></svg></sc-if></span></label>
+          <span style="font-size:13px;font-weight:700">{{s.t}}</span>
+          <span class="cap" style="text-align:center">{{s.d}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section aria-labelledby="s2" style="display:grid;grid-template-columns:1fr 1fr;gap:28px">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h2 id="s2" class="hd" style="margin:0;font-size:24px">放在卡片上</h2>
+      <div style="display:flex;gap:16px">
+        <sc-for list="{{cards}}" as="c" hint-placeholder-count="2">
+          <div style="position:relative;flex:1;display:flex;gap:12px;padding:12px;border-radius:14px;background:{{c.bg}};box-shadow:{{c.ring}}">
+            <span style="position:relative;width:84px;height:96px;border-radius:10px;background:#F1E4E2;flex:none">
+              <label class="cb" style="position:absolute;left:-10px;top:-10px"><input type="checkbox" aria-label="選取商品"><span class="bx" style="background:{{c.bxbg}};box-shadow:{{c.bxsh}};transform:rotate({{c.r}}deg)"><sc-if value="{{c.on}}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if></span></label>
+            </span>
+            <span style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:700;line-height:1.5">直坑紋磨毛肩帶小可愛</span><span class="num" style="font-size:14px;font-weight:700">NT$299</span><span class="cap">{{c.t}}</span></span>
+          </div>
+        </sc-for>
+      </div>
+      <span class="cap">勾選框壓在縮圖左上角，四周留一圈底色，避免跟照片混在一起。選取模式下，點整張卡片就是勾選（不會打開詳情）；勾起來的卡片外框變深色。</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h2 class="hd" style="margin:0;font-size:24px">全選</h2>
+      <div style="display:flex;align-items:center;gap:6px;padding:8px 14px 8px 4px;border-radius:14px;background:#FFFCF6">
+        <label class="cb"><input type="checkbox" aria-label="全選目前篩選的 3 件"><span class="bx" style="background:#3B2F25;transform:rotate(-4deg)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"></path></svg></span></label>
+        <span style="font-size:14px;font-weight:500">全選目前 <b class="num">3</b> 件</span>
+        <span style="font-size:13px;color:#5A4A3C;margin-left:8px">已選 <b class="num" style="color:#3B2F25">2</b> 件</span>
+      </div>
+      <span class="cap">只選「目前篩選出來的」。部分選取時顯示橫線；再點一次變成全選，再點一次全部取消。切換篩選時，已選的不會被清掉，數字會寫「已選 5 件（2 件不在目前篩選中）」。</span>
+      <div class="paper" style="padding:14px 16px;display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:13px;font-weight:700">規格</span>
+        <span class="cap">框 24 px、圓角 7 px；點擊區 44 × 44。<br>沒勾：底 #FFFCF6、1.5 px 框線 #8C775C（對比 4.3:1）。<br>勾選／部分：底 #3B2F25、勾號 #FBF4E8、旋轉 −4°。<br>停用：底 #F3E7D4、實線 #D9C7AC。焦點：2.5 px #3E6270 外框。<br>用原生 <span class="num">input type="checkbox"</span> 疊在上面（透明），鍵盤、螢幕閱讀器照常運作；部分選取設 <span class="num">indeterminate</span>。</span>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const OFF = 'inset 0 0 0 1.5px #8C775C', ON = '#3B2F25';
+    return {
+      states: [
+        { t: '沒勾', d: '細框線', bg: '#FFFCF6', sh: OFF, r: 0, check: false, dash: false, ol: 'none' },
+        { t: '滑過', d: '框變粗、深一階', bg: '#FFFCF6', sh: 'inset 0 0 0 2px #3B2F25', r: 0, check: false, dash: false, ol: 'none' },
+        { t: '勾選', d: '深色、歪 −4°', bg: ON, sh: 'none', r: -4, check: true, dash: false, ol: 'none' },
+        { t: '部分選取', d: '只用在「全選」', bg: ON, sh: 'none', r: -4, check: false, dash: true, ol: 'none' },
+        { t: '鍵盤焦點', d: '霧藍外框', bg: '#FFFCF6', sh: OFF, r: 0, check: false, dash: false, ol: '2.5px solid #3E6270' },
+        { t: '停用・沒勾', d: '不能選時', bg: '#F3E7D4', sh: 'inset 0 0 0 1.5px #D9C7AC', r: 0, check: false, dash: false, ol: 'none' },
+        { t: '停用・勾選', d: '鎖定的選項', bg: '#B9A88E', sh: 'none', r: -4, check: true, dash: false, ol: 'none' }
+      ],
+      cards: [
+        { t: '沒選', bg: '#FFFCF6', ring: '0 1px 0 rgba(59,47,37,.05),0 10px 20px -16px rgba(59,47,37,.3)', bxbg: '#FFFCF6', bxsh: 'inset 0 0 0 1.5px #8C775C,0 0 0 3px #FFFCF6', r: 0, on: false },
+        { t: '已選', bg: '#FFF9EE', ring: 'inset 0 0 0 2px #3B2F25', bxbg: '#3B2F25', bxsh: '0 0 0 3px #FFFCF6', r: -4, on: true }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

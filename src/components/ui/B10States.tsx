@@ -100,7 +100,7 @@ export function SaveFailureState({ message = '內容已保留成草稿，不會�
 /** B10-08：搜尋為零筆，可點建議字詞快速替換搜尋字。 */
 export function NoSearchResultsState({ query, suggestions = [], onSuggestion, onOpenCompare }: { query: string; suggestions?: string[]; onSuggestion?: (value: string) => void; onOpenCompare?: () => void }) {
   return (
-    <PageState icon="search" tone="mist" title={`找不到「${query}」`} description="試試更短的關鍵字，或搜尋顏色、品牌。" action={onOpenCompare && <Button variant="secondary" onClick={onOpenCompare}>在網路上找？加到比較試搭台</Button>}>
+    <PageState icon="search" tone="mist" title={`找不到「${query}」`} description="試試更短的關鍵字，或搜尋顏色、品牌。" action={onOpenCompare && <Button variant="secondary" onClick={onOpenCompare}>在網路上找？加入選購比較</Button>}>
       {suggestions.map((suggestion) => <Button key={suggestion} variant="secondary" className="h-9 rounded-full px-3" onClick={() => onSuggestion?.(suggestion)}>{suggestion}</Button>)}
     </PageState>
   )

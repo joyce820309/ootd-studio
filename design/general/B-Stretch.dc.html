@@ -66,7 +66,7 @@ a{color:#3E6270}
       <span class="lbl" style="background:#F2CF8E;transform:rotate(-2deg);align-self:flex-start">規格 v2</span>
       <h1 class="hd" style="margin:0;font-size:36px">彈性尺寸：平放 ＋ 可拉伸</h1>
     </div>
-    <p style="margin:0 0 4px auto;max-width:620px;font-size:13px;line-height:1.8;color:#5A4A3C">網拍常寫「胸寬 40-60」：平放 40，可拉到 60。這張是所有頁面共用的輸入、顯示、判定和規則提醒狀態；新增衣物、衣物詳細、覆盤、選購清單、比較試搭台都照這裡做。資料存在 <span class="num">flat_stretch</span>（migration 0013）。</p>
+    <p style="margin:0 0 4px auto;max-width:620px;font-size:13px;line-height:1.8;color:#5A4A3C">網拍常寫「胸寬 40-60」：平放 40，可拉到 60。這張是所有頁面共用的輸入、顯示、判定和規則提醒狀態；新增衣物、衣物詳細、覆盤、選購清單、比較頁都照這裡做。資料存在 <span class="num">flat_stretch</span>（migration 0013）。</p>
   </header>
 
   <section aria-labelledby="sa" style="display:flex;flex-direction:column;gap:18px">
@@ -128,7 +128,7 @@ a{color:#3E6270}
   </section>
 
   <section aria-labelledby="sb" style="display:flex;flex-direction:column;gap:18px">
-    <div style="display:flex;align-items:baseline;gap:14px"><h2 id="sb" class="hd h2">B・顯示</h2><span class="cap">用在 B5／BM16 衣物詳細、B7 選購卡片、B7+ 比較試搭台。</span></div>
+    <div style="display:flex;align-items:baseline;gap:14px"><h2 id="sb" class="hd h2">B・顯示</h2><span class="cap">用在 B5／BM16 衣物詳細、B7 選購卡片、B23 比較。</span></div>
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:22px;align-items:start">
       <div class="paper" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
         <div style="display:flex;align-items:baseline;gap:8px"><span class="hd" style="font-size:19px">平放尺寸</span><span style="font-size:12px;color:#74624F">cm</span><span class="stc" style="margin-left:6px">材質有彈性・彈性纖維 6%</span></div>
@@ -143,7 +143,7 @@ a{color:#3E6270}
         <span style="font-size:13px;font-weight:700">給 AI 的文字（B17.3）</span>
         <pre style="margin:0;padding:10px 12px;border-radius:10px;background:#FBF4E8;font:400 12px/1.7 ui-monospace,'Chiron GoRound TC',monospace;white-space:pre-wrap">平放尺寸（cm）：肩寬 38、胸寬 40（有彈性，可拉到 60）、衣長 56、袖長 60
 材質：棉 94%、彈性纖維 6%</pre>
-        <span class="cap">比較試搭台的尺寸列也顯示成「40 ↔ 60」。</span>
+        <span class="cap">比較頁的尺寸列也顯示成「40 ↔ 60」。</span>
       </div>
     </div>
   </section>
@@ -186,7 +186,7 @@ a{color:#3E6270}
   </section>
 
   <section aria-labelledby="sd" style="display:flex;flex-direction:column;gap:18px">
-    <div style="display:flex;align-items:baseline;gap:14px"><h2 id="sd" class="hd h2">D・挑選規則提醒</h2><span class="cap">用在 B7 新增選購、B7+ 比較試搭台。規則讀平放值與拉伸值；只有「至少」型規則會因彈性放寬。</span></div>
+    <div style="display:flex;align-items:baseline;gap:14px"><h2 id="sd" class="hd h2">D・挑選規則提醒</h2><span class="cap">用在 B7 新增選購、B23 比較。規則讀平放值與拉伸值；只有「至少」型規則會因彈性放寬。</span></div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start">
       <div class="paper state">
         <span class="tag" style="align-self:flex-start;background:#E6EEE2;color:#2E3F2B">符合</span>
@@ -256,7 +256,7 @@ class Component extends DCLogic {
         ['B17.1／BM14.1 覆盤', 'C', '尺寸對照列換成這裡的畫法'],
         ['B17.3／BM14.3 給 AI 的文字', 'B', '「胸寬 40（有彈性，可拉到 60）」'],
         ['B7 新增選購（含手機）', 'A＋D', '網拍貼上「40-60」最常見；規則提醒顯示在表單下方'],
-        ['B7+ 比較試搭台', 'B＋D', '尺寸列顯示 40 ↔ 60；候選品小標顯示規則結果'],
+        ['B23 比較', 'B＋D', '尺寸列顯示 40 ↔ 60；候選品小標顯示規則結果'],
         ['移至已購買／B17.2 換貨複製', '—', '移至已購買：拉伸值一起帶；換尺寸複製：平放與拉伸都清空']
       ].map(([page, parts, note]) => ({ page, parts, note }))
     };

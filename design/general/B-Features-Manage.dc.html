@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>特徵管理</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.side a{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border-radius:10px;color:#3B2F25;text-decoration:none;font-size:14px}
+.side a[aria-current="page"]{background:#FFFCF6;font-weight:700;box-shadow:inset 3px 0 0 #F2CF8E}
+.tr{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.3fr) minmax(0,1.2fr) 56px 56px 124px;align-items:center;gap:8px;min-height:52px;padding:0 12px;border-top:1.5px dashed #EADCC6;font-size:14px;cursor:pointer}
+.tr.th{min-height:36px;border-top:0;font-size:12px;color:#74624F;cursor:default}
+.ib{width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:#5A4A3C;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.mini{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;font-size:12px;background:#F3E7D4;color:#5A4A3C;white-space:nowrap}
+.fc{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 13px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.fc[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+.cap{margin:0;font-size:12.5px;line-height:1.75;color:#5A4A3C}
+</style>
+</helmet>
+<div style="width:100%;min-height:1530px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
+      <a class="nav-a" href="B-Home.dc.html">首頁</a>
+      <a class="nav-a" href="B-Closet.dc.html">我的衣櫃</a>
+      <a class="nav-a" href="B-Outfit.dc.html">今日搭配</a>
+      <a class="nav-a" href="#diary">穿搭日記</a>
+      <a class="nav-a" href="B-Wishlist.dc.html">選購清單</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:4px;padding-bottom:10px">
+      <button class="ibtn" type="button" aria-label="通知" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"></path></svg></button>
+      <a href="B-Body.dc.html" aria-label="個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#FFFCF6;border:1.5px solid #3B2F25;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span></a>
+    </div>
+  </header>
+  <main style="max-width:1320px;margin:0 auto;padding:28px 32px 56px;display:grid;grid-template-columns:200px minmax(0,1fr) 340px;gap:28px;align-items:start">
+    <nav aria-label="個人資料" class="side" style="display:flex;flex-direction:column;gap:2px;position:sticky;top:16px">
+      <span style="font-size:12px;color:#74624F;padding:0 12px 6px">個人資料</span>
+      <a href="B-Body.dc.html">體態與尺寸</a>
+      <a href="B-History.dc.html">量測紀錄</a>
+      <span style="font-size:12px;color:#74624F;padding:14px 12px 6px">清單管理</span>
+      <a href="B-Brands.dc.html">品牌<span class="num" style="margin-left:auto;font-size:12px;color:#74624F">14</span></a>
+      <a href="B-Shops.dc.html">購買通路<span class="num" style="margin-left:auto;font-size:12px;color:#74624F">11</span></a>
+      <a href="B-Materials.dc.html">材質<span class="num" style="margin-left:auto;font-size:12px;color:#74624F">16</span></a>
+      <a href="B-Features-Manage.dc.html" aria-current="page">特徵<span class="num" style="margin-left:auto;font-size:12px;color:#74624F">16</span></a>
+    </nav>
+
+    <section style="display:flex;flex-direction:column;gap:16px;min-width:0">
+      <div style="display:flex;align-items:flex-end;gap:12px">
+        <div style="display:flex;flex-direction:column;gap:6px;margin-right:auto">
+          <h1 class="hd" style="margin:0;font-size:32px">特徵</h1>
+          <span style="font-size:13px;color:#5A4A3C">衣櫃和選購清單共用。改名、合併會一起更新所有衣物；別名用來從商品名稱找特徵。</span>
+        </div>
+        <button class="btn btn-s" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M12 5v14M5 12h14"></path></svg>新增特徵</button>
+      </div>
+
+      <section aria-labelledby="dup-t" class="paper" style="padding:14px 16px;display:flex;flex-direction:column;gap:8px;background:#FFF9EE">
+        <h2 id="dup-t" style="margin:0;font-size:14px;font-weight:700">可能是同一個意思</h2>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;border-radius:12px;background:#FFFCF6">
+          <span class="chip" style="height:32px;background:#F3E7D4">闊腿褲 <span class="num" style="color:#74624F">2</span></span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;color:#74624F"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+          <span style="font-size:13px">併進 <b>寬褲</b>，「闊腿褲」留作別名</span>
+          <span style="margin-left:auto;display:flex;gap:6px"><button class="btn btn-s" type="button" style="height:36px">不是</button><button class="btn btn-o" type="button" style="height:36px">合併</button></span>
+        </div>
+      </section>
+
+      <section aria-label="特徵清單" class="paper" style="padding:12px 6px 8px">
+        <div style="display:flex;gap:8px;align-items:center;padding:0 12px 10px;flex-wrap:wrap">
+          <sc-for list="{{dims}}" as="d" hint-placeholder-count="6"><button type="button" class="fc" aria-pressed="{{d.on}}">{{d.t}}<span class="num" style="font-size:12px;opacity:.7">{{d.n}}</span></button></sc-for>
+          <button type="button" class="fc" style="margin-left:auto;border-style:dashed">沒用到的 <span class="num">2</span></button>
+        </div>
+        <div role="table" aria-label="特徵">
+          <div role="row" class="tr th"><span role="columnheader">名稱</span><span role="columnheader">也叫做</span><span role="columnheader">適用類型</span><span role="columnheader" style="text-align:right">衣櫃</span><span role="columnheader" style="text-align:right">選購</span><span role="columnheader"></span></div>
+          <sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+            <div role="rowgroup">
+              <div role="row" style="display:flex;align-items:baseline;gap:8px;padding:14px 12px 6px"><b class="hd" style="font-size:17px;font-weight:400">{{g.t}}</b><span style="font-size:12px;color:#5A4A3C">{{g.kind}}</span></div>
+              <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
+                <div role="row" class="tr" onClick="{{r.sel}}" style="background:{{r.bg}};box-shadow:{{r.ring}};border-radius:{{r.rad}}">
+                  <span role="cell" style="font-weight:500">{{r.t}}</span>
+                  <span role="cell" style="display:flex;gap:4px;flex-wrap:wrap"><sc-for list="{{r.syn}}" as="y" hint-placeholder-count="1"><span class="mini">{{y}}</span></sc-for></span>
+                  <span role="cell" style="font-size:12.5px;color:#5A4A3C">{{r.types}}</span>
+                  <span role="cell" class="num" style="text-align:right;color:{{r.c1}}">{{r.a}}</span>
+                  <span role="cell" class="num" style="text-align:right;color:{{r.c2}}">{{r.b}}</span>
+                  <span role="cell" style="display:flex;justify-content:flex-end;gap:2px">
+                    <button class="ib" type="button" aria-label="改名 {{r.t}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"></path></svg></button>
+                    <button class="ib" type="button" aria-label="把 {{r.t}} 合併到其他特徵"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M6 4v5a6 6 0 0 0 6 6h6M6 20v-5M15 12l3 3-3 3"></path></svg></button>
+                    <button class="ib" type="button" aria-label="刪除 {{r.t}}" style="color:#8E4A3E"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"></path></svg></button>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </section>
+
+    <aside style="display:flex;flex-direction:column;gap:16px;position:sticky;top:16px">
+      <section aria-labelledby="ed" class="paper" style="padding:18px;display:flex;flex-direction:column;gap:12px">
+        <h2 id="ed" class="hd" style="margin:0;font-size:21px">編輯「{{cur.t}}」</h2>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500">名稱<input value="{{cur.t}}" style="height:44px;padding:0 12px;border-radius:10px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:400 14px 'Chiron GoRound TC';color:#3B2F25"></label>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500">維度<span style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{cur.dim}}" as="d" hint-placeholder-count="3"><span class="fc" aria-pressed="{{d.on}}" style="height:34px">{{d.t}}</span></sc-for></span><span style="font-size:11.5px;font-weight:400;color:#5A4A3C">腰高、褲型這類「單選屬性」的選項，只能在同一個維度內新增或改名。</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500">別名<span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><sc-for list="{{cur.syn}}" as="y" hint-placeholder-count="2"><span class="mini" style="height:30px;font-size:13px;gap:6px">{{y}}<span aria-hidden="true">×</span></span></sc-for><span class="mini" style="height:30px;font-size:13px;background:transparent;border:1.5px dashed #C9B79C">＋ 加別名</span></span><span style="font-size:11.5px;font-weight:400;color:#5A4A3C">商品名稱出現這些詞，也會建議「{{cur.t}}」。</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500">適用類型<span style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{cur.types}}" as="d" hint-placeholder-count="4"><span class="fc" aria-pressed="{{d.on}}" style="height:34px">{{d.t}}</span></sc-for></span><span style="font-size:11.5px;font-weight:400;color:#5A4A3C">只會出現在這些類型的建議裡；其他類型可在「更多特徵」找到。</span></div>
+        <div style="padding:10px 12px;border-radius:10px;background:#F3E7D4;font-size:13px;line-height:1.7">用在 <b class="num">{{cur.a}}</b> 件衣物、<b class="num">{{cur.b}}</b> 件選購候選</div>
+        <div style="display:flex;gap:8px"><button class="btn btn-g" type="button" style="color:#8E4A3E;padding:0 8px">刪除…</button><button class="btn btn-s" type="button" style="margin-left:auto">取消</button><button class="btn btn-p" type="button">儲存</button></div>
+      </section>
+      <section class="paper" style="padding:14px 16px;display:flex;flex-direction:column;gap:6px">
+        <b style="font-size:14px">刪除時</b>
+        <p class="cap">有用到的會先問：「厚磅 用在 6 件衣物、2 件選購。刪除後這些衣物會拿掉這個特徵。」可以改選「合併到其他特徵」。沒用到的直接刪，底部提示可復原。</p>
+        <b style="font-size:14px;margin-top:4px">預設清單</b>
+        <p class="cap">第一次使用時帶入預設的維度和特徵（依類型）。維度第一版不開放自訂，特徵可以自由新增、改名、合併。</p>
+      </section>
+    </aside>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1530}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { sel: '厚磅' }; }
+  renderVals() {
+    const sel = this.state.sel;
+    const G = [
+      ['腰高', '單選屬性・褲子、裙子', [['高腰', [], '褲子、裙子', 9, 3], ['中腰', [], '褲子、裙子', 4, 1], ['低腰', [], '褲子、裙子', 1, 0]]],
+      ['褲型', '單選屬性・褲子', [['寬褲', ['闊腿'], '褲子', 6, 4], ['直筒', [], '褲子、牛仔褲', 3, 1], ['錐形', [], '褲子、牛仔褲', 1, 0], ['燈籠', [], '褲子', 0, 0]]],
+      ['質感', '多選特徵', [['厚磅', ['加厚', '厚款'], '褲子、外套、針織', 6, 2], ['磨毛', ['內磨毛', '刷毛'], '褲子、上衣、外套', 4, 2], ['垂墜', ['垂感'], '褲子、裙子、襯衫', 2, 1], ['挺版', ['挺'], '外套、褲子', 3, 0]]],
+      ['細節', '多選特徵', [['後鬆緊', ['鬆緊腰', '後腰鬆緊'], '褲子、裙子', 5, 2], ['打褶', ['褶'], '褲子、裙子', 2, 1], ['有口袋', ['口袋'], '全部', 4, 0]]],
+      ['場合', '多選特徵', [['上班', ['通勤', 'OL'], '全部', 7, 1], ['運動', [], '全部', 0, 0]]]
+    ];
+    let cur = null;
+    const groups = G.map(([t, kind, rows]) => ({ t, kind, rows: rows.map(([n, syn, types, a, b]) => {
+      const on = n === sel; if (on) cur = { t: n, syn, a, b, dimName: t, typesS: types };
+      return { t: n, syn, types, a, b, c1: a ? '#3B2F25' : '#B9A88E', c2: b ? '#3B2F25' : '#B9A88E',
+        bg: on ? '#FFF9EE' : 'transparent', ring: on ? 'inset 0 0 0 2px #3B2F25' : 'none', rad: on ? '10px' : '0', sel: () => this.setState({ sel: n }) };
+    }) }));
+    const TY = ['褲子', '牛仔褲', '裙子', '外套', '針織', '上衣', '襯衫'];
+    return {
+      dims: [['全部', 16, 1], ['腰高', 3], ['褲型', 4], ['質感', 4], ['細節', 3], ['場合', 2]].map(([t, n, on]) => ({ t, n, on: on ? 'true' : 'false' })),
+      groups,
+      cur: Object.assign({}, cur, {
+        dim: ['質感', '細節', '場合'].map(d => ({ t: d, on: d === cur.dimName ? 'true' : 'false' })).concat(['腰高', '褲型'].includes(cur.dimName) ? [{ t: cur.dimName, on: 'true' }] : []),
+        types: TY.map(d => ({ t: d, on: (cur.typesS === '全部' || cur.typesS.includes(d)) ? 'true' : 'false' }))
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -94,6 +94,12 @@
   --color-note-rule: rgb(62 98 112 / 0.22);
   --color-note-grid: rgb(150 186 198 / 0.22);
 
+  /* 勾選框（B21）：沒勾的細框線、鎖定且已勾選的底色 */
+  --color-check-edge: #8C775C;
+  --color-check-locked: #B9A88E;
+  /* 選取模式下已勾選的卡片底色 */
+  --color-card-selected: #FFF9EE;
+
   /* 彈性尺寸（B20／BM17） */
   --color-stretch-field: #FFF9EE;
   --color-stretch-cell: #FFF6E2;

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { toPng } from 'html-to-image'
 import { ItemImage } from '@/components/closet/ItemImage'
 import { Button } from '@/components/ui/Button'
@@ -8,7 +9,7 @@ import { LoadingState, PageState } from '@/components/ui/PageState'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
 import { StudioCanvas, type StudioPiece } from '@/components/outfit/StudioCanvas'
 import { isWearable, SLOT_META } from '@/lib/slots'
-import { fetchClosetItems, fetchWishlist, saveStudioOutfit } from '@/lib/data'
+import { fetchAllWishlist, fetchClosetItems, fetchWishlist, saveStudioOutfit } from '@/lib/data'
 import { recommendStudioTheme, STUDIO_BACKGROUND_CUSTOM_DEFAULT } from '@/lib/studioBackground'
 import type { ClosetItem, Placement, Slot, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, StudioCanvasItem, WishlistItem } from '@/types'
 
@@ -81,6 +82,9 @@ function amount(item: WishlistItem) {
 }
 
 export function StudioPage() {
+  const [searchParams] = useSearchParams()
+  const prefillWishId = searchParams.get('wish')
+  const prefillClosetId = searchParams.get('closet')
   const [closetItems, setClosetItems] = useState<ClosetItem[]>([])
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([])
   const [source, setSource] = useState<Source>('closet')
@@ -100,10 +104,16 @@ export function StudioPage() {
   const [toast, setToast] = useState<ToastMessage | null>(null)
   const [advice, setAdvice] = useState('把不同部位放上畫布，試試重疊與比例；所有位置會自動保留成草稿。')
   const canvasRef = useRef<HTMLDivElement>(null)
+  const handledPrefills = useRef(new Set<string>())
   const draftRef = useRef(draft)
   const historyRef = useRef(history)
   const historyIndexRef = useRef(historyIndex)
-  const loadData = useCallback(async () => Promise.all([fetchClosetItems(), fetchWishlist()]), [])
+  const loadData = useCallback(async () => {
+    const [closet, wishlist, allWishlist] = await Promise.all([fetchClosetItems(), fetchWishlist(), prefillWishId ? fetchAllWishlist() : Promise.resolve([])])
+    const target = prefillWishId ? allWishlist.find((item) => item.id === prefillWishId) : undefined
+    const availableWishlist = target && !wishlist.some((item) => item.id === target.id) ? [...wishlist, target] : wishlist
+    return [closet, availableWishlist] as const
+  }, [prefillWishId])
 
   useEffect(() => {
     let alive = true
@@ -113,11 +123,33 @@ export function StudioPage() {
         setClosetItems(closet)
         setWishlistItems(wishlist)
         setLoadError(null)
+        const prefillSource: Source | null = prefillWishId ? 'wishlist' : prefillClosetId ? 'closet' : null
+        const prefillId = prefillWishId ?? prefillClosetId
+        const prefillKey = prefillSource && prefillId ? entryKey(prefillSource, prefillId) : null
+        if (prefillSource && prefillId && prefillKey && !handledPrefills.current.has(prefillKey)) {
+          handledPrefills.current.add(prefillKey)
+          const entry = prefillSource === 'wishlist'
+            ? wishlist.find((item) => item.id === prefillId)
+            : closet.find((item) => item.id === prefillId)
+          if (!entry) setAdvice('這件商品目前無法加入試搭，可能已移出比較或衣櫃。')
+          else {
+            const key = prefillKey
+            const current = draftRef.current
+            if (current.pieces.some((piece) => piece.key === key)) setSelectedKey(key)
+            else {
+              pushHistory({ ...current, pieces: [...current.pieces, { key, source: prefillSource, itemId: entry.id, placement: positionFor(current.pieces.length, current.pieces) }] })
+              setSelectedKey(key)
+              setAdvice(`已把「${entry.name}」放上畫布，可以繼續搭配衣櫃單品。`)
+            }
+            setSource(prefillSource)
+            setFilter('all')
+          }
+        }
       })
       .catch((cause: Error) => alive && setLoadError(cause.message || '衣物素材載入失敗。'))
       .finally(() => alive && setLoading(false))
     return () => { alive = false }
-  }, [loadData])
+  }, [loadData, prefillClosetId, prefillWishId])
 
   useEffect(() => {
     draftRef.current = draft
@@ -132,8 +164,8 @@ export function StudioPage() {
 
   const catalog = useMemo<CatalogRecord[]>(() => [
     ...closetItems.map((item) => ({ source: 'closet' as const, item, slot: itemSlot(item) })),
-    ...wishlistItems.filter((item) => !['bought', 'dropped'].includes(item.status)).map((item) => ({ source: 'wishlist' as const, item, slot: itemSlot(item) })),
-  ], [closetItems, wishlistItems])
+    ...wishlistItems.filter((item) => !['bought', 'dropped'].includes(item.status) || item.id === prefillWishId).map((item) => ({ source: 'wishlist' as const, item, slot: itemSlot(item) })),
+  ], [closetItems, prefillWishId, wishlistItems])
 
   const selectedCatalog = useMemo(() => new Map(catalog.map((entry) => [entryKey(entry.source, entry.item.id), entry])), [catalog])
   const pieces = useMemo<StudioPiece[]>(() => draft.pieces.flatMap((entry) => {

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { Switch } from '@/components/ui/Switch'
 import { LoadingState } from '@/components/ui/PageState'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
 import { fetchTrendPrefs, resetTrendPrefs, saveTrendPrefs } from '@/lib/data'
@@ -27,17 +28,6 @@ import { useIsMobile } from '@/lib/useIsMobile'
 import type { BodyMeasurement, MeasurementTrendPrefs, TrendMetricKey } from '@/types'
 
 const timeLabel = (record: TrendRecord) => (record.morning ? '早上空腹' : record.timeOfDay === 'afternoon_evening' ? '下午・晚上' : '其他時段')
-
-function Switch({ checked, label, onChange, className = '' }: { checked: boolean; label: string; onChange: () => void; className?: string }) {
-  return (
-    <button type="button" role="switch" aria-checked={checked} onClick={onChange} className={`flex min-h-11 items-center gap-2 text-left text-[13px] text-ink ${className}`}>
-      <span aria-hidden="true" className={`relative h-6 w-[42px] flex-none rounded-full transition-colors ${checked ? 'bg-sage-deep' : 'bg-line-strong'}`}>
-        <span className={`absolute top-0.5 size-5 rounded-full bg-card shadow-sticker transition-transform ${checked ? 'translate-x-5' : 'translate-x-0.5'}`} />
-      </span>
-      <span className="flex-1 md:flex-none">{label}</span>
-    </button>
-  )
-}
 
 function RangeSeg({ value, onChange, compact }: { value: MeasurementTrendPrefs['range']; onChange: (range: MeasurementTrendPrefs['range']) => void; compact: boolean }) {
   return (

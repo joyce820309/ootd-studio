@@ -64,7 +64,7 @@ a{color:#3E6270}
 .mi span{font-size:11px;color:#74624F}
 </style>
 </helmet>
-<div style="width:390px;height:2700px;background:#FFFCF6;position:relative;overflow:hidden">
+<div style="width:390px;height:3420px;background:#FFFCF6;position:relative;overflow:hidden">
   <section role="dialog" aria-modal="true" aria-labelledby="wa-t" style="width:390px;background:#FFFCF6;display:flex;flex-direction:column;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
     <header style="display:flex;align-items:center;padding:8px 8px 8px 16px;border-bottom:1.5px dashed #EADCC6">
       <h2 id="wa-t" class="hd" style="margin:0;font-size:20px">加入選購清單</h2>
@@ -104,21 +104,36 @@ a{color:#3E6270}
       <section class="sec" aria-labelledby="s-c">
         <h3 class="sh" id="s-c"><b>考慮中的顏色</b><span>可複選</span></h3>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <sc-for list="{{colors}}" as="c" hint-placeholder-count="2">
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px 8px 8px;border-radius:12px;background:#FBF4E8">
-              <span style="width:32px;height:32px;border-radius:8px;background:{{c.hex}};box-shadow:inset 0 0 0 1px rgba(59,47,37,.18);flex:none"></span>
-              <span style="font-size:14px;font-weight:500;width:56px">{{c.t}}</span>
+          <sc-for list="{{colors}}" as="c" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:10px;padding:6px 6px 6px 6px;border-radius:12px;background:#FBF4E8">
+              <button type="button" aria-label="改{{c.t}}的顏色" aria-haspopup="dialog" style="width:44px;height:44px;border:0;background:none;padding:6px;cursor:pointer;flex:none"><span style="display:block;width:32px;height:32px;border-radius:8px;background:{{c.hex}};box-shadow:{{c.ring}}"></span></button>
+              <span style="font-size:14px;font-weight:500">{{c.t}}</span>
+              
+              <span class="tag" style="height:20px;font-size:10px;background:{{c.tbg}};color:{{c.tfg}}">{{c.src}}</span>
               <span style="flex:1"></span>
-              <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#74624F">HEX<input aria-label="{{c.t}} HEX（選填）" value="{{c.code}}" placeholder="選填" class="num" style="width:84px;height:36px;border:1.5px solid #E2D2B8;border-radius:10px;background:#FFFCF6;padding:0 8px;font-size:13px"></label>
-              <button class="ibtn" type="button" aria-label="移除{{c.t}}" style="width:36px;height:36px;color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+              <button class="ibtn" type="button" aria-label="移除{{c.t}}" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
             </div>
           </sc-for>
         </div>
-        <div role="group" aria-label="從色系新增顏色" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-          <span style="font-size:12px;color:#5A4A3C;margin-right:4px">＋ 新增</span>
-          <sc-for list="{{fam}}" as="f" hint-placeholder-count="16"><button type="button" class="sw18" aria-label="{{f.t}}" aria-pressed="{{f.on}}" title="{{f.t}}" style="background:{{f.hex}};box-shadow:{{f.sh}}"></button></sc-for>
+        <div style="position:relative">
+          <button type="button" class="sc" aria-haspopup="dialog" aria-expanded="true" style="height:44px;border-style:solid;border-color:#3B2F25;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M12 5v14M5 12h14"></path></svg>新增顏色</button>
+          <div role="dialog" aria-label="選擇顏色（元件 B22，手機從下方滑出；這裡展開示意）" style="position:relative;margin-top:10px;width:100%;background:#FFFCF6;border-radius:18px;box-shadow:0 0 0 1.5px #EADCC6,0 20px 40px -18px rgba(59,47,37,.45);display:flex;flex-direction:column">
+            <div style="display:grid;grid-template-columns:1fr 1fr;padding:3px;margin:12px 14px 6px;border-radius:10px;background:#F3E7D4"><button type="button" role="tab" aria-selected="true" style="height:38px;border:0;border-radius:8px;background:#FFFCF6;font:700 13px 'Chiron GoRound TC';color:#3B2F25;box-shadow:0 1px 2px rgba(59,47,37,.1)">色名</button><button type="button" role="tab" aria-selected="false" style="height:38px;border:0;border-radius:8px;background:transparent;font:500 13px 'Chiron GoRound TC';color:#5A4A3C">從照片取色</button></div>
+            <div style="padding:0 14px 4px">
+              <sc-for list="{{pick}}" as="f" hint-placeholder-count="10">
+                <div style="display:grid;grid-template-columns:40px 1fr;gap:6px;align-items:start;padding:6px 0;border-top:{{f.bt}}">
+                  <span style="font-size:11px;color:#74624F;padding-top:8px">{{f.t}}</span>
+                  <div style="display:flex;flex-wrap:wrap;gap:4px"><sc-for list="{{f.c}}" as="c" hint-placeholder-count="5"><button type="button" aria-label="{{c.n}}" aria-pressed="{{c.on}}" style="display:flex;flex-direction:column;align-items:center;gap:2px;width:42px;min-height:48px;border:0;background:none;padding:0;cursor:pointer"><span style="display:block;flex:none;width:30px;height:30px;border-radius:8px;background:{{c.bg}};box-shadow:{{c.sh}}"></span><span style="font-size:10px;line-height:1.3;white-space:nowrap;color:{{c.fg}}">{{c.n}}</span></button></sc-for></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:10px 14px 14px;border-top:1.5px dashed #EADCC6">
+              <span style="width:28px;height:28px;border-radius:8px;background:#B9D3EA"></span><span style="font-size:13px;font-weight:700">寶寶藍</span>
+              <button type="button" class="btn btn-p" style="margin-left:auto;height:40px;padding:0 16px">加入</button>
+            </div>
+          </div>
         </div>
-        <span class="hint">買的時候再選定哪一色；兩色都買，會各建立一件衣物。</span>
+        <span class="hint">點色塊可以改顏色、改用照片取色（元件見 B22）。買的時候再選定哪一色；兩色都買，會各建立一件衣物。</span>
       </section>
 
       <section class="sec" aria-labelledby="s-s">
@@ -144,7 +159,7 @@ a{color:#3E6270}
               <label class="fl" style="font-size:12px">{{f.k}}<span class="mi" style="border-color:{{f.bd}};background:{{f.bg}}"><input value="{{f.v}}" placeholder="選填" inputmode="decimal"><span>cm</span></span><sc-if value="{{f.ok}}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:400;color:#2E3F2B">平放 40・可拉到 60</span></sc-if></label>
             </sc-for>
           </div>
-          <span class="hint">有填平放尺寸，挑選規則和比較試搭台才判斷得了「會不會太緊」。</span>
+          <span class="hint">有填平放尺寸，挑選規則和比較頁才判斷得了「會不會太緊」。</span>
         </div>
       </section>
 
@@ -172,24 +187,34 @@ a{color:#3E6270}
   </section>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2700}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":3420}}'>
 class Component extends DCLogic {
   renderVals() {
     const P = [['outer', '外套', '#A9C6CF'], ['top', '上衣', '#F2CF8E'], ['bottom', '下身', '#B7CBB0'], ['shoe', '鞋子', '#E2B4A8'], ['bag', '包包', '#E2B4A8'], ['acc', '配件', '#F2CF8E']];
-    const FAM = [['白','#F4F1EA'],['米','#EFE6D2'],['燕麥','#D9CBB3'],['駝','#B88A5A'],['咖啡','#5A4031'],['灰','#9A9893'],['黑','#232322'],['海軍藍','#2E3A4F'],['藍','#8FA3BC'],['綠','#8C9A86'],['黃','#E8C66A'],['橘','#D98A4E'],['紅','#A8423A'],['酒紅','#6E2E34'],['粉','#E7B9B4'],['紫','#8E7AA6']];
-    const chosen = { '酒紅': 1, '黑': 1, '米': 1 };
     const g = '#E8DCC8', d = '#C9B79A';
     return {
       photos: [
         { bg: '#F1E9DD', fill: '#7A2630', shape: true, table: false, cells: [], tag: '● 酒紅', cover: true, ring: '0 0 0 2px #3B2F25', alt: '酒紅色針織開衫' },
         { bg: '#F1E9DD', fill: '#262424', shape: true, table: false, cells: [], tag: '● 黑', cover: false, ring: 'none', alt: '黑色針織開衫' },
-        { bg: '#F1E9DD', fill: '#EDE4D3', shape: true, table: false, cells: [], tag: '● 米', cover: false, ring: 'none', alt: '米色針織開衫' },
+        { bg: '#F1E9DD', fill: '#EDE4D3', shape: true, table: false, cells: [], tag: '● 奶白', cover: false, ring: 'none', alt: '奶白色針織開衫' },
         { bg: '#FFFFFF', shape: false, table: true, cells: [d, d, d, g, g, g, g, g, g], tag: '尺寸表', cover: false, ring: 'inset 0 0 0 1px #EADCC6', fill: '', alt: '' }
       ],
       parts: P.map(([id, t, c]) => ({ t, c, on: id === 'top' ? 'true' : 'false' })),
       also: P.filter(p => p[0] !== 'top').map(([id, t]) => ({ t, on: id === 'outer' ? 'true' : 'false' })),
-      colors: [['酒紅', '#6E2E34', '#7A2630', '最想要・有一張圖'], ['黑', '#232322', '', '有一張圖'], ['米', '#EFE6D2', '', '有一張圖']].map(([t, hex, code, note]) => ({ t, hex: code || hex, code, note })),
-      fam: FAM.map(([t, hex]) => ({ t, hex, on: chosen[t] ? 'true' : 'false', sh: chosen[t] ? '0 0 0 2px #FFFCF6,0 0 0 4px #3B2F25' : 'inset 0 0 0 1px rgba(59,47,37,.15)' })),
+      colors: [['酒紅', '#782A37', 1, '最想要'], ['黑', '#232322', 0, ''], ['奶白', '#F3EDE1', 0, '']].map(([t, hex, photo, note]) => ({ t, hex, note, src: photo ? '照片取色' : '色名', tbg: photo ? '#DCE8EC' : '#F3E7D4', tfg: photo ? '#24424D' : '#5A4A3C', ring: 'inset 0 0 0 1px rgba(59,47,37,.18)' })),
+      pick: (() => {
+        const G = [['最近', [['酒紅', '#6E2E34'], ['奶白', '#F3EDE1'], ['炭灰', '#3E3E3D'], ['杏', '#EAD9C6'], ['寶寶藍', '#B9D3EA'], ['卡其', '#BFAE8C']]],
+          ['白米', [['白', '#F6F4EF'], ['奶白', '#F3EDE1'], ['米', '#EFE6D2'], ['杏', '#EAD9C6'], ['燕麥', '#D9CBB3']]],
+          ['棕', [['卡其', '#BFAE8C'], ['駝', '#B88A5A'], ['焦糖', '#A0683A'], ['咖啡', '#6B4A36'], ['深咖', '#3F2C22']]],
+          ['灰黑', [['淺灰', '#D3D1CC'], ['米灰', '#C6BFB3'], ['花灰', 'heather'], ['灰', '#9A9893'], ['深灰', '#5E5D5B'], ['炭灰', '#3E3E3D'], ['黑', '#232322']]],
+          ['藍', [['寶寶藍', '#B9D3EA'], ['藍', '#8FA3BC'], ['牛仔藍', '#4F6A8C'], ['海軍藍', '#2E3A4F']]],
+          ['綠', [['綠', '#8C9A86'], ['軍綠', '#5E6146']]], ['黃橘', [['黃', '#E8C66A'], ['橘', '#D98A4E']]],
+          ['紅粉', [['粉', '#E7B9B4'], ['紅', '#A8423A'], ['酒紅', '#6E2E34']]], ['紫', [['柔紫', '#C9BBD9'], ['紫', '#8E7AA6']]],
+          ['其他', [['多色', 'multi'], ['其他', '#D9C7AC']]]];
+        const bgOf = h => h === 'heather' ? 'radial-gradient(#7d7b77 1px,transparent 1.4px) 0 0/5px 5px,radial-gradient(#c9c7c2 1px,transparent 1.4px) 2.5px 2.5px/5px 5px,#A9A7A3' : h === 'multi' ? 'conic-gradient(#A8423A,#E8C66A,#8C9A86,#8FA3BC,#8E7AA6,#A8423A)' : h;
+        const used = { '酒紅': 1, '黑': 1, '奶白': 1 };
+        return G.map(([t, cs], gi) => ({ t, bt: gi ? '1.5px dashed #EADCC6' : 'none', c: cs.map(([n, h]) => { const sel = n === '寶寶藍', u = used[n]; return { n, bg: bgOf(h), on: sel ? 'true' : 'false', fg: u ? '#A89A88' : '#5A4A3C', sh: sel ? '0 0 0 2px #FFFCF6,0 0 0 3.5px #3B2F25' : u ? 'inset 0 0 0 1px rgba(59,47,37,.15),inset 0 0 0 30px rgba(255,252,246,.35)' : 'inset 0 0 0 1px rgba(59,47,37,.15)' }; }) }));
+      })(),
       flat: [['肩寬', '', 0], ['胸寬', '40-60', 1], ['衣長', '46', 0], ['袖長', '58', 0]].map(([k, v, ok]) => ({ k, v, ok: !!ok, bd: ok ? '#A7C09E' : '#E2D2B8', bg: ok ? '#F4F8F2' : '#FFFCF6' }))
     };
   }

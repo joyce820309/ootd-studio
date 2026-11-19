@@ -1,0 +1,23 @@
+.compare-picker[open] { display: flex; }
+.compare-picker { overscroll-behavior: contain; }
+.compare-picker::backdrop { overflow: hidden; overscroll-behavior: contain; }
+.compare-picker__filters { min-width: 0; }
+.compare-picker__filters .wishlist-filters { gap: 6px; }
+.compare-picker__filters .wishlist-filters__row { gap: 6px; }
+.compare-picker__item { min-height: 76px; }
+.compare-picker__item:has(input:focus-visible) { outline: 2.5px solid var(--color-mist-deep); outline-offset: 2px; }
+.compare-picker__footer { box-shadow: 0 -8px 18px -18px var(--color-ink); }
+
+@media (max-width: 767px) {
+  .compare-picker__filters .wishlist-filters__row--status { display: none; }
+  .compare-picker__filters .wishlist-filters__row--status-mobile { display: block; }
+  .compare-picker__filters .wishlist-filters__row--part,
+  .compare-picker__filters .wishlist-filters__row--type,
+  .compare-picker__filters .wishlist-filters__row--length { margin-inline: -16px; padding-inline: 16px; overflow-x: auto; }
+  .compare-picker__filters .wishlist-filters__label { display: none; }
+}
+
+@media (forced-colors: active) {
+  .compare-picker { border: 1px solid CanvasText; }
+  .compare-picker__item:has(input:focus-visible) { outline-color: Highlight; }
+}

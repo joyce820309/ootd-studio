@@ -62,6 +62,7 @@ const router = createBrowserRouter([
       { path: "/diary/:id/edit", element: <DiaryPage /> },
       { path: "/wishlist", element: <WishlistPage /> },
       { path: "/wishlist/compare", element: <ComparePage /> },
+      { path: "/wishlist/compare/:id", element: <ComparePage /> },
       {
         // 個人資料：大螢幕共用左側子導覽
         element: <ProfileLayout />,

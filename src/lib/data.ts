@@ -1,13 +1,14 @@
 import { todayISO } from './date'
 import { useEffect, useState } from 'react'
-import { SAMPLE_BODY_MEASUREMENTS, SAMPLE_BODY_PROFILE, SAMPLE_CATEGORIES, SAMPLE_COMPARE_GROUPS, SAMPLE_DIARY, SAMPLE_ITEMS, SAMPLE_PROFILE, SAMPLE_WISHLIST } from '@/data/sample'
+import { SAMPLE_BODY_MEASUREMENTS, SAMPLE_BODY_PROFILE, SAMPLE_CATEGORIES, SAMPLE_COMPARE_GROUPS, SAMPLE_COMPARE_GROUP_ITEMS, SAMPLE_DIARY, SAMPLE_ITEMS, SAMPLE_PROFILE, SAMPLE_WISHLIST } from '@/data/sample'
 import type { MeasurementTrendPrefs } from '@/types'
 import { DEFAULT_TREND_PREFS, normalizeTrendPrefs } from '@/lib/measurementTrend'
-import type { AddItemDestination, BodyMeasurement, BodyMeasurementInput, BodyProfile, BodyProfileInput, BrandChange, BrandSummary, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, CutoutRegion, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, GarmentShape, ItemStatus, LessonRule, LessonRuleInput, LessonStatus, ManagedEntryChange, ManagedListSummary, NewGarmentInput, Outfit, ProfilePreferences, ReviewDecision, ReviewRecord, ReviewRecordInput, ShopKind, Slot, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, StudioCanvasItem, WishlistColor, WishlistInput, WishlistItem, WishlistPhotoUpload, WishStatus } from '@/types'
+import type { AddItemDestination, BodyMeasurement, BodyMeasurementInput, BodyProfile, BodyProfileInput, BrandChange, BrandSummary, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, CompareGroupItem, CompareMembership, CutoutRegion, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, GarmentShape, ItemStatus, LessonRule, LessonRuleInput, LessonStatus, ManagedEntryChange, ManagedListSummary, NewGarmentInput, Outfit, ProfilePreferences, ReviewDecision, ReviewRecord, ReviewRecordInput, ShopKind, Slot, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, StudioCanvasItem, WishlistColor, WishlistInput, WishlistItem, WishlistPhotoUpload, WishStatus } from '@/types'
 import { toUploadableImage } from '@/lib/image'
 import { GARMENT_COLORS } from '@/lib/colors'
 import { MATERIAL_DEFAULTS, materialNames } from '@/lib/materials'
 import { cleanStretch } from '@/lib/stretch'
+import { wishlistSizeOptions } from '@/lib/wishlist'
 import { supabase } from './supabase'
 import { isInCloset, isLessonStatus } from './slots'
 
@@ -22,7 +23,14 @@ let demoTrendPrefs: MeasurementTrendPrefs | null = null
 let demoClosetItems: ClosetItem[] = [...SAMPLE_ITEMS]
 let demoWishlistItems: WishlistItem[] = [...SAMPLE_WISHLIST]
 let demoCompareGroups: CompareGroup[] = SAMPLE_COMPARE_GROUPS.map((group) => ({ ...group }))
-let demoCompareClosetItems: { groupId: string; itemId: string }[] = []
+let demoCompareGroupItems: CompareGroupItem[] = SAMPLE_COMPARE_GROUP_ITEMS.map((entry) => ({
+  groupId: entry.groupId,
+  wishlistItemId: entry.itemId,
+  position: entry.position,
+  chosenSize: wishlistSizeOptions(SAMPLE_WISHLIST.find((item) => item.id === entry.itemId)?.size)[0],
+  isDecided: 'isDecided' in entry ? entry.isDecided : false,
+  addedAt: SAMPLE_WISHLIST.find((item) => item.id === entry.itemId)?.createdAt,
+}))
 const demoGarmentDraftFiles = new Map<string, File[]>()
 const demoManagedShops = new Map<string, { kind: ShopKind; url?: string }>()
 const demoManagedMaterials = new Map<string, { aliases: string[]; sortOrder: number; isDefault: boolean; isHidden: boolean }>(MATERIAL_DEFAULTS.map((material) => [material.name, { aliases: [...material.aliases], sortOrder: material.sortOrder, isDefault: true, isHidden: false }]))
@@ -453,14 +461,17 @@ export async function deleteClosetItem(id: string): Promise<{ demo: boolean; cle
   return { demo: false }
 }
 
-const ACTIVE_WISH_STATUSES: WishStatus[] = ['considering', 'waiting', 'ready']
-const WISHLIST_COLUMNS = 'id,name,slot,primary_part,also_parts,colors,color_hex,color_name,shop,price,shipping,target_price,url,size,size_note,neckline_size,brand,material,material_composition,material_percentages,flat_measurements,flat_stretch,return_policy,reason,priority,status,compare_group_id,image_cutout_path,image_original_path,bought_item_id,bought_item_ids,created_at'
+const ACTIVE_WISH_STATUSES: WishStatus[] = ['considering', 'ready']
+const WISHLIST_COLUMNS = 'id,name,product_code,slot,primary_part,garment_type,garment_length,also_parts,colors,color_hex,color_name,shop,price,shipping,target_price,url,size,flat_measurements_size,size_note,neckline_size,brand,material,material_composition,material_percentages,flat_measurements,flat_stretch,return_policy,reason,priority,status,image_cutout_path,image_original_path,bought_item_id,bought_item_ids,created_at'
 
 interface WishlistRow {
   id: string
   name: string
+  product_code: string | null
   slot: Slot
   primary_part: Slot
+  garment_type: string | null
+  garment_length: WishlistItem['garmentLength'] | null
   also_parts: Slot[]
   colors: WishlistColor[] | null
   color_hex: string
@@ -471,6 +482,7 @@ interface WishlistRow {
   target_price: number | null
   url: string | null
   size: string | null
+  flat_measurements_size: string | null
   size_note: string | null
   neckline_size: number | null
   brand: string | null
@@ -483,7 +495,6 @@ interface WishlistRow {
   reason: string | null
   priority: number | null
   status: WishStatus
-  compare_group_id: string | null
   image_cutout_path: string | null
   image_original_path: string | null
   bought_item_id: string | null
@@ -508,7 +519,7 @@ async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
   const urls = await signed(photoPaths)
   return rows.map((r) => {
     const path = imagePath(r)
-    const colors = Array.isArray(r.colors) ? r.colors : [{ family: r.color_name || '其他', hex: r.color_hex }]
+    const colors = normalizeWishlistColors(Array.isArray(r.colors) ? r.colors : [{ family: r.color_name || '其他', hex: r.color_hex }])
     const primaryColor = colors[0]
     const photos = photosByWish.get(r.id) ?? []
     const completePhotos = photos.length
@@ -517,8 +528,11 @@ async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
     return {
       id: r.id,
       name: r.name,
+      productCode: r.product_code ?? undefined,
       slot: r.slot,
       primaryPart: r.primary_part ?? r.slot,
+      garmentType: r.garment_type ?? undefined,
+      garmentLength: r.garment_length ?? undefined,
       alsoParts: r.also_parts ?? [],
       colors,
       colorHex: primaryColor?.hex ?? GARMENT_COLORS.find((color) => color.name === primaryColor?.family)?.hex ?? r.color_hex,
@@ -529,6 +543,7 @@ async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
       targetPrice: r.target_price ?? undefined,
       url: r.url ?? undefined,
       size: r.size ?? undefined,
+      flatMeasurementsSize: r.flat_measurements_size ?? undefined,
       sizeNote: r.size_note ?? undefined,
       necklineSize: r.neckline_size ?? undefined,
       brand: r.brand ?? undefined,
@@ -540,8 +555,7 @@ async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
       returnPolicy: r.return_policy ?? undefined,
       reason: r.reason ?? undefined,
       priority: r.priority === 1 || r.priority === 2 || r.priority === 3 ? r.priority : undefined,
-      status: r.status,
-      compareGroupId: r.compare_group_id ?? undefined,
+      status: (r.status as string) === 'waiting' ? 'considering' : r.status,
       cutoutUrl: path ? urls[path] : undefined,
       photos: completePhotos,
       shape: fallbackShape(r.slot),
@@ -552,7 +566,7 @@ async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
   })
 }
 
-/** 進行中的選購候選（考慮中、等待降價、準備購買），供搭配板與比較台使用。 */
+/** 進行中的選購候選（考慮中、準備購買），供搭配板與比較台使用。 */
 export async function fetchWishlist(): Promise<WishlistItem[]> {
   if (!supabase) return demoWishlistItems.filter((item) => ACTIVE_WISH_STATUSES.includes(item.status))
   const { data, error } = await supabase
@@ -577,6 +591,15 @@ export async function fetchAllWishlist(): Promise<WishlistItem[]> {
 
 const blankToNull = (value?: string) => value?.trim() || null
 
+/** colors JSONB 最多保留一個 favorite；若舊／外部資料有多個，保留第一個。 */
+function normalizeWishlistColors(colors: WishlistColor[]): WishlistColor[] {
+  const favoriteIndex = colors.findIndex((color) => color.favorite)
+  return colors.map((color, index) => {
+    const { favorite: _favorite, ...rest } = color
+    return favoriteIndex === index ? { ...rest, favorite: true } : rest
+  })
+}
+
 /** 平放尺寸去掉空值；拉伸值只留有平放值且較大的欄位 */
 function cleanFlat(flat: Record<string, number | null>) {
   return Object.fromEntries(Object.entries(flat).filter(([, value]) => value !== null && Number.isFinite(value))) as Record<string, number>
@@ -589,12 +612,15 @@ function flatPayload(flat: Record<string, number | null>, stretch?: Record<strin
 
 function wishlistPayload(input: WishlistInput) {
   const primaryPart = input.primaryPart ?? input.slot
-  const colors = input.colors !== undefined ? input.colors : [{ family: input.colorName || '其他', hex: input.colorHex }]
+  const colors = normalizeWishlistColors(input.colors !== undefined ? input.colors : [{ family: input.colorName || '其他', hex: input.colorHex }])
   const primaryColor = colors[0]
   return {
     name: input.name.trim(),
+    product_code: blankToNull(input.productCode),
     slot: primaryPart,
     primary_part: primaryPart,
+    garment_type: blankToNull(input.garmentType ?? undefined),
+    garment_length: input.garmentLength ?? null,
     also_parts: [...new Set((input.alsoParts ?? []).filter((part) => part !== primaryPart))],
     colors,
     color_hex: primaryColor?.hex ?? GARMENT_COLORS.find((color) => color.name === primaryColor?.family)?.hex ?? input.colorHex,
@@ -606,6 +632,7 @@ function wishlistPayload(input: WishlistInput) {
     ...(input.targetPrice !== undefined ? { target_price: input.targetPrice } : {}),
     brand: blankToNull(input.brand),
     size: blankToNull(input.size),
+    flat_measurements_size: blankToNull(input.flatMeasurementsSize),
     size_note: blankToNull(input.sizeNote),
     neckline_size: input.necklineSize ?? null,
     priority: input.priority,
@@ -616,14 +643,13 @@ function wishlistPayload(input: WishlistInput) {
     ...(input.flatMeasurements !== undefined ? flatPayload(input.flatMeasurements, input.flatStretch) : {}),
     return_policy: blankToNull(input.returnPolicy),
     status: input.status,
-    ...(input.compareGroupId !== undefined ? { compare_group_id: input.compareGroupId } : {}),
   }
 }
 
 function demoWishFromInput(id: string, input: WishlistInput, base?: WishlistItem): WishlistItem {
   const optional = (value?: string) => value?.trim() || undefined
   const primaryPart = input.primaryPart ?? input.slot
-  const colors = input.colors !== undefined ? input.colors : [{ family: input.colorName || '其他', hex: input.colorHex }]
+  const colors = normalizeWishlistColors(input.colors !== undefined ? input.colors : [{ family: input.colorName || '其他', hex: input.colorHex }])
   const primaryColor = colors[0]
   const colorHex = primaryColor?.hex ?? GARMENT_COLORS.find((color) => color.name === primaryColor?.family)?.hex ?? input.colorHex
   const photoChanges = !!input.photosToAdd?.length || !!input.photoIdsToRemove?.length || !!input.photoColorAssignments?.length
@@ -643,8 +669,11 @@ function demoWishFromInput(id: string, input: WishlistInput, base?: WishlistItem
     ...base,
     id,
     name: input.name.trim(),
+    productCode: optional(input.productCode),
     slot: primaryPart,
     primaryPart,
+    garmentType: optional(input.garmentType ?? undefined),
+    garmentLength: input.garmentLength === undefined ? base?.garmentLength : (input.garmentLength ?? undefined),
     alsoParts: [...new Set((input.alsoParts ?? []).filter((part) => part !== primaryPart))],
     colors,
     colorHex,
@@ -656,6 +685,7 @@ function demoWishFromInput(id: string, input: WishlistInput, base?: WishlistItem
     targetPrice: input.targetPrice ?? base?.targetPrice,
     brand: optional(input.brand),
     size: optional(input.size),
+    flatMeasurementsSize: input.flatMeasurementsSize === undefined ? base?.flatMeasurementsSize : optional(input.flatMeasurementsSize),
     necklineSize: input.necklineSize ?? base?.necklineSize,
     sizeNote: optional(input.sizeNote),
     priority: input.priority ?? undefined,
@@ -666,7 +696,6 @@ function demoWishFromInput(id: string, input: WishlistInput, base?: WishlistItem
     ...(input.flatMeasurements !== undefined ? { flatMeasurements: cleanFlat(input.flatMeasurements), flatStretch: cleanStretch(input.flatMeasurements, input.flatStretch) } : {}),
     returnPolicy: optional(input.returnPolicy),
     status: input.status,
-    compareGroupId: input.compareGroupId === undefined ? base?.compareGroupId : (input.compareGroupId ?? undefined),
     shape: base && base.slot === input.slot ? base.shape : fallbackShape(input.slot),
     photos,
     ...(photoChanges ? { cutoutUrl: coverPhoto?.url } : {}),
@@ -951,68 +980,172 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
   return { itemIds: outputIds, demo: false }
 }
 
-// ---------- 比較群組 ----------
+// ---------- 選購比較 ----------
 
-/** 讀取比較群組，依建立時間新到舊。 */
+/** 讀取比較清單，依更新時間新到舊（封存項目也回傳，由呼叫端決定是否顯示）。 */
 export async function fetchCompareGroups(): Promise<CompareGroup[]> {
-  if (!supabase) return demoCompareGroups.map((group) => ({ ...group }))
-  const { data, error } = await supabase.from('compare_groups').select('id,title,budget,created_at').order('created_at', { ascending: false })
+  if (!supabase) return demoCompareGroups.map((group) => ({ ...group })).sort((a, b) => (b.updatedAt ?? b.createdAt ?? '').localeCompare(a.updatedAt ?? a.createdAt ?? ''))
+  const { data, error } = await supabase.from('compare_groups').select('id,name,budget,archived_at,created_at,updated_at').order('updated_at', { ascending: false })
   if (error) throw error
-  return (data ?? []).map((row) => ({ id: row.id, title: row.title, budget: row.budget ?? undefined, createdAt: row.created_at }))
+  return (data ?? []).map((row) => ({ id: row.id, name: row.name, budget: row.budget ?? undefined, archivedAt: row.archived_at ?? undefined, createdAt: row.created_at, updatedAt: row.updated_at }))
 }
 
-/** 讀取各比較群組加入的衣櫃單品 ID。 */
-export async function fetchCompareClosetItems(): Promise<Record<string, string[]>> {
+/** 讀取選購商品在比較中的順序與指定尺碼。 */
+export async function fetchCompareGroupItems(groupId?: string): Promise<CompareGroupItem[]> {
+  if (!supabase) return demoCompareGroupItems.filter((entry) => !groupId || entry.groupId === groupId).map((entry) => ({ ...entry })).sort((a, b) => a.position - b.position)
+  let query = supabase.from('compare_group_items').select('group_id,wishlist_item_id,position,chosen_size,is_decided,added_at').order('position').order('added_at')
+  if (groupId) query = query.eq('group_id', groupId)
+  const { data, error } = await query
+  if (error) throw error
+  return (data ?? []).map((row) => ({ groupId: row.group_id, wishlistItemId: row.wishlist_item_id, position: row.position, chosenSize: row.chosen_size ?? undefined, isDecided: row.is_decided, addedAt: row.added_at }))
+}
+
+/** 讀取候選已加入的比較名稱，供挑選器及卡片標記使用。 */
+export async function fetchCompareMemberships(wishlistIds?: string[]): Promise<Record<string, CompareMembership[]>> {
   if (!supabase) {
-    return demoCompareClosetItems.reduce<Record<string, string[]>>((result, entry) => {
-      result[entry.groupId] = [...(result[entry.groupId] ?? []), entry.itemId]
+    const groupsById = new Map(demoCompareGroups.map((group) => [group.id, group]))
+    return demoCompareGroupItems.reduce<Record<string, CompareMembership[]>>((result, entry) => {
+      const group = groupsById.get(entry.groupId)
+      if (!group || (wishlistIds && !wishlistIds.includes(entry.wishlistItemId))) return result
+      result[entry.wishlistItemId] = [...(result[entry.wishlistItemId] ?? []), { groupId: group.id, groupName: group.name }]
       return result
     }, {})
   }
-  const { data, error } = await supabase.from('compare_group_closet_items').select('compare_group_id,item_id')
+  let query = supabase.from('compare_group_items').select('wishlist_item_id,group_id,compare_groups(name)')
+  if (wishlistIds) query = query.in('wishlist_item_id', wishlistIds)
+  const { data, error } = await query
   if (error) throw error
-  return (data ?? []).reduce<Record<string, string[]>>((result, entry) => {
-    result[entry.compare_group_id] = [...(result[entry.compare_group_id] ?? []), entry.item_id]
+  return (data ?? []).reduce<Record<string, CompareMembership[]>>((result, row) => {
+    const group = row.compare_groups as { name?: string } | null
+    if (!group) return result
+    result[row.wishlist_item_id] = [...(result[row.wishlist_item_id] ?? []), { groupId: row.group_id, groupName: group.name ?? '' }]
     return result
   }, {})
 }
 
-/** 將衣櫃單品加入或移出比較群組；只刪除比較關聯，不會刪除衣物。 */
-export async function setCompareClosetItem(groupId: string, itemId: string, included: boolean): Promise<{ demo: boolean }> {
+/** 批次加入商品；已存在的比較關聯會忽略，不會重複。 */
+export async function addWishlistItemsToCompare(groupId: string, wishlistIds: string[]): Promise<{ demo: boolean }> {
+  const uniqueIds = [...new Set(wishlistIds)]
+  if (!uniqueIds.length) return { demo: !supabase }
+  const existing = await fetchCompareGroupItems(groupId)
+  const known = new Set(existing.map((entry) => entry.wishlistItemId))
+  const additions = uniqueIds.filter((id) => !known.has(id))
+  if (!additions.length) return { demo: !supabase }
+  const position = existing.reduce((max, entry) => Math.max(max, entry.position), -1) + 1
+  const now = new Date().toISOString()
   if (!supabase) {
-    const exists = demoCompareClosetItems.some((entry) => entry.groupId === groupId && entry.itemId === itemId)
-    if (included && !exists) demoCompareClosetItems = [...demoCompareClosetItems, { groupId, itemId }]
-    if (!included) demoCompareClosetItems = demoCompareClosetItems.filter((entry) => entry.groupId !== groupId || entry.itemId !== itemId)
+    demoCompareGroupItems = [...demoCompareGroupItems, ...additions.map((wishlistItemId, index) => {
+      const item = demoWishlistItems.find((entry) => entry.id === wishlistItemId)
+      const options = wishlistSizeOptions(item?.size)
+      const chosenSize = item?.flatMeasurementsSize && options.includes(item.flatMeasurementsSize) ? item.flatMeasurementsSize : options[0] ?? item?.flatMeasurementsSize
+      return { groupId, wishlistItemId, position: position + index, chosenSize, addedAt: now }
+    })]
+    demoCompareGroups = demoCompareGroups.map((group) => group.id === groupId ? { ...group, updatedAt: now } : group)
     return { demo: true }
   }
-  if (included) {
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError) throw authError
-    if (!user) throw new Error('請重新登入後再加入衣櫃單品。')
-    const { error } = await supabase.from('compare_group_closet_items').upsert({ owner_id: user.id, compare_group_id: groupId, item_id: itemId }, { onConflict: 'compare_group_id,item_id', ignoreDuplicates: true })
-    if (error) throw error
-  } else {
-    const { error } = await supabase.from('compare_group_closet_items').delete().eq('compare_group_id', groupId).eq('item_id', itemId)
-    if (error) throw error
-  }
+  const { data: sizeRows, error: sizeError } = await supabase.from('wishlist_items').select('id,size,flat_measurements_size').in('id', additions)
+  if (sizeError) throw sizeError
+  const sizes = new Map((sizeRows ?? []).map((row) => {
+    const options = wishlistSizeOptions(row.size ?? undefined)
+    const measurementSize = row.flat_measurements_size as string | null
+    return [row.id, measurementSize && options.includes(measurementSize) ? measurementSize : options[0] ?? measurementSize ?? null] as const
+  }))
+  const { error } = await supabase.from('compare_group_items').insert(additions.map((wishlistItemId, index) => ({ group_id: groupId, wishlist_item_id: wishlistItemId, position: position + index, chosen_size: sizes.get(wishlistItemId) ?? null })))
+  if (error) throw error
   return { demo: false }
 }
 
+/** 從單一比較移除候選，只刪關聯列。 */
+export async function removeWishlistItemFromCompare(groupId: string, wishlistId: string): Promise<{ demo: boolean }> {
+  if (!supabase) {
+    demoCompareGroupItems = demoCompareGroupItems.filter((entry) => entry.groupId !== groupId || entry.wishlistItemId !== wishlistId)
+    demoCompareGroups = demoCompareGroups.map((group) => group.id === groupId ? { ...group, updatedAt: new Date().toISOString() } : group)
+    return { demo: true }
+  }
+  const { error } = await supabase.from('compare_group_items').delete().eq('group_id', groupId).eq('wishlist_item_id', wishlistId)
+  if (error) throw error
+  return { demo: false }
+}
+
+/** 儲存目前比較表欄位順序。 */
+export async function reorderCompareGroupItems(groupId: string, wishlistIds: string[]): Promise<{ demo: boolean }> {
+  if (!supabase) {
+    const order = new Map(wishlistIds.map((id, index) => [id, index]))
+    demoCompareGroupItems = demoCompareGroupItems.map((entry) => entry.groupId === groupId && order.has(entry.wishlistItemId) ? { ...entry, position: order.get(entry.wishlistItemId)! } : entry)
+    demoCompareGroups = demoCompareGroups.map((group) => group.id === groupId ? { ...group, updatedAt: new Date().toISOString() } : group)
+    return { demo: true }
+  }
+  const client = supabase
+  const results = await Promise.all(wishlistIds.map((wishlistItemId, position) => client.from('compare_group_items').update({ position }).eq('group_id', groupId).eq('wishlist_item_id', wishlistItemId)))
+  const failure = results.find((result) => result.error)
+  if (failure?.error) throw failure.error
+  return { demo: false }
+}
+
+/** 儲存此比較要比對的尺碼。 */
+export async function setCompareChosenSize(groupId: string, wishlistId: string, chosenSize: string | null): Promise<{ demo: boolean }> {
+  if (!supabase) {
+    demoCompareGroupItems = demoCompareGroupItems.map((entry) => entry.groupId === groupId && entry.wishlistItemId === wishlistId ? { ...entry, chosenSize: chosenSize ?? undefined } : entry)
+    demoCompareGroups = demoCompareGroups.map((group) => group.id === groupId ? { ...group, updatedAt: new Date().toISOString() } : group)
+    return { demo: true }
+  }
+  const { error } = await supabase.from('compare_group_items').update({ chosen_size: chosenSize }).eq('group_id', groupId).eq('wishlist_item_id', wishlistId)
+  if (error) throw error
+  return { demo: false }
+}
+
+/** 記錄此比較中使用者決定購買的候選；null 表示取消決定。 */
+export async function setCompareDecision(groupId: string, wishlistId: string | null): Promise<{ demo: boolean }> {
+  if (!supabase) {
+    demoCompareGroupItems = demoCompareGroupItems.map((entry) => entry.groupId === groupId ? { ...entry, isDecided: entry.wishlistItemId === wishlistId } : entry)
+    demoCompareGroups = demoCompareGroups.map((group) => group.id === groupId ? { ...group, updatedAt: new Date().toISOString() } : group)
+    return { demo: true }
+  }
+  const { error } = await supabase.rpc('set_compare_decision', { p_group_id: groupId, p_wishlist_item_id: wishlistId })
+  if (error) throw error
+  return { demo: false }
+}
+
+/** 封存或還原比較。 */
+export async function setCompareGroupArchived(id: string, archived: boolean): Promise<{ demo: boolean }> {
+  const archivedAt = archived ? new Date().toISOString() : null
+  if (!supabase) {
+    demoCompareGroups = demoCompareGroups.map((group) => group.id === id ? { ...group, archivedAt: archivedAt ?? undefined, updatedAt: new Date().toISOString() } : group)
+    return { demo: true }
+  }
+  const { error } = await supabase.from('compare_groups').update({ archived_at: archivedAt }).eq('id', id)
+  if (error) throw error
+  return { demo: false }
+}
+
+/** 建立比較並加入選定候選；若加入失敗會清除剛建立的空比較。 */
+export async function createCompareWithItems(name: string, wishlistIds: string[]): Promise<{ group: CompareGroup; demo: boolean }> {
+  const { group, demo } = await createCompareGroup({ name })
+  try {
+    await addWishlistItemsToCompare(group.id, wishlistIds)
+    return { group, demo }
+  } catch (error) {
+    await deleteCompareGroup(group.id).catch(() => undefined)
+    throw error
+  }
+}
+
 function checkGroupInput(input: CompareGroupInput) {
-  if (!input.title.trim()) throw new Error('請填群組名稱。')
-  if (input.budget !== null && (!Number.isInteger(input.budget) || input.budget < 0)) throw new Error('預算請填 0 以上的整數。')
+  if (!input.name.trim()) throw new Error('請填比較名稱。')
 }
 
 export async function createCompareGroup(input: CompareGroupInput): Promise<{ group: CompareGroup; demo: boolean }> {
   checkGroupInput(input)
   if (!supabase) {
-    const group: CompareGroup = { id: `demo-group-${Date.now()}`, title: input.title.trim(), budget: input.budget ?? undefined, createdAt: new Date().toISOString() }
+    const now = new Date().toISOString()
+    const name = input.name.trim()
+    const group: CompareGroup = { id: `demo-group-${Date.now()}`, name, createdAt: now, updatedAt: now }
     demoCompareGroups = [group, ...demoCompareGroups]
     return { group, demo: true }
   }
-  const { data, error } = await supabase.from('compare_groups').insert({ title: input.title.trim(), budget: input.budget }).select('id,title,budget,created_at').single()
+  const { data, error } = await supabase.from('compare_groups').insert({ name: input.name.trim() }).select('id,name,budget,archived_at,created_at,updated_at').single()
   if (error) throw error
-  return { group: { id: data.id, title: data.title, budget: data.budget ?? undefined, createdAt: data.created_at }, demo: false }
+  return { group: { id: data.id, name: data.name, budget: data.budget ?? undefined, archivedAt: data.archived_at ?? undefined, createdAt: data.created_at, updatedAt: data.updated_at }, demo: false }
 }
 
 export async function updateCompareGroup(id: string, input: CompareGroupInput): Promise<{ group: CompareGroup; demo: boolean }> {
@@ -1020,35 +1153,25 @@ export async function updateCompareGroup(id: string, input: CompareGroupInput): 
   if (!supabase) {
     const base = demoCompareGroups.find((group) => group.id === id)
     if (!base) throw new Error('找不到這個群組，可能已被刪除。')
-    const group: CompareGroup = { ...base, title: input.title.trim(), budget: input.budget ?? undefined }
+    const name = input.name.trim()
+    const group: CompareGroup = { ...base, name, updatedAt: new Date().toISOString() }
     demoCompareGroups = demoCompareGroups.map((entry) => (entry.id === id ? group : entry))
     return { group, demo: true }
   }
-  const { data, error } = await supabase.from('compare_groups').update({ title: input.title.trim(), budget: input.budget }).eq('id', id).select('id,title,budget,created_at').maybeSingle()
+  const { data, error } = await supabase.from('compare_groups').update({ name: input.name.trim() }).eq('id', id).select('id,name,budget,archived_at,created_at,updated_at').maybeSingle()
   if (error) throw error
   if (!data) throw new Error('找不到這個群組，可能已被刪除。')
-  return { group: { id: data.id, title: data.title, budget: data.budget ?? undefined, createdAt: data.created_at }, demo: false }
+  return { group: { id: data.id, name: data.name, budget: data.budget ?? undefined, archivedAt: data.archived_at ?? undefined, createdAt: data.created_at, updatedAt: data.updated_at }, demo: false }
 }
 
-/** 刪除群組只拿掉比較關係；候選商品仍留在選購清單（資料表為 on delete set null）。 */
+/** 刪除比較只拿掉比較與其關聯；候選商品仍留在選購清單。 */
 export async function deleteCompareGroup(id: string): Promise<{ demo: boolean }> {
   if (!supabase) {
     demoCompareGroups = demoCompareGroups.filter((group) => group.id !== id)
-    demoWishlistItems = demoWishlistItems.map((item) => (item.compareGroupId === id ? { ...item, compareGroupId: undefined } : item))
+    demoCompareGroupItems = demoCompareGroupItems.filter((entry) => entry.groupId !== id)
     return { demo: true }
   }
   const { error } = await supabase.from('compare_groups').delete().eq('id', id)
-  if (error) throw error
-  return { demo: false }
-}
-
-/** 把選購候選加入或移出比較群組（groupId 為 null 時移出）。 */
-export async function setWishlistGroup(wishId: string, groupId: string | null): Promise<{ demo: boolean }> {
-  if (!supabase) {
-    demoWishlistItems = demoWishlistItems.map((item) => (item.id === wishId ? { ...item, compareGroupId: groupId ?? undefined } : item))
-    return { demo: true }
-  }
-  const { error } = await supabase.from('wishlist_items').update({ compare_group_id: groupId }).eq('id', wishId)
   if (error) throw error
   return { demo: false }
 }
@@ -1426,7 +1549,10 @@ export async function discardGarmentDraft(id: string): Promise<void> {
 export async function deleteGarment(id: string, destination: AddItemDestination): Promise<void> {
   if (!supabase) {
     if (destination === 'closet') demoClosetItems = demoClosetItems.filter((item) => item.id !== id)
-    else demoWishlistItems = demoWishlistItems.filter((item) => item.id !== id)
+    else {
+      demoWishlistItems = demoWishlistItems.filter((item) => item.id !== id)
+      demoCompareGroupItems = demoCompareGroupItems.filter((entry) => entry.wishlistItemId !== id)
+    }
     return
   }
   const table = destination === 'closet' ? 'items' : 'wishlist_items'

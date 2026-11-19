@@ -57,9 +57,9 @@ src/
     closet/              GarmentArt（示範剪影）、ItemImage、ItemTile
     outfit/              OutfitBoard（固定板型）、SlotPicker、FreeCanvas（自由擺放）
     diary/               DiaryParts（評分、場合／感受標籤、月曆小拼貼）、DiaryEntryDialog（記一筆／編輯）
-    wishlist/            WishlistTabs、WishlistForm（新增／編輯）、BoughtDialog（移至已購買）、CompareGroupDialog
+    wishlist/            WishlistTabs、WishlistForm（新增／編輯）、BoughtDialog、ComparePickerDialog、CompareBuyDialog、CompareSelectionDialog、WishlistCompareMenu
   pages/                 Landing、Login、Home、Closet、AddItem、ItemDetail、Outfit、Studio、Wishlist、Compare、Diary、Profile、MeasurementHistory
-supabase/migrations/     0001_init.sql … 0007_outfit_diary.sql（依序執行）
+supabase/migrations/     0001_init.sql … 0028_compare_decision_marker.sql（依序執行）
 ```
 
 ## 路由與進度
@@ -77,7 +77,7 @@ supabase/migrations/     0001_init.sql … 0007_outfit_diary.sql（依序執行�
 | `/diary/new`、`/diary/:id/edit` | 記一筆／編輯（桌面對話框、手機 bottom sheet） | 完成 → B-Diary-New、B-M-Diary-New |
 | `/diary/:id` | 單日紀錄（手機獨立頁；桌面在月曆右側） | 完成 → B-M-Diary-Day |
 | `/wishlist` | 選購清單（新增／編輯／改狀態／移至已購買／刪除；`?status=`、`?item=`） | 完成 → B-Wishlist |
-| `/wishlist/compare` | **比較試搭台**（主要功能；群組 CRUD、加入／淘汰候選、混搭試穿、決定買；`?group=`） | 完成 → B-Compare、B-M-Compare |
+| `/wishlist/compare`、`/wishlist/compare/:id` | 選購比較（比較表；試搭移至 `/studio?wish=:id`；舊 `?group=` 轉址） | 完成 → B23／B23.1／BM20／BM20.1 |
 | `/me` | 個人資料・新增量測（儲存為新快照） | 完成 → B-Body |
 | `/me/measurements` | 量測紀錄・依日期／對照表（`?view=table`） | 完成 → B-History、B-History-Table、B-M-History |
 | `/me/measurements/:id` | 單次紀錄（手機獨立頁；桌面在列表右側） | 完成 → B-M-History-Detail |
@@ -94,12 +94,12 @@ supabase/migrations/     0001_init.sql … 0007_outfit_diary.sql（依序執行�
 - 可放衣櫃單品或選購清單商品（`OutfitPick` 的 `closet` / `wish`）。
 - 手機：單欄、搭配板在最上方；選單品用 bottom sheet。
 
-### 比較試搭台（`/wishlist/compare`）— 最重要的功能
-使用者常猶豫要不要買網拍衣服，會在不同網站比對類似單品。
-- 一個比較群組 = 同一需求的多個候選（例：「冬天想要一條寬褲」）。
-- 並排比較：含運價格、你的尺寸是否有貨、衣櫃可搭件數、退換天數；標示「最省」「最多」。
-- 混搭試穿：候選可和衣櫃單品、**其他想買的單品**一起放上搭配板；未購買單品用虛線框標示，並算出未購買合計。
-- 結果：存成穿搭，或「決定買這件」（狀態改為 bought，保留所有資料）。
+### 選購比較（`/wishlist/compare/:id`）
+- 比較頁只回答「這幾件買哪件」；不放混搭畫布。試搭移至現有 `/studio?wish=:id`。
+- 比較與選購商品為多對多；移除關聯或刪除比較不刪商品。Schema、搬移與 RLS 規則見 `docs/specs/wishlist.md`，migration 0025。
+- 選取清單可建立新比較或批次加入既有比較；可改名、封存、刪除、排序、選尺碼。選購挑選器重用部位／類型／長度篩選和 B21 Checkbox。
+- 「就買這件」沿用 `ready`／`dropped` 狀態；外部 AI 整理只複製文字，平台不呼叫 AI。
+- 新版設計稿為 B23／B23.1、BM20／BM20.1；舊 B7+／BM4 比較試搭作廢。完整規格見 `docs/specs/wishlist.md`。
 
 ## 設計系統（風格 B・OOTD 手帳）
 
@@ -145,7 +145,7 @@ supabase/migrations/     0001_init.sql … 0007_outfit_diary.sql（依序執行�
 ## Supabase
 
 - 體態量測：`/me` 每次儲存都新增一筆 `body_measurements`「當天完整快照」，以最近一筆預填，不覆蓋舊紀錄；編輯歷史紀錄則更新指定快照。歷史頁用相鄰兩筆比較：不同→燕麥底顯示差值、上一筆沒有→霧藍「第一次記」、相同→「—」。只列數字，**不畫趨勢圖、不用紅綠色評價增減**。欄位 migration 已整併至 `0005_split_body_circumferences.sql`：上胸圍／下胸圍、肚臍圍，以及五指襪／一般襪／裸腳各自的腳長／腳寬／前掌圍／腳背圍。
-- 資料表：`profiles`、`categories`、`items`、`item_photos`、`wishlist_items`、`compare_groups`、`outfits`、`outfit_items`、`body_measurements`。
+- 資料表：`profiles`、`categories`、`items`、`item_photos`、`wishlist_items`、`compare_groups`、`compare_group_items`、`outfits`、`outfit_items`、`body_measurements`。
 - 每張表都有 `owner_id default auth.uid()` 並啟用 RLS，只有本人能讀寫。新增資料表時照同樣模式。
 - 新使用者註冊時由 `handle_new_user` trigger 建立 profile 與預設分類；分類不要寫死在 UI。
 - 圖片放私人 bucket `closet-images`，路徑第一層必須是使用者 id：`{uid}/...`；衣物原圖為 `{uid}/{item_id}/original.ext`，多圖索引在 `item_photos`，讀取用 signed URL。未完成新增會以 `items.is_draft = true` 隱藏。
@@ -173,7 +173,7 @@ supabase/migrations/     0001_init.sql … 0007_outfit_diary.sql（依序執行�
 | B5 | 衣物詳細 | `B-Detail.dc.html` | 1440 | `/closet/:id` |
 | B6 | 新增衣物流程 | `B-Add.dc.html` | 1440 | `/closet/new` |
 | B7 | 選購清單 | `B-Wishlist.dc.html` | 1440 | `/wishlist` |
-| B7+ | 比較試搭台（主要功能） | `B-Compare.dc.html` | 1440 | `/wishlist/compare` |
+| B23 | 選購比較 | `B-Compare.dc.html`、`B-Compare-Picker.dc.html` | 1440 | `/wishlist/compare/:id` |
 | B8 | 個人體態資料・新增量測 | `B-Body.dc.html` | 1440 | `/me` |
 | B8.1 | 量測紀錄・依日期 | `B-History.dc.html` | 1440 | `/me/measurements` |
 | B8.2 | 量測紀錄・對照表 | `B-History-Table.dc.html` | 1440 | `/me/measurements?view=table` |
@@ -188,7 +188,7 @@ supabase/migrations/     0001_init.sql … 0007_outfit_diary.sql（依序執行�
 | BM1 | 手機首頁 | `B-M-Home.dc.html` | 390 | `/home` |
 | BM2 | 手機今日搭配 | `B-M-Outfit.dc.html` | 390 | `/outfit` |
 | BM3 | 選擇單品 Bottom Sheet | `B-M-Sheet.dc.html` | 390 | `/outfit`（`SlotPicker`） |
-| BM4 | 手機比較試搭 | `B-M-Compare.dc.html` | 390 | `/wishlist/compare` |
+| BM20 | 手機選購比較 | `B-M-Compare.dc.html`、`B-M-Compare-Picker.dc.html` | 390 | `/wishlist/compare/:id` |
 | BM5 | 手機自由畫布（後續） | `B-M-Studio.dc.html` | 390 | `/outfit` 的「自由擺放」tab |
 | BM6 | 手機量測紀錄 | `B-M-History.dc.html` | 390 | `/me/measurements` |
 | BM6.1 | 手機單次紀錄 | `B-M-History-Detail.dc.html` | 390 | `/me/measurements/:id` |

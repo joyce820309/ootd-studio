@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機特徵管理</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.fc{display:inline-flex;align-items:center;gap:5px;height:36px;padding:0 12px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;white-space:nowrap;flex:none}
+.fc[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+.row{display:flex;gap:6px;overflow-x:auto;margin:0 -16px;padding:0 16px;scrollbar-width:none}
+.li{display:flex;align-items:center;gap:10px;min-height:56px;padding:6px 4px;border-top:1.5px dashed #EADCC6;color:#3B2F25;text-decoration:none;width:100%;background:none;border-left:0;border-right:0;border-bottom:0;font:400 14px 'Chiron GoRound TC';text-align:left;cursor:pointer}
+.mini{display:inline-flex;align-items:center;height:30px;padding:0 10px;border-radius:999px;font-size:13px;background:#F3E7D4;color:#5A4A3C;gap:6px}
+</style>
+</helmet>
+<div style="width:390px;height:1000px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden">
+  <header style="display:flex;align-items:center;gap:2px;padding:6px 4px;border-bottom:1.5px dashed #D9C7AC">
+    <a class="ibtn" href="B-M-Lists.dc.html" aria-label="回我的" style="color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></a>
+    <h1 class="hd" style="margin:0;font-size:21px">特徵</h1><span class="num" style="font-size:13px;color:#5A4A3C;margin-left:6px">16</span>
+    <button type="button" class="ibtn" aria-label="新增特徵" style="margin-left:auto;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+  </header>
+  <main style="padding:12px 16px 40px;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#FFF9EE;box-shadow:inset 0 0 0 1.5px #F2CF8E;font-size:13px">「闊腿褲」可能就是「寬褲」<button type="button" class="btn btn-o" style="margin-left:auto;height:36px;padding:0 12px">看看</button></div>
+    <div class="row" role="group" aria-label="維度"><sc-for list="{{dims}}" as="d" hint-placeholder-count="6"><button type="button" class="fc" aria-pressed="{{d.on}}">{{d.t}}<span class="num" style="font-size:11px;opacity:.7">{{d.n}}</span></button></sc-for></div>
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+      <section style="display:flex;flex-direction:column">
+        <h2 style="margin:8px 4px 4px;display:flex;align-items:baseline;gap:8px"><span class="hd" style="font-size:17px;font-weight:400">{{g.t}}</span><span style="font-size:11.5px;font-weight:400;color:#5A4A3C">{{g.kind}}</span></h2>
+        <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
+          <button type="button" class="li" onClick="{{r.open}}"><span style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-weight:500">{{r.t}}</span><span style="font-size:11.5px;color:#5A4A3C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{r.sub}}</span></span><span class="num" style="font-size:12px;color:#5A4A3C">{{r.n}}</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#74624F"><path d="M9 5l7 7-7 7"></path></svg></button>
+        </sc-for>
+      </section>
+    </sc-for>
+  </main>
+
+  <sc-if value="{{sheet}}" hint-placeholder-val="{{ false }}">
+    <div aria-hidden="true" onClick="{{close}}" style="position:absolute;inset:0;background:rgba(59,47,37,.42)"></div>
+    <section role="dialog" aria-modal="true" aria-labelledby="me" style="position:absolute;left:0;right:0;bottom:0;background:#FFFCF6;border-radius:22px 22px 0 0;padding:8px 16px 26px;display:flex;flex-direction:column;gap:12px">
+      <span aria-hidden="true" style="align-self:center;width:40px;height:4px;border-radius:2px;background:#D9C7AC"></span>
+      <div style="display:flex;align-items:center"><h2 id="me" class="hd" style="margin:0;font-size:20px">厚磅</h2><span style="font-size:12px;color:#5A4A3C;margin-left:8px">質感・衣櫃 6・選購 2</span><button type="button" onClick="{{close}}" aria-label="關閉" class="ibtn" style="margin-left:auto;margin-right:-10px;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500">別名<span style="display:flex;gap:6px;flex-wrap:wrap"><span class="mini">加厚<span aria-hidden="true">×</span></span><span class="mini">厚款<span aria-hidden="true">×</span></span><span class="mini" style="background:transparent;border:1.5px dashed #C9B79C">＋ 加別名</span></span></div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500">適用類型<span style="display:flex;gap:6px;flex-wrap:wrap"><span class="fc" aria-pressed="true">褲子</span><span class="fc">牛仔褲</span><span class="fc">裙子</span><span class="fc" aria-pressed="true">外套</span><span class="fc" aria-pressed="true">針織</span><span class="fc">上衣</span></span></div>
+      <div style="display:flex;flex-direction:column;border-radius:12px;background:#FBF4E8">
+        <button type="button" class="li" style="border-top:0;padding:0 12px">改名</button>
+        <button type="button" class="li" style="padding:0 12px">合併到其他特徵…</button>
+        <button type="button" class="li" style="padding:0 12px;color:#8E4A3E">刪除…（會從 8 件拿掉）</button>
+      </div>
+    </section>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { sheet: false }; }
+  renderVals() {
+    const op = () => this.setState({ sheet: true });
+    const G = [
+      ['腰高', '單選・褲子、裙子', [['高腰', '褲子、裙子', 12], ['中腰', '褲子、裙子', 5], ['低腰', '褲子、裙子', 1]]],
+      ['褲型', '單選・褲子', [['寬褲', '別名：闊腿', 10], ['直筒', '褲子、牛仔褲', 4], ['錐形', '褲子、牛仔褲', 1]]],
+      ['質感', '多選', [['厚磅', '別名：加厚、厚款', 8], ['磨毛', '別名：內磨毛、刷毛', 6], ['垂墜', '別名：垂感', 3]]]
+    ];
+    return {
+      sheet: this.state.sheet, close: () => this.setState({ sheet: false }),
+      dims: [['全部', 16, 1], ['腰高', 3], ['褲型', 4], ['質感', 4], ['細節', 3], ['場合', 2]].map(([t, n, on]) => ({ t, n, on: on ? 'true' : 'false' })),
+      groups: G.map(([t, kind, rows]) => ({ t, kind, rows: rows.map(([n, sub, c]) => ({ t: n, sub, n: c, open: op })) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

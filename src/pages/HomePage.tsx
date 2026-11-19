@@ -42,10 +42,10 @@ export function HomePage() {
           <Tape accent="mist" className="z-20" />
           <span className="relative z-10 font-hd text-xl">網拍還在猶豫？</span>
           <p className="relative z-10 m-0 text-sm leading-relaxed text-ink-2">
-            把不同網站的類似商品放進比較試搭台，並排比價，再和衣櫃裡的衣服混搭看看。
+            把候選放進比較表並排比價；想看和衣櫃搭不搭，再到搭配工作台試穿。
           </p>
           <ButtonLink to="/wishlist/compare" variant="secondary" className="relative z-10 self-start">
-            打開比較試搭台
+            打開選購比較
           </ButtonLink>
         </PaperCard>
       </section>

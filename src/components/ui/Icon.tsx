@@ -2,6 +2,7 @@ const PATHS = {
   plus: 'M12 5v14M5 12h14',
   check: 'M5 12l5 5L20 7',
   x: 'M6 6l12 12M18 6L6 18',
+  copy: 'M8 8h11v13H8zM5 16H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v1',
   back: 'M15 6l-6 6 6 6',
   next: 'M9 6l6 6-6 6',
   down: 'M6 9l6 6 6-6',

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>元件：特徵標籤</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.ft{display:inline-flex;align-items:center;gap:5px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.ft[data-s="sug"]{border:1.5px dashed #3E6270;background:#EEF4F6;color:#24424D}
+.ft[data-s="on"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+.ft[data-s="add"]{border-style:dashed;border-color:#C9B79C;background:transparent;color:#5A4A3C}
+.ft .sp{font-size:10px;padding:1px 5px;border-radius:999px;background:#DCE8EC;color:#24424D}
+.fl{width:44px;flex:none;font-size:12px;color:#74624F;padding-top:10px}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500}
+.inp{display:block;min-height:46px;padding:8px 12px;border-radius:12px;border:1.5px solid #E2D2B8;background:#FFFCF6;font-weight:400;font-size:14px;line-height:1.6}
+mark{background:none;color:inherit;border-bottom:2px dashed #3E6270;padding-bottom:1px}
+.cap{margin:0;font-size:12.5px;line-height:1.75;color:#5A4A3C}
+.box{display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:14px;background:#FFFCF6;box-shadow:inset 0 0 0 1.5px #EADCC6}
+.opt{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px;font-size:14px;cursor:pointer}
+</style>
+</helmet>
+<div style="width:1440px;min-height:900px;box-sizing:border-box;padding:48px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:28px">
+  <header style="display:flex;align-items:flex-end;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span class="lbl" style="background:#A9C6CF;transform:rotate(-2deg);align-self:flex-start">元件</span>
+      <h1 class="hd" style="margin:0;font-size:36px">特徵標籤 Features</h1>
+    </div>
+    <p class="cap" style="margin:0 0 4px auto;max-width:640px;font-size:13px">補「類型、長度、顏色、材質」以外的特徵，讓重複度比得準。衣櫃衣物和選購候選共用同一份清單。放在新增／編輯表單的「類型／長度」正下方：B7.1、BM19、B6、BM8.2。檔案：<span class="num">components/FeaturePicker.tsx</span></p>
+  </header>
+
+  <div style="display:grid;grid-template-columns:760px 1fr;gap:32px;align-items:start">
+    <section aria-labelledby="f-demo" class="paper" style="padding:22px 24px;display:flex;flex-direction:column;gap:16px">
+      <h2 id="f-demo" class="hd" style="margin:0;font-size:22px">表單裡的樣子（可點）</h2>
+      <div class="fld">名稱
+        <span class="inp">#802559 <mark>後鬆緊</mark><mark>高腰</mark><mark>厚磅</mark>親膚毛呢內<mark>磨毛</mark>超顯瘦<mark>寬褲</mark></span>
+        <span style="font-size:12px;font-weight:400;color:#5A4A3C">虛線底線＝在名稱裡找到的特徵詞。只比對清單裡已有的詞和別名，「超顯瘦、親膚」不在清單裡，自然略過。</span>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:13px;color:#5A4A3C"><span class="tag" style="background:#E6EEE2;color:#3F5A3B">下身</span><span class="tag" style="background:#E6EEE2;color:#3F5A3B">褲子</span><span class="tag" style="background:#E6EEE2;color:#3F5A3B">長</span><span>← 部位、類型、長度（照舊）</span></div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;padding:16px 16px 14px;border-radius:14px;background:#FBF4E8">
+        <div style="display:flex;align-items:center;gap:10px">
+          <h3 style="margin:0;font-size:15px">特徵 <span style="font-weight:400;font-size:12px;color:#5A4A3C">（選填，褲子的建議）</span></h3>
+          <sc-if value="{{hasSug}}" hint-placeholder-val="{{ true }}"><span style="font-size:12px;color:#24424D">從名稱找到 <b class="num">{{sugN}}</b> 個</span><button type="button" onClick="{{acceptAll}}" class="btn btn-s" style="height:36px;padding:0 12px;font-size:13px;margin-left:auto">全部採用</button></sc-if>
+        </div>
+        <sc-for list="{{singles}}" as="g" hint-placeholder-count="2">
+          <div role="radiogroup" aria-label="{{g.t}}" style="display:flex;gap:8px">
+            <span class="fl">{{g.t}}</span>
+            <span style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{g.opts}}" as="o" hint-placeholder-count="4"><button type="button" role="radio" aria-checked="{{o.ac}}" class="ft" data-s="{{o.s}}" onClick="{{o.tap}}"><span>{{o.t}}</span><sc-if value="{{o.isSug}}" hint-placeholder-val="{{ false }}"><span class="sp">名稱</span></sc-if></button></sc-for></span>
+          </div>
+        </sc-for>
+        <div style="display:flex;gap:8px">
+          <span class="fl">特徵</span>
+          <span style="position:relative;display:flex;gap:6px;flex-wrap:wrap;flex:1">
+            <sc-for list="{{multi}}" as="o" hint-placeholder-count="8"><button type="button" aria-pressed="{{o.ac}}" class="ft" data-s="{{o.s}}" onClick="{{o.tap}}"><span>{{o.t}}</span><sc-if value="{{o.isSug}}" hint-placeholder-val="{{ false }}"><span class="sp">名稱</span></sc-if></button></sc-for>
+            <sc-if value="{{notAdding}}" hint-placeholder-val="{{ true }}"><button type="button" class="ft" data-s="add" onClick="{{startAdd}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M12 5v14M5 12h14"></path></svg>新增</button></sc-if>
+            <sc-if value="{{adding}}" hint-placeholder-val="{{ false }}">
+              <span style="position:relative;display:inline-flex">
+                <label style="display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 6px 0 12px;border-radius:999px;border:2px solid #3E6270;background:#FFFCF6"><span style="position:absolute;width:1px;height:1px;overflow:hidden">新增特徵</span><input value="闊腿" style="width:96px;border:0;background:transparent;font:500 13px 'Chiron GoRound TC';color:#3B2F25;outline:none"><button type="button" onClick="{{endAdd}}" aria-label="取消新增" style="width:30px;height:30px;border:0;border-radius:50%;background:none;color:#5A4A3C;cursor:pointer">×</button></label>
+                <div role="listbox" aria-label="相近的特徵" class="paper" style="position:absolute;left:0;top:44px;z-index:5;width:330px;padding:6px;box-shadow:0 16px 30px -12px rgba(59,47,37,.45),0 0 0 1.5px #EADCC6">
+                  <div role="option" class="opt" onClick="{{pickSyn}}" style="background:#FBF4E8"><span><b>寬褲</b><span style="font-size:12px;color:#5A4A3C">・褲型</span></span><span style="font-size:12px;color:#5A4A3C">「闊腿」是它的別名，選這個</span></div>
+                  <div role="option" class="opt" onClick="{{endAdd}}"><span style="color:#3E6270">＋ 新增「闊腿」</span><span style="font-size:12px;color:#5A4A3C">加進清單；維度、適用類型之後可在「特徵管理」改</span></div>
+                </div>
+              </span>
+            </sc-if>
+            <button type="button" class="btn btn-g" style="height:38px;padding:0 8px;color:#3E6270;font-size:13px">更多特徵</button>
+          </span>
+        </div>
+      </div>
+      <p class="cap">選好的結果：<b style="color:#3B2F25">{{summary}}</b></p>
+    </section>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="box">
+        <b style="font-size:15px">chip 的三種狀態</b>
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+          <span style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><span class="ft">垂墜</span><span class="cap">沒選</span></span>
+          <span style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><span class="ft" data-s="sug">厚磅<span class="sp">名稱</span></span><span class="cap">從名稱找到・還沒確認</span></span>
+          <span style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><span class="ft" data-s="on">磨毛</span><span class="cap">已選</span></span>
+        </div>
+        <p class="cap">虛線的不算數，存檔時不會寫入；點一下變實心才算。「全部採用」一次確認全部。使用者手動取消過的詞，同一件衣物不再提示。</p>
+      </div>
+      <div class="box">
+        <b style="font-size:15px">兩層：單選屬性＋多選特徵</b>
+        <p class="cap"><b>單選屬性</b>：一件只會有一個答案，例如褲子的「腰高、褲型」、上衣的「肩線」、裙子的「裙型」。用 radio chip，同一列再點一次可以取消。</p>
+        <p class="cap"><b>多選特徵</b>：質感、細節、場合，例如厚磅、磨毛、後鬆緊、上班。依類型顯示最多 8 個建議，其他收在「更多特徵」。</p>
+        <p class="cap">「＋ 新增」在原地變成輸入框，邊打邊列出相近的現有特徵和別名，先擋住「寬褲／闊腿」這種分歧；真的沒有才新增。</p>
+      </div>
+      <div class="box">
+        <b style="font-size:15px">重複度怎麼算（固定規則）</b>
+        <p class="cap">1. 類型不同 → 不比。<br>2. 單選屬性：兩邊都有填、但不一樣 → 直接判「不太像」。<br>3. 顏色、材質、長度、多選特徵依序加分；多選特徵算重疊比例。<br>4. 任一邊沒填的項目<b>跳過不算</b>；跳過的太多就標「依據較少」。</p>
+        <p class="cap">結果只分三級：很像／有點像／不太像。不顯示百分比。</p>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { pick: {}, adding: false, syn: false }; }
+  renderVals() {
+    const st = this.state, pick = st.pick;
+    const SUG = ['高腰', '寬褲', '後鬆緊', '厚磅', '磨毛'];
+    const set = (k, v) => this.setState({ pick: Object.assign({}, pick, { [k]: v }) });
+    const S = [['腰高', ['高腰', '中腰', '低腰']], ['褲型', ['寬褲', '直筒', '錐形', '喇叭', '燈籠']]];
+    const singles = S.map(([t, opts]) => ({ t, opts: opts.map(o => {
+      const on = pick[t] === o || (o === '寬褲' && st.syn && pick[t] === undefined);
+      const sug = SUG.includes(o) && pick[t] === undefined && !on;
+      return { t: o, s: on ? 'on' : (sug ? 'sug' : 'off'), isSug: sug, ac: on ? 'true' : 'false', tap: () => set(t, pick[t] === o ? null : o) };
+    }) }));
+    const M = ['後鬆緊', '厚磅', '磨毛', '打褶', '垂墜', '挺版', '有口袋', '上班'];
+    const multi = M.map(o => {
+      const on = pick[o] === true, sug = SUG.includes(o) && pick[o] === undefined;
+      return { t: o, s: on ? 'on' : (sug ? 'sug' : 'off'), isSug: sug, ac: on ? 'true' : 'false', tap: () => set(o, !on) };
+    });
+    const sugLeft = SUG.filter(o => (o === '高腰' ? pick['腰高'] : o === '寬褲' ? pick['褲型'] : pick[o]) === undefined);
+    const chosen = [];
+    S.forEach(([t]) => { if (pick[t]) chosen.push(`${t}：${pick[t]}`); else if (t === '褲型' && st.syn && pick[t] === undefined) chosen.push('褲型：寬褲'); });
+    M.forEach(o => { if (pick[o] === true) chosen.push(o); });
+    return {
+      singles, multi,
+      hasSug: sugLeft.length > 0, sugN: sugLeft.length,
+      acceptAll: () => { const p = Object.assign({}, pick); if (p['腰高'] === undefined) p['腰高'] = '高腰'; if (p['褲型'] === undefined) p['褲型'] = '寬褲'; ['後鬆緊', '厚磅', '磨毛'].forEach(o => { if (p[o] === undefined) p[o] = true; }); this.setState({ pick: p }); },
+      adding: st.adding, notAdding: !st.adding,
+      startAdd: () => this.setState({ adding: true }), endAdd: () => this.setState({ adding: false }),
+      pickSyn: () => this.setState({ adding: false, pick: Object.assign({}, pick, { '褲型': '寬褲' }) }),
+      summary: chosen.length ? chosen.join('、') : '還沒選（虛線的不算）'
+    };
+  }
+}
+</script>
+</body>
+</html>

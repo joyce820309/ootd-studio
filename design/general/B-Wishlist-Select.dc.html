@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>選購清單・選取給 AI</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.cb{position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;flex:none;cursor:pointer}
+.cb input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.cb .bx{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center}
+.cb .bx svg{width:16px;height:16px;fill:none;stroke:#FBF4E8;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.seg{display:inline-grid;grid-auto-flow:column;padding:3px;border-radius:10px;background:#F3E7D4}
+.seg a{display:flex;align-items:center;height:40px;padding:0 16px;border-radius:8px;font-size:14px;font-weight:500;color:#5A4A3C;text-decoration:none}
+.seg a[aria-current="page"]{background:#FFFCF6;color:#3B2F25;font-weight:700;box-shadow:0 1px 2px rgba(59,47,37,.1)}
+.fc{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.fc[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+.fc .n{font:700 12px Nunito;opacity:.7}
+.sub{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;border:1.5px dashed #D9C7AC;background:transparent;font:500 13px 'Chiron GoRound TC';color:#5A4A3C;cursor:pointer;white-space:nowrap}
+.sub[aria-pressed="true"]{border-style:solid;border-color:#3E6270;background:#DCE8EC;color:#24424D}
+.pre{margin:0;padding:12px 14px;border-radius:12px;background:#FBF4E8;box-shadow:inset 0 0 0 1.5px #EADCC6;font:400 12.5px/1.75 ui-monospace,'Chiron GoRound TC',monospace;color:#3B2F25;white-space:pre-wrap}
+</style>
+</helmet>
+<div style="width:100%;min-height:960px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
+      <a class="nav-a" href="B-Home.dc.html">首頁</a>
+      <a class="nav-a" href="B-Closet.dc.html">我的衣櫃</a>
+      <a class="nav-a" href="B-Outfit.dc.html">今日搭配</a>
+      <a class="nav-a" href="#diary">穿搭日記</a>
+      <a class="nav-a" href="B-Wishlist.dc.html" aria-current="page" style="border-bottom-color:#F2CF8E;color:#3B2F25;font-weight:700">選購清單</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:4px;padding-bottom:10px">
+      <button class="ibtn" type="button" aria-label="通知" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"></path></svg></button>
+      <a href="B-Body.dc.html" aria-label="個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#FFFCF6;border:1.5px solid #3B2F25;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span></a>
+    </div>
+  </header>
+  <main style="max-width:1240px;margin:0 auto;padding:24px clamp(16px,4vw,48px) 64px;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span class="lbl" style="background:#E2B4A8;transform:rotate(-2deg)">選購清單</span>
+      <nav class="seg" aria-label="檢視"><a href="B-Wishlist.dc.html" aria-current="page">清單</a><a href="B-Compare.dc.html">比較</a></nav>
+      <span style="font-size:13px;color:#5A4A3C">進行中 <b class="num">12</b> 件・預估合計 <b class="num">NT$6,889</b></span>
+      <a class="btn btn-o" href="B-Wishlist-Add.dc.html" style="margin-left:auto"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"></path></svg>加入選購</a>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:16px;background:#FFFCF6">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-size:12px;color:#74624F;width:36px">狀態</span>
+        <sc-for list="{{status}}" as="s" hint-placeholder-count="4"><button type="button" class="fc" aria-pressed="{{s.on}}">{{s.t}}<span class="n">{{s.n}}</span></button></sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-size:12px;color:#74624F;width:36px">部位</span>
+        <sc-for list="{{parts}}" as="s" hint-placeholder-count="7"><button type="button" class="fc" aria-pressed="{{s.on}}"><span style="width:9px;height:9px;border-radius:50%;background:{{s.c}}"></span>{{s.t}}<span class="n">{{s.n}}</span></button></sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-left:44px">
+        <span style="font-size:12px;color:#74624F">上衣類型</span>
+        <sc-for list="{{types}}" as="s" hint-placeholder-count="5"><button type="button" class="sub" aria-pressed="{{s.on}}">{{s.t}}<span class="num" style="font-size:12px;opacity:.75">{{s.n}}</span></button></sc-for>
+      </div>
+    </div>
+
+    <div role="toolbar" aria-label="選取" style="position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:6px;padding:6px 8px 6px 4px;border-radius:14px;background:#3B2F25;color:#FBF4E8">
+      <label class="cb"><input type="checkbox" aria-label="全選目前篩選的 3 件"><span class="bx" style="background:#FBF4E8;transform:rotate(-4deg)"><svg viewBox="0 0 24 24" aria-hidden="true" style="stroke:#3B2F25"><path d="M6 12h12"></path></svg></span></label>
+      <span style="font-size:14px;font-weight:500">全選目前 <b class="num">3</b> 件</span>
+      <span style="width:1px;height:20px;background:rgba(251,244,232,.3);margin:0 10px"></span>
+      <span style="font-size:14px">已選 <b class="num">2</b> 件</span>
+      <button type="button" style="height:40px;padding:0 10px;border:0;background:none;color:#DCE8EC;font:500 13px 'Chiron GoRound TC';cursor:pointer">清除</button>
+      <span style="position:relative;margin-left:auto">
+        <button type="button" class="btn" aria-expanded="true" style="height:40px;background:#F2CF8E;border-color:#E2B866;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M4 5h6v14H4zM14 5h6v14h-6z"></path></svg>比較 2 件</button>
+        <div role="menu" aria-label="放進哪個比較" class="paper" style="position:absolute;right:0;top:48px;width:300px;padding:6px;display:flex;flex-direction:column;color:#3B2F25;box-shadow:0 16px 32px -12px rgba(59,47,37,.45),0 0 0 1.5px #EADCC6">
+          <a role="menuitem" href="B-Compare.dc.html" style="display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px;background:#FBF4E8;color:#3B2F25;text-decoration:none"><span style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"></path></svg>開新的比較</span><span style="font-size:12px;color:#5A4A3C;padding-left:26px">先取名「小可愛 2 件」，之後可以改</span></a>
+          <span style="font-size:11px;color:#74624F;padding:8px 12px 2px">加進現有的</span>
+          <a role="menuitem" href="B-Compare.dc.html" style="display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:10px;font-size:14px;color:#3B2F25;text-decoration:none">小可愛<span class="num" style="margin-left:auto;font-size:12px;color:#5A4A3C">2 → 4</span></a>
+          <a role="menuitem" href="B-Compare.dc.html" style="display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:10px;font-size:14px;color:#3B2F25;text-decoration:none">寬褲三選一<span class="num" style="margin-left:auto;font-size:12px;color:#5A4A3C">3</span></a>
+          <a role="menuitem" href="B-Compare.dc.html" style="display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:10px;font-size:14px;color:#3B2F25;text-decoration:none">褲子<span class="num" style="margin-left:auto;font-size:12px;color:#5A4A3C">5</span></a>
+        </div>
+      </span>
+      <button type="button" class="btn" style="height:40px;background:transparent;border-color:rgba(251,244,232,.4);color:#FBF4E8">完成選取</button>
+    </div>
+
+    <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+      <section aria-label="商品" style="flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:12px">
+        <sc-for list="{{items}}" as="it" hint-placeholder-count="3">
+          <div role="checkbox" aria-checked="{{it.ac}}" tabindex="0" style="position:relative;display:flex;gap:14px;padding:14px;border-radius:16px;background:{{it.bg}};box-shadow:{{it.ring}};cursor:pointer">
+            <span style="position:relative;width:96px;height:112px;border-radius:12px;background:#F1E4E2;flex:none;display:flex;align-items:center;justify-content:center">
+              <svg viewBox="0 0 100 100" style="width:70%;height:70%" aria-hidden="true"><path d="M34 22L40 8M66 22L60 8M30 22H70L74 86H26Z" fill="{{it.hex}}" stroke="rgba(59,47,37,.3)" stroke-width="1.2"></path></svg>
+              <span class="cb" style="position:absolute;left:-10px;top:-10px;pointer-events:none"><span class="bx" style="background:{{it.bxbg}};box-shadow:{{it.bxsh}};transform:rotate({{it.r}}deg)"><sc-if value="{{it.on}}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if></span></span>
+            </span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+              <span style="display:flex;gap:10px;align-items:flex-start"><span style="flex:1;font-size:15px;font-weight:700;line-height:1.5">{{it.name}}</span><span class="num" style="font-size:15px;font-weight:700">{{it.price}}</span></span>
+              <span style="font-size:12px;color:#5A4A3C">{{it.meta}}</span>
+              <span style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag" style="height:22px;font-size:11px;background:#F6E7C6;color:#5A3F12">上衣・背心／小可愛</span><span class="tag" style="height:22px;font-size:11px;background:#F3E7D4;color:#5A4A3C">考慮中</span></span>
+            </span>
+          </div>
+        </sc-for>
+        <p class="cap" style="margin:0;font-size:12px;line-height:1.7;color:#5A4A3C">選取模式下點整張卡片就是勾選；按「完成選取」回到一般模式，點卡片才會打開右邊的詳情。</p>
+      </section>
+
+      <aside aria-labelledby="ai-t" class="paper" style="flex:1 1 440px;max-width:560px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:baseline;gap:8px"><h2 id="ai-t" class="hd" style="margin:0;font-size:21px">整理給 AI</h2><span style="font-size:12px;color:#5A4A3C">已選 2 件・平台不呼叫 AI</span></div>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500">範本
+          <span style="display:flex;align-items:center;gap:8px;height:46px;padding:0 12px;border-radius:12px;border:1.5px solid #E2D2B8;background:#FFFCF6;font-weight:400">選購評估（預設）<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;margin-left:auto;color:#74624F"><path d="M6 9l6 6 6-6"></path></svg></span>
+        </label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <sc-for list="{{incl}}" as="i" hint-placeholder-count="5"><span class="sub" aria-pressed="{{i.on}}" style="height:30px;font-size:12px">{{i.t}}</span></sc-for>
+        </div>
+        <pre class="pre">請幫我比較下面 2 件小可愛，用繁體中文回答。
+
+【我的體態】上胸圍 84、下胸圍 70（2026/11/16）
+【衣櫃裡已有】背心／小可愛 3 件：米白棉質、黑色羅紋、膚色無鋼圈
+
+1. #17039 直坑紋磨毛肩帶可調天然乳膠杯小可愛
+   NT$299・As.Hine・顏色：杏、卡、灰、黑
+2. #22049 羊絨磨毛＋桑蠶絲蕾絲肩帶小可愛
+   NT$350・As.Hine・L-XL・顏色：奶白、灰、黑
+
+請回答：哪一件比較值得買、跟我現有的會不會重複、建議的顏色。</pre>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:#5A4A3C;flex:1">約 <span class="num">260</span> 字</span>
+          <a href="#templates" style="font-size:13px;min-height:44px;display:flex;align-items:center">編輯範本</a>
+          <button type="button" class="btn btn-p"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M8 8h11v12H8zM5 16V4h11"></path></svg>複製</button>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const OFF = 'inset 0 0 0 1.5px #8C775C,0 0 0 3px #FFFCF6';
+    const I = [
+      ['#17039 直坑紋磨毛肩帶可調天然乳膠杯小可愛', 'NT$299', 'As.Hine・顏色 杏、卡、灰、黑', '#D9CBB3', 1],
+      ['#22049 羊絨磨毛＋桑蠶絲蕾絲肩帶小可愛', 'NT$350', 'As.Hine・L-XL・顏色 奶白、灰、黑・優先 高', '#232322', 1],
+      ['#7788 細肩帶棉質小可愛', 'NT$259', '蝦皮・F・顏色 白、膚', '#F4F1EA', 0]
+    ];
+    return {
+      status: [['全部', 12, 1], ['考慮中', 11], ['準備購買', 1], ['已購買', 0], ['已放棄', 0]].map(([t, n, on]) => ({ t, n, on: on ? 'true' : 'false' })),
+      parts: [['全部', 12, '#D9C7AC'], ['上衣', 7, '#F2CF8E', 1], ['外套', 2, '#A9C6CF'], ['下身', 2, '#B7CBB0'], ['連身', 0, '#E2B4A8'], ['鞋子', 1, '#E2B4A8'], ['包包', 0, '#E2B4A8'], ['配件', 0, '#F2CF8E']].map(([t, n, c, on]) => ({ t, n, c, on: on ? 'true' : 'false' })),
+      types: [['全部', 7], ['T 恤・大學 T', 2], ['針織', 2], ['背心・小可愛', 3, 1], ['襯衫', 0]].map(([t, n, on]) => ({ t, n, on: on ? 'true' : 'false' })),
+      items: I.map(([name, price, meta, hex, on]) => ({ name, price, meta, hex, on: !!on, ac: on ? 'true' : 'false',
+        bg: on ? '#FFF9EE' : '#FFFCF6', ring: on ? 'inset 0 0 0 2px #3B2F25' : '0 1px 0 rgba(59,47,37,.05),0 10px 20px -16px rgba(59,47,37,.3)',
+        bxbg: on ? '#3B2F25' : '#FFFCF6', bxsh: on ? '0 0 0 3px #FFFCF6' : OFF, r: on ? -4 : 0 })),
+      incl: [['名稱與價格', 1], ['顏色與尺寸', 1], ['平放尺寸', 1], ['我的體態', 1], ['衣櫃裡同類', 1], ['圖片網址', 0]].map(([t, on]) => ({ t, on: on ? 'true' : 'false' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

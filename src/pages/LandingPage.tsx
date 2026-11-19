@@ -7,7 +7,7 @@ import { LogoSticker, PaperCard, Tape, TiltLabel, WashBlob } from '@/components/
 const FEATURES = [
   { n: '01', t: '整理衣櫃', d: '拍一張照，自動去背。依分類、顏色、季節和狀態整理，送洗或借出也記得清清楚楚。', accent: 'oat' as const, deep: 'text-oat-deep' },
   { n: '02', t: '今日搭配', d: '依部位勾選單品，系統自動排好版：上衣在上、下身在中、鞋子在下。', accent: 'sage' as const, deep: 'text-sage-deep' },
-  { n: '03', t: '比較試搭台', d: '把不同網站的候選並排比價、比材質、比可搭件數，再和衣櫃混搭，想清楚再下單。', accent: 'rose' as const, deep: 'text-rose-deep', main: true },
+  { n: '03', t: '選購比較', d: '把不同網站的候選排成比較表，仔細比價格、尺寸、材質與退換條件；想看搭配，再到搭配工作台試穿。', accent: 'rose' as const, deep: 'text-rose-deep', main: true },
 ]
 
 export function LandingPage() {

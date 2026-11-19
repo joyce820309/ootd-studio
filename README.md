@@ -1,6 +1,6 @@
 # My Closet・OOTD Studio
 
-OOTD 手帳感的私人造型工作室。延續 2021 年的 [OOTD](https://github.com/joyce820309/OOTD) 專案：整理衣櫃、依部位勾選完成今日搭配、比較網拍候選並和衣櫃混搭試穿。
+OOTD 手帳感的私人造型工作室。延續 2021 年的 [OOTD](https://github.com/joyce820309/OOTD) 專案：整理衣櫃、依部位勾選完成今日搭配、比較網拍候選，並在搭配工作台和衣櫃混搭試穿。
 
 技術：React 19 ＋ TypeScript ＋ Vite ＋ Tailwind CSS v4 ＋ Supabase（Auth、Database、Storage、Edge Functions）＋ Vercel。
 
@@ -96,5 +96,5 @@ supabase/
 - [x] Supabase 資料表與 RLS
 - [x] 新增衣物四步流程：多張照片、選擇／略過去背、衣物資料、存入衣櫃或選購清單
 - [ ] 衣物詳細、穿搭日記
-- [ ] 選購清單與比較試搭台
+- [x] 選購清單與選購比較（多對多、比較表、批次挑選、外部 AI 文字、手機雙欄）
 - [ ] AI 搭配建議（Edge Function）

@@ -135,6 +135,9 @@ export interface ClosetPhoto {
 export interface WishlistColor {
   family: string
   hex?: string
+  /** 這批候選中最想要的顏色；最多一項為 true。 */
+  favorite?: boolean
+  source?: 'photo' | 'pick'
 }
 
 export interface WishlistPhotoUpload {
@@ -142,13 +145,18 @@ export interface WishlistPhotoUpload {
   colorFamily?: string | null
 }
 
-export type WishStatus = 'considering' | 'waiting' | 'ready' | 'bought' | 'dropped'
+export type WishStatus = 'considering' | 'ready' | 'bought' | 'dropped'
+export type GarmentLength = 'short' | 'mid' | 'long'
 
 export interface WishlistItem {
   id: string
   name: string
+  productCode?: string
   /** 主要部位；slot 保留為舊資料相容欄位。 */
   primaryPart?: Slot
+  /** 部位底下的類型（例：上衣 › 背心・小可愛），選項見 lib/wishlist 的 GARMENT_TYPES；沒填時篩選依名稱推測。 */
+  garmentType?: string
+  garmentLength?: GarmentLength
   alsoParts?: Slot[]
   slot: Slot
   colors?: WishlistColor[]
@@ -159,7 +167,6 @@ export interface WishlistItem {
   url?: string
   sizeNote?: string
   status: WishStatus
-  compareGroupId?: string
   cutoutUrl?: string
   photos?: ClosetPhoto[]
   shape?: GarmentShape
@@ -167,6 +174,8 @@ export interface WishlistItem {
   brand?: string
   /** 預計購買的尺寸 */
   size?: string
+  /** flat_measurements 這組平放尺寸實際量測的尺碼 */
+  flatMeasurementsSize?: string
   necklineSize?: number
   targetPrice?: number
   /** 1 低・2 中・3 高 */
@@ -189,7 +198,10 @@ export type WishPriority = 1 | 2 | 3
 /** 選購清單新增／編輯表單的內容 */
 export interface WishlistInput {
   name: string
+  productCode?: string
   primaryPart?: Slot
+  garmentType?: string | null
+  garmentLength?: GarmentLength | null
   alsoParts?: Slot[]
   slot: Slot
   colors?: WishlistColor[]
@@ -202,6 +214,7 @@ export interface WishlistInput {
   targetPrice?: number | null
   brand?: string
   size?: string
+  flatMeasurementsSize?: string
   sizeNote?: string
   necklineSize?: number | null
   priority: WishPriority | null
@@ -213,25 +226,40 @@ export interface WishlistInput {
   flatStretch?: Record<string, number>
   returnPolicy?: string
   status: Exclude<WishStatus, 'bought'>
-  /** undefined＝不變更所屬群組；null＝移出群組 */
-  compareGroupId?: string | null
   /** 表單暫存的新增圖片與待刪照片 ID；不會直接寫入商品資料列。 */
   photosToAdd?: WishlistPhotoUpload[]
   photoIdsToRemove?: string[]
   photoColorAssignments?: { photoId: string; colorFamily: string | null }[]
 }
 
-/** 比較群組：同一個需求的多個候選，例如「冬天想要一條寬褲」。 */
+/** 比較：同一個需求的多個候選，例如「冬天想要一條寬褲」。 */
 export interface CompareGroup {
   id: string
-  title: string
+  name: string
+  /** 舊版 schema 的預算欄位暫保留讀取，改版 UI 不使用。 */
   budget?: number
+  archivedAt?: string
   createdAt?: string
+  updatedAt?: string
 }
 
 export interface CompareGroupInput {
-  title: string
-  budget: number | null
+  name: string
+}
+
+/** 比較與選購清單商品的多對多關聯。 */
+export interface CompareGroupItem {
+  groupId: string
+  wishlistItemId: string
+  position: number
+  chosenSize?: string
+  isDecided?: boolean
+  addedAt?: string
+}
+
+export interface CompareMembership {
+  groupId: string
+  groupName: string
 }
 
 /** 搭配板上的一格：可以是衣櫃單品或選購中的商品。 */

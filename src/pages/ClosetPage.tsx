@@ -120,7 +120,7 @@ export function ClosetPage() {
         <PageState icon="closet" tone="oat" title="衣櫃還是空的" description="先放進第一件衣物吧，從最常穿的那件開始。" action={<ButtonLink to="/closet/new" variant="primary">加入第一件衣物</ButtonLink>} />
       )}
       {items && items.length > 0 && visible.length === 0 && (
-        <PageState icon="search" tone="mist" compact title={q ? `找不到「${q}」` : '這個條件沒有衣物'} description="試試更短的關鍵字，或搜尋顏色、品牌；也可以換個分類看看。" action={<ButtonLink to="/wishlist/compare" variant="secondary">到比較試搭台找商品</ButtonLink>} />
+        <PageState icon="search" tone="mist" compact title={q ? `找不到「${q}」` : '這個條件沒有衣物'} description="試試更短的關鍵字，或搜尋顏色、品牌；也可以換個分類看看。" action={<ButtonLink to="/wishlist" variant="secondary">到選購清單看看</ButtonLink>} />
       )}
 
       {!loading && !error && items && items.length > 0 && visible.length > 0 && <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-[repeat(auto-fill,minmax(168px,1fr))] sm:gap-x-4 sm:gap-y-6">
