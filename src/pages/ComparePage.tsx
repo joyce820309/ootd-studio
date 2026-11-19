@@ -7,6 +7,7 @@ import { Icon } from '@/components/ui/Icon'
 import { LoadingState, PageState } from '@/components/ui/PageState'
 import { Select } from '@/components/ui/Select'
 import { Switch } from '@/components/ui/Switch'
+import { FloatToggle } from '@/components/ui/FloatToggle'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
 import { MarkdownNote } from '@/components/ui/MarkdownNote'
 import { WishlistAiPanel } from '@/components/wishlist/WishlistAiPanel'
@@ -172,18 +173,22 @@ function sizeMismatchHint(candidate: CompareCandidate) {
 
 function buildTableSections(candidates: CompareCandidate[]): TableSection[] {
   if (!candidates.length) return []
-  const totals = candidates.map(({ item }) => totalPrice(item))
-  const totalSet = new Set(totals)
-  const minTotal = Math.min(...totals)
+  const prices = candidates.map(({ item }) => item.price)
+  const priceSet = new Set(prices)
+  const minPrice = Math.min(...prices)
   const matches = candidates.map(({ insights }) => insights.matchCount)
   const maxMatches = Math.max(...matches)
   const matchSet = new Set(matches)
   const sections: TableSection[] = [
     {
       id: 'price', title: '價格', rows: [
-        { id: 'price', label: '售價', cells: candidates.map(({ item }) => cell(formatNT(item.price))) },
-        { id: 'shipping', label: '運費', cells: candidates.map(({ item }) => cell(item.shipping == null ? '未提供' : item.shipping === 0 ? '免運' : formatNT(item.shipping))) },
-        { id: 'total', label: '含運總價', cells: candidates.map(({ item }) => cell(formatNT(totalPrice(item)), totalSet.size > 1 && totalPrice(item) === minTotal ? { label: '最便宜', tone: 'sage' } : undefined)) },
+        // 通常會湊免運，比較表只比售價（運費、含運總價不列）
+        { id: 'price', label: '售價', cells: candidates.map(({ item }) => cell(formatNT(item.price), priceSet.size > 1 && item.price === minPrice ? { label: '最便宜', tone: 'sage' } : undefined)) },
+      ],
+    },
+    {
+      id: 'size-note', title: '商品頁尺寸表', hint: '原文照貼，不判斷', rows: [
+        { id: 'size-note', label: '', cells: candidates.map(({ item }) => ({ text: item.sizeNote ? '' : '未提供', note: item.sizeNote, noteSizes: sizeNoteRows(item.sizeNote) })) },
       ],
     },
   ]
@@ -210,25 +215,20 @@ function buildTableSections(candidates: CompareCandidate[]): TableSection[] {
   if (dimensions.length) sections.push({ id: 'size', title: '尺寸 vs 我的身體', hint: '依 B20 既有規則判斷；沒有判斷資料時只顯示數字', rows: dimensions })
 
   sections.push({
-    id: 'material', title: '材質與版型', rows: [
-      { id: 'composition', label: '成分', cells: candidates.map(({ item }) => cell(item.materialComposition ?? item.material)) },
-      { id: 'fit', label: '版型', cells: candidates.map(() => cell('—')) },
-      { id: 'seasons', label: '季節', cells: candidates.map(() => cell('—')) },
-      { id: 'washing', label: '洗滌', cells: candidates.map(() => cell('—')) },
-    ],
-  })
-  sections.push({
     id: 'colors', title: '顏色', hint: '框起來的是「最想要」', rows: [
       { id: 'color-list', label: '可選', cells: candidates.map(({ item }) => ({ text: `${colorValues(item).length} 色`, colors: colorValues(item) })) },
     ],
   })
+  sections.push({ id: 'notes', title: '我的筆記', rows: [{ id: 'note', label: '', cells: candidates.map(({ item }) => item.reason?.trim() ? { text: item.reason.trim(), markdown: item.reason.trim() } : cell(null)) }] })
+
+  // 材質與版型各自一列；選購商品目前只存成分，版型／彈性／季節／洗滌沒有欄位，整列空白時自動隱藏
   sections.push({
-    id: 'purchase', title: '購買', rows: [
-      { id: 'returns', label: '退換', cells: candidates.map(({ item }) => {
-        const value = item.returnPolicy ?? '—'
-        return cell(value, /不含運|自付|不可退|不退/.test(value) ? { label: '退換有限制', tone: 'rose' } : undefined)
-      }) },
-      { id: 'size-note', label: '尺寸備註', cells: candidates.map(({ item }) => ({ text: item.sizeNote ? '' : '未提供', note: item.sizeNote, noteSizes: sizeNoteRows(item.sizeNote) })) },
+    id: 'material', title: '材質與版型', rows: [
+      { id: 'composition', label: '成分', cells: candidates.map(({ item }) => cell(compositionText(item))) },
+      { id: 'fit', label: '版型', cells: candidates.map(() => cell(null)) },
+      { id: 'stretch', label: '彈性', cells: candidates.map(() => cell(null)) },
+      { id: 'seasons', label: '季節', cells: candidates.map(() => cell(null)) },
+      { id: 'washing', label: '洗滌', cells: candidates.map(() => cell(null)) },
     ],
   })
   sections.push({
@@ -237,8 +237,33 @@ function buildTableSections(candidates: CompareCandidate[]): TableSection[] {
       { id: 'overlap', label: '重複', cells: candidates.map(({ insights }) => cell(insights.closest ? `${OVERLAP_LABEL[insights.overlap]}・像${insights.closest.name}` : `${OVERLAP_LABEL[insights.overlap]}・衣櫃沒有${insights.compareLabel}`, insights.overlap === 'high' ? { label: '有點重複', tone: 'oat' } : undefined)) },
     ],
   })
-  sections.push({ id: 'notes', title: '我的筆記', rows: [{ id: 'note', label: '', cells: candidates.map(({ item }) => item.reason?.trim() ? { text: item.reason.trim(), markdown: item.reason.trim() } : cell(null)) }] })
+  sections.push({
+    id: 'purchase', title: '購買', rows: [
+      { id: 'returns', label: '退換', cells: candidates.map(({ item }) => {
+        const value = item.returnPolicy?.trim() || null
+        return cell(value, value && /不含運|自付|不可退|不退/.test(value) ? { label: '退換有限制', tone: 'rose' } : undefined)
+      }) },
+    ],
+  })
+  // 每件都沒填的列不顯示；整個區塊沒列了就整塊拿掉
   return sections
+    .map((section) => ({ ...section, rows: section.rows.filter((row) => row.cells.some(cellHasContent)) }))
+    .filter((section) => section.rows.length)
+}
+
+/** 成分：有百分比時排成「聚酯 70%・羊毛 30%」，否則用原文，再退回材質名稱 */
+function compositionText(item: WishlistItem) {
+  const percentages = Object.entries(item.materialPercentages ?? {}).filter(([, value]) => value != null)
+  if (percentages.length) return percentages.sort((a, b) => b[1] - a[1]).map(([name, value]) => `${name} ${value}%`).join('・')
+  return item.materialComposition?.trim() || item.material?.trim() || null
+}
+
+/** 預設收起、由右下角懸浮鈕（B26）展開的區塊 */
+const FOLD_SECTION_IDS = new Set(['material', 'closet', 'purchase'])
+
+function cellHasContent(value: ValueCell) {
+  if (value.note?.trim() || value.markdown?.trim() || value.colors?.length) return true
+  return !['', '—', '未提供'].includes(value.text.trim())
 }
 
 function valueSignature(value: ValueCell) {
@@ -284,6 +309,8 @@ export function ComparePage() {
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null)
   const [nameDraft, setNameDraft] = useState('')
   const [onlyDifferent, setOnlyDifferent] = useState(false)
+  // 材質與版型、跟衣櫃、購買預設收起
+  const [foldOpen, setFoldOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [aiOpen, setAiOpen] = useState(false)
   const [aiInclude, setAiInclude] = useState<Set<AiInclude>>(defaultAiIncludes)
@@ -341,16 +368,23 @@ export function ComparePage() {
   // 「只看不一樣」只比這一組看得到的欄；這組只剩 1 件時改比全部
   const diffIndexes = pageIndexes.length > 1 ? pageIndexes : undefined
   const visibleSections = useMemo(() => filteredSections(sections, onlyDifferent, diffIndexes), [sections, onlyDifferent, diffIndexes])
-  const deskSections = useMemo(() => visibleSections.map((section) => ({ ...section, rows: section.rows.filter((row) => row.id !== 'size-note') })).filter((section) => section.rows.length), [visibleSections])
-  const showNoteRow = visibleSections.some((section) => section.rows.some((row) => row.id === 'size-note'))
   const leftIndex = candidates.length < 2 ? 0 : Math.min(mobileIndexes[0], candidates.length - 1)
   const rightIndex = candidates.length < 2 ? 1 : Math.min(mobileIndexes[1], candidates.length - 1)
   const activeIndexes: readonly [number, number] = [leftIndex, rightIndex]
   const mobileSections = useMemo(() => filteredSections(sections, onlyDifferent, [leftIndex, rightIndex]), [sections, onlyDifferent, leftIndex, rightIndex])
   const sizeChoices = (diffIndexes ?? candidates.map((_, index) => index)).map((index) => selectedCompareSize(candidates[index]) || '未提供')
   const hiddenSizeRow = !isMobile && onlyDifferent && sizeChoices.length > 1 && new Set(sizeChoices).size === 1
-  const hiddenNames = [...(hiddenSizeRow ? ['比的尺碼'] : []), ...sections.flatMap((section) => section.rows.filter((row) => onlyDifferent && !rowIsDifferent(row, isMobile ? activeIndexes : diffIndexes)).map((row) => (row.id === 'size-note' && !isMobile ? '商品頁尺寸表' : row.label || section.title)))]
+  const hiddenNames = [...(hiddenSizeRow ? ['比的尺碼'] : []), ...sections.flatMap((section) => section.rows.filter((row) => onlyDifferent && !rowIsDifferent(row, isMobile ? activeIndexes : diffIndexes)).map((row) => row.label || section.title))]
   const hiddenRows = hiddenNames.length
+  const foldSections = (isMobile ? mobileSections : visibleSections).filter((section) => FOLD_SECTION_IDS.has(section.id))
+  const unfolded = (list: TableSection[]) => (foldOpen ? list : list.filter((section) => !FOLD_SECTION_IDS.has(section.id)))
+  const folded = foldOpen ? [] : foldSections.map((section) => section.title)
+  // 收起時捲回第一個被收起的區塊上緣（收起後那裡會是「還有 N 區收起來了」橫條）
+  const toggleFold = () => {
+    const closing = foldOpen
+    setFoldOpen(!closing)
+    if (closing) requestAnimationFrame(() => document.getElementById('compare-fold-start')?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }))
+  }
   const groupItems = useMemo(() => groupLinks.map((entry) => wishlist.find((item) => item.id === entry.wishlistItemId)).filter((item): item is WishlistItem => !!item), [groupLinks, wishlist])
   if (!id && params.get('group')) return <Navigate replace to={`/wishlist/compare/${encodeURIComponent(params.get('group')!)}`} />
   if (!id && groups && activeGroups[0]) return <Navigate replace to={`/wishlist/compare/${activeGroups[0].id}`} />
@@ -497,7 +531,7 @@ export function ComparePage() {
   const cancelRename = () => { setNameEditing(false); setEditingGroupId(null); setNameDraft(group.name) }
 
   return (
-    <main className="compare-page mx-auto flex max-w-[1360px] flex-col gap-3 px-4 pt-5 pb-28 md:px-[clamp(16px,3vw,40px)] md:pt-3.5 md:pb-16">
+    <main className="compare-page mx-auto flex max-w-[1360px] flex-col gap-3 px-4 pt-5 pb-[calc(208px+env(safe-area-inset-bottom))] [--float-toggle-bottom:calc(146px+env(safe-area-inset-bottom))] md:px-[clamp(16px,3vw,40px)] md:pt-3.5 md:pb-24">
       <div className="compare-page__top flex flex-wrap items-center gap-3 md:hidden">
         <div className="flex w-full items-center gap-1 border-b-[1.5px] border-dashed border-line-strong pb-2">
           <ButtonLink to="/wishlist" variant="ghost" className="-ml-2 h-11 px-2"><Icon name="back" size={18} />回選購清單</ButtonLink>
@@ -533,15 +567,16 @@ export function ComparePage() {
         {!groupLinks.length ? (
           <div className="mt-1 rounded-card bg-card p-8 text-center shadow-paper"><h2 className="m-0 font-hd text-2xl">這個比較還沒有商品</h2><p className="mx-auto my-2 max-w-md text-sm leading-6 text-ink-2">加入選購清單裡的候選，排成比較表。商品可以同時放在多個比較裡。</p><Button variant="oat" onClick={() => setPickerOpen(true)}><Icon name="plus" />加入商品</Button></div>
         ) : isMobile ? (
-          <MobileCompare onEdit={(candidate) => setEditingItem(candidate.item)} columns={mobileCandidates} sections={mobileSections} indexes={mobileIndexes} total={candidates.length} onMove={moveMobile} onBuy={(candidate) => setBuying(candidate.item)} onChooseSize={(candidate, size) => void chooseSize(candidate.item, size)} />
+          <MobileCompare onEdit={(candidate) => setEditingItem(candidate.item)} columns={mobileCandidates} sections={unfolded(mobileSections)} folded={folded} onUnfold={toggleFold} indexes={mobileIndexes} total={candidates.length} onMove={moveMobile} onBuy={(candidate) => setBuying(candidate.item)} onChooseSize={(candidate, size) => void chooseSize(candidate.item, size)} />
         ) : (
-          <DesktopCompare onEdit={(candidate) => setEditingItem(candidate.item)} candidates={candidates} indexes={pageIndexes} sections={deskSections} showSizeRow={!hiddenSizeRow} showNoteRow={showNoteRow} onPage={(direction) => setDeskStart(Math.max(0, pageStart + direction * DESK_PAGE))} onAdd={() => setPickerOpen(true)} onRemove={(candidate) => void removeItem(candidate.item)} onMove={(from, to) => { const next = [...candidates.map((candidate) => candidate.item.id)]; const [moved] = next.splice(from, 1); next.splice(to, 0, moved); void reorderItems(next) }} onBuy={(candidate) => setBuying(candidate.item)} onChooseSize={(candidate, size) => void chooseSize(candidate.item, size)} />
+          <DesktopCompare onEdit={(candidate) => setEditingItem(candidate.item)} candidates={candidates} indexes={pageIndexes} sections={unfolded(visibleSections)} folded={folded} onUnfold={toggleFold} showSizeRow={!hiddenSizeRow} onPage={(direction) => setDeskStart(Math.max(0, pageStart + direction * DESK_PAGE))} onAdd={() => setPickerOpen(true)} onRemove={(candidate) => void removeItem(candidate.item)} onMove={(from, to) => { const next = [...candidates.map((candidate) => candidate.item.id)]; const [moved] = next.splice(from, 1); next.splice(to, 0, moved); void reorderItems(next) }} onBuy={(candidate) => setBuying(candidate.item)} onChooseSize={(candidate, size) => void chooseSize(candidate.item, size)} />
         )}
         {onlyDifferent && hiddenRows > 0 && <p className="compare-page__diff-summary mx-1 mt-3 flex flex-wrap items-center rounded-btn bg-oat-soft px-3 py-1.5 text-[13px] leading-5 text-oat-ink">已收起 {hiddenRows} 列看得到的幾件都一樣的：{hiddenNames.join('、')}。<button type="button" onClick={() => setOnlyDifferent(false)} className="min-h-10 px-1.5 text-mist-deep underline">全部顯示</button></p>}
       </section>
 
       {isMobile && <div className="compare-page__mobile-actions fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-20 flex gap-2 border-t-[1.5px] border-dashed border-line-strong bg-card px-3 py-2"><Button variant="oat" className="flex-1" onClick={() => setPickerOpen(true)}><Icon name="plus" size={18} />加入商品</Button><Button variant="secondary" className="flex-1" disabled={!candidates.length} onClick={() => setAiOpen(true)}><Icon name="copy" size={17} />整理給 AI</Button></div>}
 
+      {!!groupLinks.length && !pickerOpen && !editingItem && !addFormOpen && !buying && !deleteGroup && !aiOpen && <FloatToggle open={foldOpen} count={foldSections.length} onToggle={toggleFold} controls="compare-body" compact={isMobile} />}
       {pickerOpen && <ComparePickerDialog groupId={group.id} groupName={group.name} items={wishlist} groupWishlistIds={groupLinks.map((entry) => entry.wishlistItemId)} memberships={memberships} onClose={() => setPickerOpen(false)} onAdd={(ids) => void addItems(ids)} onAddUrl={() => { setPickerOpen(false); setAddFormOpen(true) }} />}
       {editingItem && <WishlistForm key={`edit-${editingItem.id}`} item={editingItem} saving={saving} onCancel={() => setEditingItem(null)} onSubmit={(input) => void saveEdit(editingItem, input)} />}
       {addFormOpen && <WishlistForm key="compare-add" saving={saving} onCancel={() => setAddFormOpen(false)} onSubmit={(input) => void addFromForm(input)} />}
@@ -618,11 +653,10 @@ function CompareGroupMenu({ current, activeGroups, archivedGroups, links, wishli
   </div>
 }
 
-function DesktopCompare({ onEdit, candidates, indexes, sections, showSizeRow, showNoteRow, onPage, onAdd, onRemove, onMove, onBuy, onChooseSize }: { onEdit: (candidate: CompareCandidate) => void; candidates: CompareCandidate[]; indexes: number[]; sections: TableSection[]; showSizeRow: boolean; showNoteRow: boolean; onPage: (direction: -1 | 1) => void; onAdd: () => void; onRemove: (candidate: CompareCandidate) => void; onMove: (from: number, to: number) => void; onBuy: (candidate: CompareCandidate) => void; onChooseSize: (candidate: CompareCandidate, size: string) => void }) {
+function DesktopCompare({ onEdit, candidates, indexes, sections, folded, onUnfold, showSizeRow, onPage, onAdd, onRemove, onMove, onBuy, onChooseSize }: { onEdit: (candidate: CompareCandidate) => void; candidates: CompareCandidate[]; indexes: number[]; sections: TableSection[]; folded: string[]; onUnfold: () => void; showSizeRow: boolean; onPage: (direction: -1 | 1) => void; onAdd: () => void; onRemove: (candidate: CompareCandidate) => void; onMove: (from: number, to: number) => void; onBuy: (candidate: CompareCandidate) => void; onChooseSize: (candidate: CompareCandidate, size: string) => void }) {
   const [dragged, setDragged] = useState<string | null>(null)
   const [announcement, setAnnouncement] = useState('')
   const [compact, setCompact] = useState(false)
-  const [notesOpen, setNotesOpen] = useState(false)
   const headRef = useRef<HTMLTableSectionElement>(null)
   const shown = indexes.map((index) => candidates[index])
   const showAdd = candidates.length < DESK_PAGE
@@ -693,7 +727,7 @@ function DesktopCompare({ onEdit, candidates, indexes, sections, showSizeRow, sh
         {showAdd && <th scope="col" className="compare-head"><button type="button" onClick={onAdd} className="compare-add-card"><Icon name="plus" size={22} /><span>加入商品</span></button></th>}
         {Array.from({ length: Math.max(0, fillers) }, (_, index) => <td key={`head-blank-${index}`} />)}
       </tr></thead>
-      <tbody>
+      <tbody id="compare-body">
         {showSizeRow && <tr className="compare-table__row">
           <th scope="row" className="compare-table__row-label"><b>比的尺碼</b></th>
           {shown.map((candidate) => {
@@ -702,12 +736,8 @@ function DesktopCompare({ onEdit, candidates, indexes, sections, showSizeRow, sh
           })}
           {blanks('size')}
         </tr>}
-        {sections.map((section) => <SectionRows key={section.id} section={section} indexes={indexes} blanks={blanks} dimmed={shown.map(dimmed)} />)}
-        {showNoteRow && <tr className="compare-table__row">
-          <th scope="row" className="compare-table__row-label compare-table__row-label--top"><span>商品頁尺寸表</span><small>原文照貼，不判斷</small>{shown.some((candidate) => candidate.item.sizeNote?.trim()) && <button type="button" aria-expanded={notesOpen} onClick={() => setNotesOpen((value) => !value)} className="mt-1 min-h-10 self-start text-xs font-medium text-mist-deep underline">{notesOpen ? '收起' : '展開全部'}</button>}</th>
-          {shown.map((candidate) => <td key={candidate.item.id} className={`compare-table__cell align-top ${dimmed(candidate) ? 'opacity-55' : ''}`}>{candidate.item.sizeNote?.trim() ? <div className={`compare-note ${notesOpen ? '' : 'is-clamped'}`}><MarkdownNote value={candidate.item.sizeNote.trim()} /></div> : <span className="text-ink-3">未提供</span>}</td>)}
-          {blanks('notes')}
-        </tr>}
+        {sections.map((section) => <SectionRows key={section.id} section={section} indexes={indexes} blanks={blanks} dimmed={shown.map(dimmed)} anchor={FOLD_SECTION_IDS.has(section.id) && section.id === sections.find((entry) => FOLD_SECTION_IDS.has(entry.id))?.id} />)}
+        {folded.length > 0 && <tr><td colSpan={1 + DESK_PAGE} className="pt-3"><FoldBar names={folded} onUnfold={onUnfold} /></td></tr>}
       </tbody>
       <tfoot className="compare-table__foot"><tr>
         <th scope="row" className="compare-table__row-label"><span className="text-xs leading-[1.6] text-ink-2">看完了，決定吧</span></th>
@@ -723,12 +753,26 @@ function DesktopCompare({ onEdit, candidates, indexes, sections, showSizeRow, sh
   </div>
 }
 
-function SectionRows({ section, indexes, blanks, dimmed }: { section: TableSection; indexes: number[]; blanks: (key: string) => ReactNode[]; dimmed: boolean[] }) {
+/** 收起處的斜紋橫條：「還有 N 區收起來了：…」，點了跟右下角懸浮鈕一樣展開 */
+function FoldBar({ names, onUnfold }: { names: string[]; onUnfold: () => void }) {
+  return <button id="compare-fold-start" type="button" aria-expanded="false" aria-controls="compare-body" onClick={onUnfold} className="compare-fold-bar">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l5 5 5-5M7 13l5 5 5-5" /></svg>
+    <span>還有 <b className="font-num tabular">{names.length}</b> 區收起來了：{names.join('、')}</span>
+    <span className="compare-fold-bar__hint">右下角的按鈕也能展開</span>
+  </button>
+}
+
+function SectionRows({ section, indexes, blanks, dimmed, anchor = false }: { section: TableSection; indexes: number[]; blanks: (key: string) => ReactNode[]; dimmed: boolean[]; anchor?: boolean }) {
   return <>
-    <tr className="compare-table__section"><th colSpan={1 + DESK_PAGE} scope="colgroup"><span className="font-hd text-[17px]">{section.title}</span>{section.hint && <span className="ml-2.5 text-[11.5px] text-ink-2">{section.hint}</span>}</th></tr>
+    <tr id={anchor ? 'compare-fold-start' : undefined} className="compare-table__section"><th colSpan={1 + DESK_PAGE} scope="colgroup"><span className="font-hd text-[17px]">{section.title}</span>{section.hint && <span className="ml-2.5 text-[11.5px] text-ink-2">{section.hint}</span>}</th></tr>
     {section.rows.map((row) => <tr key={row.id} className="compare-table__row">
       <th scope="row" className="compare-table__row-label"><span>{row.label}</span>{row.bodyLabel && <small>{row.bodyLabel}</small>}</th>
-      {indexes.map((candidateIndex, index) => <td key={`${row.id}-${candidateIndex}`} className={`compare-table__cell ${dimmed[index] ? 'opacity-55' : ''}`}><CellContent value={row.cells[candidateIndex] ?? cell('—')} /></td>)}
+      {indexes.map((candidateIndex, index) => {
+        const value = row.cells[candidateIndex] ?? cell('—')
+        // 商品頁尺寸表一律完整顯示，原文照貼
+        if (row.id === 'size-note') return <td key={`${row.id}-${candidateIndex}`} className={`compare-table__cell align-top ${dimmed[index] ? 'opacity-55' : ''}`}>{value.note?.trim() ? <div className="compare-note"><MarkdownNote value={value.note.trim()} /></div> : <span className="text-ink-3">未提供</span>}</td>
+        return <td key={`${row.id}-${candidateIndex}`} className={`compare-table__cell ${dimmed[index] ? 'opacity-55' : ''}`}><CellContent value={value} /></td>
+      })}
       {blanks(row.id)}
     </tr>)}
   </>
@@ -739,7 +783,7 @@ function CellContent({ value }: { value: ValueCell }) {
   return <div className="compare-cell">{value.note ? <div className="compare-cell__note w-full min-w-0 rounded-btn bg-mist-soft px-2.5 py-2 text-xs leading-[1.65] text-ink"><span className="mb-1.5 block text-[11px] font-medium text-ink-2">尺寸備註</span>{value.noteSizes ? <div className="grid min-w-0 gap-1">{value.noteSizes.map((row) => <div key={row.size} className="grid min-w-0 grid-cols-[2.25rem_minmax(0,1fr)] items-start gap-1.5 rounded-sm bg-card/75 px-2 py-1.5"><b className="font-num text-ink">{row.size}</b><span className="min-w-0 break-words [overflow-wrap:anywhere]">{row.details}</span></div>)}</div> : <MarkdownNote value={value.note} />}</div> : <span className="compare-cell__main">{value.text}{value.colors?.map((color) => <span key={`${color.name}-${color.hex}`} title={`${color.name}${color.preferred ? '・最想要' : ''}`} aria-label={`${color.name}${color.preferred ? '・最想要' : ''}`} className={`compare-cell__color ${color.preferred ? 'is-preferred' : ''}`} style={{ backgroundColor: color.hex }} />)}</span>}{value.tag && <span className={`compare-cell__tag ${TONE_CLASSES[value.tag.tone]}`}>{value.tag.label}</span>}{value.hint && <small className="compare-cell__hint">{value.hint}</small>}</div>
 }
 
-function MobileCompare({ onEdit, columns, sections, indexes, total, onMove, onBuy, onChooseSize }: { onEdit: (candidate: CompareCandidate) => void; columns: (CompareCandidate | null)[]; sections: TableSection[]; indexes: [number, number]; total: number; onMove: (index: number, direction: -1 | 1) => void; onBuy: (candidate: CompareCandidate) => void; onChooseSize: (candidate: CompareCandidate, size: string) => void }) {
+function MobileCompare({ onEdit, columns, sections, folded, onUnfold, indexes, total, onMove, onBuy, onChooseSize }: { onEdit: (candidate: CompareCandidate) => void; columns: (CompareCandidate | null)[]; sections: TableSection[]; folded: string[]; onUnfold: () => void; indexes: [number, number]; total: number; onMove: (index: number, direction: -1 | 1) => void; onBuy: (candidate: CompareCandidate) => void; onChooseSize: (candidate: CompareCandidate, size: string) => void }) {
   const indexedValues = (row: TableRow) => indexes.map((index) => row.cells[index] ?? cell('—'))
   return <div className="compare-mobile mt-1">
     <div className="compare-mobile__products">
@@ -754,14 +798,16 @@ function MobileCompare({ onEdit, columns, sections, indexes, total, onMove, onBu
         </div>)}
       </div>
     </div>
-    <div className="compare-mobile__body">
+    <div id="compare-body" className="compare-mobile__body">
       {sections.map((section) => {
         const rows = section.rows
         if (!rows.length) return null
-        return <section key={section.id} className="compare-mobile__section"><h2 className="m-0 mt-4 font-hd text-lg">{section.title}</h2>
+        const anchor = FOLD_SECTION_IDS.has(section.id) && section.id === sections.find((entry) => FOLD_SECTION_IDS.has(entry.id))?.id
+        return <section key={section.id} id={anchor ? 'compare-fold-start' : undefined} className="compare-mobile__section"><h2 className="m-0 mt-4 font-hd text-lg">{section.title}</h2>
           {rows.map((row) => <div key={row.id} className="compare-mobile__row"><div className="compare-mobile__row-label"><span>{row.label}</span>{row.bodyLabel && <small>{row.bodyLabel}</small>}</div><div className="compare-mobile__values">{indexedValues(row).map((value, index) => <div key={`${row.id}-${index}`} className={`compare-table__cell ${columns[index]?.item.status === 'dropped' ? 'opacity-55' : ''}`}><CellContent value={value} /></div>)}</div></div>)}
         </section>
       })}
+      {folded.length > 0 && <div className="mt-4"><FoldBar names={folded} onUnfold={onUnfold} /></div>}
       <div className="compare-mobile__buy-grid">{columns.map((candidate) => candidate ? <div key={candidate.item.id} className="flex flex-col gap-1.5"><Button variant={candidate.link.isDecided ? 'primary' : 'secondary'} disabled={candidate.item.status === 'bought'} className="w-full px-2 text-xs" onClick={() => onBuy(candidate)}>{candidate.item.status === 'bought' ? '已購買' : candidate.link.isDecided ? '✓ 決定買' : '就買這件'}</Button><ButtonLink to={studioUrl(candidate.item)} variant="ghost" className="w-full px-1 text-xs text-mist-deep"><Icon name="outfit" size={15} />拿去試搭</ButtonLink></div> : <span key="blank" />)}</div>
     </div>
   </div>

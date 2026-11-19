@@ -48,7 +48,15 @@
 .compare-table__foot th,
 .compare-table__foot td { border-top: 2px solid var(--color-ink); padding-top: 14px; }
 .compare-note { overflow-wrap: anywhere; border-radius: var(--radius-tile); padding: 8px 10px; background: var(--color-mist-soft); color: var(--color-ink); font-size: 12.5px; line-height: 1.7; }
-.compare-note.is-clamped { max-height: 82px; overflow: hidden; -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent); }
+/* 收起處的斜紋橫條（還有 N 區收起來了） */
+.compare-fold-bar { display: flex; width: 100%; min-height: 56px; align-items: center; gap: 12px; padding: 0 16px; border: 1.5px dashed var(--color-line-strong); border-radius: 12px; background: repeating-linear-gradient(-45deg, var(--color-card) 0 10px, var(--color-paper) 10px 20px); color: var(--color-ink); font: 500 14px var(--font-sans); text-align: left; cursor: pointer; }
+.compare-fold-bar:hover { border-color: var(--color-ink-3); }
+.compare-fold-bar:focus-visible { outline: 2.5px solid var(--color-mist-deep); outline-offset: 2px; }
+.compare-fold-bar svg { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--color-ink-2); stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.compare-fold-bar__hint { margin-left: auto; color: var(--color-ink-2); font-size: 12px; }
+@media (max-width: 767px) { .compare-fold-bar { font-size: 13px; } .compare-fold-bar__hint { display: none; } }
+/* 收起後捲回這裡：讓開黏在頂端的精簡商品列 */
+#compare-fold-start { scroll-margin-top: 88px; }
 /* 捲動後的精簡商品列：高度 0 的 sticky 容器，蓋在表格上方，不推動版面 */
 .compare-compact { position: sticky; top: 0; z-index: 20; height: 0; }
 .compare-compact__bar { display: grid; grid-template-columns: 128px repeat(5, minmax(0, 1fr)); align-items: center; margin: 0 -18px; border-bottom: 2px solid var(--color-ink); border-radius: var(--radius-card) var(--radius-card) 0 0; padding: 8px 18px; background: var(--color-card); box-shadow: 0 12px 16px -16px var(--color-ink); animation: compare-compact-in .16s ease-out; }

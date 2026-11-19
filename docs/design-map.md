@@ -106,7 +106,7 @@
 | B23.1 | 比較・加入商品 | `B-Compare-Picker.dc.html` | 1440 | `/wishlist/compare/:id`（Dialog） |
 | B24   | 元件：特徵標籤 | `B-Features.dc.html` | 1440 | 元件（用在 B7.1、B6） |
 | B25   | 特徵管理 | `B-Features-Manage.dc.html` | 1440 | `/me/features` |
-
+| B26   | 元件：懸浮展開鈕 | `B-FloatToggle.dc.html` | 1440 | 元件（用在 B23、BM20） |
 
 ## 手機
 

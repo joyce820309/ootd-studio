@@ -52,6 +52,13 @@ a{color:#3E6270}
 .dt{display:inline-block;width:16px;height:16px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1.5px rgba(59,47,37,.18)}
 .arw{width:44px;height:44px;border:0;background:none;display:inline-flex;align-items:center;justify-content:center;color:#3B2F25;cursor:pointer;flex:none}
 .cell{display:flex;flex-direction:column;align-items:flex-start;gap:4px;font-size:14px;line-height:1.5;min-width:0}
+.ftg{position:absolute;right:12px;bottom:96px;z-index:5;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 14px 0 6px;border-radius:14px;border:1.5px solid #E2B866;background:#F2CF8E;color:#3B2F25;font:500 13px 'Chiron GoRound TC';transform:rotate(-2deg);box-shadow:0 2px 0 rgba(59,47,37,.08),0 16px 26px -12px rgba(59,47,37,.5)}
+.ftg[data-open="true"]{background:#FFFCF6;border-color:#3B2F25;transform:rotate(1.5deg)}
+.ftg-tape{position:absolute;left:12px;top:-8px;width:40px;height:14px;background:rgba(169,198,207,.8);transform:rotate(-8deg)}
+.ftg-ic{width:30px;height:30px;border-radius:50%;background:#FFFCF6;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1.5px rgba(59,47,37,.15)}
+.ftg[data-open="true"] .ftg-ic{background:#F3E7D4}
+.ftg-ic svg{width:17px;height:17px;fill:none;stroke:#3B2F25;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ftg-n{min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#3B2F25;color:#FBF4E8;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
 </style>
 </helmet>
 <div style="width:390px;height:2140px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden">
@@ -89,13 +96,14 @@ a{color:#3E6270}
             <span style="display:flex;align-items:baseline;gap:8px;font-size:12px;color:#5A4A3C"><span>{{r.label}}</span><sc-if value="{{r.me}}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;color:#74624F">{{r.me}}</span></sc-if></span>
             <div class="two">
               <sc-for list="{{r.cells}}" as="c" hint-placeholder-count="2">
-                <span class="cell"><span style="display:flex;align-items:center;gap:5px;flex-wrap:wrap"><span class="{{c.cls}}" style="font-weight:{{c.w}}">{{c.v}}</span><sc-for list="{{c.dots}}" as="d" hint-placeholder-count="0"><span class="dt" style="background:{{d.h}};outline:{{d.ol}};outline-offset:2px"></span></sc-for></span><sc-if value="{{c.chip}}" hint-placeholder-val="{{ false }}"><span class="ch" style="background:{{c.cb}};color:{{c.cf}}">{{c.chip}}</span></sc-if></span>
+                <span class="cell"><sc-if value="{{c.isNote}}" hint-placeholder-val="{{ false }}"><span style="width:100%;padding:8px 9px;border-radius:10px;background:#EEF4F6;font-size:12px;line-height:1.7;color:#24323A;white-space:pre-line">{{c.v}}</span></sc-if><span style="display:{{c.disp}};align-items:center;gap:5px;flex-wrap:wrap"><span class="{{c.cls}}" style="font-weight:{{c.w}}">{{c.v}}</span><sc-for list="{{c.dots}}" as="d" hint-placeholder-count="0"><span class="dt" style="background:{{d.h}};outline:{{d.ol}};outline-offset:2px"></span></sc-for></span><sc-if value="{{c.chip}}" hint-placeholder-val="{{ false }}"><span class="ch" style="background:{{c.cb}};color:{{c.cf}}">{{c.chip}}</span></sc-if></span>
               </sc-for>
             </div>
           </div>
         </sc-for>
       </section>
     </sc-for>
+    <sc-if value="{{folded}}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{toggleFold}}" style="display:flex;align-items:center;gap:8px;width:100%;margin-top:12px;min-height:52px;padding:8px 12px;border:1.5px dashed #D9C7AC;border-radius:12px;background:repeating-linear-gradient(-45deg,#FFFCF6 0 10px,#FBF4E8 10px 20px);font:500 13px 'Chiron GoRound TC';color:#3B2F25;text-align:left"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg><span>還有 <b class="num">{{foldN}}</b> 區：{{foldNames}}</span></button></sc-if>
     <sc-if value="{{diff}}" hint-placeholder-val="{{ false }}"><p style="margin:12px 4px 0;padding:10px 12px;border-radius:10px;background:#F6E7C6;font-size:12px;line-height:1.7;color:#5A3F12">已收起 3 列一樣的：版型、季節、洗滌。</p></sc-if>
     <div class="two" style="margin-top:16px;padding-top:14px;border-top:2px solid #3B2F25">
       <sc-for list="{{cols}}" as="c" hint-placeholder-count="2">
@@ -105,6 +113,7 @@ a{color:#3E6270}
     <p style="margin:12px 4px 0;font-size:12px;line-height:1.7;color:#5A4A3C">按「就買這件」會跳出跟桌機同樣的確認：其他幾件要不要改成不考慮、這個比較要不要封存。</p>
   </main>
 
+  <button type="button" class="ftg" data-open="{{ftOpen}}" onClick="{{toggleFold}}" aria-expanded="{{ftOpen}}"><span class="ftg-tape" aria-hidden="true"></span><span class="ftg-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="{{ftPath}}"></path></svg></span><span>{{ftText}}</span><sc-if value="{{folded}}" hint-placeholder-val="{{ true }}"><span class="num ftg-n">{{foldN}}</span></sc-if></button>
   <div style="position:absolute;left:0;right:0;bottom:0;display:flex;gap:8px;padding:10px 12px 26px;background:#FFFCF6;border-top:1.5px dashed #D9C7AC">
     <a class="btn btn-o" href="B-M-Compare-Picker.dc.html" style="flex:1;height:48px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"></path></svg>加入商品</a>
     <button type="button" class="btn btn-s" style="flex:1;height:48px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M8 8h11v12H8zM5 16V4h11"></path></svg>整理給 AI</button>
@@ -113,7 +122,7 @@ a{color:#3E6270}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2140}}'>
 class Component extends DCLogic {
-  constructor(p) { super(p); this.state = { l: 0, r: 1, diff: false }; }
+  constructor(p) { super(p); this.state = { l: 0, r: 1, diff: false, open: false }; }
   renderVals() {
     const st = this.state;
     const SAGE = ['#E6EEE2', '#3F5A3B'], ROSE = ['#F4DDD6', '#8E4A3E'], OAT = ['#F6E7C6', '#5A3F12'], MIST = ['#DCE8EC', '#24424D'], GRAY = ['#F3E7D4', '#5A4A3C'];
@@ -128,45 +137,48 @@ class Component extends DCLogic {
     const dots = a => a.map(([h, on]) => ({ h, ol: on ? '2px solid #3B2F25' : 'none' }));
     const S = [
       { t: '價格', rows: [
-        { label: '含運總價', cells: [n('NT$590', Object.assign({ w: 700 }, ch('最便宜', SAGE))), n('NT$1,050', { w: 700 }), n('NT$2,340', { w: 700 })] }
+        { label: '售價', cells: [n('NT$590', Object.assign({ w: 700 }, ch('最便宜', SAGE))), n('NT$990'), n('NT$2,280')] }
+      ] },
+      { t: '商品頁尺寸表', rows: [
+        { label: '原文照貼，不判斷', note: 1, cells: [c('S 腰31-38 臀60 長94\nM 腰33-40 臀62 長95\nL 腰35-42 臀64 長96', { note: 1 }), c('XS–XL 見官網\nM 腰36 臀52 長88', { note: 1 }), c('L 腰38 臀50 長102', { note: 1 })] }
       ] },
       { t: '尺寸 vs 我的身體', rows: [
         { label: '腰圍', me: '我 70', cells: [n('33 ↔ 40', ch('有彈性・會貼身', OAT)), n('36', ch('合身', SAGE)), n('38', ch('偏鬆', MIST))] },
-        { label: '臀圍', me: '我 92', cells: [n('62', ch('寬鬆', MIST)), n('52', ch('寬鬆', MIST)), n('50', ch('合身', SAGE))] },
-        { label: '大腿', me: '我 54', cells: [n('36', ch('寬鬆', MIST)), n('33', ch('寬鬆', MIST)), n('30', ch('合身', SAGE))] },
-        { label: '褲長', me: '我常穿 95', cells: [n('95', ch('剛好', SAGE)), n('88', ch('九分', GRAY)), n('102', ch('偏長 7 cm', ROSE))] }
-      ] },
-      { t: '材質與版型', rows: [
-        { label: '成分', cells: [c('聚酯 70%・羊毛 30%'), c('聚酯纖維 100%'), c('羊毛 50%・尼龍 50%')] },
-        { label: '版型', same: 1, cells: [c('高腰寬褲'), c('高腰寬褲'), c('高腰寬褲')] },
-        { label: '季節', same: 1, cells: [c('秋冬'), c('秋冬'), c('秋冬')] },
-        { label: '洗滌', same: 1, cells: [c('手洗'), c('手洗'), c('手洗')] }
+        { label: '臀圍', me: '我 92', cells: [n('62', ch('寬鬆', MIST)), n('52', ch('寬鬆', MIST)), n('50', ch('合身', SAGE))] }
       ] },
       { t: '顏色', rows: [
         { label: '可選・框起來是最想要的', cells: [c('3 色', { dots: dots([['#2B2724', 1], ['#6B4A36'], ['#F3EDE1']]) }), c('2 色', { dots: dots([['#C9B48F', 1], ['#232322']]) }), c('1 色', { dots: dots([['#F3EDE1', 1]]) })] }
       ] },
-      { t: '購買', rows: [
-        { label: '退換', cells: [c('7 天・不含運', ch('換貨自付運費', ROSE)), c('30 天・門市可退'), c('7 天・自付運費')] },
-        { label: '有貨', cells: [c('M 有貨'), c('M 有貨'), c('只剩 L', ch('沒你的尺碼', ROSE))] }
-      ] },
-      { t: '跟衣櫃', rows: [
-        { label: '可以搭', cells: [n('12 件', Object.assign({ w: 700 }, ch('最好搭', SAGE))), n('9 件'), n('10 件')] },
-        { label: '重複・衣櫃裡最像的', cells: [c('像「燕麥色高腰厚磅寬褲」・同：寬褲、高腰、厚磅', ch('很像', ROSE)), c('像「黑色高腰彈力直筒褲」・依據較少；點「補特徵」從下方滑出面板', ch('有點像', OAT)), c('衣櫃沒有淺色寬褲', ch('不太像', SAGE))] }
-      ] },
       { t: '我的筆記', rows: [
         { label: '', cells: [c('撞色收邊很可愛，毛呢會不會起毛球？'), c('門市可以先試穿'), c('顏色最美，但只剩 L')] }
+      ] },
+      { t: '材質與版型', fold: 1, rows: [
+        { label: '成分', cells: [c('聚酯 70%・羊毛 30%'), c('聚酯纖維 100%'), c('羊毛 50%・尼龍 50%')] },
+        { label: '版型', same: 1, cells: [c('高腰寬褲'), c('高腰寬褲'), c('高腰寬褲')] },
+        { label: '季節', same: 1, cells: [c('秋冬'), c('秋冬'), c('秋冬')] }
+      ] },
+      { t: '跟衣櫃', fold: 1, rows: [
+        { label: '可以搭', cells: [n('12 件', Object.assign({ w: 700 }, ch('最好搭', SAGE))), n('9 件'), n('10 件')] },
+        { label: '重複・衣櫃裡最像的', cells: [c('像「燕麥色高腰厚磅寬褲」・同：寬褲、高腰、厚磅', ch('很像', ROSE)), c('像「黑色高腰彈力直筒褲」・依據較少', ch('有點像', OAT)), c('衣櫃沒有淺色寬褲', ch('不太像', SAGE))] }
+      ] },
+      { t: '購買', fold: 1, rows: [
+        { label: '退換', cells: [c('7 天', ch('換貨自付運費', ROSE)), c('30 天・門市可退'), c('7 天・自付運費')] }
       ] }
     ];
     const L = st.l, R = st.r, N = IT.length;
     const step = (cur, other, d) => { let x = cur; do { x = (x + d + N) % N; } while (x === other); return x; };
     const sameTwo = r => r.same || (r.cells[L].v === r.cells[R].v && !r.cells[L].chip && !r.cells[R].chip && !r.cells[L].dots.length);
-    const sections = S.map(s => ({ t: s.t, rows: s.rows.filter(r => !(st.diff && sameTwo(r))).map(r => ({ label: r.label, me: r.me || '', cells: [r.cells[L], r.cells[R]] })) })).filter(s => s.rows.length);
+    const all = S.map(s => ({ t: s.t, fold: !!s.fold, rows: s.rows.filter(r => !(st.diff && !r.note && sameTwo(r))).map(r => ({ label: r.label, me: r.me || '', cells: [r.cells[L], r.cells[R]].map(x => Object.assign({ note: 0 }, x, { isNote: !!x.note, disp: x.note ? 'none' : 'flex' })) })) })).filter(s => s.rows.length);
+    const foldList = all.filter(s => s.fold), open = st.open;
+    const sections = all.filter(s => open || !s.fold);
     const col = (i, other, key) => Object.assign({}, IT[i], { pos: `${i + 1} / ${N}`,
       prev: () => this.setState({ [key]: step(i, other, -1) }), next: () => this.setState({ [key]: step(i, other, 1) }) });
     return {
       diff: st.diff, diffA: st.diff ? 'true' : 'false', swBg: st.diff ? '#3E6270' : '#D9C7AC', swL: st.diff ? '20px' : '2px',
       toggleDiff: () => this.setState({ diff: !st.diff }),
-      cols: [col(L, R, 'l'), col(R, L, 'r')], sections
+      cols: [col(L, R, 'l'), col(R, L, 'r')], sections,
+      folded: !open && foldList.length > 0, foldN: foldList.length, foldNames: foldList.map(x => x.t).join('、'), toggleFold: () => this.setState({ open: !open }),
+      ftOpen: open ? 'true' : 'false', ftText: open ? '收起' : '展開', ftPath: open ? 'M7 17l5-5 5 5M7 11l5-5 5 5' : 'M7 7l5 5 5-5M7 13l5 5 5-5'
     };
   }
 }

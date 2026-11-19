@@ -71,9 +71,17 @@ a{color:#3E6270}
 .ft[data-s="sug"]{border:1.5px dashed #3E6270;background:#EEF4F6;color:#24424D}
 .ft[data-s="on"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
 .why{flex-basis:100%;font-size:12px;line-height:1.6;color:#5A4A3C}
+.ftg{position:fixed;right:32px;bottom:32px;z-index:25;display:inline-flex;align-items:center;gap:10px;height:50px;padding:0 18px 0 8px;border-radius:14px;border:1.5px solid #E2B866;background:#F2CF8E;color:#3B2F25;font:500 14px 'Chiron GoRound TC';cursor:pointer;transform:rotate(-2deg);box-shadow:0 2px 0 rgba(59,47,37,.08),0 16px 26px -12px rgba(59,47,37,.5);transition:transform .15s,box-shadow .15s}
+.ftg:hover{transform:rotate(0) translateY(-2px)}
+.ftg[data-open="true"]{background:#FFFCF6;border-color:#3B2F25;transform:rotate(1.5deg)}
+.ftg-tape{position:absolute;left:14px;top:-8px;width:44px;height:15px;background:rgba(169,198,207,.8);transform:rotate(-8deg);box-shadow:0 1px 2px rgba(59,47,37,.1)}
+.ftg-ic{width:32px;height:32px;border-radius:50%;background:#FFFCF6;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1.5px rgba(59,47,37,.15)}
+.ftg[data-open="true"] .ftg-ic{background:#F3E7D4}
+.ftg-ic svg{width:18px;height:18px;fill:none;stroke:#3B2F25;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ftg-n{min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#3B2F25;color:#FBF4E8;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
 </style>
 </helmet>
-<div style="position:relative;width:100%;min-height:1880px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+<div style="position:relative;width:100%;min-height:2120px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
   <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
     <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
     <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
@@ -171,6 +179,15 @@ a{color:#3E6270}
       <sc-for list="{{sections}}" as="s" hint-placeholder-count="4">
         <div style="display:flex;flex-direction:column">
           <h3 class="hd" style="margin:12px 0 0;font-size:17px;display:flex;align-items:baseline;gap:10px"><span>{{s.t}}</span><span style="font:400 11.5px 'Chiron GoRound TC';color:#5A4A3C">{{s.hint}}</span></h3>
+          <sc-if value="{{s.isNotes}}" hint-placeholder-val="{{ false }}">
+            <div class="g" style="border-top:1.5px dashed #EADCC6">
+              <span class="rl" style="justify-content:flex-start;padding-top:12px"><span class="me">原文照貼，不判斷</span></span>
+              <sc-for list="{{items}}" as="it" hint-placeholder-count="3">
+                <span class="cell" style="align-items:flex-start"><span class="note">{{it.notes}}</span></span>
+              </sc-for>
+              <span></span><span></span>
+            </div>
+          </sc-if>
           <sc-for list="{{s.rows}}" as="r" hint-placeholder-count="3">
             <div class="g" style="border-top:1.5px dashed #EADCC6">
               <span class="rl"><span>{{r.label}}</span><sc-if value="{{r.me}}" hint-placeholder-val="{{ false }}"><span class="me">{{r.me}}</span></sc-if></span>
@@ -191,16 +208,16 @@ a{color:#3E6270}
         </div>
       </sc-for>
 
-      <div class="g" style="border-top:1.5px dashed #EADCC6">
-        <span class="rl" style="justify-content:flex-start;padding-top:12px"><span>商品頁尺寸表</span><span class="me">原文照貼，不判斷</span><button type="button" onClick="{{toggleNotes}}" aria-expanded="{{notesA}}" style="align-self:flex-start;min-height:40px;padding:0;border:0;background:none;font:500 12px 'Chiron GoRound TC';color:#3E6270;text-decoration:underline;cursor:pointer">{{notesBtn}}</button></span>
-        <sc-for list="{{items}}" as="it" hint-placeholder-count="3">
-          <span class="cell" style="align-items:flex-start"><span class="note" style="max-height:{{notesH}};overflow:hidden;-webkit-mask-image:{{notesMask}}">{{it.notes}}</span></span>
-        </sc-for>
-        <span></span><span></span>
-      </div>
+      <sc-if value="{{folded}}" hint-placeholder-val="{{ true }}">
+        <button type="button" onClick="{{toggleFold}}" aria-expanded="false" style="position:relative;display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;padding:0 16px;min-height:56px;border:1.5px dashed #D9C7AC;border-radius:12px;background:repeating-linear-gradient(-45deg,#FFFCF6 0 10px,#FBF4E8 10px 20px);font:500 14px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;text-align:left">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#5A4A3C"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg>
+          <span>還有 <b class="num">{{foldN}}</b> 區收起來了：{{foldNames}}</span>
+          <span style="margin-left:auto;font-size:12px;color:#5A4A3C">右下角的按鈕也能展開</span>
+        </button>
+      </sc-if>
 
       <sc-if value="{{diff}}" hint-placeholder-val="{{ false }}">
-        <p style="margin:12px 0 0;padding:6px 12px;border-radius:10px;background:#F6E7C6;font-size:13px;color:#5A3F12;display:flex;align-items:center">已收起 3 列三件都一樣的：版型、季節、洗滌。<button type="button" onClick="{{toggleDiff}}" style="min-height:40px;margin-left:6px;border:0;background:none;font:500 13px 'Chiron GoRound TC';color:#3E6270;text-decoration:underline;cursor:pointer">全部顯示</button></p>
+        <p style="margin:12px 0 0;padding:6px 12px;border-radius:10px;background:#F6E7C6;font-size:13px;color:#5A3F12;display:flex;align-items:center">已收起三件都一樣的列：版型、季節。<button type="button" onClick="{{toggleDiff}}" style="min-height:40px;margin-left:6px;border:0;background:none;font:500 13px 'Chiron GoRound TC';color:#3E6270;text-decoration:underline;cursor:pointer">全部顯示</button></p>
       </sc-if>
 
       <div class="g" style="margin-top:14px;padding-top:14px;border-top:2px solid #3B2F25">
@@ -230,14 +247,20 @@ a{color:#3E6270}
           <p>欄名欄從 176 縮到 128 px，列高縮到約 40 px。</p>
         </div>
         <div class="spec">
-          <b style="font-size:14px">3・「只看不一樣」用開關，不用勾選框</b>
+          <b style="font-size:14px">3・開關、順序、收合、空的不顯示</b>
           <p>用 review.css 的 <span class="num">.sw</span> 開關，跟 B8.3 趨勢的「只看早上空腹」同一個。按了立刻生效的設定用開關；B21 Checkbox 留給「選商品」這種多選。</p>
           <p>用 <span class="num">button role="switch" aria-checked</span>，整個文字都可以點。</p>
-          <p>商品頁尺寸表的原文預設只露 3 行，按「展開」時所有欄一起打開。</p>
+          <p>順序：價格（只留售價）→ 商品頁尺寸表 →（尺寸 vs 我的身體）→ 顏色 → 我的筆記 → 材質與版型 → 跟衣櫃 → 購買。某一列所有商品都沒資料就不顯示；整區都空就連標題一起藏。</p><p>收合改到最後面：價格、尺寸表、顏色、筆記一律完整顯示；材質與版型、跟衣櫃、購買預設收起，用右下角懸浮按鈕（B26）一次展開／收起。</p>
         </div>
       </div>
     </section>
   </main>
+
+  <button type="button" class="ftg" data-open="{{ftOpen}}" onClick="{{toggleFold}}" aria-expanded="{{ftOpen}}" aria-label="{{ftAria}}">
+    <span class="ftg-tape" aria-hidden="true"></span>
+    <span class="ftg-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="{{ftPath}}"></path></svg></span>
+    <span>{{ftText}}</span><sc-if value="{{folded}}" hint-placeholder-val="{{ true }}"><span class="num ftg-n">{{foldN}}</span></sc-if>
+  </button>
 
   <sc-if value="{{dlg}}" hint-placeholder-val="{{ false }}">
     <div aria-hidden="true" onClick="{{cancel}}" style="position:absolute;inset:0;z-index:30;background:rgba(59,47,37,.42)"></div>
@@ -261,9 +284,9 @@ a{color:#3E6270}
   </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1880}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2120}}'>
 class Component extends DCLogic {
-  constructor(p) { super(p); this.state = { diff: false, rename: false, menu: false, compact: false, notes: false, dlg: null, decided: null, pop: false, filled: false }; }
+  constructor(p) { super(p); this.state = { diff: false, rename: false, menu: false, compact: false, open: false, dlg: null, decided: null, pop: false, filled: false }; }
   renderVals() {
     const st = this.state;
     const SAGE = ['#E6EEE2', '#3F5A3B'], ROSE = ['#F4DDD6', '#8E4A3E'], OAT = ['#F6E7C6', '#5A3F12'], MIST = ['#DCE8EC', '#24424D'], GRAY = ['#F3E7D4', '#5A4A3C'];
@@ -281,23 +304,29 @@ class Component extends DCLogic {
     const dots = a => a.map(([h, nn, on]) => ({ h, n: nn, ol: on ? '2px solid #3B2F25' : 'none' }));
     const S = [
       { t: '價格', hint: '', rows: [
-        { label: '含運總價', me: '售價＋運費', cells: [n('NT$750'), n('NT$590', Object.assign({ w: 700 }, chip('最便宜', SAGE))), n('NT$2,340')] }
+        { label: '售價', cells: [n('NT$690'), n('NT$590', Object.assign({ w: 700 }, chip('最便宜', SAGE))), n('NT$2,280')] }
       ] },
-      { t: '尺寸 vs 我的身體', hint: '平放 × 2 跟身體比；有彈性的用「拉開」的數字判斷', rows: [
+      { t: '商品頁尺寸表', hint: '', isNotes: true, rows: [] },
+      { t: '尺寸 vs 我的身體', hint: '有平放尺寸才出現', rows: [
         { label: '腰圍', me: '我 70', cells: [n('32 ↔ 36', chip('有彈性・會貼身', OAT)), n('33 ↔ 40', chip('有彈性・會貼身', OAT)), n('38', chip('偏鬆', MIST))] },
         { label: '臀圍', me: '我 92', cells: [n('60', chip('寬鬆', MIST)), n('62', chip('寬鬆', MIST)), n('50', chip('合身', SAGE))] },
-        { label: '大腿', me: '我 54', cells: [n('36', chip('寬鬆', MIST)), n('35', chip('寬鬆', MIST)), n('30', chip('合身', SAGE))] },
         { label: '褲長', me: '', cells: [n('97'), n('95'), n('102')] }
       ] },
-      { t: '材質與版型', hint: '', rows: [
+      { t: '顏色', hint: '框起來的是「最想要」', rows: [
+        { label: '可選', cells: [c('3 色', { dots: dots([['#EAD9C6', '杏', 1], ['#232322', '黑'], ['#6B4A36', '深咖']]) }), c('3 色', { dots: dots([['#2B2724', '黑', 1], ['#6B4A36', '深咖'], ['#F3EDE1', '奶白']]) }), c('1 色', { dots: dots([['#F3EDE1', '奶白', 1]]) })] }
+      ] },
+      { t: '我的筆記', hint: '', rows: [
+        { label: '', cells: [c('內磨毛很暖，怕太厚'), c('撞色收邊很可愛，毛呢會不會起毛球？'), c('—')] }
+      ] },
+      { t: '材質與版型', hint: '整列都沒資料就不顯示（這次「洗滌」沒資料，已藏起來）', fold: 1, rows: [
         { label: '成分', cells: [c('聚酯・內磨毛'), c('聚酯 70%・羊毛 30%'), c('羊毛 50%・尼龍 50%')] },
         { label: '版型', same: 1, cells: [c('高腰寬褲'), c('高腰寬褲'), c('高腰寬褲')] },
+        { label: '彈性', cells: [c('後鬆緊'), c('後鬆緊'), c('—')] },
         { label: '季節', same: 1, cells: [c('秋冬'), c('秋冬'), c('秋冬')] },
-        { label: '洗滌', same: 1, cells: [c('手洗'), c('手洗'), c('手洗')] }
+        { label: '洗滌', empty: 1, cells: [c('—'), c('—'), c('—')] }
       ] },
-      { t: '顏色・購買・衣櫃', hint: '', rows: [
-        { label: '顏色', me: '框起來＝最想要', cells: [c('3 色', { dots: dots([['#EAD9C6', '杏', 1], ['#232322', '黑'], ['#6B4A36', '深咖']]) }), c('3 色', { dots: dots([['#2B2724', '黑', 1], ['#6B4A36', '深咖'], ['#F3EDE1', '奶白']]) }), c('1 色', { dots: dots([['#F3EDE1', '奶白', 1]]) })] },
-        { label: '退換', cells: [c('7 天'), c('7 天・不含運', chip('換貨自付運費', ROSE)), c('7 天・自付運費')] },
+      { t: '跟衣櫃', hint: '', fold: 1, rows: [
+        { label: '可以搭', cells: [n('1 件'), n('1 件'), n('0 件')] },
         { label: '重複', me: '衣櫃裡最像的', cells: [
           c('像「燕麥色高腰厚磅寬褲」', Object.assign({ dup: { same: '寬褲、高腰、厚磅、杏色系', diff: '材質', few: false, fill: false, done: false, pop: false } }, chip('很像', ROSE))),
           st.filled
@@ -305,11 +334,16 @@ class Component extends DCLogic {
             : c('像「黑色高腰彈力直筒褲」', Object.assign({ dup: { same: '黑色、長褲', diff: '—', few: true, fill: !st.pop, done: false, pop: st.pop, ref: '黑色高腰彈力直筒褲',
                 onFill: () => this.setState({ pop: true }), onClose: () => this.setState({ pop: false }), onSave: () => this.setState({ pop: false, filled: true }) } }, chip('有點像', OAT))),
           c('衣櫃沒有淺色寬褲', Object.assign({ dup: { same: '—', diff: '顏色、褲型', few: false, fill: false, done: false, pop: false } }, chip('不太像', SAGE)))
-        ] },
-        { label: '可以搭', cells: [n('1 件'), n('1 件'), n('0 件')] }
+        ] }
+      ] },
+      { t: '購買', hint: '', fold: 1, rows: [
+        { label: '退換', cells: [c('7 天'), c('7 天', chip('換貨自付運費', ROSE)), c('7 天・自付運費')] }
       ] }
     ];
-    const sections = S.map(s => Object.assign({}, s, { rows: s.rows.filter(r => !(st.diff && r.same)).map(r => Object.assign({ me: '' }, r)) })).filter(s => s.rows.length);
+    const open = st.open;
+    const all = S.map(s => Object.assign({ isNotes: false }, s, { rows: s.rows.filter(r => !r.empty && !(st.diff && r.same)).map(r => Object.assign({ me: '' }, r)) })).filter(s => s.isNotes || s.rows.length);
+    const foldList = all.filter(s => s.fold);
+    const sections = all.filter(s => open || !s.fold);
     const items = IT.map((it, i) => Object.assign({}, it, {
       decided: st.decided === i,
       bcls: st.decided === i ? 'btn-p' : 'btn-s', btext: st.decided === i ? '✓ 決定買' : '就買這件',
@@ -321,7 +355,10 @@ class Component extends DCLogic {
       startRename: () => this.setState({ rename: true, menu: false }), endRename: () => this.setState({ rename: false }),
       menu: st.menu, menuA: st.menu ? 'true' : 'false', menuBg: st.menu ? '#F3E7D4' : 'transparent', toggleMenu: () => this.setState({ menu: !st.menu }),
       compact: st.compact, notCompact: !st.compact, toggleCompact: () => this.setState({ compact: !st.compact }),
-      notesH: st.notes ? 'none' : '82px', notesMask: st.notes ? 'none' : 'linear-gradient(#000 60%,transparent)', notesA: st.notes ? 'true' : 'false', notesBtn: st.notes ? '收起' : '展開全部', toggleNotes: () => this.setState({ notes: !st.notes }),
+      folded: !open && foldList.length > 0, foldN: foldList.length, foldNames: foldList.map(x => x.t).join('、'),
+      toggleFold: () => this.setState({ open: !open }),
+      ftOpen: open ? 'true' : 'false', ftText: open ? '收起' : '展開全部', ftAria: open ? '收起後面幾區' : `展開其餘 ${foldList.length} 區`,
+      ftPath: open ? 'M7 17l5-5 5 5M7 11l5-5 5 5' : 'M7 7l5 5 5-5M7 13l5 5 5-5',
       diff: st.diff, diffA: st.diff ? 'true' : 'false', swBg: st.diff ? '#3E6270' : '#D9C7AC', swL: st.diff ? '20px' : '2px',
       toggleDiff: () => this.setState({ diff: !st.diff }),
       groups: [

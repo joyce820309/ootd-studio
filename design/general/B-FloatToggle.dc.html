@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>元件：懸浮展開鈕</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.ftg{position:relative;display:inline-flex;align-items:center;gap:10px;height:50px;padding:0 18px 0 8px;border-radius:14px;border:1.5px solid #E2B866;background:#F2CF8E;color:#3B2F25;font:500 14px 'Chiron GoRound TC';cursor:pointer;transform:rotate(-2deg);box-shadow:0 2px 0 rgba(59,47,37,.08),0 16px 26px -12px rgba(59,47,37,.5);transition:transform .15s}
+.ftg[data-v="hover"]{transform:rotate(0) translateY(-2px);box-shadow:0 2px 0 rgba(59,47,37,.08),0 20px 30px -12px rgba(59,47,37,.55)}
+.ftg[data-v="focus"]{outline:2.5px solid #3E6270;outline-offset:3px}
+.ftg[data-open="true"]{background:#FFFCF6;border-color:#3B2F25;transform:rotate(1.5deg)}
+.ftg[data-v="m"]{height:44px;padding:0 14px 0 6px;font-size:13px;gap:8px}
+.ftg-tape{position:absolute;left:14px;top:-8px;width:44px;height:15px;background:rgba(169,198,207,.8);transform:rotate(-8deg);box-shadow:0 1px 2px rgba(59,47,37,.1)}
+.ftg-ic{width:32px;height:32px;border-radius:50%;background:#FFFCF6;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1.5px rgba(59,47,37,.15)}
+.ftg[data-open="true"] .ftg-ic{background:#F3E7D4}
+.ftg-ic svg{width:18px;height:18px;fill:none;stroke:#3B2F25;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ftg-n{min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#3B2F25;color:#FBF4E8;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.st{display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:16px;padding:30px 12px 16px;border-radius:14px;background:#FFFCF6;min-height:170px}
+.cap{margin:0;font-size:12.5px;line-height:1.75;color:#5A4A3C}
+.box{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border-radius:14px;background:#FFFCF6;box-shadow:inset 0 0 0 1.5px #EADCC6}
+</style>
+</helmet>
+<div style="width:1440px;min-height:660px;box-sizing:border-box;padding:48px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:32px">
+  <header style="display:flex;align-items:flex-end;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span class="lbl" style="background:#A9C6CF;transform:rotate(-2deg);align-self:flex-start">元件</span>
+      <h1 class="hd" style="margin:0;font-size:36px">懸浮展開鈕 FloatToggle</h1>
+    </div>
+    <p class="cap" style="margin:0 0 4px auto;max-width:620px;font-size:13px">固定在畫面右下角，不跟著版面跑。用在「一頁裡有收起來的區塊」：選購比較（B23／BM20）。外觀是一張貼了紙膠帶的便利貼，收起時是燕麥黃，展開後變成紙色加深色框。檔案：<span class="num">components/ui/FloatToggle.tsx</span></p>
+  </header>
+
+  <section aria-labelledby="s1" style="display:flex;flex-direction:column;gap:14px">
+    <h2 id="s1" class="hd" style="margin:0;font-size:24px">狀態</h2>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+      <div class="st"><button type="button" class="ftg"><span class="ftg-tape" aria-hidden="true"></span><span class="ftg-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg></span><span>展開全部</span><span class="num ftg-n">3</span></button><span class="cap" style="text-align:center"><b style="color:#3B2F25">收起中</b><br>數字＝還有幾區沒展開</span></div>
+      <div class="st"><button type="button" class="ftg" data-v="hover"><span class="ftg-tape" aria-hidden="true"></span><span class="ftg-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg></span><span>展開全部</span><span class="num ftg-n">3</span></button><span class="cap" style="text-align:center"><b style="color:#3B2F25">滑過</b><br>擺正、往上浮 2 px</span></div>
+      <div class="st"><button type="button" class="ftg" data-v="focus"><span class="ftg-tape" aria-hidden="true"></span><span class="ftg-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg></span><span>展開全部</span><span class="num ftg-n">3</span></button><span class="cap" style="text-align:center"><b style="color:#3B2F25">鍵盤焦點</b><br>霧藍外框</span></div>
+      <div class="st"><button type="button" class="ftg" data-open="true"><span class="ftg-tape" aria-hidden="true"></span><span class="ftg-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17l5-5 5 5M7 11l5-5 5 5"></path></svg></span><span>收起</span></button><span class="cap" style="text-align:center"><b style="color:#3B2F25">展開中</b><br>紙色、深色框、往另一邊歪</span></div>
+      <div class="st"><button type="button" class="ftg" data-v="m"><span class="ftg-tape" aria-hidden="true"></span><span class="ftg-ic" aria-hidden="true" style="width:30px;height:30px"><svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg></span><span>展開</span><span class="num ftg-n">3</span></button><span class="cap" style="text-align:center"><b style="color:#3B2F25">手機</b><br>高 44、文字縮短</span></div>
+    </div>
+  </section>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+    <div class="box">
+      <b style="font-size:15px">位置</b>
+      <p class="cap">桌機：<span class="num">position:fixed; right:32px; bottom:32px</span>。<br>手機：<span class="num">right:12px</span>，底部要讓開底部操作列：<span class="num">bottom: 列高 + 12px + env(safe-area-inset-bottom)</span>。</p>
+      <p class="cap">頁面底部加留白（桌機 96 px、手機再加操作列高度），最後一列不會被它蓋住。z-index 低於對話框和底部面板，打開那些時它要藏起來。</p>
+    </div>
+    <div class="box">
+      <b style="font-size:15px">行為</b>
+      <p class="cap">點一下切換「展開全部／收起」，所有可收起的區塊一起動。收起時捲回第一個被收起的區塊上緣，不要讓人掉到頁面中間。</p>
+      <p class="cap">頁面上沒有可收起的區塊時（例如資料都空，被藏起來了）不顯示。表格裡收起的地方另有一條「還有 3 區收起來了」的橫條，點它效果一樣。</p>
+    </div>
+    <div class="box">
+      <b style="font-size:15px">無障礙</b>
+      <p class="cap">用 <span class="num">&lt;button aria-expanded aria-controls&gt;</span>，aria-label 寫完整：「展開其餘 3 區」「收起後面幾區」。數字徽章和膠帶都 aria-hidden。</p>
+      <p class="cap">使用者設定「減少動態」時，不做浮起和旋轉動畫，只換顏色。</p>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":660}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
