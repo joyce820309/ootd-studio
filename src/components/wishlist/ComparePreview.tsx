@@ -34,6 +34,8 @@ interface ComparePreviewProps {
   studioUrl: (item: WishlistItem) => string
   /** 每件在這個比較的欄頂封面（storage_path） */
   coverPaths: Record<string, string | undefined>
+  /** 每件在這個比較「比的尺碼」，當購買明細的預設尺碼 */
+  chosenSizes?: Record<string, string | undefined>
   onSetCover: (item: WishlistItem, path: string | null) => void
 }
 
@@ -42,7 +44,7 @@ interface ComparePreviewProps {
  * 桌機是貼右邊的抽屜（寬 520、不蓋灰底，比較表照樣能捲能點；視窗小於 1200 加淡灰底）；手機是 top 40px 的 Bottom Sheet。
  * ← → 循環切換、Esc 關閉。
  */
-export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, onClose, onEdit, onRemove, onPutInBasket, onTakeOut, studioUrl, coverPaths, onSetCover }: ComparePreviewProps) {
+export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, onClose, onEdit, onRemove, onPutInBasket, onTakeOut, studioUrl, coverPaths, chosenSizes = {}, onSetCover }: ComparePreviewProps) {
   const panelRef = useRef<HTMLElement>(null)
   // 按「＋ 準備購買」或「調整」後，底部往上展開編輯區；換商品就收起（不寫入）
   const [pickingId, setPickingId] = useState<string | null>(null)
@@ -164,11 +166,11 @@ export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, o
 
       {pickingId === item.id && !bought ? (
         <div className="flex-none border-t-2 border-ink bg-card px-4 pt-3.5 pb-4 shadow-[0_-14px_24px_-18px_rgb(59_47_37/0.5)]">
-          <BuyPickerEditor key={item.id} item={item} variant="strip" onCancel={() => setPickingId(null)} onConfirm={(lines) => void onPutInBasket(item, lines).then((ok) => { if (ok) setPickingId(null) })} />
+          <BuyPickerEditor key={item.id} item={item} variant="strip" preferredSize={chosenSizes[item.id]} onCancel={() => setPickingId(null)} onConfirm={(lines) => void onPutInBasket(item, lines).then((ok) => { if (ok) setPickingId(null) })} />
         </div>
       ) : (
         <div className={`compare-preview__foot ${item.status === 'ready' ? 'flex-wrap' : ''}`}>
-          {item.status === 'ready' && <div className="w-full"><BuySummary item={item} lines={effectiveBuyLines(item)} variant="strip" onAdjust={() => setPickingId(item.id)} onRemove={() => onTakeOut(item)} /></div>}
+          {item.status === 'ready' && <div className="w-full"><BuySummary item={item} lines={effectiveBuyLines(item, chosenSizes[item.id])} variant="strip" onAdjust={() => setPickingId(item.id)} onRemove={() => onTakeOut(item)} /></div>}
           {!mobile && <Button variant="ghost" className="text-rose-ink" onClick={() => onRemove(item)}>從這個比較移除</Button>}
           <ButtonLink to={studioUrl(item)} variant="secondary" className={mobile ? 'h-12 flex-1' : 'ml-auto'}>拿去試搭</ButtonLink>
           {bought

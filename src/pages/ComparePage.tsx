@@ -16,7 +16,7 @@ import { WishlistBar } from '@/components/wishlist/WishlistLayout'
 import { CompareWrapUpDialog } from '@/components/wishlist/CompareWrapUpDialog'
 import { BuyPickerEditor, BuySummary } from '@/components/wishlist/BuyPicker'
 import { ShoppingBasket } from '@/components/wishlist/ShoppingBasket'
-import { effectiveBuyLines } from '@/lib/basket'
+import { buySizeOptions, effectiveBuyLines } from '@/lib/basket'
 import { useBasket } from '@/lib/useBasket'
 import { ComparePickerDialog } from '@/components/wishlist/ComparePickerDialog'
 import { ComparePreview } from '@/components/wishlist/ComparePreview'
@@ -40,7 +40,7 @@ import {
   setWishlistStatus,
   updateCompareGroup,
 } from '@/lib/data'
-import { formatNT, totalPrice, wishAsClosetItem, wishInsights, wishlistSizeOptions } from '@/lib/wishlist'
+import { formatNT, totalPrice, wishAsClosetItem, wishInsights } from '@/lib/wishlist'
 import { buildSizeRows, formatCm, hasSizeComparison, judgeLabel, type SizeRow } from '@/lib/review'
 import { formatStretch } from '@/lib/stretch'
 import { materialMix, materialMixText } from '@/lib/materialMix'
@@ -122,8 +122,7 @@ function compareValueRows(items: WishlistItem[], closet: ClosetItem[], body: Bod
 }
 
 function sizeChoicesFor(item: WishlistItem) {
-  const options = wishlistSizeOptions(item.size)
-  return options.length || !item.flatMeasurementsSize ? options : [item.flatMeasurementsSize]
+  return buySizeOptions(item)
 }
 
 function selectedCompareSize(candidate: CompareCandidate) {
@@ -631,7 +630,7 @@ export function ComparePage() {
 
       {isMobile && <div className="compare-page__mobile-actions fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-20 flex gap-2 border-t-[1.5px] border-dashed border-line-strong bg-card px-3 py-2"><Button variant="oat" className="flex-1" onClick={() => setPickerOpen(true)}><Icon name="plus" size={18} />加入商品</Button><Button variant="secondary" className="flex-1" disabled={!candidates.length} onClick={() => setAiOpen(true)}><Icon name="copy" size={17} />整理給 AI</Button></div>}
 
-      {previewItem && <ComparePreview items={candidates.map((candidate) => candidate.item)} currentId={previewItem.id} mobile={isMobile} keyboard={!dialogOpen} onSelect={(itemId) => setPreview(itemId, false)} onClose={closePreview} onEdit={setEditingItem} onRemove={(item) => { closePreview(); void removeItem(item) }} onPutInBasket={(item, lines) => shopping.putInBasket(item, lines)} onTakeOut={(item) => void shopping.takeOutOfBasket(item)} studioUrl={studioUrl} coverPaths={Object.fromEntries(candidates.map((candidate) => [candidate.item.id, candidate.link.coverPhotoPath]))} onSetCover={(item, path) => void chooseCover(item, path)} />}
+      {previewItem && <ComparePreview items={candidates.map((candidate) => candidate.item)} currentId={previewItem.id} mobile={isMobile} keyboard={!dialogOpen} onSelect={(itemId) => setPreview(itemId, false)} onClose={closePreview} onEdit={setEditingItem} onRemove={(item) => { closePreview(); void removeItem(item) }} onPutInBasket={(item, lines) => shopping.putInBasket(item, lines)} onTakeOut={(item) => void shopping.takeOutOfBasket(item)} studioUrl={studioUrl} coverPaths={Object.fromEntries(candidates.map((candidate) => [candidate.item.id, candidate.link.coverPhotoPath]))} chosenSizes={Object.fromEntries(candidates.map((candidate) => [candidate.item.id, selectedCompareSize(candidate)]))} onSetCover={(item, path) => void chooseCover(item, path)} />}
       <FloatActions hidden={dialogOpen || groupsSheetOpen || !!previewItem || shopping.open} fold={groupLinks.length ? { open: foldOpen, count: foldSections.length, onToggle: toggleFold, controls: 'compare-body' } : undefined} basket={{ qty: shopping.basket.qty, onOpen: openBasket }} />
       {pickerOpen && <ComparePickerDialog groupId={group.id} groupName={group.name} items={wishlist} groupWishlistIds={groupLinks.map((entry) => entry.wishlistItemId)} memberships={memberships} onClose={() => setPickerOpen(false)} onAdd={(ids) => void addItems(ids)} onAddUrl={() => { setPickerOpen(false); setAddFormOpen(true) }} />}
       {editingItem && <WishlistForm key={`edit-${editingItem.id}`} item={editingItem} saving={saving} onCancel={() => setEditingItem(null)} onSubmit={(input) => void saveEdit(editingItem, input)} />}
@@ -811,7 +810,7 @@ function DesktopCompare({ previewId, onPreview, candidates, indexes, sections, f
         <th scope="row" className="compare-table__row-label align-top"><span className="block pt-3 text-xs leading-[1.6] text-ink-2">可以選好幾件，<br />也可以一件買多色</span></th>
         {shown.map((candidate) => <td key={candidate.item.id} className="compare-table__cell align-top">
           <div className="flex flex-col gap-2">
-            <CompareBuyCell item={candidate.item} buy={buy} />
+            <CompareBuyCell item={candidate.item} buy={buy} preferredSize={selectedCompareSize(candidate)} />
             <ButtonLink to={studioUrl(candidate.item)} variant="ghost" className="w-full text-[13px] text-mist-deep" aria-label={`拿去試搭：${candidate.item.name}`}>拿去試搭</ButtonLink>
           </div>
         </td>)}
@@ -860,12 +859,12 @@ interface BuyCellApi {
  * 比較欄底部的購買明細（B28 C）三種狀態：「＋ 準備購買」按鈕／編輯小卡（取消／確定）／收合的摘要卡（調整、移出）。
  * 預設收合，表格不會被黃框撐高；按確定才寫入。
  */
-function CompareBuyCell({ item, buy }: { item: WishlistItem; buy: BuyCellApi }) {
+function CompareBuyCell({ item, buy, preferredSize }: { item: WishlistItem; buy: BuyCellApi; preferredSize?: string }) {
   if (item.status === 'bought') return <span className="compare-ready is-bought">已購買</span>
   if (buy.editingId === item.id) {
-    return <div className="buy-picker__mini-box"><BuyPickerEditor item={item} variant="mini" saving={buy.saving} onCancel={buy.cancel} onDirtyChange={buy.setDirty} onConfirm={(lines) => buy.confirm(item, lines)} /></div>
+    return <div className="buy-picker__mini-box"><BuyPickerEditor item={item} variant="mini" preferredSize={preferredSize} saving={buy.saving} onCancel={buy.cancel} onDirtyChange={buy.setDirty} onConfirm={(lines) => buy.confirm(item, lines)} /></div>
   }
-  if (item.status === 'ready') return <BuySummary item={item} lines={effectiveBuyLines(item)} variant="card" onAdjust={() => buy.start(item)} onRemove={() => buy.remove(item)} />
+  if (item.status === 'ready') return <BuySummary item={item} lines={effectiveBuyLines(item, preferredSize)} variant="card" onAdjust={() => buy.start(item)} onRemove={() => buy.remove(item)} />
   return <button type="button" onClick={() => buy.start(item)} aria-label={`準備購買：${item.name}`} className="compare-ready">＋ 準備購買</button>
 }
 
@@ -900,7 +899,7 @@ function MobileCompare({ onPreview, columns, sections, folded, onUnfold, indexes
       })}
       {folded.length > 0 && <div className="mt-4"><FoldBar names={folded} onUnfold={onUnfold} /></div>}
       <p className="m-0 mt-2 px-1 text-[11.5px] leading-[1.6] text-ink-2">按下「準備購買」後，顏色、件數、單價在下方採購籃裡調整。</p>
-      <div className="compare-mobile__buy-grid">{columns.map((candidate) => candidate ? <div key={candidate.item.id} className="flex min-w-0 flex-col gap-1.5"><CompareBuyCell item={candidate.item} buy={buy} /><ButtonLink to={studioUrl(candidate.item)} variant="ghost" className="w-full px-1 text-xs text-mist-deep"><Icon name="outfit" size={15} />拿去試搭</ButtonLink></div> : <span key="blank" />)}</div>
+      <div className="compare-mobile__buy-grid">{columns.map((candidate) => candidate ? <div key={candidate.item.id} className="flex min-w-0 flex-col gap-1.5"><CompareBuyCell item={candidate.item} buy={buy} preferredSize={selectedCompareSize(candidate)} /><ButtonLink to={studioUrl(candidate.item)} variant="ghost" className="w-full px-1 text-xs text-mist-deep"><Icon name="outfit" size={15} />拿去試搭</ButtonLink></div> : <span key="blank" />)}</div>
     </div>
   </div>
 }

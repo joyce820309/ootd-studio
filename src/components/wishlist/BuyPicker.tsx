@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Fragment, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
-import { buyColorOptions, buyDraftLines, buyQty, buyTotal, sameBuyLines } from '@/lib/basket'
+import { buyColorOptions, buyDraftLines, buyLineKey, buyLineLabel, buyQty, buySizeOptions, buyTotal, defaultBuySize, sameBuyLines } from '@/lib/basket'
 import { formatNT } from '@/lib/wishlist'
 import type { BuyLine, WishlistItem } from '@/types'
 import './BuyPicker.css'
@@ -11,7 +11,8 @@ import './BuyPicker.css'
  *
  * 共通規則：
  * 1. 選顏色＝點色塊，可複選；預設勾「最想要」那色。商品沒有顏色時只有「不指定顏色」。
- * 2. 每個勾選的顏色一行：件數 − ＋（最少 1）、單價（預設原價，點虛線數字才變輸入框）。
+ * 2. 每個勾選的顏色一行：尺碼、件數 − ＋（最少 1）、單價（預設原價，點虛線數字才變輸入框）。
+ *    尺碼：寬版面一排小按鈕、窄版面（mini）小下拉、只有一個尺碼直接顯示文字；同色可「＋ 加一個尺碼」。
  * 3. 草稿制：編輯中的內容只在元件裡；按「放進採購籃／確定」才寫入。取消、關閉、Esc 一律放棄。
  * 4. 放進去之後收成摘要（BuySummary）；「移出」是獨立的按鈕。
  *
@@ -31,25 +32,34 @@ interface BuyPickerEditorProps {
   onDirtyChange?: (dirty: boolean) => void
   /** 標題 id（panel／sheet 由外層 dialog 引用） */
   titleId?: string
+  /** 比較裡選的「比的尺碼」，當預設尺碼的第一順位 */
+  preferredSize?: string
 }
 
-export function BuyPickerEditor({ item, variant, saving = false, onCancel, onConfirm, onDirtyChange, titleId }: BuyPickerEditorProps) {
+export function BuyPickerEditor({ item, variant, saving = false, onCancel, onConfirm, onDirtyChange, titleId, preferredSize }: BuyPickerEditorProps) {
   const options = buyColorOptions(item)
-  const [initial] = useState(() => buyDraftLines(item))
+  const sizes = buySizeOptions(item)
+  const sizeGroupName = useId()
+  const [initial] = useState(() => buyDraftLines(item, preferredSize))
   const [lines, setLines] = useState<BuyLine[]>(initial)
   const inBasket = item.status === 'ready'
   const dirty = !inBasket || !sameBuyLines(lines, initial)
 
   useEffect(() => { onDirtyChange?.(!sameBuyLines(lines, initial)) }, [lines, initial, onDirtyChange])
 
+  const colorOrder = (name: string) => options.findIndex((entry) => entry.name === name)
+  const sortLines = (list: BuyLine[]) => [...list].sort((a, b) => colorOrder(a.colorName) - colorOrder(b.colorName) || sizes.indexOf(a.size ?? '') - sizes.indexOf(b.size ?? ''))
   const selected = (name: string) => lines.some((line) => line.colorName === name)
-  const toggle = (option: (typeof options)[number]) => setLines((current) => {
-    if (current.some((line) => line.colorName === option.name)) return current.filter((line) => line.colorName !== option.name)
-    const next = [...current, { colorName: option.name, hex: option.hex, qty: 1, unitPrice: item.price }]
-    // 照商品的顏色順序排
-    return next.sort((a, b) => options.findIndex((entry) => entry.name === a.colorName) - options.findIndex((entry) => entry.name === b.colorName))
-  })
-  const update = (name: string, patch: Partial<BuyLine>) => setLines((current) => current.map((line) => (line.colorName === name ? { ...line, ...patch } : line)))
+  const toggle = (option: (typeof options)[number]) => setLines((current) => current.some((line) => line.colorName === option.name)
+    ? current.filter((line) => line.colorName !== option.name)
+    : sortLines([...current, { colorName: option.name, hex: option.hex, size: defaultBuySize(item, preferredSize), qty: 1, unitPrice: item.price }]))
+  const update = (key: string, patch: Partial<BuyLine>) => setLines((current) => current.map((line) => (buyLineKey(line) === key ? { ...line, ...patch } : line)))
+  const usedSizes = (color: string) => lines.filter((line) => line.colorName === color).map((line) => line.size)
+  const addSize = (line: BuyLine) => {
+    const next = sizes.find((size) => !usedSizes(line.colorName).includes(size))
+    if (next) setLines((current) => sortLines([...current, { ...line, size: next, qty: 1 }]))
+  }
+  const removeLine = (key: string) => setLines((current) => current.filter((line) => buyLineKey(line) !== key))
 
   const big = variant === 'panel' || variant === 'sheet'
   const confirmLabel = inBasket ? '確定' : big ? '放進採購籃' : '確定'
@@ -77,19 +87,62 @@ export function BuyPickerEditor({ item, variant, saving = false, onCancel, onCon
     </div>
   )
 
+  const sizeControl = (line: BuyLine, groupName: string) => {
+    if (!sizes.length) return null
+    if (sizes.length === 1) return <span className="buy-picker__size-fixed" title={`這件只有 ${sizes[0]}`}>{sizes[0]}</span>
+    const taken = usedSizes(line.colorName)
+    if (variant === 'mini') {
+      return (
+        <select aria-label={`${line.colorName}尺碼`} value={line.size ?? ''} onChange={(event) => update(buyLineKey(line), { size: event.target.value })} className="buy-picker__size-select">
+          {sizes.map((size) => <option key={size} value={size} disabled={size !== line.size && taken.includes(size)}>{size}</option>)}
+        </select>
+      )
+    }
+    return (
+      <span role="radiogroup" aria-label={`${line.colorName}尺碼`} className="buy-picker__sizes">
+        {sizes.map((size) => (
+          <label key={size} className="buy-picker__size">
+            <input type="radio" name={groupName} value={size} checked={line.size === size} disabled={size !== line.size && taken.includes(size)} onChange={() => update(buyLineKey(line), { size })} className="sr-only" />
+            <span>{size}</span>
+          </label>
+        ))}
+      </span>
+    )
+  }
+
   const lineRows = lines.length > 0 && (
     <div>
-      {lines.map((line) => (
-        <div key={line.colorName} className="buy-picker__line">
-          <span className="buy-picker__name"><span aria-hidden="true" className="buy-picker__dot" style={{ background: line.hex ?? item.colorHex }} /><span>{line.colorName}</span></span>
-          <span className="buy-picker__stepper" role="group" aria-label={`${line.colorName}件數`}>
-            <button type="button" disabled={line.qty <= 1} onClick={() => update(line.colorName, { qty: line.qty - 1 })} aria-label={`${line.colorName}減一件`}>−</button>
-            <span aria-live="polite">{line.qty}</span>
-            <button type="button" onClick={() => update(line.colorName, { qty: line.qty + 1 })} aria-label={`${line.colorName}加一件`}>＋</button>
-          </span>
-          <PriceField label={line.colorName} value={line.unitPrice} short={variant === 'mini'} onCommit={(unitPrice) => update(line.colorName, { unitPrice })} />
-        </div>
-      ))}
+      {lines.map((line, index) => {
+        const key = buyLineKey(line)
+        const label = buyLineLabel(line)
+        const sameColor = lines.filter((entry) => entry.colorName === line.colorName)
+        const lastOfColor = lines[index + 1]?.colorName !== line.colorName
+        const extra = sameColor.length > 1 && sameColor[0] !== line
+        // 商品改過顏色後，舊明細裡的顏色不在色塊裡，點不掉，只能從這一行移除
+        const orphan = !options.some((option) => option.name === line.colorName)
+        // 同色的第幾行：換尺碼時不重建這一行，焦點留在原地
+        const rowId = `${line.colorName}#${sameColor.indexOf(line)}`
+        return (
+          <Fragment key={rowId}>
+            <div className="buy-picker__line">
+              <span className="buy-picker__name">
+                <span aria-hidden="true" className="buy-picker__dot" style={{ background: line.hex ?? item.colorHex }} />
+                <span>{line.colorName}</span>
+                {orphan && <span className="buy-picker__orphan">已不在顏色選項</span>}
+                {(extra || orphan) && <button type="button" onClick={() => removeLine(key)} aria-label={`移除${label}`} className="buy-picker__remove"><Icon name="x" size={14} /></button>}
+              </span>
+              {sizeControl(line, `${sizeGroupName}-${rowId}`)}
+              <span className="buy-picker__stepper" role="group" aria-label={`${label}件數`}>
+                <button type="button" disabled={line.qty <= 1} onClick={() => update(key, { qty: line.qty - 1 })} aria-label={`${label}減一件`}>−</button>
+                <span aria-live="polite">{line.qty}</span>
+                <button type="button" onClick={() => update(key, { qty: line.qty + 1 })} aria-label={`${label}加一件`}>＋</button>
+              </span>
+              <PriceField label={label} value={line.unitPrice} short={variant === 'mini'} onCommit={(unitPrice) => update(key, { unitPrice })} />
+            </div>
+            {lastOfColor && !orphan && sizes.length > sameColor.length && <button type="button" onClick={() => addSize(line)} className="buy-picker__add-size">＋ {line.colorName}加一個尺碼</button>}
+          </Fragment>
+        )
+      })}
     </div>
   )
   const empty = lines.length === 0 && <span className="text-xs text-ink-2">至少選一個顏色</span>
@@ -169,10 +222,10 @@ function PriceField({ label, value, short, onCommit }: { label: string; value: n
 const LineList = ({ lines, item }: { lines: BuyLine[]; item: WishlistItem }) => (
   <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5">
     {lines.map((line, index) => (
-      <span key={line.colorName} className="inline-flex items-center gap-1.5">
+      <span key={buyLineKey(line)} className="inline-flex items-center gap-1.5">
         {index > 0 && <span aria-hidden="true">・</span>}
         <span aria-hidden="true" className="buy-picker__dot" style={{ background: line.hex ?? item.colorHex }} />
-        {line.colorName} × <span className="font-num tabular">{line.qty}</span>
+        {buyLineLabel(line)} × <span className="font-num tabular">{line.qty}</span>
       </span>
     ))}
   </span>

@@ -33,7 +33,7 @@
 - migration 0026 為選購候選新增可為 null 的 `garment_length`（`short`／`mid`／`long`），由選購表單及篩選器使用。
 - migration 0027 為選購候選新增可為 null 的 `flat_measurements_size`，標記平放／拉伸尺寸量測尺碼；最想要顏色旗標存於 `colors` JSONB 元素，不另增欄位。`colors` 最多只有一個元素 `favorite: true`。
 - migration 0028 為 `compare_group_items` 新增 `is_decided`，並提供受 RLS 保護的 `set_compare_decision` RPC，每個比較最多標記一個最後決定商品。
-- migration 0029 為 `wishlist_items` 新增 `buy_lines`（jsonb 陣列，`[{ color_name, hex, qty, unit_price }]`，預設 `[]`）存準備購買明細，並為 `profiles` 新增 `shopping_target`（整數、可為 null）存採購籃目標金額。示範模式只保留在目前工作階段（目標預設 NT$5,000）。
+- migration 0029 為 `wishlist_items` 新增 `buy_lines`（jsonb 陣列，`[{ color_name, hex, size, qty, unit_price }]`，預設 `[]`；`size` 由 0033 補入欄位說明，color_name＋size 不重複）存準備購買明細，並為 `profiles` 新增 `shopping_target`（整數、可為 null）存採購籃目標金額。示範模式只保留在目前工作階段（目標預設 NT$5,000）。
 - migration 0031 為 `compare_group_items` 新增可為 null 的 `cover_photo_path`（商品圖 storage_path），記錄該比較欄頂要用哪張圖；null 時用商品封面。
 - migration 0032 為 `wishlist_items` 新增可為 null 的 `ai_review`（文字）與 `ai_reviewed_at`（timestamptz），存使用者從外部 AI 貼回的「AI 看過的提醒」；平台不呼叫 AI。
 - migration 0030 新增使用者私有 `garment_features` 字典，以及 `items.feature_tags`／`wishlist_items.feature_tags` JSONB 特徵快照、`feature_suggestions_dismissed` 文字陣列。改名／合併／刪除使用 RLS 保護的 `replace_garment_feature_tags` RPC 同步更新兩種商品。

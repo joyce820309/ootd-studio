@@ -62,7 +62,7 @@ import {
   type LookCell,
   type WishFacets,
 } from '@/lib/wishlist'
-import { buyQty, effectiveBuyLines } from '@/lib/basket'
+import { buyQty, chosenSizeFor, effectiveBuyLines } from '@/lib/basket'
 import { photoColorLabel } from '@/lib/wishColors'
 import { defaultAiIncludes, flatMeasurementEntries, flatMeasurementText, type AiInclude } from '@/lib/wishlistAi'
 import type { BodyMeasurement, BodyProfile, BuyLine, ClosetItem, CompareGroup, CompareGroupItem, GarmentLength, Slot, WishlistInput, WishlistItem, WishStatus } from '@/types'
@@ -489,6 +489,7 @@ export function WishlistPage() {
               busy={saving}
               compareGroups={compareGroups}
               compareGroupIds={(compareMemberships[selected.id] ?? []).map((entry) => entry.groupId)}
+              preferredSize={chosenSizeFor(selected.id, compareGroups, compareLinks)}
               className={showDetailOnMobile ? 'flex' : 'hidden md:flex'}
               onBack={() => updateParams({ item: null })}
               onEdit={() => setDialog({ kind: 'edit', item: selected })}
@@ -675,6 +676,7 @@ function WishDetail({
   onStatus,
   onPutInBasket,
   onTakeOut,
+  preferredSize,
   onCompareToggle,
   onNewCompare,
 }: {
@@ -691,6 +693,7 @@ function WishDetail({
   onStatus: (status: WishlistInput['status']) => void
   onPutInBasket: (lines: BuyLine[]) => Promise<boolean>
   onTakeOut: () => void
+  preferredSize?: string
   onCompareToggle: (groupId: string, included: boolean) => void
   onNewCompare: () => void
 }) {
@@ -842,8 +845,8 @@ function WishDetail({
           </div>
         )}
         {picking
-          ? <div className="rounded-card border-t-2 border-ink bg-card px-4 pt-3.5 pb-4 shadow-float"><BuyPickerEditor item={item} variant="strip" saving={busy} onCancel={() => setPicking(false)} onConfirm={(lines) => void onPutInBasket(lines).then((ok) => { if (ok) setPicking(false) })} /></div>
-          : item.status === 'ready' && <BuySummary item={item} lines={effectiveBuyLines(item)} variant="strip" disabled={busy} onAdjust={() => setPicking(true)} onRemove={onTakeOut} />}
+          ? <div className="rounded-card border-t-2 border-ink bg-card px-4 pt-3.5 pb-4 shadow-float"><BuyPickerEditor item={item} variant="strip" preferredSize={preferredSize} saving={busy} onCancel={() => setPicking(false)} onConfirm={(lines) => void onPutInBasket(lines).then((ok) => { if (ok) setPicking(false) })} /></div>
+          : item.status === 'ready' && <BuySummary item={item} lines={effectiveBuyLines(item, preferredSize)} variant="strip" disabled={busy} onAdjust={() => setPicking(true)} onRemove={onTakeOut} />}
 
         <div className="grid grid-cols-3 gap-2.5">
           <div className="rounded-tile bg-sage-soft p-3.5 text-sage-ink">

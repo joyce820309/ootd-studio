@@ -513,12 +513,12 @@ interface WishlistRow {
   created_at: string
 }
 
-interface BuyLineRow { color_name: string; hex?: string | null; qty: number; unit_price: number }
+interface BuyLineRow { color_name: string; hex?: string | null; size?: string | null; qty: number; unit_price: number }
 
 const buyLinesFromRow = (rows: BuyLineRow[] | null | undefined): BuyLine[] => (Array.isArray(rows) ? rows : [])
   .filter((row) => row && typeof row.color_name === 'string')
-  .map((row) => ({ colorName: row.color_name, hex: row.hex ?? undefined, qty: Math.max(1, Math.round(Number(row.qty) || 1)), unitPrice: Math.max(0, Math.round(Number(row.unit_price) || 0)) }))
-const buyLinesToRow = (lines: BuyLine[]): BuyLineRow[] => lines.map((line) => ({ color_name: line.colorName, hex: line.hex ?? null, qty: Math.max(1, Math.round(line.qty)), unit_price: Math.max(0, Math.round(line.unitPrice)) }))
+  .map((row) => ({ colorName: row.color_name, hex: row.hex ?? undefined, size: typeof row.size === 'string' && row.size.trim() ? row.size.trim() : undefined, qty: Math.max(1, Math.round(Number(row.qty) || 1)), unitPrice: Math.max(0, Math.round(Number(row.unit_price) || 0)) }))
+const buyLinesToRow = (lines: BuyLine[]): BuyLineRow[] => lines.map((line) => ({ color_name: line.colorName, hex: line.hex ?? null, size: line.size?.trim() || null, qty: Math.max(1, Math.round(line.qty)), unit_price: Math.max(0, Math.round(line.unitPrice)) }))
 
 async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
   const imagePath = (r: WishlistRow) => r.image_cutout_path ?? r.image_original_path
@@ -926,9 +926,9 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
   const pieces = (colors: WishlistColor[]) => purchase.lines?.length
     ? purchase.lines.flatMap((line) => {
       const color = colors.find((entry) => entry.name === line.colorName) ?? colorFromName(line.colorName, line.hex)
-      return Array.from({ length: Math.max(1, line.qty) }, () => ({ color, price: line.unitPrice as number | null }))
+      return Array.from({ length: Math.max(1, line.qty) }, () => ({ color, price: line.unitPrice as number | null, size: line.size }))
     })
-    : colors.filter((color) => new Set(purchase.colorFamilies?.length ? purchase.colorFamilies : colors.map((entry) => entry.name)).has(color.name)).map((color) => ({ color, price: purchase.paidPrice }))
+    : colors.filter((color) => new Set(purchase.colorFamilies?.length ? purchase.colorFamilies : colors.map((entry) => entry.name)).has(color.name)).map((color) => ({ color, price: purchase.paidPrice, size: undefined as string | undefined }))
   if (!supabase) {
     const wish = demoWishlistItems.find((item) => item.id === id)
     if (!wish) throw new Error('找不到這件商品，可能已被刪除。')
@@ -936,7 +936,7 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
     const colors = wish.colors?.length ? wish.colors : [colorFromName(wish.colorName || '其他', wish.colorHex)]
     const selectedPieces = pieces(colors)
     if (!selectedPieces.length) throw new Error('請至少選擇一個購買顏色。')
-    const itemIds = selectedPieces.map(({ color, price }, index) => {
+    const itemIds = selectedPieces.map(({ color, price, size }, index) => {
       const itemId = `demo-bought-${Date.now()}-${index}`
       const category = SAMPLE_CATEGORIES.find((entry) => entry.slot === (wish.primaryPart ?? wish.slot))
       const photoFamily = color.name
@@ -949,7 +949,7 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
         colorName: color.name,
         colorHex: color.hex || wish.colorHex,
         brand: wish.brand,
-        size: wish.size,
+        size: size ?? wish.size,
         necklineSize: wish.necklineSize,
         flatMeasurements: { ...wish.flatMeasurements },
         flatStretch: { ...wish.flatStretch },
@@ -993,7 +993,7 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
   const insertedItems: string[] = []
   const outputIds: string[] = []
   try {
-    for (const { color, price } of selectedPieces) {
+    for (const { color, price, size } of selectedPieces) {
       const itemId = crypto.randomUUID()
       const familyPhotos = (wishlistPhotos ?? []).filter((photo) => !photo.color_family || photo.color_family === color.name)
       const legacyCover = !(wishlistPhotos?.length) ? data.image_original_path : null
@@ -1018,7 +1018,7 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
         color_name: color.name,
         color_hex: color.hex || data.color_hex,
         second_color_hex: null,
-        size: data.size || data.size_note || '',
+        size: size || data.size || data.size_note || '',
         neckline_size: data.neckline_size,
         brand: data.brand,
         seasons: data.seasons ?? [],

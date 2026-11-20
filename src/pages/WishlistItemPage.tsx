@@ -32,7 +32,7 @@ import {
   updateWishlistItem,
 } from '@/lib/data'
 import { materialMix } from '@/lib/materialMix'
-import { buyQty, effectiveBuyLines } from '@/lib/basket'
+import { buyQty, chosenSizeFor, effectiveBuyLines } from '@/lib/basket'
 import { buildSizeRows, FLAT_LABELS, judgeLabel } from '@/lib/review'
 import { SLOT_META } from '@/lib/slots'
 import { elasticFiberPercent, formatStretch } from '@/lib/stretch'
@@ -227,8 +227,9 @@ export function WishlistItemPage() {
   const compareMenu = <WishlistCompareMenu item={current} groups={groups} groupIds={groupIds} disabled={saving} onToggle={(groupId, included) => void onCompareToggle(groupId, included)} onCreate={() => void onNewCompare()} />
   const moreMenu = (tone: 'plain' | 'overlay') => <WishItemMoreMenu item={current} tone={tone} disabled={saving} onDrop={() => onChangeStatus('dropped')} onReconsider={() => void onStatus('considering')} onDelete={() => setDialog({ kind: 'delete' })} />
   const pickerTitleId = `buy-picker-${current.id}`
-  const pickerEditor = picking && <BuyPickerEditor key={current.id} item={current} variant={isMobile ? 'sheet' : 'panel'} titleId={pickerTitleId} onCancel={closePicker} onConfirm={(lines) => void onPutInBasket(lines)} />
-  const basketSummary = current.status === 'ready' && <BuySummary item={current} lines={effectiveBuyLines(current)} variant="bar" disabled={picking} onAdjust={() => setPicking(true)} onRemove={() => void shopping.takeOutOfBasket(current)} />
+  const preferredSize = chosenSizeFor(current.id, groups, links)
+  const pickerEditor = picking && <BuyPickerEditor key={current.id} item={current} variant={isMobile ? 'sheet' : 'panel'} preferredSize={preferredSize} titleId={pickerTitleId} onCancel={closePicker} onConfirm={(lines) => void onPutInBasket(lines)} />
+  const basketSummary = current.status === 'ready' && <BuySummary item={current} lines={effectiveBuyLines(current, preferredSize)} variant="bar" disabled={picking} onAdjust={() => setPicking(true)} onRemove={() => void shopping.takeOutOfBasket(current)} />
   const backTo = `/wishlist?item=${encodeURIComponent(current.id)}`
 
   return (

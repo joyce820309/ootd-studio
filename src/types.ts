@@ -237,10 +237,12 @@ export interface WishlistItem {
   createdAt?: string
 }
 
-/** 準備購買的一行：顏色 × 件數 × 單價（單價可填活動後的價格） */
+/** 準備購買的一行：顏色＋尺碼 × 件數 × 單價（單價可填活動後的價格）。同一件商品裡 colorName＋size 不重複 */
 export interface BuyLine {
   colorName: string
   hex?: string
+  /** 商品沒有尺碼清單時不帶 */
+  size?: string
   qty: number
   unitPrice: number
 }

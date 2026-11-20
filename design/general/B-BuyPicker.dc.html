@@ -56,7 +56,7 @@ a{color:#3E6270}
 .ct .s{width:28px;height:28px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(59,47,37,.18)}
 .ct[aria-pressed="true"]{border:2px solid #3B2F25;background:#FFF9EE}
 .ct[aria-pressed="true"]::after{content:"✓";position:absolute;right:-7px;top:-7px;width:20px;height:20px;border-radius:50%;background:#3B2F25;color:#FBF4E8;font:700 11px Nunito;display:flex;align-items:center;justify-content:center}
-.ln{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:8px 0;border-top:1.5px dashed #EADCC6;font-size:14px}
+.ln{display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:10px;padding:8px 0;border-top:1.5px dashed #EADCC6;font-size:14px}
 .stp{display:inline-flex;align-items:center;height:36px;border-radius:10px;border:1.5px solid #E2D2B8;background:#FFFCF6}
 .stp button{width:34px;height:34px;border:0;background:none;font:600 16px Nunito;color:#3B2F25;cursor:pointer}
 .stp span{min-width:20px;text-align:center;font:700 14px Nunito}
@@ -72,9 +72,14 @@ a{color:#3E6270}
 .sc .s{width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(59,47,37,.18)}
 .sc[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
 .sc[aria-pressed="true"] .s{box-shadow:0 0 0 2px #FBF4E8}
+.sz{display:inline-flex;padding:2px;border-radius:9px;background:#F3E7D4}
+.sz button{min-width:30px;height:30px;padding:0 6px;border:0;border-radius:7px;background:transparent;font:600 12.5px Nunito;color:#5A4A3C;cursor:pointer}
+.sz button[aria-checked="true"]{background:#3B2F25;color:#FBF4E8}
+.szb{display:inline-flex;align-items:center;gap:2px;height:32px;padding:0 8px;border-radius:9px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:600 12.5px Nunito;color:#3B2F25;cursor:pointer}
+.szf{font:600 12.5px Nunito;color:#5A4A3C;padding:0 6px}
 </style>
 </helmet>
-<div style="width:1440px;min-height:2280px;box-sizing:border-box;padding:48px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:30px">
+<div style="width:1440px;min-height:2330px;box-sizing:border-box;padding:48px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:30px">
   <header style="display:flex;align-items:flex-end;gap:24px">
     <div style="display:flex;flex-direction:column;gap:10px">
       <span class="lbl" style="background:#A9C6CF;transform:rotate(-2deg);align-self:flex-start">元件</span>
@@ -85,7 +90,7 @@ a{color:#3E6270}
 
   <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
     <div class="box"><b style="font-size:14px">① 選顏色＝點色塊</b><p class="cap">商品的顏色列成色塊，可以複選；預設勾「最想要」那色。沒有任何顏色的商品，只有一個「不指定顏色」。</p></div>
-    <div class="box"><b style="font-size:14px">② 勾了才出現件數</b><p class="cap">每個勾選的顏色一行：件數 − ＋（最少 1）、單價。單價預設商品原價，點虛線數字才能改（多色優惠時用），平常不會誤改。</p></div>
+    <div class="box"><b style="font-size:14px">② 勾了才出現尺碼和件數</b><p class="cap">每個勾選的顏色一行：<b>尺碼</b>、件數 − ＋（最少 1）、單價。尺碼預設：比較裡選的尺碼 → 有平放尺寸的那個尺碼 → 依身體尺寸推薦的。只有 F 時直接顯示 F。同色要買兩個尺碼，按「＋ 加一個尺碼」。單價點虛線數字才能改。</p></div>
     <div class="box"><b style="font-size:14px">③ 確定／取消</b><p class="cap">按「放進採購籃／確定」才寫入、狀態才變「準備購買」。取消或關掉＝不變。已在籃子裡再「調整」也是同樣流程。</p></div>
     <div class="box"><b style="font-size:14px">④ 移出要分開</b><p class="cap">摘要列上的「移出」才會拿掉：狀態回「考慮中」，跳 5 秒「已移出・復原」。不再用一顆會切換的按鈕。</p></div>
   </section>
@@ -107,8 +112,9 @@ a{color:#3E6270}
             <button type="button" class="ct" aria-pressed="true"><span class="s" style="background:#1E1C1B"></span>黑</button>
           </div>
           <div>
-            <div class="ln"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#C9BFB3"></span>灰杏</span><span class="stp"><button type="button" aria-label="減一件">−</button><span>1</span><button type="button" aria-label="加一件">＋</button></span><button type="button" class="pr" aria-label="單價 490，點了可以改">單價 <u>$490</u></button></div>
-            <div class="ln"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#1E1C1B"></span>黑</span><span class="stp"><button type="button" aria-label="減一件">−</button><span>2</span><button type="button" aria-label="加一件">＋</button></span><button type="button" class="pr">單價 <u>$450</u></button></div>
+            <div class="ln"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#C9BFB3"></span>灰杏</span><span class="sz" role="radiogroup" aria-label="尺碼"><button type="button" role="radio" aria-checked="false">S</button><button type="button" role="radio" aria-checked="true">M</button><button type="button" role="radio" aria-checked="false">L</button><button type="button" role="radio" aria-checked="false">XL</button></span><span class="stp"><button type="button" aria-label="減一件">−</button><span>1</span><button type="button" aria-label="加一件">＋</button></span><button type="button" class="pr" aria-label="單價 490，點了可以改">單價 <u>$490</u></button></div>
+            <button type="button" class="lk" style="font-size:12px;padding:0;min-height:28px">＋ 灰杏加一個尺碼</button>
+            <div class="ln"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#1E1C1B"></span>黑</span><span class="sz" role="radiogroup" aria-label="尺碼"><button type="button" role="radio" aria-checked="false">S</button><button type="button" role="radio" aria-checked="true">M</button><button type="button" role="radio" aria-checked="false">L</button><button type="button" role="radio" aria-checked="false">XL</button></span><span class="stp"><button type="button" aria-label="減一件">−</button><span>2</span><button type="button" aria-label="加一件">＋</button></span><button type="button" class="pr">單價 <u>$450</u></button></div>
           </div>
           <div style="display:flex;align-items:baseline;padding-top:8px;border-top:2px solid #3B2F25"><span style="font-size:13px">共 <b class="num">3</b> 件</span><b class="num" style="margin-left:auto;font-size:20px">NT$1,390</b></div>
           <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-g">取消</button><button type="button" class="btn btn-o">放進採購籃</button></div>
@@ -121,7 +127,7 @@ a{color:#3E6270}
         <span style="display:inline-flex;align-self:flex-start;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;border:1.5px solid #B7CBB0;background:#E6EEE2;color:#3F5A3B;font-size:13px;font-weight:500">● 準備購買 ▾</span>
         <span class="hd" style="font-size:26px">#30876 本檔必收超舒服寬鬆好穿大學T</span>
         <b class="num" style="font-size:26px">NT$490</b>
-        <div class="sum"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#9A6B43"><path d="M4 8h16l-1.5 11h-13zM9 8V6a3 3 0 0 1 6 0v2"></path></svg><span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">採購籃裡：<span class="dt" style="background:#C9BFB3"></span>灰杏 × 1・<span class="dt" style="background:#1E1C1B"></span>黑 × 2</span><b class="num" style="margin-left:auto">NT$1,390</b><button type="button" class="lk">調整</button><button type="button" class="lk rm">移出</button></div>
+        <div class="sum"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#9A6B43"><path d="M4 8h16l-1.5 11h-13zM9 8V6a3 3 0 0 1 6 0v2"></path></svg><span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">採購籃裡：<span class="dt" style="background:#C9BFB3"></span>灰杏 M × 1・<span class="dt" style="background:#1E1C1B"></span>黑 M × 2</span><b class="num" style="margin-left:auto">NT$1,390</b><button type="button" class="lk">調整</button><button type="button" class="lk rm">移出</button></div>
         <p class="cap">「調整」再打開同一個面板（帶入目前的選擇）。狀態選單改成「考慮中／已放棄」時，也會先問「要把它移出採購籃嗎？」。</p>
       </div>
       <h2 class="vh" style="margin-top:8px"><b>E　手機（BM19.2）</b><span>從下方滑出，色塊兩欄、按鈕更大</span></h2>
@@ -134,7 +140,7 @@ a{color:#3E6270}
             <button type="button" class="ct" aria-pressed="true"><span class="s" style="background:#3A3836"></span>灰黑 ★</button>
             <button type="button" class="ct" aria-pressed="false"><span class="s" style="background:#E3D6C2"></span>米杏</button>
           </div>
-          <div class="ln"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#3A3836"></span>灰黑</span><span class="stp" style="height:40px"><button type="button" style="width:40px;height:38px">−</button><span>1</span><button type="button" style="width:40px;height:38px">＋</button></span><button type="button" class="pr">單價 <u>$1,406</u></button></div>
+          <div class="ln"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#3A3836"></span>灰黑</span><span class="szf" title="這件只有 F">F</span><span class="stp" style="height:40px"><button type="button" style="width:40px;height:38px">−</button><span>1</span><button type="button" style="width:40px;height:38px">＋</button></span><button type="button" class="pr">單價 <u>$1,406</u></button></div>
           <div style="display:flex;align-items:baseline;padding-top:8px;border-top:2px solid #3B2F25"><span style="font-size:13px">共 1 件</span><b class="num" style="margin-left:auto;font-size:19px">NT$1,406</b></div>
           <div style="display:flex;gap:8px"><button type="button" class="btn btn-s" style="flex:1;height:48px">取消</button><button type="button" class="btn btn-o" style="flex:2;height:48px">放進採購籃</button></div>
         </section>
@@ -150,7 +156,7 @@ a{color:#3E6270}
         <div style="background:#FFFCF6;border-top:2px solid #3B2F25;padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 -14px 24px -18px rgba(59,47,37,.5)">
           <div style="display:flex;align-items:center"><b style="font-size:15px">放進採購籃</b><button type="button" class="ibtn" aria-label="收起，不變更" style="margin-left:auto;color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button></div>
           <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="sc" aria-pressed="false"><span class="s" style="background:#EAD9C6"></span>杏</span><span class="sc" aria-pressed="true"><span class="s" style="background:#C9BFB3"></span>灰杏</span><span class="sc" aria-pressed="false"><span class="s" style="background:#9C9A86"></span>綠</span><span class="sc" aria-pressed="false"><span class="s" style="background:#6E6A70"></span>灰</span><span class="sc" aria-pressed="false"><span class="s" style="background:#1E1C1B"></span>黑</span></div>
-          <div class="ln" style="border-top:0;padding-top:0"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#C9BFB3"></span>灰杏</span><span class="stp"><button type="button">−</button><span>1</span><button type="button">＋</button></span><button type="button" class="pr">單價 <u>$490</u></button></div>
+          <div class="ln" style="border-top:0;padding-top:0"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#C9BFB3"></span>灰杏</span><span class="sz" role="radiogroup" aria-label="尺碼"><button type="button" role="radio" aria-checked="false">S</button><button type="button" role="radio" aria-checked="true">M</button><button type="button" role="radio" aria-checked="false">L</button><button type="button" role="radio" aria-checked="false">XL</button></span><span class="stp"><button type="button">−</button><span>1</span><button type="button">＋</button></span><button type="button" class="pr">單價 <u>$490</u></button></div>
           <div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px">共 1 件・<b class="num">NT$490</b></span><button type="button" class="btn btn-g" style="margin-left:auto;height:40px">取消</button><button type="button" class="btn btn-o" style="height:40px">確定</button></div>
         </div>
       </div>
@@ -160,7 +166,7 @@ a{color:#3E6270}
       <h2 class="vh"><b>B　放進去之後</b><span>底部一行摘要＋原本的按鈕</span></h2>
       <div class="stage" style="padding:0;overflow:hidden;width:520px">
         <div style="background:#FFFCF6;padding:12px 16px 14px;display:flex;flex-direction:column;gap:10px;border-top:1.5px dashed #D9C7AC">
-          <div class="sum" style="padding:8px 10px"><span style="font-weight:700;color:#3F5A3B">✓ 準備購買</span><span style="display:flex;align-items:center;gap:5px"><span class="dt" style="background:#C9BFB3"></span>灰杏 × 1</span><b class="num" style="margin-left:auto">NT$490</b><button type="button" class="lk">調整</button><button type="button" class="lk rm">移出</button></div>
+          <div class="sum" style="padding:8px 10px"><span style="font-weight:700;color:#3F5A3B">✓ 準備購買</span><span style="display:flex;align-items:center;gap:5px"><span class="dt" style="background:#C9BFB3"></span>灰杏 M × 1</span><b class="num" style="margin-left:auto">NT$490</b><button type="button" class="lk">調整</button><button type="button" class="lk rm">移出</button></div>
           <div style="display:flex;gap:8px"><button type="button" class="btn btn-g" style="color:#8E4A3E;height:40px">從這個比較移除</button><button type="button" class="btn btn-s" style="margin-left:auto;height:40px">拿去試搭</button></div>
         </div>
       </div>
@@ -181,13 +187,13 @@ a{color:#3E6270}
         <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;color:#5A4A3C">編輯中（還沒寫入）</span>
           <div class="mini">
             <div style="display:flex;gap:4px;flex-wrap:wrap"><span class="sc" aria-pressed="true" style="height:30px;font-size:12px"><span class="s" style="width:18px;height:18px;background:#C9BFB3"></span>灰杏</span><span class="sc" aria-pressed="false" style="height:30px;font-size:12px"><span class="s" style="width:18px;height:18px;background:#1E1C1B"></span>黑</span></div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:13px"><span class="dt" style="background:#C9BFB3"></span>灰杏<span class="stp" style="margin-left:auto;height:32px"><button type="button" style="width:28px;height:30px">−</button><span>1</span><button type="button" style="width:28px;height:30px">＋</button></span></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:13px"><span class="dt" style="background:#C9BFB3"></span>灰杏<button type="button" class="szb" style="margin-left:auto;height:30px">M ▾</button><span class="stp" style="margin-left:4px;height:32px"><button type="button" style="width:28px;height:30px">−</button><span>1</span><button type="button" style="width:28px;height:30px">＋</button></span></div>
             <button type="button" class="pr" style="align-self:flex-end;min-height:28px;font-size:12px">單價 <u>$490</u></button>
             <div style="display:flex;gap:6px"><button type="button" class="btn btn-g" style="flex:1;height:36px;padding:0">取消</button><button type="button" class="btn btn-o" style="flex:1;height:36px;padding:0">確定</button></div>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;color:#5A4A3C">已放進（收合）</span>
-          <div class="sum" style="flex-direction:column;align-items:stretch;gap:4px;padding:10px"><b style="color:#3F5A3B;font-size:13px">✓ 在採購籃</b><span style="display:flex;align-items:center;gap:5px;font-size:13px"><span class="dt" style="background:#C9BFB3"></span>灰杏 × 1<b class="num" style="margin-left:auto">NT$490</b></span><span style="display:flex;justify-content:space-between"><button type="button" class="lk" style="padding:0">調整</button><button type="button" class="lk rm" style="padding:0">移出</button></span></div>
+          <div class="sum" style="flex-direction:column;align-items:stretch;gap:4px;padding:10px"><b style="color:#3F5A3B;font-size:13px">✓ 在採購籃</b><span style="display:flex;align-items:center;gap:5px;font-size:13px"><span class="dt" style="background:#C9BFB3"></span>灰杏 M × 1<b class="num" style="margin-left:auto">NT$490</b></span><span style="display:flex;justify-content:space-between"><button type="button" class="lk" style="padding:0">調整</button><button type="button" class="lk rm" style="padding:0">移出</button></span></div>
           <a class="btn btn-g" href="#" style="height:36px;color:#3E6270;font-size:13px">拿去試搭</a>
         </div>
       </div>
@@ -199,7 +205,7 @@ a{color:#3E6270}
         <div style="background:#FFFCF6;padding:4px 16px">
           <div style="display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1.5px dashed #EADCC6">
             <span style="width:44px;height:52px;border-radius:8px;background:#E8E2DA"></span>
-            <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">半領抓褶磨毛上衣</span><span style="display:flex;align-items:center;gap:5px;font-size:12px;color:#5A4A3C"><span class="dt" style="background:#9A9893"></span>灰色 × 1</span></span>
+            <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">半領抓褶磨毛上衣</span><span style="display:flex;align-items:center;gap:5px;font-size:12px;color:#5A4A3C"><span class="dt" style="background:#9A9893"></span>灰色・F × 1</span></span>
             <span style="display:flex;flex-direction:column;align-items:flex-end"><b class="num">NT$769</b><span><button type="button" class="lk" style="padding:0 4px;font-size:12px">調整</button><button type="button" class="lk rm" style="padding:0 4px;font-size:12px">移出</button></span></span>
           </div>
           <div style="padding:12px 0;display:flex;flex-direction:column;gap:10px">
@@ -210,8 +216,8 @@ a{color:#3E6270}
             </div>
             <div class="mini" style="margin-left:54px">
               <div style="display:flex;gap:4px;flex-wrap:wrap"><span class="sc" aria-pressed="false" style="height:30px;font-size:12px"><span class="s" style="width:18px;height:18px;background:#EAD9C6"></span>杏</span><span class="sc" aria-pressed="true" style="height:30px;font-size:12px"><span class="s" style="width:18px;height:18px;background:#C9BFB3"></span>灰杏</span><span class="sc" aria-pressed="true" style="height:30px;font-size:12px"><span class="s" style="width:18px;height:18px;background:#1E1C1B"></span>黑</span></div>
-              <div class="ln" style="border-top:0;padding:0"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#C9BFB3"></span>灰杏</span><span class="stp" style="height:32px"><button type="button" style="width:28px;height:30px">−</button><span>1</span><button type="button" style="width:28px;height:30px">＋</button></span><button type="button" class="pr" style="font-size:12px">$<u>490</u></button></div>
-              <div class="ln" style="padding:6px 0 0"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#1E1C1B"></span>黑</span><span class="stp" style="height:32px"><button type="button" style="width:28px;height:30px">−</button><span>1</span><button type="button" style="width:28px;height:30px">＋</button></span><button type="button" class="pr" style="font-size:12px">$<u>490</u></button></div>
+              <div class="ln" style="border-top:0;padding:0"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#C9BFB3"></span>灰杏</span><button type="button" class="szb" aria-label="尺碼 M，點了換">M ▾</button><span class="stp" style="height:32px"><button type="button" style="width:28px;height:30px">−</button><span>1</span><button type="button" style="width:28px;height:30px">＋</button></span><button type="button" class="pr" style="font-size:12px">$<u>490</u></button></div>
+              <div class="ln" style="padding:6px 0 0"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#1E1C1B"></span>黑</span><button type="button" class="szb" aria-label="尺碼 L，點了換">L ▾</button><span class="stp" style="height:32px"><button type="button" style="width:28px;height:30px">−</button><span>1</span><button type="button" style="width:28px;height:30px">＋</button></span><button type="button" class="pr" style="font-size:12px">$<u>490</u></button></div>
               <div style="display:flex;align-items:center;gap:6px"><span style="font-size:12.5px">2 件・<b class="num">NT$980</b></span><button type="button" class="btn btn-g" style="margin-left:auto;height:34px;padding:0 10px">取消</button><button type="button" class="btn btn-o" style="height:34px;padding:0 12px">確定</button></div>
             </div>
           </div>
@@ -222,7 +228,7 @@ a{color:#3E6270}
   </section>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2280}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2330}}'>
 class Component extends DCLogic {
   renderVals() { return {}; }
 }
