@@ -15,7 +15,7 @@ import { materialMix, materialMixText } from '@/lib/materialMix'
 import { LoadingState, PageState } from '@/components/ui/PageState'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
 import { BoughtDialog } from '@/components/wishlist/BoughtDialog'
-import { BuyLinesEditor } from '@/components/wishlist/BuyLinesEditor'
+import { BuyPickerEditor, BuySummary } from '@/components/wishlist/BuyPicker'
 import { ShoppingBasket } from '@/components/wishlist/ShoppingBasket'
 import { CompareSelectionDialog } from '@/components/wishlist/CompareSelectionDialog'
 import { WishlistAiPanel } from '@/components/wishlist/WishlistAiPanel'
@@ -62,13 +62,13 @@ import {
   type LookCell,
   type WishFacets,
 } from '@/lib/wishlist'
-import { effectiveBuyLines } from '@/lib/basket'
+import { buyQty, effectiveBuyLines } from '@/lib/basket'
 import { photoColorLabel } from '@/lib/wishColors'
 import { defaultAiIncludes, flatMeasurementEntries, flatMeasurementText, type AiInclude } from '@/lib/wishlistAi'
 import type { BodyMeasurement, BodyProfile, BuyLine, ClosetItem, CompareGroup, CompareGroupItem, GarmentLength, Slot, WishlistInput, WishlistItem, WishStatus } from '@/types'
 
 type TabKey = WishStatus | 'all'
-type Dialog = { kind: 'create' } | { kind: 'edit'; item: WishlistItem } | { kind: 'bought'; item: WishlistItem } | { kind: 'delete'; item: WishlistItem } | null
+type Dialog = { kind: 'create' } | { kind: 'edit'; item: WishlistItem } | { kind: 'bought'; item: WishlistItem } | { kind: 'delete'; item: WishlistItem } | { kind: 'leaveBasket'; item: WishlistItem; next: 'considering' | 'dropped' } | null
 
 const demoSuffix = (demo: boolean) => (demo ? '（示範模式，重新整理後會還原）' : '')
 
@@ -272,8 +272,9 @@ export function WishlistPage() {
     })
 
   const onStatus = (item: WishlistItem, status: WishlistInput['status']) => {
-    // 進出「準備購買」走採購籃流程：第一次準備購買會寫入預設的顏色／件數明細
-    if (status === 'ready' || (item.status === 'ready' && status === 'considering')) return shopping.toggleReady(item)
+    // 「準備購買」由預覽面板的購買明細選擇器（B28）按確定才寫入；還在採購籃裡卻要改狀態，先問要不要移出
+    if (status === 'ready') return
+    if (item.status === 'ready') { setDialog({ kind: 'leaveBasket', item, next: status }); return }
     return run(async () => {
       const { demo } = await setWishlistStatus(item.id, status)
       replaceItem({ ...item, status })
@@ -482,6 +483,7 @@ export function WishlistPage() {
 
           {!selecting && selected && insights && (
             <WishDetail
+              key={selected.id}
               item={selected}
               insights={insights}
               busy={saving}
@@ -493,7 +495,8 @@ export function WishlistPage() {
               onBought={() => setDialog({ kind: 'bought', item: selected })}
               onDelete={() => setDialog({ kind: 'delete', item: selected })}
               onStatus={(status) => void onStatus(selected, status)}
-              onLines={(lines) => void shopping.saveLines(selected, lines)}
+              onPutInBasket={(lines) => shopping.putInBasket(selected, lines)}
+              onTakeOut={() => void shopping.takeOutOfBasket(selected)}
               onCompareToggle={(groupId, included) => void onCompareMembership(selected, groupId, included)}
               onNewCompare={() => void onCreateCompareFromItem(selected)}
             />
@@ -547,6 +550,16 @@ export function WishlistPage() {
         />
       )}
       {dialog?.kind === 'bought' && <BoughtDialog key={dialog.item.id} item={dialog.item} saving={saving} onCancel={() => setDialog(null)} onConfirm={(purchase) => void onBought(dialog.item, purchase)} />}
+      {dialog?.kind === 'leaveBasket' && (
+        <DestructiveActionDialog
+          title="要把它移出採購籃嗎？"
+          description={`「${dialog.item.name}」目前在採購籃裡（${buyQty(effectiveBuyLines(dialog.item))} 件）。移出後件數和顏色會清空，狀態改為${WISH_STATUS[dialog.next].label}。`}
+          confirmLabel="移出採購籃"
+          cancelLabel="先不要"
+          onCancel={() => setDialog(null)}
+          onConfirm={() => { const { item, next } = dialog; setDialog(null); void shopping.takeOutOfBasket(item, next) }}
+        />
+      )}
       {dialog?.kind === 'delete' && (
         <DestructiveActionDialog
           title={`永久刪除「${dialog.item.name}」？`}
@@ -562,7 +575,7 @@ export function WishlistPage() {
         />
       )}
       <FloatActions hidden={floatHidden} basket={{ qty: shopping.basket.qty, onOpen: () => shopping.setOpen(true) }} />
-      {shopping.open && <ShoppingBasket basket={shopping.basket} target={shopping.target} mobile={isMobile} saving={shopping.saving} onClose={() => shopping.setOpen(false)} onTarget={(value) => void shopping.changeTarget(value)} onLines={(item, lines) => void shopping.saveLines(item, lines)} onBought={(input) => void shopping.markBought(input)} onCopied={(ok) => setToast(ok ? { tone: 'success', text: '採購清單已複製。' } : { tone: 'error', text: '無法複製，請再試一次。' })} />}
+      {shopping.open && <ShoppingBasket basket={shopping.basket} target={shopping.target} mobile={isMobile} saving={shopping.saving} onClose={() => shopping.setOpen(false)} onTarget={(value) => void shopping.changeTarget(value)} onAdjust={(item, lines) => shopping.putInBasket(item, lines)} onRemove={(item) => void shopping.takeOutOfBasket(item)} onBought={(input) => void shopping.markBought(input)} onCopied={(ok) => setToast(ok ? { tone: 'success', text: '採購清單已複製。' } : { tone: 'error', text: '無法複製，請再試一次。' })} />}
       <Toast message={toast} onClose={closeToast} />
     </div>
   )
@@ -660,7 +673,8 @@ function WishDetail({
   onBought,
   onDelete,
   onStatus,
-  onLines,
+  onPutInBasket,
+  onTakeOut,
   onCompareToggle,
   onNewCompare,
 }: {
@@ -675,13 +689,16 @@ function WishDetail({
   onBought: () => void
   onDelete: () => void
   onStatus: (status: WishlistInput['status']) => void
-  onLines: (lines: BuyLine[]) => void
+  onPutInBasket: (lines: BuyLine[]) => Promise<boolean>
+  onTakeOut: () => void
   onCompareToggle: (groupId: string, included: boolean) => void
   onNewCompare: () => void
 }) {
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const lightboxRef = useRef<HTMLDialogElement>(null)
+  // 購買明細選擇器（B28 B）：點「準備購買」後在狀態列下方展開，按確定才寫入
+  const [picking, setPicking] = useState(false)
   const photos = item.photos ?? []
   const sizeEntries = flatMeasurementEntries(item)
   const selectedPhoto = photos.find((photo) => photo.id === selectedPhotoId) ?? photos.find((photo) => photo.isCover) ?? photos[0]
@@ -818,13 +835,15 @@ function WishDetail({
           <div role="group" aria-label="變更狀態" className="flex flex-wrap items-center gap-2">
             <span className="text-[13px] text-ink-2">狀態</span>
             {ACTIVE_STATUSES.map((s) => (
-              <Chip key={s} selected={item.status === s} disabled={busy} onClick={() => item.status !== s && onStatus(s as WishlistInput['status'])} className="h-11 md:h-9">
+              <Chip key={s} selected={item.status === s || (s === 'ready' && picking)} disabled={busy} onClick={() => { if (s === 'ready') { setPicking(true); return } setPicking(false); if (item.status !== s) onStatus(s as WishlistInput['status']) }} className="h-11 md:h-9">
                 {WISH_STATUS[s].label}
               </Chip>
             ))}
           </div>
         )}
-        {item.status === 'ready' && <BuyLinesEditor item={item} lines={effectiveBuyLines(item)} disabled={busy} onChange={onLines} />}
+        {picking
+          ? <div className="rounded-card border-t-2 border-ink bg-card px-4 pt-3.5 pb-4 shadow-float"><BuyPickerEditor item={item} variant="strip" saving={busy} onCancel={() => setPicking(false)} onConfirm={(lines) => void onPutInBasket(lines).then((ok) => { if (ok) setPicking(false) })} /></div>
+          : item.status === 'ready' && <BuySummary item={item} lines={effectiveBuyLines(item)} variant="strip" disabled={busy} onAdjust={() => setPicking(true)} onRemove={onTakeOut} />}
 
         <div className="grid grid-cols-3 gap-2.5">
           <div className="rounded-tile bg-sage-soft p-3.5 text-sage-ink">

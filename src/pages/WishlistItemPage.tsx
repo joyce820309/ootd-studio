@@ -11,6 +11,7 @@ import { PhotoColorDot, PhotoColorTag } from '@/components/ui/PhotoColorTag'
 import { StickyNote } from '@/components/ui/StickyNote'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
 import { BoughtDialog } from '@/components/wishlist/BoughtDialog'
+import { BuyPickerEditor, BuyPickerPopover, BuyPickerSheet, BuySummary } from '@/components/wishlist/BuyPicker'
 import { WishItemMoreMenu } from '@/components/wishlist/WishItemMoreMenu'
 import { WishlistCompareMenu } from '@/components/wishlist/WishlistCompareMenu'
 import { WishlistForm } from '@/components/wishlist/WishlistForm'
@@ -31,6 +32,7 @@ import {
   updateWishlistItem,
 } from '@/lib/data'
 import { materialMix } from '@/lib/materialMix'
+import { buyQty, effectiveBuyLines } from '@/lib/basket'
 import { buildSizeRows, FLAT_LABELS, judgeLabel } from '@/lib/review'
 import { SLOT_META } from '@/lib/slots'
 import { elasticFiberPercent, formatStretch } from '@/lib/stretch'
@@ -39,11 +41,9 @@ import { useIsMobile } from '@/lib/useIsMobile'
 import { colorFromName, photoColorLabel } from '@/lib/wishColors'
 import { formatAddedDate, formatNT, garmentLengthName, garmentTypeOf, isActiveWish, PRIORITY_LABEL, wishAsClosetItem, wishInsights } from '@/lib/wishlist'
 import { buildAiText, defaultAiIncludes, flatMeasurementEntries } from '@/lib/wishlistAi'
-import type { BodyMeasurement, BodyProfile, ClosetItem, CompareGroup, CompareGroupItem, WishlistColor, WishlistInput, WishlistItem, WishStatus } from '@/types'
-// 準備購買開關沿用比較頁的 .compare-ready 樣式
-import './ComparePage.css'
+import type { BodyMeasurement, BodyProfile, BuyLine, ClosetItem, CompareGroup, CompareGroupItem, WishlistColor, WishlistInput, WishlistItem, WishStatus } from '@/types'
 
-type Dialog = { kind: 'edit' } | { kind: 'delete' } | { kind: 'bought' } | { kind: 'aiPaste' } | null
+type Dialog = { kind: 'edit' } | { kind: 'delete' } | { kind: 'bought' } | { kind: 'aiPaste' } | { kind: 'leaveBasket'; next: 'considering' | 'dropped' } | null
 type Slide = { id: string; url: string; label?: string; hex?: string }
 
 /** 狀態膠囊（B7.3）：顏色跟著狀態變；小說明寫在選單每一項旁邊 */
@@ -87,6 +87,9 @@ export function WishlistItemPage() {
   // 點了沒有標記照片的顏色：提示「X 還沒有標記照片」
   const [photoHint, setPhotoHint] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  // 購買明細選擇器（B28）：桌機是狀態按鈕下方的彈出面板，手機是 Bottom Sheet
+  const [picking, setPicking] = useState(false)
+  const closePicker = useCallback(() => setPicking(false), [])
   const [toast, setToast] = useState<ToastMessage | null>(null)
   const closeToast = useCallback(() => setToast(null), [])
 
@@ -152,12 +155,17 @@ export function WishlistItemPage() {
     replaceItem({ ...current, status })
     setToast({ tone: 'success', text: `改為${STATUS_PILL[status].label}${demoSuffix(demo)}` })
   })
-  // 狀態膠囊：隨時可以改。準備購買走採購籃開關（和手機底部開關同步）；已購買開「移至已購買」流程
+  // 狀態膠囊：隨時可以改。選「準備購買」打開購買明細選擇器（按確定才寫入）；已購買開「移至已購買」流程；
+  // 還在採購籃裡卻改成考慮中／已放棄，先問要不要移出
   const onChangeStatus = (next: WishStatus) => {
     if (next === current.status) return
     if (next === 'bought') { setDialog({ kind: 'bought' }); return }
-    if (next === 'ready' || (current.status === 'ready' && next === 'considering')) { void shopping.toggleReady(current); return }
+    if (next === 'ready') { setPicking(true); return }
+    if (current.status === 'ready') { setDialog({ kind: 'leaveBasket', next }); return }
     void onStatus(next)
+  }
+  const onPutInBasket = async (lines: BuyLine[]) => {
+    if (await shopping.putInBasket(current, lines)) setPicking(false)
   }
   const onBought = (purchase: { purchaseDate: string; paidPrice: number | null; colorFamilies: string[] }) => run(async () => {
     const { itemIds, demo } = await markWishlistBought(current.id, purchase)
@@ -217,7 +225,10 @@ export function WishlistItemPage() {
   })
 
   const compareMenu = <WishlistCompareMenu item={current} groups={groups} groupIds={groupIds} disabled={saving} onToggle={(groupId, included) => void onCompareToggle(groupId, included)} onCreate={() => void onNewCompare()} />
-  const moreMenu = (tone: 'plain' | 'overlay') => <WishItemMoreMenu item={current} tone={tone} disabled={saving} onDrop={() => void onStatus('dropped')} onReconsider={() => void onStatus('considering')} onDelete={() => setDialog({ kind: 'delete' })} />
+  const moreMenu = (tone: 'plain' | 'overlay') => <WishItemMoreMenu item={current} tone={tone} disabled={saving} onDrop={() => onChangeStatus('dropped')} onReconsider={() => void onStatus('considering')} onDelete={() => setDialog({ kind: 'delete' })} />
+  const pickerTitleId = `buy-picker-${current.id}`
+  const pickerEditor = picking && <BuyPickerEditor key={current.id} item={current} variant={isMobile ? 'sheet' : 'panel'} titleId={pickerTitleId} onCancel={closePicker} onConfirm={(lines) => void onPutInBasket(lines)} />
+  const basketSummary = current.status === 'ready' && <BuySummary item={current} lines={effectiveBuyLines(current)} variant="bar" disabled={picking} onAdjust={() => setPicking(true)} onRemove={() => void shopping.takeOutOfBasket(current)} />
   const backTo = `/wishlist?item=${encodeURIComponent(current.id)}`
 
   return (
@@ -255,6 +266,8 @@ export function WishlistItemPage() {
           photoHint={photoHint}
           onPhotoColor={pickPhotoColor}
           statusControl={<StatusMenu status={current.status} disabled={saving || shopping.saving} onChange={onChangeStatus} />}
+          picker={!isMobile && pickerEditor && <BuyPickerPopover labelledBy={pickerTitleId} onCancel={closePicker}>{pickerEditor}</BuyPickerPopover>}
+          basketSummary={basketSummary}
           onCopyAi={() => void onCopyAi()}
           onPasteAi={() => setDialog({ kind: 'aiPaste' })}
           closet={closet}
@@ -273,12 +286,25 @@ export function WishlistItemPage() {
               ? <Button variant="primary" className="h-12 flex-1" disabled={saving} onClick={() => void onStatus('considering')}>重新考慮</Button>
               : <>
                 <div className="flex-1 [&_summary]:h-12 [&_summary]:w-full [&_summary]:justify-center [&>details]:w-full">{compareMenu}</div>
-                <button type="button" aria-pressed={current.status === 'ready'} disabled={shopping.saving} onClick={() => void shopping.toggleReady(current)} className={`compare-ready h-12 flex-1 ${current.status === 'ready' ? 'is-on' : ''}`}>{current.status === 'ready' ? '✓ 準備購買' : '＋ 準備購買'}</button>
+                {current.status === 'ready'
+                  ? <Button variant="secondary" className="h-12 flex-1" onClick={() => setPicking(true)}>✓ 在採購籃・調整</Button>
+                  : <Button variant="oat" className="h-12 flex-1" onClick={() => setPicking(true)}>＋ 準備購買</Button>}
               </>}
         </div>
       )}
 
       {dialog?.kind === 'edit' && <WishlistForm key={current.id} item={current} saving={saving} onCancel={() => setDialog(null)} onSubmit={(input) => void onUpdate(input)} onDelete={() => setDialog({ kind: 'delete' })} />}
+      {isMobile && pickerEditor && <BuyPickerSheet labelledBy={pickerTitleId} onCancel={closePicker}>{pickerEditor}</BuyPickerSheet>}
+      {dialog?.kind === 'leaveBasket' && (
+        <DestructiveActionDialog
+          title="要把它移出採購籃嗎？"
+          description={`「${current.name}」目前在採購籃裡（${buyQty(effectiveBuyLines(current))} 件）。移出後件數和顏色會清空，狀態改為${STATUS_PILL[dialog.next].label}。`}
+          confirmLabel="移出採購籃"
+          cancelLabel="先不要"
+          onCancel={() => setDialog(null)}
+          onConfirm={() => { const next = dialog.next; setDialog(null); void shopping.takeOutOfBasket(current, next) }}
+        />
+      )}
       {dialog?.kind === 'bought' && <BoughtDialog key={current.id} item={current} saving={saving} onCancel={() => setDialog(null)} onConfirm={(purchase) => void onBought(purchase)} />}
       {dialog?.kind === 'aiPaste' && <AiPasteDialog value={current.aiReview ?? ''} saving={saving} onCancel={() => setDialog(null)} onSave={(text) => void onSaveAi(text)} />}
       {dialog?.kind === 'delete' && (
@@ -577,6 +603,10 @@ interface ItemDetailsProps {
   photoHint: string | null
   onPhotoColor: (color: string | null, hint?: string | null) => void
   statusControl: ReactNode
+  /** 購買明細選擇器的彈出面板（桌機），貼在狀態按鈕下面 */
+  picker: ReactNode
+  /** 放進採購籃後，價格下方的摘要列 */
+  basketSummary: ReactNode
   onCopyAi: () => void
   onPasteAi: () => void
   closet: ClosetItem[]
@@ -586,7 +616,7 @@ interface ItemDetailsProps {
   mobile: boolean
 }
 
-function ItemDetails({ item, photoColor, photoHint, onPhotoColor, statusControl, onCopyAi, onPasteAi, closet, body, profile, memberships, mobile }: ItemDetailsProps) {
+function ItemDetails({ item, photoColor, photoHint, onPhotoColor, statusControl, picker, basketSummary, onCopyAi, onPasteAi, closet, body, profile, memberships, mobile }: ItemDetailsProps) {
   const added = formatAddedDate(item.createdAt)
   const insights = useMemo(() => wishInsights(item, closet), [item, closet])
   const flat = flatMeasurementEntries(item)
@@ -677,8 +707,9 @@ function ItemDetails({ item, photoColor, photoHint, onPhotoColor, statusControl,
   return (
     <section aria-labelledby="wish-item-title" className={`@container flex min-w-0 flex-col gap-3 ${mobile ? 'px-4 pt-1' : ''}`}>
       <div className="flex flex-col gap-1.5">
-        <span className="flex flex-wrap items-center gap-1.5">
+        <span className="relative flex flex-wrap items-center gap-1.5">
           {statusControl}
+          {picker}
           {item.priority && <span className="inline-flex h-6 items-center rounded-full bg-tile px-2.5 text-xs font-medium text-ink-2">優先 {PRIORITY_LABEL[item.priority]}</span>}
         </span>
         <h1 id="wish-item-title" className="m-0 font-hd text-2xl leading-[1.35] md:text-[32px] md:leading-[1.3]">{item.name}</h1>
@@ -687,6 +718,7 @@ function ItemDetails({ item, photoColor, photoHint, onPhotoColor, statusControl,
           {facts && <span className="text-xs text-ink-2 md:text-[13px]">{facts}</span>}
           {item.url && <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[13px] md:min-h-8">{mobile ? '商品頁' : '前往商品頁'} ↗<span className="sr-only">（另開新視窗）</span></a>}
         </div>
+        {basketSummary}
       </div>
 
       {mobile ? (

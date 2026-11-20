@@ -22,6 +22,7 @@
 
 - 優先沿用 `components/ui`：Button、Chip／StatusTag、Checkbox、Select、Combobox、DatePicker、PaperCard、TiltLabel、Tape、WashBlob、StickyNote、PhotoColorTag、Icon、Toast。
 - 便利貼 StickyNote（B19，全專案）：本體一律不旋轉（旋轉會讓瀏覽器重新取樣文字，字會糊）。角度只放在膠帶（-3°）和後面墊的另一張紙（同色系較深、旋轉 1°，`tilt="none"` 可不墊）。摺角統一在右下 22px：右下那塊是頁面底色、摺起來的三角在左上（`linear-gradient(135deg, 摺角色 50%, 頁面底色 50%)`）。另有 `tone="lavender"`、`paper="squared"`（22px 方格紙）、`titleStyle="label"`（14px 粗體標題＋`titleNote` 小字）、`size="compact"`、`fold={false}`，給選購商品完整頁面的小便利貼用。
+- 購買明細選擇器 BuyPicker（B28，`components/wishlist/BuyPicker.tsx`）：`BuyPickerEditor` 依頁面有 panel（完整頁面彈出面板，色塊三欄）、sheet（手機 Bottom Sheet，兩欄、按鈕 48px）、strip（預覽抽屜底部，小膠囊）、mini（比較欄、採購籃列）四種長相；`BuySummary` 有 bar／strip／card 三種摘要；外框用 `BuyPickerPopover`、`BuyPickerSheet`。規則見 [wishlist.md](wishlist.md)。提示 Toast 支援「復原」等動作（停留 5 秒）。
 - 紙膠帶色（`--color-washi-*`）：燕麥黃、霧藍、鼠尾草、蜜桃粉、薰衣草，半透明平光；PhotoColorTag（B27）與便利貼膠帶共用。
 - 固定選項用 `components/ui/Select`；可輸入新值用 `Combobox`。不可使用原生 `<select>`／`<datalist>`。
 - 日期欄位用 `components/ui/DatePicker`，值為 `YYYY-MM-DD` 字串；不可使用 `<input type="date">`。日期工具在 `src/lib/date.ts`。

@@ -4,13 +4,15 @@ import { Icon } from './Icon'
 export interface ToastMessage {
   tone: 'success' | 'error'
   text: string
+  /** 例如「復原」；有動作的提示停留 5 秒 */
+  action?: { label: string; onClick: () => void }
 }
 
-/** 頁面底部的提示。成功 4 秒後自動消失；錯誤需要手動關閉。 */
+/** 頁面底部的提示。成功 4 秒後自動消失（有「復原」等動作時 5 秒）；錯誤需要手動關閉。 */
 export function Toast({ message, onClose }: { message: ToastMessage | null; onClose: () => void }) {
   useEffect(() => {
     if (!message || message.tone === 'error') return
-    const t = setTimeout(onClose, 4000)
+    const t = setTimeout(onClose, message.action ? 5000 : 4000)
     return () => clearTimeout(t)
   }, [message, onClose])
 
@@ -27,6 +29,11 @@ export function Toast({ message, onClose }: { message: ToastMessage | null; onCl
         <Icon name={ok ? 'check' : 'alert'} size={14} />
       </span>
       <span className="flex-1">{message.text}</span>
+      {message.action && (
+        <button type="button" onClick={() => { message.action?.onClick(); onClose() }} className="min-h-9 rounded-sm bg-transparent px-2 font-medium text-oat underline underline-offset-[3px]">
+          {message.action.label}
+        </button>
+      )}
       <button type="button" onClick={onClose} aria-label="關閉提示" className="flex size-8 items-center justify-center rounded-sm bg-transparent text-current">
         <Icon name="x" size={16} />
       </button>

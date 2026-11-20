@@ -119,6 +119,8 @@
   --color-check-locked: #B9A88E;
   /* 選取模式下已勾選的卡片底色 */
   --color-card-selected: #FFF9EE;
+  /* 採購籃摘要（B28）：放進採購籃後的黃色摘要列 */
+  --color-basket-soft: #FFF3D9;
 
   /* 彈性尺寸（B20／BM17） */
   --color-stretch-field: #FFF9EE;

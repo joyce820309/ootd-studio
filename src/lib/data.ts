@@ -866,32 +866,16 @@ export async function setWishlistStatus(id: string, status: Exclude<WishStatus, 
 }
 
 /**
- * 準備購買開關（B23.3）：開＝狀態改 ready，沒有明細時寫入預設一行；關＝改回 considering，明細保留。
+ * 購買明細選擇器（B28）按「確定」才呼叫：lines＝放進採購籃（狀態改準備購買並寫入明細）；
+ * null＝移出採購籃（清空明細，狀態改成 status，預設考慮中）。
  */
-export async function setWishlistReady(id: string, ready: boolean, defaultLines: BuyLine[]): Promise<{ demo: boolean }> {
-  const status: WishStatus = ready ? 'ready' : 'considering'
+export async function saveWishlistBasket(id: string, lines: BuyLine[] | null, status: Exclude<WishStatus, 'bought' | 'ready'> = 'considering'): Promise<{ demo: boolean }> {
+  const nextStatus: WishStatus = lines ? 'ready' : status
   if (!supabase) {
-    demoWishlistItems = demoWishlistItems.map((item) => item.id === id && item.status !== 'bought'
-      ? { ...item, status, buyLines: ready && !item.buyLines?.length ? defaultLines.map((line) => ({ ...line })) : item.buyLines }
-      : item)
+    demoWishlistItems = demoWishlistItems.map((item) => (item.id === id && item.status !== 'bought' ? { ...item, status: nextStatus, buyLines: lines ? lines.map((line) => ({ ...line })) : [] } : item))
     return { demo: true }
   }
-  const { data, error } = await supabase.from('wishlist_items').select('buy_lines').eq('id', id).single()
-  if (error) throw error
-  const patch: { status: WishStatus; buy_lines?: BuyLineRow[] } = { status }
-  if (ready && !buyLinesFromRow(data.buy_lines as BuyLineRow[] | null).length) patch.buy_lines = buyLinesToRow(defaultLines)
-  const { error: updateError } = await supabase.from('wishlist_items').update(patch).eq('id', id).neq('status', 'bought')
-  if (updateError) throw updateError
-  return { demo: false }
-}
-
-/** 儲存購買明細（顏色 × 件數 × 單價） */
-export async function saveWishlistBuyLines(id: string, lines: BuyLine[]): Promise<{ demo: boolean }> {
-  if (!supabase) {
-    demoWishlistItems = demoWishlistItems.map((item) => (item.id === id ? { ...item, buyLines: lines.map((line) => ({ ...line })) } : item))
-    return { demo: true }
-  }
-  const { error } = await supabase.from('wishlist_items').update({ buy_lines: buyLinesToRow(lines) }).eq('id', id).neq('status', 'bought')
+  const { error } = await supabase.from('wishlist_items').update({ status: nextStatus, buy_lines: lines ? buyLinesToRow(lines) : [] }).eq('id', id).neq('status', 'bought')
   if (error) throw error
   return { demo: false }
 }

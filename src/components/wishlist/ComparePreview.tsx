@@ -4,14 +4,16 @@ import { Button, ButtonLink } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import { MarkdownNote } from '@/components/ui/MarkdownNote'
 import { MaterialMix } from '@/components/ui/MaterialMix'
+import { BuyPickerEditor, BuySummary } from '@/components/wishlist/BuyPicker'
 import { OpenFullPageLink } from '@/components/wishlist/OpenFullPageLink'
+import { effectiveBuyLines } from '@/lib/basket'
 import { materialMix } from '@/lib/materialMix'
 import { FLAT_LABELS } from '@/lib/review'
 import { formatStretch } from '@/lib/stretch'
 import { photoColorLabel } from '@/lib/wishColors'
 import { formatAddedDate, formatNT, WISH_STATUS } from '@/lib/wishlist'
 import { flatMeasurementEntries } from '@/lib/wishlistAi'
-import type { WishlistItem } from '@/types'
+import type { BuyLine, WishlistItem } from '@/types'
 import './ComparePreview.css'
 
 interface ComparePreviewProps {
@@ -25,7 +27,10 @@ interface ComparePreviewProps {
   onClose: () => void
   onEdit: (item: WishlistItem) => void
   onRemove: (item: WishlistItem) => void
-  onToggleReady: (item: WishlistItem) => void
+  /** 購買明細選擇器（B28 B）按確定：放進採購籃或更新明細 */
+  onPutInBasket: (item: WishlistItem, lines: BuyLine[]) => Promise<boolean>
+  /** 摘要上的「移出」 */
+  onTakeOut: (item: WishlistItem) => void
   studioUrl: (item: WishlistItem) => string
   /** 每件在這個比較的欄頂封面（storage_path） */
   coverPaths: Record<string, string | undefined>
@@ -37,8 +42,10 @@ interface ComparePreviewProps {
  * 桌機是貼右邊的抽屜（寬 520、不蓋灰底，比較表照樣能捲能點；視窗小於 1200 加淡灰底）；手機是 top 40px 的 Bottom Sheet。
  * ← → 循環切換、Esc 關閉。
  */
-export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, onClose, onEdit, onRemove, onToggleReady, studioUrl, coverPaths, onSetCover }: ComparePreviewProps) {
+export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, onClose, onEdit, onRemove, onPutInBasket, onTakeOut, studioUrl, coverPaths, onSetCover }: ComparePreviewProps) {
   const panelRef = useRef<HTMLElement>(null)
+  // 按「＋ 準備購買」或「調整」後，底部往上展開編輯區；換商品就收起（不寫入）
+  const [pickingId, setPickingId] = useState<string | null>(null)
   const index = Math.max(0, items.findIndex((item) => item.id === currentId))
   const item = items[index]
   const total = items.length
@@ -155,11 +162,20 @@ export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, o
         </section>}
       </div>
 
-      <div className="compare-preview__foot">
-        {!mobile && <Button variant="ghost" className="text-rose-ink" onClick={() => onRemove(item)}>從這個比較移除</Button>}
-        <ButtonLink to={studioUrl(item)} variant="secondary" className={mobile ? 'h-12 flex-1' : 'ml-auto'}>拿去試搭</ButtonLink>
-        {bought ? <span className="inline-flex h-11 items-center px-3 text-sm text-ink-2">已購買</span> : <button type="button" aria-pressed={item.status === 'ready'} onClick={() => onToggleReady(item)} className={`compare-ready ${item.status === 'ready' ? 'is-on' : ''} ${mobile ? 'h-12 flex-1' : 'w-auto px-5'}`}>{item.status === 'ready' ? '✓ 準備購買' : '＋ 準備購買'}</button>}
-      </div>
+      {pickingId === item.id && !bought ? (
+        <div className="flex-none border-t-2 border-ink bg-card px-4 pt-3.5 pb-4 shadow-[0_-14px_24px_-18px_rgb(59_47_37/0.5)]">
+          <BuyPickerEditor key={item.id} item={item} variant="strip" onCancel={() => setPickingId(null)} onConfirm={(lines) => void onPutInBasket(item, lines).then((ok) => { if (ok) setPickingId(null) })} />
+        </div>
+      ) : (
+        <div className={`compare-preview__foot ${item.status === 'ready' ? 'flex-wrap' : ''}`}>
+          {item.status === 'ready' && <div className="w-full"><BuySummary item={item} lines={effectiveBuyLines(item)} variant="strip" onAdjust={() => setPickingId(item.id)} onRemove={() => onTakeOut(item)} /></div>}
+          {!mobile && <Button variant="ghost" className="text-rose-ink" onClick={() => onRemove(item)}>從這個比較移除</Button>}
+          <ButtonLink to={studioUrl(item)} variant="secondary" className={mobile ? 'h-12 flex-1' : 'ml-auto'}>拿去試搭</ButtonLink>
+          {bought
+            ? <span className="inline-flex h-11 items-center px-3 text-sm text-ink-2">已購買</span>
+            : item.status !== 'ready' && <Button variant="oat" className={mobile ? 'h-12 flex-1' : ''} onClick={() => setPickingId(item.id)}>＋ 準備購買</Button>}
+        </div>
+      )}
     </aside>
   </>
 }

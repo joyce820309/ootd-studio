@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
 import type { ToastMessage } from '@/components/ui/Toast'
-import { buildBasket, defaultBuyLines, type BasketRow } from '@/lib/basket'
-import { fetchShoppingTarget, markWishlistBought, saveShoppingTarget, saveWishlistBuyLines, setWishlistReady } from '@/lib/data'
+import { buildBasket, buyQty, effectiveBuyLines, type BasketRow } from '@/lib/basket'
+import { fetchShoppingTarget, markWishlistBought, saveShoppingTarget, saveWishlistBasket } from '@/lib/data'
 import type { BuyLine, CompareGroup, CompareGroupItem, WishlistItem } from '@/types'
 
 interface UseBasketInput {
@@ -34,25 +34,34 @@ export function useBasket({ items, setItems, groups, links, setToast, reload }: 
 
   const patchItem = (id: string, patch: Partial<WishlistItem>) => setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)))
 
-  async function toggleReady(item: WishlistItem) {
-    const ready = item.status !== 'ready'
-    const lines = item.buyLines?.length ? item.buyLines : defaultBuyLines(item)
-    patchItem(item.id, { status: ready ? 'ready' : 'considering', buyLines: ready ? lines : item.buyLines })
+  /** 按「放進採購籃／確定」才寫入（B28）：狀態改準備購買、明細換成這份 */
+  async function putInBasket(item: WishlistItem, lines: BuyLine[], { quiet = false }: { quiet?: boolean } = {}) {
+    const wasReady = item.status === 'ready'
+    patchItem(item.id, { status: 'ready', buyLines: lines })
     try {
-      const { demo } = await setWishlistReady(item.id, ready, lines)
-      if (demo) setToast({ tone: 'success', text: `「${item.name}」${ready ? '準備購買' : '改回考慮中'}${demoSuffix(demo)}` })
+      const { demo } = await saveWishlistBasket(item.id, lines)
+      if (!quiet) setToast({ tone: 'success', text: `${wasReady ? '已更新' : '已放進採購籃：'}「${item.name}」${buyQty(lines)} 件${demoSuffix(demo)}` })
+      return true
     } catch (cause) {
-      setToast({ tone: 'error', text: errorText(cause, '準備購買沒有儲存') })
+      setToast({ tone: 'error', text: errorText(cause, '採購籃沒有儲存') })
       await reload()
+      return false
     }
   }
 
-  async function saveLines(item: WishlistItem, lines: BuyLine[]) {
-    patchItem(item.id, { buyLines: lines })
+  /** 摘要上的「移出」：清空明細、狀態改回考慮中（或指定的狀態），跳 5 秒「已移出・復原」 */
+  async function takeOutOfBasket(item: WishlistItem, status: 'considering' | 'dropped' = 'considering') {
+    const previous = effectiveBuyLines(item)
+    patchItem(item.id, { status, buyLines: [] })
     try {
-      await saveWishlistBuyLines(item.id, lines)
+      const { demo } = await saveWishlistBasket(item.id, null, status)
+      setToast({
+        tone: 'success',
+        text: `已移出「${item.name}」${status === 'dropped' ? '，改為已放棄' : ''}${demoSuffix(demo)}`,
+        action: { label: '復原', onClick: () => void putInBasket({ ...item, status }, previous, { quiet: true }) },
+      })
     } catch (cause) {
-      setToast({ tone: 'error', text: errorText(cause, '件數和單價沒有儲存') })
+      setToast({ tone: 'error', text: errorText(cause, '沒有移出採購籃') })
       await reload()
     }
   }
@@ -89,5 +98,5 @@ export function useBasket({ items, setItems, groups, links, setToast, reload }: 
     }
   }
 
-  return { basket, open: isOpen, setOpen, target, saving, toggleReady, saveLines, changeTarget, markBought }
+  return { basket, open: isOpen, setOpen, target, saving, putInBasket, takeOutOfBasket, changeTarget, markBought }
 }

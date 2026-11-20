@@ -1,9 +1,12 @@
 import { formatNT } from '@/lib/wishlist'
 import type { BuyLine, CompareGroup, CompareGroupItem, WishlistItem } from '@/types'
 
-/** 這件商品可選的顏色（沒有 colors 時用主色） */
+/** 商品沒有任何顏色時唯一的選項（B28） */
+export const UNSPECIFIED_COLOR = '不指定顏色'
+
+/** 這件商品可選的顏色（沒有 colors 時用舊的主色名；連主色名都沒有就是「不指定顏色」） */
 export function buyColorOptions(item: WishlistItem): { name: string; hex?: string; favorite: boolean }[] {
-  if (!item.colors?.length) return [{ name: item.colorName || '未標色', hex: item.colorHex, favorite: false }]
+  if (!item.colors?.length) return [{ name: item.colorName || UNSPECIFIED_COLOR, hex: item.colorHex, favorite: true }]
   return item.colors.map((color) => ({ name: color.name, hex: color.hex, favorite: color.favorite }))
 }
 
@@ -11,7 +14,17 @@ export function buyColorOptions(item: WishlistItem): { name: string; hex?: strin
 export function defaultBuyLines(item: WishlistItem): BuyLine[] {
   const options = buyColorOptions(item)
   const color = options.find((option) => option.favorite) ?? options[0]
-  return [{ colorName: color?.name ?? '未標色', hex: color?.hex ?? item.colorHex, qty: 1, unitPrice: item.price }]
+  return [{ colorName: color?.name ?? UNSPECIFIED_COLOR, hex: color?.hex ?? item.colorHex, qty: 1, unitPrice: item.price }]
+}
+
+/** 購買明細選擇器（B28）的起始草稿：已在採購籃就帶入目前明細，否則預設最想要那色 × 1 × 原價 */
+export function buyDraftLines(item: WishlistItem): BuyLine[] {
+  return item.status === 'ready' && item.buyLines?.length ? item.buyLines.map((line) => ({ ...line })) : defaultBuyLines(item)
+}
+
+/** 兩份明細是否相同（判斷草稿有沒有改過） */
+export function sameBuyLines(a: BuyLine[], b: BuyLine[]) {
+  return a.length === b.length && a.every((line, index) => line.colorName === b[index].colorName && line.qty === b[index].qty && line.unitPrice === b[index].unitPrice)
 }
 
 /** 目前生效的明細：準備購買但還沒有明細時，用預設一行 */

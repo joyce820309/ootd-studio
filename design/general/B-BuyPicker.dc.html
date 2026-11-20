@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>元件：購買明細選擇器</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.cap{margin:0;font-size:12.5px;line-height:1.75;color:#5A4A3C}
+.vh{display:flex;align-items:baseline;gap:10px;margin:0}
+.vh b{font:400 22px 'LXGW Marker Gothic','Chiron GoRound TC'}
+.vh span{font-size:12.5px;color:#5A4A3C}
+.stage{position:relative;padding:20px;border-radius:18px;background:#FBF4E8;box-shadow:inset 0 0 0 1.5px #EADCC6}
+.ct{position:relative;display:flex;align-items:center;gap:8px;height:44px;padding:0 12px 0 6px;border-radius:12px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 14px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer}
+.ct .s{width:28px;height:28px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(59,47,37,.18)}
+.ct[aria-pressed="true"]{border:2px solid #3B2F25;background:#FFF9EE}
+.ct[aria-pressed="true"]::after{content:"✓";position:absolute;right:-7px;top:-7px;width:20px;height:20px;border-radius:50%;background:#3B2F25;color:#FBF4E8;font:700 11px Nunito;display:flex;align-items:center;justify-content:center}
+.ln{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:8px 0;border-top:1.5px dashed #EADCC6;font-size:14px}
+.stp{display:inline-flex;align-items:center;height:36px;border-radius:10px;border:1.5px solid #E2D2B8;background:#FFFCF6}
+.stp button{width:34px;height:34px;border:0;background:none;font:600 16px Nunito;color:#3B2F25;cursor:pointer}
+.stp span{min-width:20px;text-align:center;font:700 14px Nunito}
+.pr{display:inline-flex;align-items:center;gap:4px;font:600 13px Nunito;color:#3B2F25;border:0;background:none;padding:0;cursor:pointer;min-height:36px}
+.pr u{text-decoration:underline dotted #74624F;text-underline-offset:3px}
+.dt{display:inline-block;width:12px;height:12px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(59,47,37,.2)}
+.sum{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#FFF3D9;box-shadow:inset 0 0 0 1.5px #F2CF8E;font-size:13px}
+.lk{min-height:36px;padding:0 6px;border:0;background:none;font:500 13px 'Chiron GoRound TC';color:#3E6270;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.lk.rm{color:#8E4A3E}
+.box{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:14px;background:#FFFCF6;box-shadow:inset 0 0 0 1.5px #EADCC6}
+.mini{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:#FFFCF6;box-shadow:inset 0 0 0 1.5px #F2CF8E}
+.sc{display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 10px 0 4px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25}
+.sc .s{width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(59,47,37,.18)}
+.sc[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+.sc[aria-pressed="true"] .s{box-shadow:0 0 0 2px #FBF4E8}
+</style>
+</helmet>
+<div style="width:1440px;min-height:2280px;box-sizing:border-box;padding:48px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:30px">
+  <header style="display:flex;align-items:flex-end;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span class="lbl" style="background:#A9C6CF;transform:rotate(-2deg);align-self:flex-start">元件</span>
+      <h1 class="hd" style="margin:0;font-size:36px">購買明細選擇器 BuyPicker</h1>
+    </div>
+    <p class="cap" style="margin:0 0 4px auto;max-width:660px;font-size:13px">「準備購買」時選顏色、件數、單價。同一套資料與規則，依頁面長成四種樣子。共通原則：<b>先編輯、按確定才寫入</b>（取消＝什麼都沒變）；放進去之後收成一行摘要，要改再展開；「移出採購籃」是獨立的按鈕，不會因為點錯而消失。</p>
+  </header>
+
+  <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+    <div class="box"><b style="font-size:14px">① 選顏色＝點色塊</b><p class="cap">商品的顏色列成色塊，可以複選；預設勾「最想要」那色。沒有任何顏色的商品，只有一個「不指定顏色」。</p></div>
+    <div class="box"><b style="font-size:14px">② 勾了才出現件數</b><p class="cap">每個勾選的顏色一行：件數 − ＋（最少 1）、單價。單價預設商品原價，點虛線數字才能改（多色優惠時用），平常不會誤改。</p></div>
+    <div class="box"><b style="font-size:14px">③ 確定／取消</b><p class="cap">按「放進採購籃／確定」才寫入、狀態才變「準備購買」。取消或關掉＝不變。已在籃子裡再「調整」也是同樣流程。</p></div>
+    <div class="box"><b style="font-size:14px">④ 移出要分開</b><p class="cap">摘要列上的「移出」才會拿掉：狀態回「考慮中」，跳 5 秒「已移出・復原」。不再用一顆會切換的按鈕。</p></div>
+  </section>
+
+  <section aria-labelledby="vA" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <h2 id="vA" class="vh"><b>A　完整頁面（B7.3）</b><span>彈出面板，貼在狀態按鈕下面</span></h2>
+      <div class="stage" style="min-height:560px">
+        <span style="display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;border:1.5px solid #E2D2B8;background:#F3E7D4;font-size:13px;font-weight:500">● 考慮中 ▾</span>
+        <span style="font-size:12px;color:#5A4A3C;margin-left:8px">→ 選了「準備購買」</span>
+        <div role="dialog" aria-labelledby="pA" class="paper" style="position:absolute;left:20px;top:66px;width:420px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 18px 36px -14px rgba(59,47,37,.5),0 0 0 1.5px #EADCC6">
+          <div style="display:flex;align-items:baseline;gap:8px"><h3 id="pA" class="hd" style="margin:0;font-size:21px">放進採購籃</h3><span style="font-size:12px;color:#5A4A3C">#30876 大學T・NT$490</span></div>
+          <span style="font-size:12.5px;color:#5A4A3C">要買哪幾色？（可以複選）</span>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <button type="button" class="ct" aria-pressed="false"><span class="s" style="background:#EAD9C6"></span>杏</button>
+            <button type="button" class="ct" aria-pressed="true"><span class="s" style="background:#C9BFB3"></span>灰杏 ★</button>
+            <button type="button" class="ct" aria-pressed="false"><span class="s" style="background:#9C9A86"></span>綠</button>
+            <button type="button" class="ct" aria-pressed="false"><span class="s" style="background:#6E6A70"></span>灰</button>
+            <button type="button" class="ct" aria-pressed="true"><span class="s" style="background:#1E1C1B"></span>黑</button>
+          </div>
+          <div>
+            <div class="ln"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#C9BFB3"></span>灰杏</span><span class="stp"><button type="button" aria-label="減一件">−</button><span>1</span><button type="button" aria-label="加一件">＋</button></span><button type="button" class="pr" aria-label="單價 490，點了可以改">單價 <u>$490</u></button></div>
+            <div class="ln"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#1E1C1B"></span>黑</span><span class="stp"><button type="button" aria-label="減一件">−</button><span>2</span><button type="button" aria-label="加一件">＋</button></span><button type="button" class="pr">單價 <u>$450</u></button></div>
+          </div>
+          <div style="display:flex;align-items:baseline;padding-top:8px;border-top:2px solid #3B2F25"><span style="font-size:13px">共 <b class="num">3</b> 件</span><b class="num" style="margin-left:auto;font-size:20px">NT$1,390</b></div>
+          <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-g">取消</button><button type="button" class="btn btn-o">放進採購籃</button></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <h2 class="vh"><b>A　放進去之後</b><span>價格下方多一行摘要</span></h2>
+      <div class="stage" style="display:flex;flex-direction:column;gap:12px">
+        <span style="display:inline-flex;align-self:flex-start;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;border:1.5px solid #B7CBB0;background:#E6EEE2;color:#3F5A3B;font-size:13px;font-weight:500">● 準備購買 ▾</span>
+        <span class="hd" style="font-size:26px">#30876 本檔必收超舒服寬鬆好穿大學T</span>
+        <b class="num" style="font-size:26px">NT$490</b>
+        <div class="sum"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;color:#9A6B43"><path d="M4 8h16l-1.5 11h-13zM9 8V6a3 3 0 0 1 6 0v2"></path></svg><span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">採購籃裡：<span class="dt" style="background:#C9BFB3"></span>灰杏 × 1・<span class="dt" style="background:#1E1C1B"></span>黑 × 2</span><b class="num" style="margin-left:auto">NT$1,390</b><button type="button" class="lk">調整</button><button type="button" class="lk rm">移出</button></div>
+        <p class="cap">「調整」再打開同一個面板（帶入目前的選擇）。狀態選單改成「考慮中／已放棄」時，也會先問「要把它移出採購籃嗎？」。</p>
+      </div>
+      <h2 class="vh" style="margin-top:8px"><b>E　手機（BM19.2）</b><span>從下方滑出，色塊兩欄、按鈕更大</span></h2>
+      <div style="display:flex;justify-content:center"><div style="position:relative;width:390px;height:520px;border-radius:24px;overflow:hidden;background:#FBF4E8;box-shadow:inset 0 0 0 1.5px #EADCC6">
+        <div aria-hidden="true" style="position:absolute;inset:0;background:rgba(59,47,37,.4)"></div>
+        <section class="paper" style="position:absolute;left:0;right:0;bottom:0;border-radius:22px 22px 0 0;padding:8px 16px 22px;display:flex;flex-direction:column;gap:10px">
+          <span aria-hidden="true" style="align-self:center;width:40px;height:4px;border-radius:2px;background:#D9C7AC"></span>
+          <h3 class="hd" style="margin:0;font-size:20px">放進採購籃</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button type="button" class="ct" aria-pressed="true"><span class="s" style="background:#3A3836"></span>灰黑 ★</button>
+            <button type="button" class="ct" aria-pressed="false"><span class="s" style="background:#E3D6C2"></span>米杏</button>
+          </div>
+          <div class="ln"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#3A3836"></span>灰黑</span><span class="stp" style="height:40px"><button type="button" style="width:40px;height:38px">−</button><span>1</span><button type="button" style="width:40px;height:38px">＋</button></span><button type="button" class="pr">單價 <u>$1,406</u></button></div>
+          <div style="display:flex;align-items:baseline;padding-top:8px;border-top:2px solid #3B2F25"><span style="font-size:13px">共 1 件</span><b class="num" style="margin-left:auto;font-size:19px">NT$1,406</b></div>
+          <div style="display:flex;gap:8px"><button type="button" class="btn btn-s" style="flex:1;height:48px">取消</button><button type="button" class="btn btn-o" style="flex:2;height:48px">放進採購籃</button></div>
+        </section>
+      </div></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="vB" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <h2 id="vB" class="vh"><b>B　預覽抽屜（B23.2、清單預覽 B7）</b><span>底部往上展開</span></h2>
+      <div class="stage" style="padding:0;overflow:hidden;width:520px">
+        <div aria-hidden="true" style="height:140px;padding:16px;display:flex;flex-direction:column;gap:8px;opacity:.45"><span style="height:14px;width:60%;border-radius:4px;background:#D9C7AC"></span><span style="height:60px;border-radius:10px;background:#EADCC6"></span></div>
+        <div style="background:#FFFCF6;border-top:2px solid #3B2F25;padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 -14px 24px -18px rgba(59,47,37,.5)">
+          <div style="display:flex;align-items:center"><b style="font-size:15px">放進採購籃</b><button type="button" class="ibtn" aria-label="收起，不變更" style="margin-left:auto;color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="sc" aria-pressed="false"><span class="s" style="background:#EAD9C6"></span>杏</span><span class="sc" aria-pressed="true"><span class="s" style="background:#C9BFB3"></span>灰杏</span><span class="sc" aria-pressed="false"><span class="s" style="background:#9C9A86"></span>綠</span><span class="sc" aria-pressed="false"><span class="s" style="background:#6E6A70"></span>灰</span><span class="sc" aria-pressed="false"><span class="s" style="background:#1E1C1B"></span>黑</span></div>
+          <div class="ln" style="border-top:0;padding-top:0"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#C9BFB3"></span>灰杏</span><span class="stp"><button type="button">−</button><span>1</span><button type="button">＋</button></span><button type="button" class="pr">單價 <u>$490</u></button></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px">共 1 件・<b class="num">NT$490</b></span><button type="button" class="btn btn-g" style="margin-left:auto;height:40px">取消</button><button type="button" class="btn btn-o" style="height:40px">確定</button></div>
+        </div>
+      </div>
+      <p class="cap">抽屜空間小：顏色用小膠囊一排，按「準備購買」後底部往上展開成這塊，內容區不動。按確定後收回，底部變成 B 的摘要。</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <h2 class="vh"><b>B　放進去之後</b><span>底部一行摘要＋原本的按鈕</span></h2>
+      <div class="stage" style="padding:0;overflow:hidden;width:520px">
+        <div style="background:#FFFCF6;padding:12px 16px 14px;display:flex;flex-direction:column;gap:10px;border-top:1.5px dashed #D9C7AC">
+          <div class="sum" style="padding:8px 10px"><span style="font-weight:700;color:#3F5A3B">✓ 準備購買</span><span style="display:flex;align-items:center;gap:5px"><span class="dt" style="background:#C9BFB3"></span>灰杏 × 1</span><b class="num" style="margin-left:auto">NT$490</b><button type="button" class="lk">調整</button><button type="button" class="lk rm">移出</button></div>
+          <div style="display:flex;gap:8px"><button type="button" class="btn btn-g" style="color:#8E4A3E;height:40px">從這個比較移除</button><button type="button" class="btn btn-s" style="margin-left:auto;height:40px">拿去試搭</button></div>
+        </div>
+      </div>
+      <div class="stage" style="padding:0;overflow:hidden;width:520px">
+        <div style="background:#FFFCF6;padding:12px 16px 14px;display:flex;gap:8px">
+          <button type="button" class="btn btn-g" style="color:#8E4A3E;height:44px">從這個比較移除</button><button type="button" class="btn btn-s" style="margin-left:auto;height:44px">拿去試搭</button><button type="button" class="btn btn-o" style="height:44px">＋ 準備購買</button>
+        </div>
+      </div>
+      <p class="cap">還沒放進去時（下面那張）：底部是「＋ 準備購買」，按了才展開上面的編輯區。</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="vC" style="display:grid;grid-template-columns:1.25fr 1fr;gap:24px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <h2 id="vC" class="vh"><b>C　比較表的欄（B23.3）</b><span>三種狀態</span></h2>
+      <div class="stage" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;color:#5A4A3C">還沒放</span><button type="button" class="btn btn-s" style="width:100%">＋ 準備購買</button><a class="btn btn-g" href="#" style="height:36px;color:#3E6270;font-size:13px">拿去試搭</a></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;color:#5A4A3C">編輯中（還沒寫入）</span>
+          <div class="mini">
+            <div style="display:flex;gap:4px;flex-wrap:wrap"><span class="sc" aria-pressed="true" style="height:30px;font-size:12px"><span class="s" style="width:18px;height:18px;background:#C9BFB3"></span>灰杏</span><span class="sc" aria-pressed="false" style="height:30px;font-size:12px"><span class="s" style="width:18px;height:18px;background:#1E1C1B"></span>黑</span></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:13px"><span class="dt" style="background:#C9BFB3"></span>灰杏<span class="stp" style="margin-left:auto;height:32px"><button type="button" style="width:28px;height:30px">−</button><span>1</span><button type="button" style="width:28px;height:30px">＋</button></span></div>
+            <button type="button" class="pr" style="align-self:flex-end;min-height:28px;font-size:12px">單價 <u>$490</u></button>
+            <div style="display:flex;gap:6px"><button type="button" class="btn btn-g" style="flex:1;height:36px;padding:0">取消</button><button type="button" class="btn btn-o" style="flex:1;height:36px;padding:0">確定</button></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;color:#5A4A3C">已放進（收合）</span>
+          <div class="sum" style="flex-direction:column;align-items:stretch;gap:4px;padding:10px"><b style="color:#3F5A3B;font-size:13px">✓ 在採購籃</b><span style="display:flex;align-items:center;gap:5px;font-size:13px"><span class="dt" style="background:#C9BFB3"></span>灰杏 × 1<b class="num" style="margin-left:auto">NT$490</b></span><span style="display:flex;justify-content:space-between"><button type="button" class="lk" style="padding:0">調整</button><button type="button" class="lk rm" style="padding:0">移出</button></span></div>
+          <a class="btn btn-g" href="#" style="height:36px;color:#3E6270;font-size:13px">拿去試搭</a>
+        </div>
+      </div>
+      <p class="cap">欄寬窄，所以編輯區只放必要的；預設是收合摘要，表格不會被一堆黃框撐高。一次只能有一欄在編輯中，打開另一欄時，前一欄若有沒確定的變更，先問「要放棄修改嗎？」。</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <h2 class="vh"><b>D　採購籃抽屜裡</b><span>每一列可以展開調整</span></h2>
+      <div class="stage" style="padding:0;overflow:hidden">
+        <div style="background:#FFFCF6;padding:4px 16px">
+          <div style="display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1.5px dashed #EADCC6">
+            <span style="width:44px;height:52px;border-radius:8px;background:#E8E2DA"></span>
+            <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">半領抓褶磨毛上衣</span><span style="display:flex;align-items:center;gap:5px;font-size:12px;color:#5A4A3C"><span class="dt" style="background:#9A9893"></span>灰色 × 1</span></span>
+            <span style="display:flex;flex-direction:column;align-items:flex-end"><b class="num">NT$769</b><span><button type="button" class="lk" style="padding:0 4px;font-size:12px">調整</button><button type="button" class="lk rm" style="padding:0 4px;font-size:12px">移出</button></span></span>
+          </div>
+          <div style="padding:12px 0;display:flex;flex-direction:column;gap:10px">
+            <div style="display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center">
+              <span style="width:44px;height:52px;border-radius:8px;background:#E6EEE2"></span>
+              <span style="font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">#30876 本檔必收超舒服寬鬆好穿大學T</span>
+              <span style="font-size:12px;color:#5A4A3C">調整中</span>
+            </div>
+            <div class="mini" style="margin-left:54px">
+              <div style="display:flex;gap:4px;flex-wrap:wrap"><span class="sc" aria-pressed="false" style="height:30px;font-size:12px"><span class="s" style="width:18px;height:18px;background:#EAD9C6"></span>杏</span><span class="sc" aria-pressed="true" style="height:30px;font-size:12px"><span class="s" style="width:18px;height:18px;background:#C9BFB3"></span>灰杏</span><span class="sc" aria-pressed="true" style="height:30px;font-size:12px"><span class="s" style="width:18px;height:18px;background:#1E1C1B"></span>黑</span></div>
+              <div class="ln" style="border-top:0;padding:0"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#C9BFB3"></span>灰杏</span><span class="stp" style="height:32px"><button type="button" style="width:28px;height:30px">−</button><span>1</span><button type="button" style="width:28px;height:30px">＋</button></span><button type="button" class="pr" style="font-size:12px">$<u>490</u></button></div>
+              <div class="ln" style="padding:6px 0 0"><span style="display:flex;align-items:center;gap:6px"><span class="dt" style="background:#1E1C1B"></span>黑</span><span class="stp" style="height:32px"><button type="button" style="width:28px;height:30px">−</button><span>1</span><button type="button" style="width:28px;height:30px">＋</button></span><button type="button" class="pr" style="font-size:12px">$<u>490</u></button></div>
+              <div style="display:flex;align-items:center;gap:6px"><span style="font-size:12.5px">2 件・<b class="num">NT$980</b></span><button type="button" class="btn btn-g" style="margin-left:auto;height:34px;padding:0 10px">取消</button><button type="button" class="btn btn-o" style="height:34px;padding:0 12px">確定</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="cap">一次只展開一列；確定後總金額、件數、進度條立刻更新。「移出」拿掉整件（狀態回考慮中），列尾跳出「已移出・復原」。</p>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2280}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

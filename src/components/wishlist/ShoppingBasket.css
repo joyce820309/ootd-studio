@@ -32,26 +32,3 @@
 .shopping-basket__grip { align-self: center; width: 40px; height: 4px; flex: none; margin-top: 8px; border-radius: 2px; background: var(--color-line-strong); }
 
 /* 購買明細編輯（比較欄下方／採購籃） */
-.buy-lines { display: flex; flex-direction: column; gap: 8px; border-radius: 12px; padding: 10px; background: var(--color-card-selected); box-shadow: inset 0 0 0 1.5px var(--color-oat); }
-.buy-lines.is-compact { gap: 6px; border-radius: 0; padding: 0; background: transparent; box-shadow: none; }
-.buy-lines__row { display: flex; flex-direction: column; gap: 6px; padding-bottom: 6px; border-bottom: 1.5px dashed var(--color-line); }
-.buy-lines.is-compact .buy-lines__row { flex-direction: row; flex-wrap: wrap; align-items: center; border-bottom: 0; padding-bottom: 0; }
-.buy-lines__color { display: flex; min-width: 0; align-items: center; gap: 6px; font-size: 13px; }
-.buy-lines.is-compact .buy-lines__color { min-width: 72px; flex: 1; }
-.buy-lines__dot { display: inline-block; width: 14px; height: 14px; flex: none; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgb(59 47 37 / 0.18); }
-.buy-lines__remove { display: inline-flex; width: 32px; height: 32px; flex: none; align-items: center; justify-content: center; margin-left: auto; border: 0; border-radius: 8px; background: none; color: var(--color-rose-ink); font-size: 16px; cursor: pointer; }
-.buy-lines__remove:disabled { color: var(--color-ink-3); opacity: 0.4; cursor: default; }
-.buy-lines__controls { display: flex; min-width: 0; align-items: center; gap: 6px; }
-.buy-lines__stepper { display: inline-flex; height: 34px; flex: none; align-items: center; overflow: hidden; border: 1.5px solid var(--color-line-strong); border-radius: 10px; background: var(--color-card); }
-.buy-lines__stepper button { width: 32px; height: 100%; border: 0; background: transparent; color: var(--color-ink); font-size: 15px; cursor: pointer; }
-.buy-lines__stepper button:disabled { color: var(--color-ink-3); opacity: 0.4; cursor: default; }
-.buy-lines__stepper > span { min-width: 24px; text-align: center; font-size: 14px; font-weight: 700; }
-.buy-lines__price { display: inline-flex; height: 34px; min-width: 0; flex: 1; align-items: center; gap: 2px; border: 1.5px solid var(--color-line-strong); border-radius: 10px; padding: 0 8px; background: var(--color-card); }
-.buy-lines__price > span[aria-hidden] { color: var(--color-ink-3); font-size: 11px; }
-.buy-lines__price input { width: 100%; min-width: 40px; border: 0; background: transparent; color: var(--color-ink); font-size: 14px; outline: none; }
-.buy-lines__price:focus-within { border-color: var(--color-mist-deep); }
-.buy-lines__add { min-height: 32px; border: 0; padding: 0; background: none; color: var(--color-mist-deep); font: 500 12.5px var(--font-sans); cursor: pointer; }
-.buy-lines__menu { position: absolute; top: 100%; left: 0; z-index: 5; display: flex; min-width: 140px; flex-direction: column; border-radius: 12px; padding: 6px; background: var(--color-card); box-shadow: var(--shadow-float), 0 0 0 1.5px var(--color-line); }
-.buy-lines__menu button { display: flex; min-height: 40px; align-items: center; gap: 8px; border: 0; border-radius: 8px; padding: 0 10px; background: transparent; color: var(--color-ink); font: 400 13px var(--font-sans); text-align: left; cursor: pointer; }
-.buy-lines__menu button:hover { background: var(--color-tile); }
-.buy-lines button:focus-visible { outline: 2.5px solid var(--color-mist-deep); outline-offset: 2px; }

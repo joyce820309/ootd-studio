@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { Icon } from '@/components/ui/Icon'
-import { BuyLinesEditor } from '@/components/wishlist/BuyLinesEditor'
+import { BuyPickerEditor } from '@/components/wishlist/BuyPicker'
 import { basketText, buyLinesText, targetProgress, type BasketRow, type BasketSummary } from '@/lib/basket'
 import { todayISO } from '@/lib/date'
 import { formatNT } from '@/lib/wishlist'
@@ -18,17 +18,22 @@ interface ShoppingBasketProps {
   saving: boolean
   onClose: () => void
   onTarget: (target: number | null) => void
-  onLines: (item: WishlistItem, lines: BuyLine[]) => void
+  /** 列上的「調整」按確定後：寫入新的明細 */
+  onAdjust: (item: WishlistItem, lines: BuyLine[]) => Promise<boolean>
+  /** 列上的「移出」：狀態回考慮中，跳「已移出・復原」 */
+  onRemove: (item: WishlistItem) => void
   onBought: (input: { purchaseDate: string; rows: BasketRow[] }) => void
   onCopied: (ok: boolean) => void
 }
 
 /**
- * 採購籃（B23.3／BM20.3）：所有「準備購買」依比較分組。桌機右側抽屜寬 470；手機 Bottom Sheet，可直接改件數和單價。
+ * 採購籃（B23.3／BM20.3）：所有「準備購買」依比較分組。桌機右側抽屜寬 470；手機 Bottom Sheet。
+ * 每一列右邊「調整｜移出」；「調整」在那一列下方展開購買明細選擇器（B28 D，一次只展開一列），按確定才寫入。
  */
-export function ShoppingBasket({ basket, target, mobile, saving, onClose, onTarget, onLines, onBought, onCopied }: ShoppingBasketProps) {
+export function ShoppingBasket({ basket, target, mobile, saving, onClose, onTarget, onAdjust, onRemove, onBought, onCopied }: ShoppingBasketProps) {
   const panelRef = useRef<HTMLElement>(null)
   const [boughtOpen, setBoughtOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const progress = targetProgress(basket.total, target)
 
   useEffect(() => {
@@ -72,15 +77,26 @@ export function ShoppingBasket({ basket, target, mobile, saving, onClose, onTarg
       <div className="shopping-basket__body">
         {basket.groups.map((group) => <section key={group.id} aria-label={group.name} className="flex flex-col">
           <h3 className="mt-3 mb-0.5 flex items-baseline gap-2 text-[13px] font-normal"><span className="font-hd text-[17px]">{group.name}</span><span className="text-ink-2">{group.id === 'other' ? '' : '比較・'}{group.qty} 件</span></h3>
-          {group.rows.map((row) => <div key={row.item.id} className="shopping-basket__row">
-            <span className="shopping-basket__thumb" style={{ backgroundColor: row.item.colorHex + '26' }}><ItemImage name={row.item.name} cutoutUrl={row.item.cutoutUrl} shape={row.item.shape} colorHex={row.item.colorHex} className="h-[80%] w-[72%]" /></span>
-            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="truncate text-[13px] font-medium" title={row.item.name}>{row.item.name}</span>
-              {!mobile && <span className="text-xs text-ink-2">{buyLinesText(row.lines)}</span>}
-            </span>
-            <b className="font-num text-sm tabular">{formatNT(row.total)}</b>
-            {mobile && <div className="shopping-basket__editor"><BuyLinesEditor compact item={row.item} lines={row.lines} disabled={saving} onChange={(lines) => onLines(row.item, lines)} /></div>}
-          </div>)}
+          {group.rows.map((row) => {
+            const editing = editingId === row.item.id
+            return <div key={row.item.id} className="shopping-basket__row">
+              <span className="shopping-basket__thumb" style={{ backgroundColor: row.item.colorHex + '26' }}><ItemImage name={row.item.name} cutoutUrl={row.item.cutoutUrl} shape={row.item.shape} colorHex={row.item.colorHex} className="h-[80%] w-[72%]" /></span>
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="truncate text-[13px] font-medium" title={row.item.name}>{row.item.name}</span>
+                {!editing && <span className="text-xs text-ink-2">{buyLinesText(row.lines)}</span>}
+              </span>
+              {editing ? <span className="text-xs text-ink-2">調整中</span> : <span className="flex flex-col items-end">
+                <b className="font-num text-sm tabular">{formatNT(row.total)}</b>
+                <span className="flex">
+                  <button type="button" disabled={saving} onClick={() => setEditingId(row.item.id)} aria-label={`調整：${row.item.name}`} className="buy-summary__link min-h-8 px-1 text-xs">調整</button>
+                  <button type="button" disabled={saving} onClick={() => onRemove(row.item)} aria-label={`移出：${row.item.name}`} className="buy-summary__link is-remove min-h-8 px-1 text-xs">移出</button>
+                </span>
+              </span>}
+              {editing && <div className="shopping-basket__editor buy-picker__mini-box">
+                <BuyPickerEditor item={row.item} variant="mini" saving={saving} onCancel={() => setEditingId(null)} onConfirm={(lines) => void onAdjust(row.item, lines).then((ok) => { if (ok) setEditingId(null) })} />
+              </div>}
+            </div>
+          })}
         </section>)}
       </div>
 

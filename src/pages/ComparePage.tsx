@@ -14,7 +14,7 @@ import { WishlistAiPanel } from '@/components/wishlist/WishlistAiPanel'
 import { WishlistForm } from '@/components/wishlist/WishlistForm'
 import { WishlistBar } from '@/components/wishlist/WishlistLayout'
 import { CompareWrapUpDialog } from '@/components/wishlist/CompareWrapUpDialog'
-import { BuyLinesEditor } from '@/components/wishlist/BuyLinesEditor'
+import { BuyPickerEditor, BuySummary } from '@/components/wishlist/BuyPicker'
 import { ShoppingBasket } from '@/components/wishlist/ShoppingBasket'
 import { effectiveBuyLines } from '@/lib/basket'
 import { useBasket } from '@/lib/useBasket'
@@ -315,6 +315,10 @@ export function ComparePage() {
   const [aiOpen, setAiOpen] = useState(false)
   const [aiInclude, setAiInclude] = useState<Set<AiInclude>>(defaultAiIncludes)
   const [wrapUpOpen, setWrapUpOpen] = useState(false)
+  // 比較欄的購買明細選擇器（B28 C）：一次只能有一欄在編輯；換欄前若有沒確定的變更，先問要不要放棄
+  const [buyEditingId, setBuyEditingId] = useState<string | null>(null)
+  const [buyDirty, setBuyDirty] = useState(false)
+  const [buySwitchTo, setBuySwitchTo] = useState<string | null>(null)
   const [deleteGroup, setDeleteGroup] = useState<DeleteState>(null)
   const [addFormOpen, setAddFormOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<WishlistItem | null>(null)
@@ -358,6 +362,19 @@ export function ComparePage() {
   useEffect(() => { void load() }, [load])
   const basketGroups = useMemo(() => groups ?? [], [groups])
   const shopping = useBasket({ items: wishlist, setItems: setWishlist, groups: basketGroups, links, setToast, reload: load })
+  const buyCell: BuyCellApi = {
+    editingId: buyEditingId,
+    saving: shopping.saving,
+    start: (item) => {
+      if (buyEditingId && buyEditingId !== item.id && buyDirty) { setBuySwitchTo(item.id); return }
+      setBuyDirty(false)
+      setBuyEditingId(item.id)
+    },
+    cancel: () => { setBuyEditingId(null); setBuyDirty(false) },
+    confirm: (item, lines) => { void shopping.putInBasket(item, lines).then((ok) => { if (ok) { setBuyEditingId(null); setBuyDirty(false) } }) },
+    setDirty: setBuyDirty,
+    remove: (item) => { if (buyEditingId === item.id) setBuyEditingId(null); void shopping.takeOutOfBasket(item) },
+  }
   const group = groups?.find((entry) => entry.id === id) ?? null
   const activeGroups = useMemo(() => (groups ?? []).filter((entry) => !entry.archivedAt), [groups])
   const archivedGroups = useMemo(() => (groups ?? []).filter((entry) => !!entry.archivedAt), [groups])
@@ -605,22 +622,32 @@ export function ComparePage() {
         {!groupLinks.length ? (
           <div className="mt-1 rounded-card bg-card p-8 text-center shadow-paper"><h2 className="m-0 font-hd text-2xl">這個比較還沒有商品</h2><p className="mx-auto my-2 max-w-md text-sm leading-6 text-ink-2">加入選購清單裡的候選，排成比較表。商品可以同時放在多個比較裡。</p><Button variant="oat" onClick={() => setPickerOpen(true)}><Icon name="plus" />加入商品</Button></div>
         ) : isMobile ? (
-          <MobileCompare onPreview={(candidate) => openPreview(candidate.item)} columns={mobileCandidates} sections={unfolded(mobileSections)} folded={folded} onUnfold={toggleFold} indexes={mobileIndexes} total={candidates.length} onMove={moveMobile} onToggleReady={(candidate) => void shopping.toggleReady(candidate.item)} onChooseSize={(candidate, size) => void chooseSize(candidate.item, size)} />
+          <MobileCompare onPreview={(candidate) => openPreview(candidate.item)} columns={mobileCandidates} sections={unfolded(mobileSections)} folded={folded} onUnfold={toggleFold} indexes={mobileIndexes} total={candidates.length} onMove={moveMobile} buy={buyCell} onChooseSize={(candidate, size) => void chooseSize(candidate.item, size)} />
         ) : (
-          <DesktopCompare previewId={previewItem?.id ?? null} onPreview={(candidate) => openPreview(candidate.item)} candidates={candidates} indexes={pageIndexes} sections={unfolded(visibleSections)} folded={folded} onUnfold={toggleFold} showSizeRow={!hiddenSizeRow} onPage={(direction) => setDeskStart(Math.max(0, pageStart + direction * DESK_PAGE))} onAdd={() => setPickerOpen(true)} onRemove={(candidate) => void removeItem(candidate.item)} onMove={(from, to) => { const next = [...candidates.map((candidate) => candidate.item.id)]; const [moved] = next.splice(from, 1); next.splice(to, 0, moved); void reorderItems(next) }} onToggleReady={(candidate) => void shopping.toggleReady(candidate.item)} onLines={(candidate, lines) => void shopping.saveLines(candidate.item, lines)} onChooseSize={(candidate, size) => void chooseSize(candidate.item, size)} />
+          <DesktopCompare previewId={previewItem?.id ?? null} onPreview={(candidate) => openPreview(candidate.item)} candidates={candidates} indexes={pageIndexes} sections={unfolded(visibleSections)} folded={folded} onUnfold={toggleFold} showSizeRow={!hiddenSizeRow} onPage={(direction) => setDeskStart(Math.max(0, pageStart + direction * DESK_PAGE))} onAdd={() => setPickerOpen(true)} onRemove={(candidate) => void removeItem(candidate.item)} onMove={(from, to) => { const next = [...candidates.map((candidate) => candidate.item.id)]; const [moved] = next.splice(from, 1); next.splice(to, 0, moved); void reorderItems(next) }} buy={buyCell} onChooseSize={(candidate, size) => void chooseSize(candidate.item, size)} />
         )}
         {onlyDifferent && hiddenRows > 0 && <p className="compare-page__diff-summary mx-1 mt-3 flex flex-wrap items-center rounded-btn bg-oat-soft px-3 py-1.5 text-[13px] leading-5 text-oat-ink">已收起 {hiddenRows} 列看得到的幾件都一樣的：{hiddenNames.join('、')}。<button type="button" onClick={() => setOnlyDifferent(false)} className="min-h-10 px-1.5 text-mist-deep underline">全部顯示</button></p>}
       </section>
 
       {isMobile && <div className="compare-page__mobile-actions fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-20 flex gap-2 border-t-[1.5px] border-dashed border-line-strong bg-card px-3 py-2"><Button variant="oat" className="flex-1" onClick={() => setPickerOpen(true)}><Icon name="plus" size={18} />加入商品</Button><Button variant="secondary" className="flex-1" disabled={!candidates.length} onClick={() => setAiOpen(true)}><Icon name="copy" size={17} />整理給 AI</Button></div>}
 
-      {previewItem && <ComparePreview items={candidates.map((candidate) => candidate.item)} currentId={previewItem.id} mobile={isMobile} keyboard={!dialogOpen} onSelect={(itemId) => setPreview(itemId, false)} onClose={closePreview} onEdit={setEditingItem} onRemove={(item) => { closePreview(); void removeItem(item) }} onToggleReady={(item) => void shopping.toggleReady(item)} studioUrl={studioUrl} coverPaths={Object.fromEntries(candidates.map((candidate) => [candidate.item.id, candidate.link.coverPhotoPath]))} onSetCover={(item, path) => void chooseCover(item, path)} />}
+      {previewItem && <ComparePreview items={candidates.map((candidate) => candidate.item)} currentId={previewItem.id} mobile={isMobile} keyboard={!dialogOpen} onSelect={(itemId) => setPreview(itemId, false)} onClose={closePreview} onEdit={setEditingItem} onRemove={(item) => { closePreview(); void removeItem(item) }} onPutInBasket={(item, lines) => shopping.putInBasket(item, lines)} onTakeOut={(item) => void shopping.takeOutOfBasket(item)} studioUrl={studioUrl} coverPaths={Object.fromEntries(candidates.map((candidate) => [candidate.item.id, candidate.link.coverPhotoPath]))} onSetCover={(item, path) => void chooseCover(item, path)} />}
       <FloatActions hidden={dialogOpen || groupsSheetOpen || !!previewItem || shopping.open} fold={groupLinks.length ? { open: foldOpen, count: foldSections.length, onToggle: toggleFold, controls: 'compare-body' } : undefined} basket={{ qty: shopping.basket.qty, onOpen: openBasket }} />
       {pickerOpen && <ComparePickerDialog groupId={group.id} groupName={group.name} items={wishlist} groupWishlistIds={groupLinks.map((entry) => entry.wishlistItemId)} memberships={memberships} onClose={() => setPickerOpen(false)} onAdd={(ids) => void addItems(ids)} onAddUrl={() => { setPickerOpen(false); setAddFormOpen(true) }} />}
       {editingItem && <WishlistForm key={`edit-${editingItem.id}`} item={editingItem} saving={saving} onCancel={() => setEditingItem(null)} onSubmit={(input) => void saveEdit(editingItem, input)} />}
       {addFormOpen && <WishlistForm key="compare-add" saving={saving} onCancel={() => setAddFormOpen(false)} onSubmit={(input) => void addFromForm(input)} />}
       {wrapUpOpen && <CompareWrapUpDialog others={groupItems.filter((item) => item.status === 'considering' || item.status === 'dropped')} readyCount={readyHere.length} groupName={group.name} saving={saving} onCancel={() => setWrapUpOpen(false)} onConfirm={(input) => void confirmWrapUp(input)} />}
-      {shopping.open && <ShoppingBasket basket={shopping.basket} target={shopping.target} mobile={isMobile} saving={shopping.saving} onClose={() => shopping.setOpen(false)} onTarget={(value) => void shopping.changeTarget(value)} onLines={(item, lines) => void shopping.saveLines(item, lines)} onBought={(input) => void shopping.markBought(input)} onCopied={(ok) => setToast(ok ? { tone: 'success', text: '採購清單已複製。' } : { tone: 'error', text: '無法複製，請再試一次。' })} />}
+      {buySwitchTo && (
+        <DestructiveActionDialog
+          title="要放棄修改嗎？"
+          description="另一欄的顏色和件數還沒按「確定」，換到這一欄的話，剛剛的修改不會存下來。"
+          confirmLabel="放棄修改"
+          cancelLabel="回去繼續改"
+          onCancel={() => setBuySwitchTo(null)}
+          onConfirm={() => { setBuyEditingId(buySwitchTo); setBuyDirty(false); setBuySwitchTo(null) }}
+        />
+      )}
+      {shopping.open && <ShoppingBasket basket={shopping.basket} target={shopping.target} mobile={isMobile} saving={shopping.saving} onClose={() => shopping.setOpen(false)} onTarget={(value) => void shopping.changeTarget(value)} onAdjust={(item, lines) => shopping.putInBasket(item, lines)} onRemove={(item) => void shopping.takeOutOfBasket(item)} onBought={(input) => void shopping.markBought(input)} onCopied={(ok) => setToast(ok ? { tone: 'success', text: '採購清單已複製。' } : { tone: 'error', text: '無法複製，請再試一次。' })} />}
       {deleteGroup && <DestructiveActionDialog title={`刪除「${deleteGroup.name}」？`} description="只會刪除這個比較和它的商品關聯，選購清單中的商品不會被刪除。" confirmLabel="刪除比較" onCancel={() => setDeleteGroup(null)} onConfirm={() => void confirmDeleteGroup()} />}
       {aiOpen && <CompareAiDialog candidates={candidates} closet={closet} body={body} bodyProfile={bodyProfile} allowBody={allowBody} include={aiInclude} onIncludeChange={setAiInclude} onClose={() => setAiOpen(false)} onCopied={(ok) => setToast(ok ? { tone: 'success', text: '比較資料已複製，可貼到外部 AI。' } : { tone: 'error', text: '無法複製，請手動選取預覽文字。' })} />}
       {groupsSheetOpen && <CompareGroupsSheet groups={showArchived ? archivedGroups : activeGroups} currentId={group.id} onClose={() => setGroupsSheetOpen(false)} onCreate={() => void createBlankCompare()} onToggleArchived={() => setShowArchived((value) => !value)} archivedCount={archivedGroups.length} showArchived={showArchived} />}
@@ -693,7 +720,7 @@ function CompareGroupMenu({ current, activeGroups, archivedGroups, links, wishli
   </div>
 }
 
-function DesktopCompare({ previewId, onPreview, candidates, indexes, sections, folded, onUnfold, showSizeRow, onPage, onAdd, onRemove, onMove, onToggleReady, onLines, onChooseSize }: { previewId: string | null; onPreview: (candidate: CompareCandidate) => void; candidates: CompareCandidate[]; indexes: number[]; sections: TableSection[]; folded: string[]; onUnfold: () => void; showSizeRow: boolean; onPage: (direction: -1 | 1) => void; onAdd: () => void; onRemove: (candidate: CompareCandidate) => void; onMove: (from: number, to: number) => void; onToggleReady: (candidate: CompareCandidate) => void; onLines: (candidate: CompareCandidate, lines: BuyLine[]) => void; onChooseSize: (candidate: CompareCandidate, size: string) => void }) {
+function DesktopCompare({ previewId, onPreview, candidates, indexes, sections, folded, onUnfold, showSizeRow, onPage, onAdd, onRemove, onMove, buy, onChooseSize }: { previewId: string | null; onPreview: (candidate: CompareCandidate) => void; candidates: CompareCandidate[]; indexes: number[]; sections: TableSection[]; folded: string[]; onUnfold: () => void; showSizeRow: boolean; onPage: (direction: -1 | 1) => void; onAdd: () => void; onRemove: (candidate: CompareCandidate) => void; onMove: (from: number, to: number) => void; buy: BuyCellApi; onChooseSize: (candidate: CompareCandidate, size: string) => void }) {
   const [dragged, setDragged] = useState<string | null>(null)
   const [announcement, setAnnouncement] = useState('')
   const [compact, setCompact] = useState(false)
@@ -784,8 +811,7 @@ function DesktopCompare({ previewId, onPreview, candidates, indexes, sections, f
         <th scope="row" className="compare-table__row-label align-top"><span className="block pt-3 text-xs leading-[1.6] text-ink-2">可以選好幾件，<br />也可以一件買多色</span></th>
         {shown.map((candidate) => <td key={candidate.item.id} className="compare-table__cell align-top">
           <div className="flex flex-col gap-2">
-            <ReadyToggle candidate={candidate} onToggle={() => onToggleReady(candidate)} />
-            {candidate.item.status === 'ready' && <BuyLinesEditor item={candidate.item} lines={effectiveBuyLines(candidate.item)} onChange={(lines) => onLines(candidate, lines)} />}
+            <CompareBuyCell item={candidate.item} buy={buy} />
             <ButtonLink to={studioUrl(candidate.item)} variant="ghost" className="w-full text-[13px] text-mist-deep" aria-label={`拿去試搭：${candidate.item.name}`}>拿去試搭</ButtonLink>
           </div>
         </td>)}
@@ -820,12 +846,27 @@ function SectionRows({ section, indexes, blanks, dimmed, anchor = false }: { sec
   </>
 }
 
-/** 「準備購買」開關（B23.3）：開＝狀態改準備購買並帶入預設明細；再按一次改回考慮中，明細保留 */
-function ReadyToggle({ candidate, onToggle }: { candidate: CompareCandidate; onToggle: () => void }) {
-  const { item } = candidate
+interface BuyCellApi {
+  editingId: string | null
+  saving: boolean
+  start: (item: WishlistItem) => void
+  cancel: () => void
+  confirm: (item: WishlistItem, lines: BuyLine[]) => void
+  setDirty: (dirty: boolean) => void
+  remove: (item: WishlistItem) => void
+}
+
+/**
+ * 比較欄底部的購買明細（B28 C）三種狀態：「＋ 準備購買」按鈕／編輯小卡（取消／確定）／收合的摘要卡（調整、移出）。
+ * 預設收合，表格不會被黃框撐高；按確定才寫入。
+ */
+function CompareBuyCell({ item, buy }: { item: WishlistItem; buy: BuyCellApi }) {
   if (item.status === 'bought') return <span className="compare-ready is-bought">已購買</span>
-  const on = item.status === 'ready'
-  return <button type="button" aria-pressed={on} onClick={onToggle} aria-label={`準備購買：${item.name}`} className={`compare-ready ${on ? 'is-on' : ''}`}>{on ? '✓ 準備購買' : '＋ 準備購買'}</button>
+  if (buy.editingId === item.id) {
+    return <div className="buy-picker__mini-box"><BuyPickerEditor item={item} variant="mini" saving={buy.saving} onCancel={buy.cancel} onDirtyChange={buy.setDirty} onConfirm={(lines) => buy.confirm(item, lines)} /></div>
+  }
+  if (item.status === 'ready') return <BuySummary item={item} lines={effectiveBuyLines(item)} variant="card" onAdjust={() => buy.start(item)} onRemove={() => buy.remove(item)} />
+  return <button type="button" onClick={() => buy.start(item)} aria-label={`準備購買：${item.name}`} className="compare-ready">＋ 準備購買</button>
 }
 
 function CellContent({ value }: { value: ValueCell }) {
@@ -833,7 +874,7 @@ function CellContent({ value }: { value: ValueCell }) {
   return <div className="compare-cell">{value.note ? <div className="compare-cell__note w-full min-w-0 rounded-btn bg-mist-soft px-2.5 py-2 text-xs leading-[1.65] text-ink"><span className="mb-1.5 block text-[11px] font-medium text-ink-2">尺寸備註</span>{value.noteSizes ? <div className="grid min-w-0 gap-1">{value.noteSizes.map((row) => <div key={row.size} className="grid min-w-0 grid-cols-[2.25rem_minmax(0,1fr)] items-start gap-1.5 rounded-sm bg-card/75 px-2 py-1.5"><b className="font-num text-ink">{row.size}</b><span className="min-w-0 break-words [overflow-wrap:anywhere]">{row.details}</span></div>)}</div> : <MarkdownNote value={value.note} />}</div> : <span className="compare-cell__main">{value.text}{value.colors?.map((color) => <span key={`${color.name}-${color.hex}`} title={`${color.name}${color.preferred ? '・最想要' : ''}`} aria-label={`${color.name}${color.preferred ? '・最想要' : ''}`} className={`compare-cell__color ${color.preferred ? 'is-preferred' : ''}`} style={{ backgroundColor: color.hex }} />)}</span>}{value.tag && <span className={`compare-cell__tag ${TONE_CLASSES[value.tag.tone]}`}>{value.tag.label}</span>}{value.hint && <small className="compare-cell__hint">{value.hint}</small>}{value.action && <Link to={value.action.href} className="inline-flex min-h-11 items-center text-xs font-medium text-mist-deep">{value.action.label}</Link>}</div>
 }
 
-function MobileCompare({ onPreview, columns, sections, folded, onUnfold, indexes, total, onMove, onToggleReady, onChooseSize }: { onPreview: (candidate: CompareCandidate) => void; columns: (CompareCandidate | null)[]; sections: TableSection[]; folded: string[]; onUnfold: () => void; indexes: [number, number]; total: number; onMove: (index: number, direction: -1 | 1) => void; onToggleReady: (candidate: CompareCandidate) => void; onChooseSize: (candidate: CompareCandidate, size: string) => void }) {
+function MobileCompare({ onPreview, columns, sections, folded, onUnfold, indexes, total, onMove, buy, onChooseSize }: { onPreview: (candidate: CompareCandidate) => void; columns: (CompareCandidate | null)[]; sections: TableSection[]; folded: string[]; onUnfold: () => void; indexes: [number, number]; total: number; onMove: (index: number, direction: -1 | 1) => void; buy: BuyCellApi; onChooseSize: (candidate: CompareCandidate, size: string) => void }) {
   const indexedValues = (row: TableRow) => indexes.map((index) => row.cells[index] ?? cell('—'))
   return <div className="compare-mobile mt-1">
     <div className="compare-mobile__products">
@@ -859,7 +900,7 @@ function MobileCompare({ onPreview, columns, sections, folded, onUnfold, indexes
       })}
       {folded.length > 0 && <div className="mt-4"><FoldBar names={folded} onUnfold={onUnfold} /></div>}
       <p className="m-0 mt-2 px-1 text-[11.5px] leading-[1.6] text-ink-2">按下「準備購買」後，顏色、件數、單價在下方採購籃裡調整。</p>
-      <div className="compare-mobile__buy-grid">{columns.map((candidate) => candidate ? <div key={candidate.item.id} className="flex flex-col gap-1.5"><ReadyToggle candidate={candidate} onToggle={() => onToggleReady(candidate)} /><ButtonLink to={studioUrl(candidate.item)} variant="ghost" className="w-full px-1 text-xs text-mist-deep"><Icon name="outfit" size={15} />拿去試搭</ButtonLink></div> : <span key="blank" />)}</div>
+      <div className="compare-mobile__buy-grid">{columns.map((candidate) => candidate ? <div key={candidate.item.id} className="flex min-w-0 flex-col gap-1.5"><CompareBuyCell item={candidate.item} buy={buy} /><ButtonLink to={studioUrl(candidate.item)} variant="ghost" className="w-full px-1 text-xs text-mist-deep"><Icon name="outfit" size={15} />拿去試搭</ButtonLink></div> : <span key="blank" />)}</div>
     </div>
   </div>
 }

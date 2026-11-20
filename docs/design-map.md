@@ -115,6 +115,7 @@
 | B25   | 特徵管理 | `B-Features-Manage.dc.html` | 1440 | `/me/features` |
 | B26   | 元件：右下角懸浮按鈕（回到頂端・展開／收起・採購籃） | `B-FloatToggle.dc.html` | 1440 | 元件（用在 B23、BM20、/wishlist） |
 | B27   | 元件：照片顏色標籤（紙膠帶） | `B-PhotoTag.dc.html` | 1440 | 元件（用在 B7.3、BM19.2、預覽） |
+| B28   | 元件：購買明細選擇器（顏色・件數・單價） | `B-BuyPicker.dc.html` | 1440 | 元件（用在 B7.3、BM19.2、B7、B23.2、B23.3、採購籃） |
 
 ## 手機
 
