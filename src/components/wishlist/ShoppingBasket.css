@@ -1,0 +1,57 @@
+/* 採購籃抽屜：桌機右側寬 470、全高；小於 1200 加淡灰底 */
+.shopping-basket { position: fixed; top: 0; right: 0; bottom: 0; z-index: 41; display: flex; width: min(470px, 100vw); flex-direction: column; background: var(--color-card); color: var(--color-ink); box-shadow: -18px 0 36px -20px rgb(59 47 37 / 0.45), -1.5px 0 0 var(--color-line); outline: none; }
+.shopping-basket__scrim { display: none; }
+@media (max-width: 1199px) { .shopping-basket__scrim { position: fixed; inset: 0; z-index: 40; display: block; background: rgb(59 47 37 / 0.18); } }
+.shopping-basket__head { display: flex; flex: none; align-items: center; gap: 8px; padding: 14px 10px 12px 20px; border-bottom: 1.5px dashed var(--color-line-strong); }
+.shopping-basket__icon-btn { display: inline-flex; width: 44px; height: 44px; flex: none; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: transparent; color: var(--color-ink); cursor: pointer; }
+.shopping-basket__icon-btn:hover { background: var(--color-tile); }
+.shopping-basket__target { display: flex; flex: none; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 12px 20px; background: var(--color-paper); }
+.shopping-basket__target-input { display: inline-flex; width: 130px; height: 40px; align-items: center; gap: 4px; border: 1.5px solid var(--color-line-strong); border-radius: 10px; padding: 0 10px; background: var(--color-card); }
+.shopping-basket__target-input > span { color: var(--color-ink-3); font-size: 11px; }
+.shopping-basket__target-input input { width: 100%; min-width: 0; border: 0; background: transparent; color: var(--color-ink); font-size: 14px; outline: none; }
+.shopping-basket__target-input:focus-within { border-color: var(--color-mist-deep); }
+.shopping-basket__body { min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 4px 20px 12px; }
+.shopping-basket__row { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 0; border-top: 1.5px dashed var(--color-line); }
+.shopping-basket__thumb { display: flex; width: 44px; height: 52px; align-items: center; justify-content: center; overflow: hidden; border-radius: 8px; }
+.shopping-basket__editor { grid-column: 2 / -1; }
+.shopping-basket__foot { display: flex; flex: none; flex-direction: column; gap: 10px; padding: 14px 20px 18px; border-top: 2px solid var(--color-ink); }
+.shopping-basket__track { display: block; height: 8px; flex: 1; overflow: hidden; border-radius: 4px; background: var(--color-tile); }
+.shopping-basket__track > span { display: block; height: 100%; background: var(--color-oat-edge); }
+.shopping-basket button:focus-visible,
+.shopping-basket input:focus-visible { outline: 2.5px solid var(--color-mist-deep); outline-offset: 2px; }
+
+/* 手機：Bottom Sheet */
+.shopping-basket.is-mobile { top: 70px; left: 0; width: auto; border-radius: 22px 22px 0 0; box-shadow: var(--shadow-sheet); }
+.shopping-basket.is-mobile .shopping-basket__head { padding: 4px 6px 6px 16px; border-bottom: 0; }
+.shopping-basket.is-mobile .shopping-basket__target { padding: 8px 16px; }
+.shopping-basket.is-mobile .shopping-basket__body { padding: 0 16px 12px; }
+.shopping-basket.is-mobile .shopping-basket__row { grid-template-columns: 40px minmax(0, 1fr) auto; }
+.shopping-basket.is-mobile .shopping-basket__thumb { width: 40px; height: 48px; }
+.shopping-basket.is-mobile .shopping-basket__foot { padding: 12px 16px calc(16px + env(safe-area-inset-bottom)); }
+.shopping-basket__scrim.is-mobile { position: fixed; inset: 0; z-index: 40; display: block; background: var(--color-scrim); }
+.shopping-basket__grip { align-self: center; width: 40px; height: 4px; flex: none; margin-top: 8px; border-radius: 2px; background: var(--color-line-strong); }
+
+/* 購買明細編輯（比較欄下方／採購籃） */
+.buy-lines { display: flex; flex-direction: column; gap: 8px; border-radius: 12px; padding: 10px; background: var(--color-card-selected); box-shadow: inset 0 0 0 1.5px var(--color-oat); }
+.buy-lines.is-compact { gap: 6px; border-radius: 0; padding: 0; background: transparent; box-shadow: none; }
+.buy-lines__row { display: flex; flex-direction: column; gap: 6px; padding-bottom: 6px; border-bottom: 1.5px dashed var(--color-line); }
+.buy-lines.is-compact .buy-lines__row { flex-direction: row; flex-wrap: wrap; align-items: center; border-bottom: 0; padding-bottom: 0; }
+.buy-lines__color { display: flex; min-width: 0; align-items: center; gap: 6px; font-size: 13px; }
+.buy-lines.is-compact .buy-lines__color { min-width: 72px; flex: 1; }
+.buy-lines__dot { display: inline-block; width: 14px; height: 14px; flex: none; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgb(59 47 37 / 0.18); }
+.buy-lines__remove { display: inline-flex; width: 32px; height: 32px; flex: none; align-items: center; justify-content: center; margin-left: auto; border: 0; border-radius: 8px; background: none; color: var(--color-rose-ink); font-size: 16px; cursor: pointer; }
+.buy-lines__remove:disabled { color: var(--color-ink-3); opacity: 0.4; cursor: default; }
+.buy-lines__controls { display: flex; min-width: 0; align-items: center; gap: 6px; }
+.buy-lines__stepper { display: inline-flex; height: 34px; flex: none; align-items: center; overflow: hidden; border: 1.5px solid var(--color-line-strong); border-radius: 10px; background: var(--color-card); }
+.buy-lines__stepper button { width: 32px; height: 100%; border: 0; background: transparent; color: var(--color-ink); font-size: 15px; cursor: pointer; }
+.buy-lines__stepper button:disabled { color: var(--color-ink-3); opacity: 0.4; cursor: default; }
+.buy-lines__stepper > span { min-width: 24px; text-align: center; font-size: 14px; font-weight: 700; }
+.buy-lines__price { display: inline-flex; height: 34px; min-width: 0; flex: 1; align-items: center; gap: 2px; border: 1.5px solid var(--color-line-strong); border-radius: 10px; padding: 0 8px; background: var(--color-card); }
+.buy-lines__price > span[aria-hidden] { color: var(--color-ink-3); font-size: 11px; }
+.buy-lines__price input { width: 100%; min-width: 40px; border: 0; background: transparent; color: var(--color-ink); font-size: 14px; outline: none; }
+.buy-lines__price:focus-within { border-color: var(--color-mist-deep); }
+.buy-lines__add { min-height: 32px; border: 0; padding: 0; background: none; color: var(--color-mist-deep); font: 500 12.5px var(--font-sans); cursor: pointer; }
+.buy-lines__menu { position: absolute; top: 100%; left: 0; z-index: 5; display: flex; min-width: 140px; flex-direction: column; border-radius: 12px; padding: 6px; background: var(--color-card); box-shadow: var(--shadow-float), 0 0 0 1.5px var(--color-line); }
+.buy-lines__menu button { display: flex; min-height: 40px; align-items: center; gap: 8px; border: 0; border-radius: 8px; padding: 0 10px; background: transparent; color: var(--color-ink); font: 400 13px var(--font-sans); text-align: left; cursor: pointer; }
+.buy-lines__menu button:hover { background: var(--color-tile); }
+.buy-lines button:focus-visible { outline: 2.5px solid var(--color-mist-deep); outline-offset: 2px; }

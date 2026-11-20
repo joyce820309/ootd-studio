@@ -1,0 +1,90 @@
+/* B26 右下角懸浮按鈕組：三顆 44×44 圖示鈕上下疊放，沒出現的不佔位 */
+.float-actions {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.float-actions__button {
+  position: relative;
+  display: flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--color-line-strong);
+  border-radius: 8px;
+  background: var(--color-card);
+  color: var(--color-ink);
+  padding: 0;
+  box-shadow: 0 1px 0 rgb(59 47 37 / 0.05), 0 10px 20px -10px rgb(59 47 37 / 0.45);
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s, background-color 0.15s;
+}
+.float-actions__button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.float-actions__button:hover { border-color: var(--color-ink); transform: translateY(-1px); }
+.float-actions__button:focus-visible { outline: 2.5px solid var(--color-mist-deep); outline-offset: 3px; }
+
+/* 回到頂端：捲過一個畫面才淡入 */
+.float-actions__button--top { animation: float-actions-fade-in 0.2s ease-out; }
+@keyframes float-actions-fade-in { from { opacity: 0; } }
+
+/* 已展開：箭頭朝上、霧藍底 */
+.float-actions__button--fold[aria-expanded='true'] { border-color: var(--color-mist); background: var(--color-mist-soft); color: var(--color-mist-ink); }
+.float-actions__button--fold[aria-expanded='true']:hover { border-color: var(--color-ink); }
+
+/* 採購籃：深色底、燕麥色圖示，右上角件數角標 */
+.float-actions__button--basket { border-color: var(--color-ink); background: var(--color-ink); color: var(--color-oat); }
+.float-actions__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: flex;
+  min-width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--color-oat);
+  box-shadow: 0 0 0 2px var(--color-paper);
+  color: var(--color-ink);
+  font: 700 10.5px/1 var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 左側文字提示：只給有滑鼠的裝置；滑過或鍵盤焦點時出現 */
+.float-actions__tip {
+  position: absolute;
+  top: 50%;
+  right: 54px; /* 按鈕 44px＋左側 10px 間距 */
+  display: none;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font: 500 12px/1.4 var(--font-sans);
+  white-space: nowrap;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .float-actions__button:hover .float-actions__tip,
+  .float-actions__button:focus-visible .float-actions__tip { display: block; }
+}
+
+/* 手機：讓開底部操作列（由頁面提供 --float-actions-bottom，已含 12px 與 safe-area） */
+@media (max-width: 767px) {
+  .float-actions { right: 12px; bottom: var(--float-actions-bottom, calc(12px + env(safe-area-inset-bottom))); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-actions__button, .float-actions__button:hover { transform: none; transition: border-color 0.15s, background-color 0.15s; }
+  .float-actions__button--top { animation: none; }
+}

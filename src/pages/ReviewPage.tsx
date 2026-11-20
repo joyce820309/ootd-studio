@@ -31,6 +31,7 @@ import {
 } from '@/lib/review'
 import type { BodyMeasurement, BodyProfile, ClosetItem, LessonRule, LessonRuleInput, ReviewRecord } from '@/types'
 import { toISODate } from '@/lib/date'
+import { materialMix, materialMixText } from '@/lib/materialMix'
 
 const slash = (iso?: string) => (iso ? iso.replace(/-/g, '/') : '')
 const shortDate = (iso?: string) => (iso ? iso.slice(5).replace('-', '/') : '')
@@ -460,7 +461,7 @@ export function ReviewPage() {
               </span>
               <span className="flex min-w-0 flex-col gap-0.5 text-[13px] text-ink-2">
                 {item.brand && <span>{item.brand}</span>}
-                {(item.materialComposition || item.material) && <span className="truncate">{item.materialComposition || item.material}</span>}
+                {materialMixText(materialMix(item)) && <span className="truncate">{materialMixText(materialMix(item))}</span>}
                 {item.purchasePrice != null && <span className="font-num tabular">NT${item.purchasePrice.toLocaleString('zh-TW')}</span>}
               </span>
             </PaperCard>
@@ -469,7 +470,7 @@ export function ReviewPage() {
                 {[
                   ['品牌', item.brand],
                   ['尺寸標', item.size],
-                  ['材質', item.materialComposition || item.material],
+                  ['材質', materialMixText(materialMix(item)) ?? undefined],
                   ['購買通路', item.store],
                   ['價格', item.purchasePrice != null ? `NT$${item.purchasePrice.toLocaleString('zh-TW')}${record.decision === 'returned' ? '・已退款' : record.decision === 'exchanged' && record.exchangeExtra ? `・補差價 NT$${record.exchangeExtra.toLocaleString('zh-TW')}` : ''}` : undefined],
                   ['購買日', slash(item.purchaseDate)],

@@ -1,0 +1,14 @@
+/* 選購清單／比較共用外框：兩頁同寬、同上緣，切換分頁時頁首不跳動 */
+.wishlist-shell { display: flex; max-width: 1360px; flex-direction: column; gap: 16px; margin-inline: auto; padding: 20px clamp(16px, 3vw, 40px) 0; }
+.wishlist-bar { display: flex; min-height: 52px; flex-wrap: wrap; align-items: center; gap: 12px; }
+/* 頁面放進來的控制項直接成為頁首的 flex 子項 */
+.wishlist-bar__slot { display: contents; }
+
+@media (max-width: 767px) {
+  .wishlist-bar.is-mobile-hidden { display: none; }
+}
+
+/* 桌機寬螢幕：預覽或採購籃抽屜開著時整頁讓出右邊 520px，不被抽屜蓋住 */
+@media (min-width: 1200px) {
+  .wishlist-shell.has-side-panel { max-width: none; margin-right: 520px; }
+}

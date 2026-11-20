@@ -9,14 +9,17 @@ import { MarkdownNoteField } from '@/components/ui/MarkdownNote'
 import { ImageUploadProgressState, CutoutFailureState, CutoutProcessingState } from '@/components/ui/B10States'
 import { CutoutRegionDialog } from '@/components/closet/CutoutRegionDialog'
 import { FlatMeasureField } from '@/components/closet/FlatMeasureField'
+import { FeatureTagPicker } from '@/components/ui/FeatureTagPicker'
 import { collectMeasures, SIZING, type FlatFieldValue, type MeasureField } from '@/lib/stretch'
 import { PaperCard, Tape, TiltLabel, WashBlob } from '@/components/ui/Paper'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
-import { fetchCategories, fetchClosetBrands, fetchManagedList, createManagedEntry, createGarmentDraft, updateGarmentDraft, finalizeGarmentDraft, discardGarmentDraft, removeItemBackground, getGarmentPhotoUrl, useLatestBody } from '@/lib/data'
+import { fetchCategories, fetchClosetBrands, fetchGarmentFeatures, fetchManagedList, createManagedEntry, createGarmentFeature, createGarmentDraft, updateGarmentDraft, finalizeGarmentDraft, discardGarmentDraft, removeItemBackground, getGarmentPhotoUrl, useLatestBody } from '@/lib/data'
 import { materialNames, parsePercentages } from '@/lib/materials'
+import { closetItemTypeOf } from '@/lib/wishlist'
+import { featureTypeKeys } from '@/lib/features'
 import { toUploadableImage } from '@/lib/image'
 import { GARMENT_COLORS } from '@/lib/colors'
-import type { AddItemDestination, Category, CutoutRegion, ManagedListSummary, NewGarmentInput } from '@/types'
+import type { AddItemDestination, Category, CutoutRegion, FeatureDefinition, FeatureDimension, ManagedListSummary, NewGarmentInput } from '@/types'
 
 type Step = 1 | 2 | 3 | 4
 type CutoutState = 'idle' | 'processing' | 'done' | 'failed' | 'demo'
@@ -38,6 +41,7 @@ const INPUT_CLASS = 'h-12 w-full rounded-btn border-[1.5px] border-line bg-card 
 const BASE_FORM: FormState = {
   name: '', categoryId: '', colorName: '燕麥', colorHex: '#D9CBB3', secondColorHex: '', brand: '', size: '',
   seasons: [], necklineSize: '', material: '', materialComposition: '', materialPercentages: {}, purchasePrice: null, purchaseDate: null, store: '', productUrl: '', note: '', flatMeasurements: {},
+  features: [], featureSuggestionsDismissed: [],
 }
 
 function slotSizing(category: Category | undefined): MeasureField[] {
@@ -76,6 +80,7 @@ export function AddItemPage() {
   const [brandSuggestions, setBrandSuggestions] = useState<string[]>([])
   const [shopSuggestions, setShopSuggestions] = useState<string[]>([])
   const [materials, setMaterials] = useState<ManagedListSummary[]>([])
+  const [featureDefinitions, setFeatureDefinitions] = useState<FeatureDefinition[]>([])
   const [customMaterialName, setCustomMaterialName] = useState('')
   const [showCustomMaterial, setShowCustomMaterial] = useState(false)
   const [addingMaterial, setAddingMaterial] = useState(false)
@@ -107,6 +112,11 @@ export function AddItemPage() {
 
   const selectedCategory = categories.find((category) => category.id === form.categoryId)
   const measurements = useMemo(() => slotSizing(selectedCategory), [selectedCategory])
+  const featureTypeIds = useMemo(() => {
+    if (!selectedCategory?.slot) return []
+    const type = closetItemTypeOf({ name: form.name, categoryName: selectedCategory.name, slot: selectedCategory.slot })
+    return featureTypeKeys(selectedCategory.slot, type?.id)
+  }, [form.name, selectedCategory])
   const body = useLatestBody()
   const selectedMaterials = useMemo(() => materialNames(form.material), [form.material])
   const materialPercentageValues = useMemo(() => parsePercentages(form.materialPercentages), [form.materialPercentages])
@@ -121,12 +131,13 @@ export function AddItemPage() {
 
   useEffect(() => {
     let alive = true
-    Promise.all([fetchCategories(), fetchClosetBrands().catch(() => []), fetchManagedList('shops'), fetchManagedList('materials')]).then(([items, brands, shops, materialList]) => {
+    Promise.all([fetchCategories(), fetchClosetBrands().catch(() => []), fetchManagedList('shops'), fetchManagedList('materials'), fetchGarmentFeatures()]).then(([items, brands, shops, materialList, features]) => {
       if (!alive) return
       setCategories(items)
       setBrandSuggestions(brands)
       setShopSuggestions(shops.entries.map((entry) => entry.name))
       setMaterials(materialList.entries.filter((entry) => !entry.isHidden))
+      setFeatureDefinitions(features)
       setForm((current) => ({ ...current, categoryId: current.categoryId || items[0]?.id || '' }))
     }).catch((cause: Error) => alive && setError(cause.message || '衣物分類載入失敗。'))
       .finally(() => alive && setLoadingCategories(false))
@@ -138,6 +149,20 @@ export function AddItemPage() {
 
   function updateForm<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }))
+  }
+
+  async function createFeatureFromPicker(name: string, dimension: FeatureDimension) {
+    const normalized = name.normalize('NFKC').trim().toLocaleLowerCase()
+    const existing = featureDefinitions.find((feature) => [feature.name, ...feature.aliases].some((value) => value.normalize('NFKC').trim().toLocaleLowerCase() === normalized))
+    if (existing) return existing
+    const feature: FeatureDefinition = {
+      name: name.trim(), dimension, aliases: [], applicableTypes: featureTypeIds,
+      sortOrder: Math.max(0, ...featureDefinitions.filter((entry) => entry.dimension === dimension).map((entry) => entry.sortOrder)) + 10,
+      isHidden: false, closetCount: 0, wishCount: 0,
+    }
+    await createGarmentFeature(feature)
+    setFeatureDefinitions((current) => [...current.filter((entry) => entry.name !== feature.name), feature])
+    return feature
   }
 
   const appendFiles = useCallback((list: FileList | File[]) => {
@@ -554,6 +579,20 @@ export function AddItemPage() {
               <div className="grid gap-3 sm:grid-cols-2"><div className="garment-brand-field flex min-w-0 flex-col gap-1.5"><span className="text-[13px] font-medium text-ink">品牌<small className="ml-1 text-[11px] font-normal text-ink-3">選填</small></span><Combobox label="品牌" value={form.brand ?? ''} options={brandSuggestions} onChange={(value) => updateForm('brand', value)} manageHref="/me/brands" /></div><Field label="標籤尺寸"><input value={form.size} onChange={(event) => updateForm('size', event.target.value)} placeholder="衣物標籤上寫的尺寸" className={INPUT_CLASS} /></Field></div>
               <Field label="季節" hint="可複選"><div className="flex flex-wrap gap-2">{SEASONS.map((season) => <Chip key={season} selected={form.seasons.includes(season)} onClick={() => toggleSeason(season)}>{season}</Chip>)}</div></Field>
             </FormSection>
+            <section className="rounded-card bg-card p-4 shadow-paper">
+              <div className="mb-2 flex justify-end"><Link to="/me/features" target="_blank" rel="noreferrer" className="flex min-h-11 items-center gap-1 text-xs font-medium text-mist-deep">管理特徵<Icon name="link" size={13} /><span className="sr-only">（在新分頁開啟）</span></Link></div>
+              <FeatureTagPicker
+                name={form.name}
+                definitions={featureDefinitions}
+                value={form.features ?? []}
+                dismissed={form.featureSuggestionsDismissed ?? []}
+                typeKeys={featureTypeIds}
+                onChange={(features) => updateForm('features', features)}
+                onDismissedChange={(dismissed) => updateForm('featureSuggestionsDismissed', dismissed)}
+                onCreate={createFeatureFromPicker}
+                disabled={saving || uploading}
+              />
+            </section>
             <FormSection title="平放尺寸" accent="mist" hint="單位 cm・選填">
               <div className="garment-sizing__guide rounded-tile bg-apricot p-3 text-xs leading-5 text-ink-2">平放在桌面量，不要拉扯布料；網拍尺寸表通常也是平放量。誤差 1–2 cm 屬於正常。有彈性的可以直接填「40-60」（平放 40，拉開後也量平放 60）。</div>
               {measurements.length > 0 ? <div className="garment-sizing__fields grid grid-cols-3 gap-3">{measurements.map((field) => <Fragment key={field.key}><FlatMeasureField field={field} value={form.flatMeasurements[field.key] ?? { text: '' }} body={body} onChange={(value) => updateForm('flatMeasurements', { ...form.flatMeasurements, [field.key]: value })} />{field.key === 'length' && necklineField && <div className="garment-sizing__neckline">{necklineField}</div>}</Fragment>)}{necklineField && !measurements.some((field) => field.key === 'length') && <div className="garment-sizing__neckline">{necklineField}</div>}</div> : <><p className="m-0 text-sm text-ink-2">這個分類暫無建議的平放尺寸欄位。</p>{necklineField}</>}
@@ -584,7 +623,7 @@ export function AddItemPage() {
           </section>}
 
         {step === 4 && <section className="grid gap-6 md:grid-cols-[260px_minmax(0,1fr)]">
-          <PaperCard className="relative space-y-3 p-3"><Tape accent="oat" /><PhotoPreview photo={photos[0]} title="搭配板預覽" /><div><p className="mb-1 font-medium">{form.name}</p><p className="m-0 text-sm text-ink-2">{form.colorName}・{form.brand || '未填品牌'}・{form.size || '未填尺寸'}</p></div><div className="flex flex-wrap gap-1.5"><span className="rounded-full bg-tile px-2.5 py-1 text-xs">{photos.length ? `${photos.length} 張照片` : '尚未上傳照片'}</span><span className="rounded-full bg-sage-soft px-2.5 py-1 text-xs text-sage-ink">{!photos.length ? '之後可補照片' : cutoutState === 'done' && useCutout ? '去背圖' : '使用原圖'}</span><span className="rounded-full bg-mist-soft px-2.5 py-1 text-xs text-mist-ink">平放尺寸 {Object.values(form.flatMeasurements).filter((value) => value.text.trim()).length} 項</span></div></PaperCard>
+          <PaperCard className="relative space-y-3 p-3"><Tape accent="oat" /><PhotoPreview photo={photos[0]} title="搭配板預覽" /><div><p className="mb-1 font-medium">{form.name}</p><p className="m-0 text-sm text-ink-2">{form.colorName}・{form.brand || '未填品牌'}・{form.size || '未填尺寸'}</p></div><div className="flex flex-wrap gap-1.5"><span className="rounded-full bg-tile px-2.5 py-1 text-xs">{photos.length ? `${photos.length} 張照片` : '尚未上傳照片'}</span><span className="rounded-full bg-sage-soft px-2.5 py-1 text-xs text-sage-ink">{!photos.length ? '之後可補照片' : cutoutState === 'done' && useCutout ? '去背圖' : '使用原圖'}</span><span className="rounded-full bg-mist-soft px-2.5 py-1 text-xs text-mist-ink">平放尺寸 {Object.values(form.flatMeasurements).filter((value) => value.text.trim()).length} 項</span></div>{form.features?.length ? <div className="flex flex-wrap gap-1.5" aria-label="已選特徵">{form.features.map((feature) => <span key={`${feature.dimension}-${feature.name}`} className="rounded-full bg-tile px-2.5 py-1 text-[11px] text-ink-2">{feature.name}</span>)}</div> : null}</PaperCard>
           <div className="space-y-5"><h1 className="m-0 font-hd text-3xl">要放到哪裡？</h1><div role="radiogroup" aria-label="儲存位置與到貨狀態" className="space-y-3"><ChoiceCard selected={destination === 'closet' && closetStatus === 'ok'} accent="sage" title="我的衣櫃（已購買）" description="可以馬上用在今日搭配。" onClick={() => { setDestination('closet'); setClosetStatus('ok') }} /><ChoiceCard selected={destination === 'closet' && closetStatus === 'not_arrived'} accent="mist" title="網購未到貨" description="先放進衣櫃管理；到貨前不會出現在可穿與搭配候選中。" onClick={() => { setDestination('closet'); setClosetStatus('not_arrived') }} /><ChoiceCard selected={destination === 'wishlist'} accent="rose" title="選購清單（還在考慮）" description="網拍穿搭照和尺寸表一起留著，方便比較。" disabled={!selectedCategory?.slot} onClick={() => setDestination('wishlist')} /></div><div className="space-y-1 rounded-tile bg-card p-4 text-sm text-ink-2"><p className="m-0">搭配板用圖：<b className="font-medium text-ink">{cutoutState === 'done' && useCutout ? '去背圖' : '封面原圖'}</b></p><p className="m-0">儲存狀態：<b className="font-medium text-ink">{destination === 'wishlist' ? '選購清單・考慮中' : closetStatus === 'not_arrived' ? '衣櫃・未到貨' : '衣櫃・可穿'}</b></p><p className="m-0">平放尺寸：<b className="font-medium text-ink">已填 {Object.values(form.flatMeasurements).filter((value) => value.text.trim()).length} 項</b></p></div><label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={continueAdding} onChange={(event) => setContinueAdding(event.target.checked)} className="size-5 accent-[var(--color-ink)]" />存好後繼續新增下一件</label></div>
         </section>}
       </div>

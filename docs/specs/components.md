@@ -20,9 +20,12 @@
 
 ## 共用元件慣例
 
-- 優先沿用 `components/ui`：Button、Chip／StatusTag、Checkbox、Select、Combobox、DatePicker、PaperCard、TiltLabel、Tape、WashBlob、StickyNote、Icon、Toast。
+- 優先沿用 `components/ui`：Button、Chip／StatusTag、Checkbox、Select、Combobox、DatePicker、PaperCard、TiltLabel、Tape、WashBlob、StickyNote、PhotoColorTag、Icon、Toast。
+- 便利貼 StickyNote（B19，全專案）：本體一律不旋轉（旋轉會讓瀏覽器重新取樣文字，字會糊）。角度只放在膠帶（-3°）和後面墊的另一張紙（同色系較深、旋轉 1°，`tilt="none"` 可不墊）。摺角統一在右下 22px：右下那塊是頁面底色、摺起來的三角在左上（`linear-gradient(135deg, 摺角色 50%, 頁面底色 50%)`）。另有 `tone="lavender"`、`paper="squared"`（22px 方格紙）、`titleStyle="label"`（14px 粗體標題＋`titleNote` 小字）、`size="compact"`、`fold={false}`，給選購商品完整頁面的小便利貼用。
+- 紙膠帶色（`--color-washi-*`）：燕麥黃、霧藍、鼠尾草、蜜桃粉、薰衣草，半透明平光；PhotoColorTag（B27）與便利貼膠帶共用。
 - 固定選項用 `components/ui/Select`；可輸入新值用 `Combobox`。不可使用原生 `<select>`／`<datalist>`。
 - 日期欄位用 `components/ui/DatePicker`，值為 `YYYY-MM-DD` 字串；不可使用 `<input type="date">`。日期工具在 `src/lib/date.ts`。
+- 材質比例 `components/ui/MaterialMix.tsx`：比例條＋圖例，規則見 [wishlist.md](wishlist.md) 的「材質比例」。一行文字用 `materialMixText`（`src/lib/materialMix.ts`），不要各頁自己組字串。
 - B21 Checkbox：`components/ui/Checkbox.tsx`。點擊區 44×44，視覺框 24px／圓角 7px；使用透明原生 checkbox 支援鍵盤與輔助科技；勾選、部分選取、停用與焦點視覺依 B21。卡片內嵌外觀可用 `CheckboxMark`，但須保留原生 input 語意。
 - Header 使用紙色背景與燕麥色 Logo 貼紙，導覽目前頁面用燕麥色底線。
 - 圓角 token：`rounded-tag`（3）、`rounded-sm`（8）、`rounded-btn`（10）、`rounded-tile`（12）、`rounded-card`（14）、`rounded-block`（20）。陰影 token：`shadow-paper`、`shadow-sticker`、`shadow-float`、`shadow-sheet`、`shadow-oat`；衣物圖用 `drop-shadow-garment`。
@@ -36,11 +39,15 @@
 - 使用語意 HTML 與正確的 label；選擇狀態不能只靠顏色表達。
 - 尊重 `prefers-reduced-motion`。對話框、bottom sheet、表單須提供關閉／錯誤處理並避免焦點遺失。
 - 空狀態、載入中、錯誤、離線都要有畫面；參考 `design/general/B-States.dc.html`。
+- 原生 `<dialog>` 的 class 不可直接放 `flex`／`grid` 等 display 工具類，會蓋掉瀏覽器「未開啟就隱藏」的預設，關閉後畫面仍留著。改用 `hidden open:flex`，或在 CSS 寫 `.xxx[open] { display: flex; }` 並以 `hidden` 當基底。
 
 ### 選色器 ColorPicker（design/B-ColorPicker.dc.html）
 - 取代原生 input type="color"；不使用瀏覽器 EyeDropper API（只取單點、iOS 不支援）
 - 分頁「色名」：GARMENT_COLORS 依 family 分排，色塊下顯示色名；最上排為最近用過 6 色
 - 分頁「從照片取色」：只能在該衣物自己的照片上取色；圓圈直徑＝圖片短邊 4%（最少 9 px），在原圖座標取樣
 - 取色演算法：排除亮度最暗與最亮各 10% 的像素，R、G、B 各取中位數；用 OKLab 距離對應最近的色名，依距離顯示「很接近／差一點／差蠻多」
-- 儲存 { name, family, hex, source: 'photo' | 'pick' }；「只用色名」時 hex 用色票預設值
+- 回傳 { name, family（色系）, hex, source: 'photo' | 'palette', nameCustom }；底部名稱可直接改，改過（或這一色原本就是自訂名）時重新取色不覆蓋，回傳 `nameCustom: true`；沒改則回傳建議名
+- 一次只綁定一色：觸發鈕 `trigger="swatch"`（44px 色塊，標題「改『X』這一色・只動這一列」）或 `trigger="add"`（「＋ 新增顏色」，加在最後）
+- 底部：目前色 → 新選的色、可編輯的名稱框（建議名：「建議名，可直接改」；自訂名：「用你改的名稱，重新取色不會換掉」），再來是取消／套用。照片取色結果寫「歸類：X・建議名稱『Y』」，按鈕「套用這個顏色」
+- HEX 只在選色器裡顯示與輸入；色票格子不常駐在表單裡
 - 用在：B6 新增衣物、B7.1 加入選購、換貨換顏色

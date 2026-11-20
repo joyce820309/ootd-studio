@@ -59,3 +59,42 @@ export const GARMENT_COLORS = [
   { name: '多色', hex: '#8C9A86', family: 'other', pattern: 'multi' },
   { name: '其他', hex: '#D9C7AC', family: 'other' },
 ] as const
+export type ColorFamilyId = (typeof COLOR_FAMILIES)[number]['id']
+
+/** 色系顯示名（「白米」「紅粉」…），用於歸類、篩選與重複度 */
+export const COLOR_FAMILY_NAMES: string[] = COLOR_FAMILIES.map((family) => family.name)
+
+const familyName = (id: string) => COLOR_FAMILIES.find((family) => family.id === id)?.name ?? '其他'
+
+/** 色票名 → 色系顯示名，例如「酒紅」→「紅粉」 */
+export function familyOfGarmentColor(name: string): string | null {
+  const color = GARMENT_COLORS.find((entry) => entry.name === name)
+  return color ? familyName(color.family) : null
+}
+
+function linearize(channel: number) {
+  return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+}
+
+/** sRGB 轉 OKLab，讓不同色相的色差比較符合人眼感受。 */
+export function toOklab(hex: string): [number, number, number] {
+  const [r8, g8, b8] = [1, 3, 5].map((index) => linearize(Number.parseInt(hex.slice(index, index + 2), 16) / 255))
+  const l = Math.cbrt(0.4122214708 * r8 + 0.5363325363 * g8 + 0.0514459929 * b8)
+  const m = Math.cbrt(0.2119034982 * r8 + 0.6806995451 * g8 + 0.1073969566 * b8)
+  const s = Math.cbrt(0.0883024619 * r8 + 0.2817188376 * g8 + 0.6299787005 * b8)
+  return [0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s, 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s]
+}
+
+export const isHex = (value: string | null | undefined): value is string => !!value && /^#[0-9a-f]{6}$/i.test(value)
+
+/** 依 OKLab 找最接近的色票（不含「多色」「其他」），附距離與色系顯示名 */
+export function nearestGarmentColor(hex: string) {
+  const target = toOklab(hex)
+  return GARMENT_COLORS
+    .filter((color) => color.family !== 'other')
+    .map((color) => {
+      const lab = toOklab(color.hex)
+      return { name: color.name as string, hex: color.hex as string, family: familyName(color.family), distance: Math.hypot(target[0] - lab[0], target[1] - lab[1], target[2] - lab[2]) }
+    })
+    .sort((a, b) => a.distance - b.distance)[0]
+}

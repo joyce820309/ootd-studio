@@ -78,7 +78,20 @@
  * 便利貼 StickyNote（B19）：依 data-tone 提供顏色變數，元件只讀 var(--note-*)。
  * 色值都來自 tokens.css。
  */
-.sticky-note[data-tone='mist'] {
+:is(.sticky-note, .sticky-note-wrap)[data-tone='lavender'] {
+  --note-under: var(--color-note-lavender-under);
+  --note-bg: var(--color-lavender-soft);
+  --note-empty: var(--color-note-lavender-empty);
+  --note-fold: var(--color-note-lavender-fold);
+  --note-empty-fold: var(--color-note-lavender-empty-fold);
+  --note-title: var(--color-lavender-ink);
+  --note-text: var(--color-ink);
+  --note-accent: var(--color-lavender-deep);
+  --note-edge: var(--color-lavender-deep);
+  --note-grid: var(--color-note-lavender-grid);
+}
+:is(.sticky-note, .sticky-note-wrap)[data-tone='mist'] {
+  --note-under: var(--color-note-mist-under);
   --note-bg: var(--color-mist-soft);
   --note-empty: var(--color-note-mist-empty);
   --note-fold: var(--color-note-mist-fold);
@@ -88,7 +101,8 @@
   --note-accent: var(--color-mist-deep);
   --note-edge: var(--color-mist);
 }
-.sticky-note[data-tone='sage'] {
+:is(.sticky-note, .sticky-note-wrap)[data-tone='sage'] {
+  --note-under: var(--color-note-sage-under);
   --note-bg: var(--color-sage-soft);
   --note-empty: var(--color-note-sage-empty);
   --note-fold: var(--color-note-sage-fold);
@@ -98,7 +112,8 @@
   --note-accent: var(--color-sage-deep);
   --note-edge: var(--color-sage);
 }
-.sticky-note[data-tone='rose'] {
+:is(.sticky-note, .sticky-note-wrap)[data-tone='rose'] {
+  --note-under: var(--color-note-rose-under);
   --note-bg: var(--color-rose-soft);
   --note-empty: var(--color-note-rose-empty);
   --note-fold: var(--color-note-rose-fold);
@@ -108,7 +123,8 @@
   --note-accent: var(--color-rose-deep);
   --note-edge: var(--color-rose);
 }
-.sticky-note[data-tone='oat'] {
+:is(.sticky-note, .sticky-note-wrap)[data-tone='oat'] {
+  --note-under: var(--color-note-oat-under);
   --note-bg: var(--color-oat-soft);
   --note-empty: var(--color-note-oat-empty);
   --note-fold: var(--color-note-oat-fold);
@@ -127,9 +143,19 @@
   --note-paper: var(--note-empty);
   --note-corner: var(--note-empty-fold);
 }
-/* 右下折角 */
+/* 右下摺角：右下那塊是頁面底色，摺起來的三角在左上 */
 .sticky-note__fold {
   background: linear-gradient(135deg, var(--note-corner) 50%, var(--color-paper) 50%);
+}
+/* 墊紙：便利貼本體不旋轉（旋轉會讓字糊掉），角度只放在後面這張紙上 */
+.sticky-note__under {
+  background: var(--note-under);
+}
+/* 方格紙：22px 一格、格線很淡（商品頁尺寸表） */
+.sticky-note--squared {
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 21px, var(--note-grid, var(--color-note-grid)) 21px 22px),
+    repeating-linear-gradient(90deg, transparent 0 21px, var(--note-grid, var(--color-note-grid)) 21px 22px);
 }
 /* hand：手帳橫線，每行 32px */
 .sticky-note--ruled {

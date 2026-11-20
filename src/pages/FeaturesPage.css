@@ -1,0 +1,7 @@
+.feature-editor-dialog:modal { overscroll-behavior: contain; }
+.feature-editor-dialog::backdrop { overflow: hidden; overscroll-behavior: contain; }
+.feature-editor-dialog[open] { display: block; }
+
+@media (forced-colors: active) {
+  .feature-editor-dialog { border: 1px solid CanvasText; }
+}

@@ -57,9 +57,9 @@ src/
     closet/              GarmentArt（示範剪影）、ItemImage、ItemTile
     outfit/              OutfitBoard（固定板型）、SlotPicker、FreeCanvas（自由擺放）
     diary/               DiaryParts（評分、場合／感受標籤、月曆小拼貼）、DiaryEntryDialog（記一筆／編輯）
-    wishlist/            WishlistTabs、WishlistForm（新增／編輯）、BoughtDialog、ComparePickerDialog、CompareBuyDialog、CompareSelectionDialog、WishlistCompareMenu
+    wishlist/            WishlistLayout（清單／比較共用頁首）、WishlistTabs、WishlistForm（新增／編輯）、BoughtDialog、ComparePickerDialog、CompareBuyDialog、CompareSelectionDialog、WishlistCompareMenu
   pages/                 Landing、Login、Home、Closet、AddItem、ItemDetail、Outfit、Studio、Wishlist、Compare、Diary、Profile、MeasurementHistory
-supabase/migrations/     0001_init.sql … 0028_compare_decision_marker.sql（依序執行）
+supabase/migrations/     0001_init.sql … 0030_garment_features.sql（依序執行）
 ```
 
 ## 路由與進度
@@ -81,6 +81,7 @@ supabase/migrations/     0001_init.sql … 0028_compare_decision_marker.sql（�
 | `/me` | 個人資料・新增量測（儲存為新快照） | 完成 → B-Body |
 | `/me/measurements` | 量測紀錄・依日期／對照表（`?view=table`） | 完成 → B-History、B-History-Table、B-M-History |
 | `/me/measurements/:id` | 單次紀錄（手機獨立頁；桌面在列表右側） | 完成 → B-M-History-Detail |
+| `/me/features` | 特徵管理（衣櫃與選購清單共用） | 完成 → B25／BM22 |
 
 新頁面一律拆成獨立檔案 `src/pages/XxxPage.tsx`，並對照設計稿同名畫面（含手機版 B-M-*）；尚未實作的頁面可用 `components/layout/PageStub` 暫代。
 
@@ -145,7 +146,7 @@ supabase/migrations/     0001_init.sql … 0028_compare_decision_marker.sql（�
 ## Supabase
 
 - 體態量測：`/me` 每次儲存都新增一筆 `body_measurements`「當天完整快照」，以最近一筆預填，不覆蓋舊紀錄；編輯歷史紀錄則更新指定快照。歷史頁用相鄰兩筆比較：不同→燕麥底顯示差值、上一筆沒有→霧藍「第一次記」、相同→「—」。只列數字，**不畫趨勢圖、不用紅綠色評價增減**。欄位 migration 已整併至 `0005_split_body_circumferences.sql`：上胸圍／下胸圍、肚臍圍，以及五指襪／一般襪／裸腳各自的腳長／腳寬／前掌圍／腳背圍。
-- 資料表：`profiles`、`categories`、`items`、`item_photos`、`wishlist_items`、`compare_groups`、`compare_group_items`、`outfits`、`outfit_items`、`body_measurements`。
+- 資料表：`profiles`、`categories`、`items`、`item_photos`、`wishlist_items`、`compare_groups`、`compare_group_items`、`outfits`、`outfit_items`、`body_measurements`、`garment_features`。
 - 每張表都有 `owner_id default auth.uid()` 並啟用 RLS，只有本人能讀寫。新增資料表時照同樣模式。
 - 新使用者註冊時由 `handle_new_user` trigger 建立 profile 與預設分類；分類不要寫死在 UI。
 - 圖片放私人 bucket `closet-images`，路徑第一層必須是使用者 id：`{uid}/...`；衣物原圖為 `{uid}/{item_id}/original.ext`，多圖索引在 `item_photos`，讀取用 signed URL。未完成新增會以 `items.is_draft = true` 隱藏。

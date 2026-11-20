@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>選購商品・完整頁面</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.sec{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:14px;background:#FFFCF6;box-shadow:inset 0 0 0 1.5px #EADCC6}
+.sh{display:flex;align-items:baseline;gap:8px;margin:0;font-size:13px;font-weight:700}
+.sh small{font-weight:400;font-size:11.5px;color:#74624F}
+.th{position:relative;width:76px;height:96px;border-radius:10px;border:0;padding:0;cursor:pointer;flex:none;overflow:hidden}
+.th .cl{position:absolute;left:4px;bottom:4px;height:18px;padding:0 6px;border-radius:999px;background:rgba(255,252,246,.92);font-size:10.5px;display:flex;align-items:center;color:#3B2F25}
+.fl{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:10px;background:#FFFCF6}
+.fl span{font-size:11px;color:#5A4A3C}
+.fl b{font:700 15px Nunito}
+.ch{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:500;white-space:nowrap}
+.mb{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;background:#FFFCF6}
+.lg{display:flex;align-items:center;gap:8px;font-size:13px}
+.lg i{width:10px;height:10px;border-radius:3px;flex:none}
+.cap{margin:0;font-size:12.5px;line-height:1.75;color:#5A4A3C}
+.cc{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 12px 0 6px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 14px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.cc .sw2{width:24px;height:24px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(59,47,37,.18)}
+.cc:hover{border-color:#3B2F25}
+.cc[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+.cc[aria-pressed="true"] .sw2{box-shadow:0 0 0 2px #FBF4E8}
+.cc[data-has="false"]{border-color:transparent;background:transparent;cursor:default;color:#5A4A3C}
+.cc[data-has="false"]:hover{border-color:transparent}
+.fbar{display:flex;align-items:center;gap:8px;height:36px;padding:0 6px 0 12px;border-radius:999px;background:#3B2F25;color:#FBF4E8;font-size:13px;align-self:flex-start}
+.fbar button{width:28px;height:28px;border:0;border-radius:50%;background:rgba(251,244,232,.15);color:#FBF4E8;cursor:pointer}
+.pn{position:relative;padding:22px 18px 16px;border-radius:3px}
+.pnw{position:relative}
+.pnw .ud{position:absolute;inset:0;border-radius:3px;transform:rotate(1deg)}
+.pn .tp2{position:absolute;left:50%;top:-11px;width:92px;height:22px;margin-left:-46px;transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.pn .fd{position:absolute;right:0;bottom:0;width:22px;height:22px}
+.wt{position:absolute;z-index:4;display:flex;align-items:center;gap:7px;height:34px;padding:0 22px;font:400 18px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;white-space:nowrap}
+.wt::before{content:"";position:absolute;inset:0;background:rgba(169,198,207,.62);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.wt span,.wt i{position:relative}
+.wt i{width:11px;height:11px;border-radius:50%;flex:none;box-shadow:0 0 0 1.5px rgba(255,252,246,.9)}
+.th .dt2{position:absolute;right:5px;bottom:5px;width:14px;height:14px;border-radius:50%;box-shadow:0 0 0 2px #FFFCF6,0 1px 3px rgba(59,47,37,.3)}
+</style>
+</helmet>
+<div style="width:100%;min-height:1240px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
+  <header style="background:#FBF4E8;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,3vw,32px) 0;flex-wrap:wrap;border-bottom:1.5px dashed #D9C7AC">
+    <a href="B-Home.dc.html" class="logo" style="font-size:22px;font-weight:600;color:#3B2F25;text-decoration:none;display:flex;align-items:center;gap:10px;padding-bottom:12px"><span style="display:inline-block;padding:4px 12px;background:#F2CF8E;border-radius:3px;transform:rotate(-2deg);box-shadow:0 2px 4px rgba(59,47,37,.14)">My Closet</span><span class="num" style="font-size:10px;letter-spacing:.2em;color:#74624F;font-weight:700">OOTD STUDIO</span></a>
+    <nav aria-label="主要導覽" style="display:flex;gap:2px;margin:0 auto;flex-wrap:wrap">
+      <a class="nav-a" href="B-Home.dc.html">首頁</a>
+      <a class="nav-a" href="B-Closet.dc.html">我的衣櫃</a>
+      <a class="nav-a" href="B-Outfit.dc.html">今日搭配</a>
+      <a class="nav-a" href="#diary">穿搭日記</a>
+      <a class="nav-a" href="B-Wishlist.dc.html" aria-current="page" style="border-bottom-color:#F2CF8E;color:#3B2F25;font-weight:700">選購清單</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:4px;padding-bottom:10px">
+      <button class="ibtn" type="button" aria-label="通知" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"></path></svg></button>
+      <a href="B-Body.dc.html" aria-label="個人資料" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span style="width:34px;height:34px;border-radius:50%;background:#FFFCF6;border:1.5px solid #3B2F25;display:flex;align-items:center;justify-content:center;font:600 14px Fredoka">J</span></a>
+    </div>
+  </header>
+  <main style="max-width:1360px;margin:0 auto;padding:16px 32px 48px;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="B-Wishlist.dc.html" class="btn btn-g" style="height:40px;padding:0 10px;color:#3E6270"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M15 5l-7 7 7 7"></path></svg>選購清單</a>
+      <span style="font-size:12px;color:#74624F">／ 下身 ・ 裙子 ・ 長</span>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <button type="button" class="btn btn-s" style="height:40px">加入比較 ▾</button>
+        <button type="button" class="btn btn-s" style="height:40px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"></path></svg>編輯</button>
+        <button type="button" class="ibtn" aria-label="更多：放棄購買、刪除" style="color:#5A4A3C"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h.01M12 12h.01M18 12h.01" style="stroke-width:3"></path></svg></button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:minmax(0,640px) minmax(0,1fr);gap:40px;align-items:start">
+      <section aria-label="照片" style="display:flex;flex-direction:column;gap:10px;position:sticky;top:16px">
+        <div style="display:flex;gap:12px">
+        <div role="tablist" aria-label="切換照片" style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{thumbs}}" as="t" hint-placeholder-count="6"><button type="button" role="tab" aria-selected="{{t.sel}}" aria-label="{{t.alt}}" class="th" onClick="{{t.go}}" style="background:{{t.bg}};box-shadow:{{t.ring}}"><svg viewBox="0 0 100 130" style="width:100%;height:100%" aria-hidden="true"><path d="M38 14H62L66 70Q76 104 84 122H16Q24 104 34 70Z" fill="{{t.fill}}" stroke="rgba(59,47,37,.25)" stroke-width="1"></path></svg><sc-if value="{{t.cl}}" hint-placeholder-val="{{ false }}"><span class="dt2" style="background:{{t.fill}}" title="{{t.cl}}"></span></sc-if></button></sc-for>
+        </div>
+        <div style="position:relative;flex:1;aspect-ratio:4/5">
+          <div style="position:absolute;inset:0;border-radius:16px;background:{{cur.bg}};overflow:hidden;box-shadow:0 1px 0 rgba(59,47,37,.05),0 18px 30px -18px rgba(59,47,37,.4)"><svg viewBox="0 0 100 130" style="position:absolute;inset:6% 14%;width:72%;height:88%" aria-hidden="true"><path d="M38 14H62L66 70Q76 104 84 122H16Q24 104 34 70Z" fill="{{cur.fill}}" stroke="rgba(59,47,37,.25)" stroke-width=".6"></path><path d="M38 14H62" stroke="rgba(59,47,37,.35)" stroke-width="2"></path></svg></div>
+          <sc-if value="{{hasF}}" hint-placeholder-val="{{ false }}"><span class="fbar" role="status" style="position:absolute;left:12px;top:12px"><span style="width:14px;height:14px;border-radius:50%;background:{{fHex}};box-shadow:0 0 0 1.5px #FBF4E8"></span>只看「{{f}}」<button type="button" onClick="{{clear}}" aria-label="取消，顯示全部照片">×</button></span></sc-if>
+          <span class="num" style="position:absolute;left:14px;bottom:14px;height:26px;padding:0 10px;border-radius:999px;background:rgba(59,47,37,.7);color:#FBF4E8;font-size:12px;display:flex;align-items:center">{{pos}}</span>
+          <button type="button" class="ibtn" aria-label="放大看" style="position:absolute;right:12px;top:12px;z-index:3;background:rgba(255,252,246,.92);color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-4.5-4.5M11 8v6M8 11h6"></path></svg></button>
+          <sc-if value="{{cur.cl}}" hint-placeholder-val="{{ true }}"><span class="wt" aria-hidden="true" style="right:-32px;bottom:40px;transform:rotate(-6deg)"><i style="background:{{cur.fill}}"></i><span>{{cur.cl}}</span></span></sc-if>
+          <button type="button" class="ibtn" onClick="{{prev}}" aria-label="上一張" style="position:absolute;left:10px;top:50%;margin-top:-22px;border-radius:50%;background:rgba(255,252,246,.85);color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+          <button type="button" class="ibtn" onClick="{{next}}" aria-label="下一張" style="position:absolute;right:10px;top:50%;margin-top:-22px;border-radius:50%;background:rgba(255,252,246,.85);color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+        </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="it-t" style="display:flex;flex-direction:column;gap:12px;min-width:0">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="position:relative;display:flex;gap:6px;align-items:center">
+            <button type="button" onClick="{{toggleSt}}" aria-haspopup="menu" aria-expanded="{{stOpenA}}" aria-label="狀態：{{stName}}，點了可以改" style="display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px 0 12px;border-radius:999px;border:1.5px solid {{stBd}};background:{{stBg}};color:{{stFg}};font:500 13px 'Chiron GoRound TC';cursor:pointer"><span style="width:7px;height:7px;border-radius:50%;background:currentColor"></span>{{stName}}<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:15px;height:15px"><path d="M6 9l6 6 6-6"></path></svg></button>
+            <span class="tag" style="height:24px;background:#F3E7D4;color:#5A4A3C">優先 高</span>
+            <sc-if value="{{stOpen}}" hint-placeholder-val="{{ false }}">
+              <div role="menu" aria-label="改狀態" class="paper" style="position:absolute;left:0;top:42px;z-index:20;width:250px;padding:6px;display:flex;flex-direction:column;box-shadow:0 16px 32px -12px rgba(59,47,37,.45),0 0 0 1.5px #EADCC6">
+                <sc-for list="{{stList}}" as="o" hint-placeholder-count="4"><button type="button" role="menuitemradio" aria-checked="{{o.on}}" onClick="{{o.go}}" style="display:flex;align-items:center;gap:10px;min-height:44px;padding:0 10px;border:0;border-radius:10px;background:{{o.rbg}};font:500 14px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;text-align:left"><span style="width:10px;height:10px;border-radius:50%;background:{{o.dot}}"></span><span style="flex:1">{{o.n}}</span><span style="font-size:11.5px;color:#74624F">{{o.note}}</span></button></sc-for>
+              </div>
+            </sc-if>
+          </span>
+          <h1 id="it-t" class="hd" style="margin:0;font-size:32px;line-height:1.3">絨面高級斜紋魚尾長裙</h1>
+          <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><b class="num" style="font-size:30px">NT$1,406</b><span style="font-size:13px;color:#5A4A3C">尚未決定・加入於 11/19</span><a href="#" style="font-size:13px;min-height:32px;display:inline-flex;align-items:center">前往商品頁 ↗</a></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="sec">
+              <h2 class="sh">顏色 <small>有框的可以點，只看那個顏色的照片</small></h2>
+              <span style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{colors}}" as="c" hint-placeholder-count="3"><button type="button" class="cc" data-has="{{c.has}}" aria-pressed="{{c.on}}" onClick="{{c.go}}" title="{{c.tip}}"><span class="sw2" style="background:{{c.hex}}"></span><span>{{c.n}}</span><sc-if value="{{c.fav}}" hint-placeholder-val="{{ false }}"><span aria-label="最想要">★</span></sc-if></button></sc-for></span>
+              <sc-if value="{{hint}}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:#5A4A3C">「{{hint}}」還沒有標記照片，顯示全部照片。</span></sc-if>
+            </div>
+            <div class="sec">
+              <h2 class="sh">材質 <small>依比例</small></h2>
+              <div class="mb" role="img" aria-label="聚酯纖維 85%、彈性纖維 15%"><span style="width:85%;background:#A9C6CF"></span><span style="width:15%;background:#E2B4A8"></span></div>
+              <span class="lg"><i style="background:#A9C6CF"></i>聚酯纖維<b class="num" style="margin-left:auto">85%</b></span>
+              <span class="lg"><i style="background:#E2B4A8"></i>彈性纖維<b class="num" style="margin-left:auto">15%</b></span>
+              <span style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px"><span class="ch" style="background:#F6E7C6;color:#5A3F12">有彈性</span><span class="ch" style="background:#F3E7D4;color:#5A4A3C">手洗</span></span>
+              <h2 class="sh" style="margin-top:6px;padding-top:10px;border-top:1.5px dashed #EADCC6">特徵</h2>
+              <span style="display:flex;gap:6px;flex-wrap:wrap"><span class="ch" style="background:#3B2F25;color:#FBF4E8">魚尾</span><span class="ch" style="background:#3B2F25;color:#FBF4E8">高腰</span><span class="ch" style="background:#3B2F25;color:#FBF4E8">後鬆緊</span><span class="ch" style="background:#3B2F25;color:#FBF4E8">垂墜</span></span>
+            </div>
+            <div class="sec">
+              <h2 class="sh">比較・衣櫃</h2>
+              <span style="font-size:13px">在比較：<a href="B-Compare.dc.html">冬天的裙子</a>、<a href="B-Compare.dc.html">長裙</a></span>
+              <span style="display:flex;align-items:center;gap:6px;font-size:13px;flex-wrap:wrap"><span class="ch" style="background:#E6EEE2;color:#3F5A3B">不太像</span>衣櫃沒有魚尾長裙・可以搭 <b class="num">6</b> 件</span>
+            </div>
+            <div class="pnw" style="margin-top:6px"><span class="ud" aria-hidden="true" style="background:#C9D8C2"></span><div class="pn" style="position:relative;background:#E6EEE2;--dot:#4A6245"><span class="tp2" aria-hidden="true" style="background:rgba(169,198,207,.62)"></span><span class="fd" aria-hidden="true" style="background:linear-gradient(135deg,#C5D8BE 50%,#FBF4E8 50%)"></span>
+              <h2 class="sh" style="color:#3F5A3B;font-size:14px;margin-bottom:6px">AI 看過的提醒 <small style="color:#5C7357">11/20 貼上</small></h2>
+              <ul class="bn" style="--dot:#4A6245;gap:2px">
+                <li style="font-size:13px;line-height:1.7"><span style="color:#2E3F2B">裙長 45 cm 對魚尾長裙偏短，可能是筆誤，下單前跟店家確認</span></li>
+                <li style="font-size:13px;line-height:1.7"><span style="color:#2E3F2B">尺寸表只有模特兒身形，沒有臀寬以外的平放尺寸</span></li>
+                <li style="font-size:13px;line-height:1.7"><span style="color:#2E3F2B">彈性纖維 15%，腰圍 70 穿 F 應該不會太緊</span></li>
+              </ul>
+              <div style="display:flex;gap:6px;margin-top:8px"><button type="button" class="btn btn-s" style="height:36px;padding:0 10px;font-size:12.5px;background:rgba(255,252,246,.7)">整理給 AI</button><button type="button" class="btn btn-g" style="height:36px;padding:0 8px;font-size:12.5px;color:#3F5A3B">貼上新回覆</button></div>
+            </div></div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="pnw"><span class="ud" aria-hidden="true" style="background:#DDD3EA"></span><div class="pn" style="position:relative;background:repeating-linear-gradient(0deg,transparent 0 21px,rgba(142,122,166,.13) 21px 22px),repeating-linear-gradient(90deg,transparent 0 21px,rgba(142,122,166,.13) 21px 22px),#EEE8F5;"><span class="tp2" aria-hidden="true" style="background:rgba(240,184,170,.6)"></span>
+              <h2 class="sh" style="color:#4E3F63;font-size:14px">商品頁尺寸表 <small style="color:#6B5C80">原文照抄</small></h2>
+              <span style="display:block;margin-top:6px;font-size:13.5px;line-height:1.8;white-space:pre-line">Model 161cm/48kg
+肩寬 38 腰圍 68 肚臍圍 73 臀圍 90 大腿圍 50</span>
+            </div></div>
+            <div class="sec" style="background:#E6EEE2;box-shadow:none">
+              <h2 class="sh" style="color:#3F5A3B">平放尺寸 <small>cm・F</small></h2>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+                <div class="fl"><span>腰寬</span><b>32 ↔ 42</b></div><div class="fl"><span>臀寬</span><b>45</b></div><div class="fl"><span>裙長</span><b>45</b></div>
+              </div>
+              <span style="display:flex;gap:6px;flex-wrap:wrap"><span class="ch" style="background:#F6E7C6;color:#5A3F12">腰 有彈性・會貼身</span><span class="ch" style="background:#DCE8EC;color:#24424D">臀 寬鬆</span></span>
+            </div>
+            <div class="pnw" style="margin-top:6px"><span class="ud" aria-hidden="true" style="background:#C5D8DE"></span><div class="pn" style="position:relative;--under:#C5D8DE;background:#DCE8EC"><span class="tp2" aria-hidden="true" style="background:rgba(240,196,118,.62)"></span><span class="fd" aria-hidden="true" style="background:linear-gradient(135deg,#C5D8DE 50%,#FBF4E8 50%)"></span><h2 class="sh" style="color:#24424D;font-size:14px;margin-bottom:6px">我的筆記</h2>
+              <ul class="bn">
+                <li><span>有絨毛還有斜紋，偶爾在陽光下看起來又像有光澤</span></li>
+                <li><span>長裙版型偏像 A 字＋魚尾</span></li>
+                <li><span>配上休閒球鞋也無違和</span></li>
+                <li><span>腰部隱藏式伸縮設計</span></li>
+                <li><span>灰黑色的漸層感明顯，非常高級</span></li>
+              </ul>
+            </div></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section aria-labelledby="sp" style="margin-top:28px;display:flex;flex-direction:column;gap:12px">
+      <h2 id="sp" class="hd" style="margin:0;font-size:22px">規格（給 Code）</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        <div class="sec"><b style="font-size:14px">入口</b><p class="cap">路由 <span class="num">/wishlist/:id</span>。清單頁預覽面板（B7）和比較頁預覽抽屜（B23.2／BM20.2）右上角的「開完整頁面 ↗」都用新分頁打開（target="_blank" rel="noopener"），原頁面不動。「← 選購清單」回 <span class="num">/wishlist?item=:id</span>。</p></div>
+        <div class="sec"><b style="font-size:14px">照片</b><p class="cap">顏色有標記照片的，顏色列是可點的膠囊：點了只顯示那個顏色的照片（縮圖、左右切換、張數都只算那幾張），照片左上角出現「只看「X」×」；再點一次同一色或按 × 回到全部。沒標記照片的顏色是純文字，點了維持顯示全部，並提示「還沒有標記照片」。不顯示張數數字。<br>便利貼本體不旋轉（旋轉會讓文字模糊），只有膠帶和底下那張「墊紙」（另一層、旋轉 1°，放在便利貼後面）有角度。尺寸表用薰衣草方格紙（格線很淡）、我的筆記用霧藍、AI 看過的提醒用鼠尾草（B19 的 AI 色），三張不同色。摺角統一：右下角那塊是頁面底色，摺起來的三角在左上（linear-gradient 135deg）。<br>主圖 4:5、寬度約佔左半，往下捲時 sticky。有標顏色的照片貼 B27 紙膠帶（跨在照片右緣），縮圖改成右下角色點；放大鏡移到右上。左側直排縮圖 76 × 96。← → 鍵、左右按鈕切換；放大鏡或點主圖開全螢幕 lightbox（可滑動、Esc 關）。1440 × 900 一個畫面內要看得到照片和全部細項，方便截圖。</p></div>
+        <div class="sec"><b style="font-size:14px">材質比例（全專案統一）</b>
+          <div class="mb" role="img" aria-label="聚酯纖維 70%、羊毛 25%、其他 5%" style="margin-top:2px"><span style="width:70%;background:#A9C6CF"></span><span style="width:25%;background:#D9CBB3"></span><span style="width:5%;background:#E2D2B8"></span></div>
+          <p class="cap">一律從多到少排，色點用材質管理（B16）的材質色。<br>完整頁面、預覽：比例條＋圖例。<br>比較表「成分」：一行「聚酯纖維 70%・羊毛 25%・其他 5%」。<br>清單卡片：只寫前兩種「聚酯 70%・羊毛 25%」。<br>沒填 %：只列名稱、不畫比例條。加總不到 100：補灰色「其他 X%」。</p></div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1240}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { i: 0, f: null, hint: '', status: 1, stOpen: false }; }
+  renderVals() {
+    const S = [['考慮中', '#F3E7D4', '#5A4A3C', '#E2D2B8', ''], ['準備購買', '#E6EEE2', '#3F5A3B', '#B7CBB0', '進採購籃'], ['已購買', '#DCE8EC', '#24424D', '#A9C6CF', '會開移至衣櫃'], ['已放棄', '#F4DDD6', '#8E4A3E', '#E2B4A8', '可再改回']];
+    const T = [['灰黑・正面', '#E9E4DF', '#3A3836', '灰黑'], ['米杏・正面', '#EFE8DD', '#E3D6C2', '米杏'], ['米杏・側面', '#F1E4E2', '#D9CAB3', '米杏'], ['灰黑・細節', '#E8E2DA', '#4A4642', '灰黑'], ['穿搭', '#E6EEE2', '#3A3836', ''], ['布料', '#F3E7D4', '#7A746E', '']];
+    const C = [['灰黑', '#3A3836', 1], ['米杏', '#E3D6C2', 0], ['深咖', '#5B4334', 0]];
+    const st = this.state, f = st.f;
+    const vis = T.map((t, k) => ({ t, k })).filter(x => !f || x.t[3] === f);
+    const N = vis.length, i = Math.min(st.i, N - 1), cur = vis[i].t;
+    return {
+      stOpen: st.stOpen, stOpenA: st.stOpen ? 'true' : 'false', toggleSt: () => this.setState({ stOpen: !st.stOpen }),
+      stName: S[st.status][0], stBg: S[st.status][1], stFg: S[st.status][2], stBd: S[st.status][3],
+      stList: S.map(([n, bg, fg, bd, note], k) => ({ n, note, dot: fg, on: k === st.status ? 'true' : 'false', rbg: k === st.status ? '#FBF4E8' : 'transparent', go: () => this.setState({ status: k, stOpen: false }) })),
+      thumbs: vis.map(({ t: [alt, bg, fill, cl] }, k) => ({ alt, bg, fill, cl, sel: k === i ? 'true' : 'false', ring: k === i ? '0 0 0 2.5px #3B2F25' : 'inset 0 0 0 1px rgba(59,47,37,.12)', go: () => this.setState({ i: k }) })),
+      cur: { bg: cur[1], fill: cur[2], label: cur[0], cl: cur[3] }, pos: f ? `${i + 1} / ${N}・${f}` : `${i + 1} / ${N}`,
+      prev: () => this.setState({ i: (i - 1 + N) % N }), next: () => this.setState({ i: (i + 1) % N }),
+      colors: C.map(([n, hex, fav]) => {
+        const has = T.some(t => t[3] === n);
+        return { n, hex, fav: !!fav, has: has ? 'true' : 'false', on: f === n ? 'true' : 'false', tip: has ? (f === n ? '再點一次顯示全部照片' : `只看「${n}」的照片`) : '還沒有標記照片',
+          go: () => has ? this.setState({ f: f === n ? null : n, i: 0, hint: '' }) : this.setState({ f: null, i: 0, hint: n }) };
+      }),
+      hasF: !!f, noF: !f, f: f || '', fHex: f ? C.find(c => c[0] === f)[1] : '', clear: () => this.setState({ f: null, i: 0 }),
+      hint: st.hint
+    };
+  }
+}
+</script>
+</body>
+</html>

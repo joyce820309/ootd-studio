@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react'
 import { SAMPLE_BODY_MEASUREMENTS, SAMPLE_BODY_PROFILE, SAMPLE_CATEGORIES, SAMPLE_COMPARE_GROUPS, SAMPLE_COMPARE_GROUP_ITEMS, SAMPLE_DIARY, SAMPLE_ITEMS, SAMPLE_PROFILE, SAMPLE_WISHLIST } from '@/data/sample'
 import type { MeasurementTrendPrefs } from '@/types'
 import { DEFAULT_TREND_PREFS, normalizeTrendPrefs } from '@/lib/measurementTrend'
-import type { AddItemDestination, BodyMeasurement, BodyMeasurementInput, BodyProfile, BodyProfileInput, BrandChange, BrandSummary, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, CompareGroupItem, CompareMembership, CutoutRegion, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, GarmentShape, ItemStatus, LessonRule, LessonRuleInput, LessonStatus, ManagedEntryChange, ManagedListSummary, NewGarmentInput, Outfit, ProfilePreferences, ReviewDecision, ReviewRecord, ReviewRecordInput, ShopKind, Slot, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, StudioCanvasItem, WishlistColor, WishlistInput, WishlistItem, WishlistPhotoUpload, WishStatus } from '@/types'
 import { toUploadableImage } from '@/lib/image'
-import { GARMENT_COLORS } from '@/lib/colors'
 import { MATERIAL_DEFAULTS, materialNames } from '@/lib/materials'
 import { cleanStretch } from '@/lib/stretch'
+import { FEATURE_DEFAULTS, normalizeFeatureAliases, normalizeFeatureTags } from '@/lib/features'
 import { wishlistSizeOptions } from '@/lib/wishlist'
+import type { AddItemDestination, BodyMeasurement, BuyLine, BodyMeasurementInput, BodyProfile, BodyProfileInput, BrandChange, BrandSummary, Category, ClosetItem, ClosetPhoto, CompareGroup, CompareGroupInput, CompareGroupItem, CompareMembership, CutoutRegion, DiaryEntry, DiaryEntryInput, DiaryFeel, DiaryPhotoChange, DiaryWeather, FeatureDefinition, FeatureDefinitionInput, FeatureTag, GarmentShape, ItemStatus, LessonRule, LessonRuleInput, LessonStatus, ManagedEntryChange, ManagedListSummary, NewGarmentInput, Outfit, ProfilePreferences, ReviewDecision, ReviewRecord, ReviewRecordInput, ShopKind, Slot, StudioBackgroundCustom, StudioBackgroundMode, StudioBackgroundTheme, StudioCanvasItem, WishlistColor, WishlistInput, WishlistItem, WishlistPhotoUpload, WishStatus } from '@/types'
 import { supabase } from './supabase'
+import { colorFromName, normalizeWishColors, wishColorsToRow } from '@/lib/wishColors'
 import { isInCloset, isLessonStatus } from './slots'
 
 const CUTOUT_BUCKET = 'closet-images'
@@ -21,7 +22,7 @@ let demoMeasurements: BodyMeasurement[] = SAMPLE_BODY_MEASUREMENTS.map((measurem
 let demoBodyProfile: BodyProfile = { ...SAMPLE_BODY_PROFILE }
 let demoTrendPrefs: MeasurementTrendPrefs | null = null
 let demoClosetItems: ClosetItem[] = [...SAMPLE_ITEMS]
-let demoWishlistItems: WishlistItem[] = [...SAMPLE_WISHLIST]
+let demoWishlistItems: WishlistItem[] = SAMPLE_WISHLIST.map((item) => ({ ...item, colors: normalizeWishColors(item.colors) }))
 let demoCompareGroups: CompareGroup[] = SAMPLE_COMPARE_GROUPS.map((group) => ({ ...group }))
 let demoCompareGroupItems: CompareGroupItem[] = SAMPLE_COMPARE_GROUP_ITEMS.map((entry) => ({
   groupId: entry.groupId,
@@ -36,6 +37,7 @@ const demoManagedShops = new Map<string, { kind: ShopKind; url?: string }>()
 const demoManagedMaterials = new Map<string, { aliases: string[]; sortOrder: number; isDefault: boolean; isHidden: boolean }>(MATERIAL_DEFAULTS.map((material) => [material.name, { aliases: [...material.aliases], sortOrder: material.sortOrder, isDefault: true, isHidden: false }]))
 let demoReviewRecords: ReviewRecord[] = []
 let demoLessonRules: LessonRule[] = []
+const demoFeatures = new Map<string, FeatureDefinition>(FEATURE_DEFAULTS.map((feature) => [feature.name, { ...feature, aliases: [...feature.aliases], applicableTypes: [...feature.applicableTypes] }]))
 
 function cloneProfile(profile: ProfilePreferences): ProfilePreferences {
   return {
@@ -163,6 +165,8 @@ interface ItemRow {
   note?: string | null
   flat_measurements?: Record<string, number | null> | null
   flat_stretch?: Record<string, number> | null
+  feature_tags?: FeatureTag[] | null
+  feature_suggestions_dismissed?: string[] | null
   status: ItemStatus
   is_favorite: boolean
   image_original_path: string | null
@@ -209,6 +213,8 @@ function itemFromRow(row: ItemRow, urls: Record<string, string>, photos?: Closet
     note: row.note ?? undefined,
     flatMeasurements: row.flat_measurements ?? {},
     flatStretch: row.flat_stretch ?? {},
+    features: normalizeFeatureTags(row.feature_tags),
+    featureSuggestionsDismissed: row.feature_suggestions_dismissed ?? [],
     status: row.status,
     isFavorite: row.is_favorite,
     cutoutUrl: imagePath ? urls[imagePath] : undefined,
@@ -232,7 +238,7 @@ export async function fetchClosetItems(): Promise<ClosetItem[]> {
   if (!supabase) return demoClosetItems.filter((item) => isInCloset(item.status)).map((item) => ({ ...item }))
   const { data, error } = await supabase
     .from('items')
-    .select('id,name,category_id,color_name,color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,flat_stretch,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(name,slot)')
+    .select('id,name,category_id,color_name,color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,flat_stretch,feature_tags,feature_suggestions_dismissed,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(name,slot)')
     .not('status', 'in', '(retired,returned,exchanged,unworn,given_away)')
     .eq('is_draft', false)
     .order('created_at', { ascending: false })
@@ -269,7 +275,7 @@ export async function fetchClosetItemDetail(id: string): Promise<ClosetItem | nu
     return { ...item, categoryId: category?.id ?? item.categoryId, categoryName: category?.name ?? item.categoryId, categorySlot: category ? category.slot : item.categorySlot ?? item.slot, seasons: item.seasons ?? [], flatMeasurements: item.flatMeasurements ?? {}, photos: [...(demoClosetPhotos.get(id) ?? [])] }
   }
   const { data, error } = await supabase.from('items')
-    .select('id,name,category_id,color_name,color_hex,second_color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,flat_stretch,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(id,name,slot,sort),item_photos(id,storage_path,sort_order,is_cover,color_family)')
+    .select('id,name,category_id,color_name,color_hex,second_color_hex,brand,size,neckline_size,fit,material,material_composition,material_percentages,seasons,occasions,purchase_date,purchase_price,store,product_url,note,flat_measurements,flat_stretch,feature_tags,feature_suggestions_dismissed,status,is_favorite,image_original_path,image_cutout_path,cutout_status,wear_count,last_worn_at,categories(id,name,slot,sort),item_photos(id,storage_path,sort_order,is_cover,color_family)')
     .eq('id', id)
     .eq('is_draft', false)
     .maybeSingle()
@@ -304,7 +310,7 @@ function closetItemPayload(input: Partial<ClosetItem> & { categoryId?: string })
     ['name', 'name'], ['categoryId', 'category_id'], ['colorName', 'color_name'], ['colorHex', 'color_hex'],
     ['secondColorHex', 'second_color_hex'], ['brand', 'brand'], ['size', 'size'], ['necklineSize', 'neckline_size'], ['fit', 'fit'],
     ['material', 'material'], ['materialComposition', 'material_composition'], ['materialPercentages', 'material_percentages'], ['seasons', 'seasons'],
-    ['occasions', 'occasions'], ['purchaseDate', 'purchase_date'], ['purchasePrice', 'purchase_price'],
+    ['occasions', 'occasions'], ['features', 'feature_tags'], ['featureSuggestionsDismissed', 'feature_suggestions_dismissed'], ['purchaseDate', 'purchase_date'], ['purchasePrice', 'purchase_price'],
     ['store', 'store'], ['productUrl', 'product_url'], ['note', 'note'], ['flatMeasurements', 'flat_measurements'], ['flatStretch', 'flat_stretch'],
   ]
   for (const [source, target] of fields) {
@@ -462,7 +468,7 @@ export async function deleteClosetItem(id: string): Promise<{ demo: boolean; cle
 }
 
 const ACTIVE_WISH_STATUSES: WishStatus[] = ['considering', 'ready']
-const WISHLIST_COLUMNS = 'id,name,product_code,slot,primary_part,garment_type,garment_length,also_parts,colors,color_hex,color_name,shop,price,shipping,target_price,url,size,flat_measurements_size,size_note,neckline_size,brand,material,material_composition,material_percentages,flat_measurements,flat_stretch,return_policy,reason,priority,status,image_cutout_path,image_original_path,bought_item_id,bought_item_ids,created_at'
+const WISHLIST_COLUMNS = 'id,name,product_code,slot,primary_part,garment_type,garment_length,also_parts,colors,color_hex,color_name,shop,price,shipping,target_price,url,size,flat_measurements_size,size_note,neckline_size,brand,material,material_composition,material_percentages,feature_tags,feature_suggestions_dismissed,flat_measurements,flat_stretch,return_policy,buy_lines,ai_review,ai_reviewed_at,reason,priority,status,image_cutout_path,image_original_path,bought_item_id,bought_item_ids,created_at'
 
 interface WishlistRow {
   id: string
@@ -473,7 +479,7 @@ interface WishlistRow {
   garment_type: string | null
   garment_length: WishlistItem['garmentLength'] | null
   also_parts: Slot[]
-  colors: WishlistColor[] | null
+  colors: unknown
   color_hex: string
   color_name: string | null
   shop: string
@@ -489,9 +495,14 @@ interface WishlistRow {
   material: string | null
   material_composition: string | null
   material_percentages: Record<string, number> | null
+  feature_tags: FeatureTag[] | null
+  feature_suggestions_dismissed: string[] | null
   flat_measurements: Record<string, number | null> | null
   flat_stretch: Record<string, number> | null
   return_policy: string | null
+  buy_lines: BuyLineRow[] | null
+  ai_review: string | null
+  ai_reviewed_at: string | null
   reason: string | null
   priority: number | null
   status: WishStatus
@@ -501,6 +512,13 @@ interface WishlistRow {
   bought_item_ids: string[] | null
   created_at: string
 }
+
+interface BuyLineRow { color_name: string; hex?: string | null; qty: number; unit_price: number }
+
+const buyLinesFromRow = (rows: BuyLineRow[] | null | undefined): BuyLine[] => (Array.isArray(rows) ? rows : [])
+  .filter((row) => row && typeof row.color_name === 'string')
+  .map((row) => ({ colorName: row.color_name, hex: row.hex ?? undefined, qty: Math.max(1, Math.round(Number(row.qty) || 1)), unitPrice: Math.max(0, Math.round(Number(row.unit_price) || 0)) }))
+const buyLinesToRow = (lines: BuyLine[]): BuyLineRow[] => lines.map((line) => ({ color_name: line.colorName, hex: line.hex ?? null, qty: Math.max(1, Math.round(line.qty)), unit_price: Math.max(0, Math.round(line.unitPrice)) }))
 
 async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
   const imagePath = (r: WishlistRow) => r.image_cutout_path ?? r.image_original_path
@@ -519,7 +537,8 @@ async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
   const urls = await signed(photoPaths)
   return rows.map((r) => {
     const path = imagePath(r)
-    const colors = normalizeWishlistColors(Array.isArray(r.colors) ? r.colors : [{ family: r.color_name || '其他', hex: r.color_hex }])
+    // 舊資料沒有 colors 時，用 color_name／color_hex 組成一色（normalizeWishColors 也接受舊格式 { family: 名稱 }）
+    const colors = normalizeWishColors(Array.isArray(r.colors) ? r.colors : [{ family: r.color_name || '其他', hex: r.color_hex }])
     const primaryColor = colors[0]
     const photos = photosByWish.get(r.id) ?? []
     const completePhotos = photos.length
@@ -535,8 +554,8 @@ async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
       garmentLength: r.garment_length ?? undefined,
       alsoParts: r.also_parts ?? [],
       colors,
-      colorHex: primaryColor?.hex ?? GARMENT_COLORS.find((color) => color.name === primaryColor?.family)?.hex ?? r.color_hex,
-      colorName: primaryColor?.family ?? r.color_name ?? undefined,
+      colorHex: primaryColor?.hex ?? r.color_hex,
+      colorName: primaryColor?.name ?? r.color_name ?? undefined,
       shop: r.shop,
       price: r.price,
       shipping: r.shipping ?? undefined,
@@ -550,9 +569,14 @@ async function mapWishlistRows(rows: WishlistRow[]): Promise<WishlistItem[]> {
       material: r.material ?? undefined,
       materialComposition: r.material_composition ?? undefined,
       materialPercentages: r.material_percentages ?? undefined,
+      features: normalizeFeatureTags(r.feature_tags),
+      featureSuggestionsDismissed: r.feature_suggestions_dismissed ?? [],
       flatMeasurements: r.flat_measurements ?? {},
       flatStretch: r.flat_stretch ?? {},
       returnPolicy: r.return_policy ?? undefined,
+      buyLines: buyLinesFromRow(r.buy_lines),
+      aiReview: r.ai_review ?? undefined,
+      aiReviewedAt: r.ai_reviewed_at ?? undefined,
       reason: r.reason ?? undefined,
       priority: r.priority === 1 || r.priority === 2 || r.priority === 3 ? r.priority : undefined,
       status: (r.status as string) === 'waiting' ? 'considering' : r.status,
@@ -591,14 +615,8 @@ export async function fetchAllWishlist(): Promise<WishlistItem[]> {
 
 const blankToNull = (value?: string) => value?.trim() || null
 
-/** colors JSONB 最多保留一個 favorite；若舊／外部資料有多個，保留第一個。 */
-function normalizeWishlistColors(colors: WishlistColor[]): WishlistColor[] {
-  const favoriteIndex = colors.findIndex((color) => color.favorite)
-  return colors.map((color, index) => {
-    const { favorite: _favorite, ...rest } = color
-    return favoriteIndex === index ? { ...rest, favorite: true } : rest
-  })
-}
+/** 表單送來的顏色（沒有 colors 時用 colorName／colorHex 組一色），整理成唯一 id、最多一個最想要 */
+const inputColors = (input: WishlistInput): WishlistColor[] => normalizeWishColors(wishColorsToRow(input.colors !== undefined ? input.colors : [colorFromName(input.colorName || '其他', input.colorHex)]))
 
 /** 平放尺寸去掉空值；拉伸值只留有平放值且較大的欄位 */
 function cleanFlat(flat: Record<string, number | null>) {
@@ -612,7 +630,7 @@ function flatPayload(flat: Record<string, number | null>, stretch?: Record<strin
 
 function wishlistPayload(input: WishlistInput) {
   const primaryPart = input.primaryPart ?? input.slot
-  const colors = normalizeWishlistColors(input.colors !== undefined ? input.colors : [{ family: input.colorName || '其他', hex: input.colorHex }])
+  const colors = inputColors(input)
   const primaryColor = colors[0]
   return {
     name: input.name.trim(),
@@ -622,9 +640,9 @@ function wishlistPayload(input: WishlistInput) {
     garment_type: blankToNull(input.garmentType ?? undefined),
     garment_length: input.garmentLength ?? null,
     also_parts: [...new Set((input.alsoParts ?? []).filter((part) => part !== primaryPart))],
-    colors,
-    color_hex: primaryColor?.hex ?? GARMENT_COLORS.find((color) => color.name === primaryColor?.family)?.hex ?? input.colorHex,
-    color_name: blankToNull(primaryColor?.family ?? (input.colors === undefined ? input.colorName : undefined)),
+    colors: wishColorsToRow(colors),
+    color_hex: primaryColor?.hex ?? input.colorHex,
+    color_name: blankToNull(primaryColor?.name ?? (input.colors === undefined ? input.colorName : undefined)),
     shop: input.shop.trim() || '尚未決定',
     url: blankToNull(input.url),
     price: input.price,
@@ -640,6 +658,8 @@ function wishlistPayload(input: WishlistInput) {
     material: blankToNull(input.material),
     material_composition: blankToNull(input.materialComposition),
     material_percentages: input.materialPercentages ?? {},
+    feature_tags: normalizeFeatureTags(input.features),
+    feature_suggestions_dismissed: [...new Set(input.featureSuggestionsDismissed ?? [])],
     ...(input.flatMeasurements !== undefined ? flatPayload(input.flatMeasurements, input.flatStretch) : {}),
     return_policy: blankToNull(input.returnPolicy),
     status: input.status,
@@ -649,9 +669,9 @@ function wishlistPayload(input: WishlistInput) {
 function demoWishFromInput(id: string, input: WishlistInput, base?: WishlistItem): WishlistItem {
   const optional = (value?: string) => value?.trim() || undefined
   const primaryPart = input.primaryPart ?? input.slot
-  const colors = normalizeWishlistColors(input.colors !== undefined ? input.colors : [{ family: input.colorName || '其他', hex: input.colorHex }])
+  const colors = inputColors(input)
   const primaryColor = colors[0]
-  const colorHex = primaryColor?.hex ?? GARMENT_COLORS.find((color) => color.name === primaryColor?.family)?.hex ?? input.colorHex
+  const colorHex = primaryColor?.hex ?? input.colorHex
   const photoChanges = !!input.photosToAdd?.length || !!input.photoIdsToRemove?.length || !!input.photoColorAssignments?.length
   const removedIds = new Set(input.photoIdsToRemove ?? [])
   const photos = photoChanges
@@ -677,7 +697,7 @@ function demoWishFromInput(id: string, input: WishlistInput, base?: WishlistItem
     alsoParts: [...new Set((input.alsoParts ?? []).filter((part) => part !== primaryPart))],
     colors,
     colorHex,
-    colorName: optional(primaryColor?.family ?? (input.colors === undefined ? input.colorName : undefined)),
+    colorName: optional(primaryColor?.name ?? (input.colors === undefined ? input.colorName : undefined)),
     shop: input.shop.trim() || '尚未決定',
     url: optional(input.url),
     price: input.price,
@@ -693,12 +713,15 @@ function demoWishFromInput(id: string, input: WishlistInput, base?: WishlistItem
     material: optional(input.material),
     materialComposition: optional(input.materialComposition),
     materialPercentages: input.materialPercentages ? { ...input.materialPercentages } : undefined,
+    features: normalizeFeatureTags(input.features ?? base?.features),
+    featureSuggestionsDismissed: [...new Set(input.featureSuggestionsDismissed ?? base?.featureSuggestionsDismissed ?? [])],
     ...(input.flatMeasurements !== undefined ? { flatMeasurements: cleanFlat(input.flatMeasurements), flatStretch: cleanStretch(input.flatMeasurements, input.flatStretch) } : {}),
     returnPolicy: optional(input.returnPolicy),
     status: input.status,
     shape: base && base.slot === input.slot ? base.shape : fallbackShape(input.slot),
     photos,
     ...(photoChanges ? { cutoutUrl: coverPhoto?.url } : {}),
+    buyLines: base?.buyLines,
     createdAt: base?.createdAt ?? new Date().toISOString(),
   }
 }
@@ -843,36 +866,113 @@ export async function setWishlistStatus(id: string, status: Exclude<WishStatus, 
 }
 
 /**
+ * 準備購買開關（B23.3）：開＝狀態改 ready，沒有明細時寫入預設一行；關＝改回 considering，明細保留。
+ */
+export async function setWishlistReady(id: string, ready: boolean, defaultLines: BuyLine[]): Promise<{ demo: boolean }> {
+  const status: WishStatus = ready ? 'ready' : 'considering'
+  if (!supabase) {
+    demoWishlistItems = demoWishlistItems.map((item) => item.id === id && item.status !== 'bought'
+      ? { ...item, status, buyLines: ready && !item.buyLines?.length ? defaultLines.map((line) => ({ ...line })) : item.buyLines }
+      : item)
+    return { demo: true }
+  }
+  const { data, error } = await supabase.from('wishlist_items').select('buy_lines').eq('id', id).single()
+  if (error) throw error
+  const patch: { status: WishStatus; buy_lines?: BuyLineRow[] } = { status }
+  if (ready && !buyLinesFromRow(data.buy_lines as BuyLineRow[] | null).length) patch.buy_lines = buyLinesToRow(defaultLines)
+  const { error: updateError } = await supabase.from('wishlist_items').update(patch).eq('id', id).neq('status', 'bought')
+  if (updateError) throw updateError
+  return { demo: false }
+}
+
+/** 儲存購買明細（顏色 × 件數 × 單價） */
+export async function saveWishlistBuyLines(id: string, lines: BuyLine[]): Promise<{ demo: boolean }> {
+  if (!supabase) {
+    demoWishlistItems = demoWishlistItems.map((item) => (item.id === id ? { ...item, buyLines: lines.map((line) => ({ ...line })) } : item))
+    return { demo: true }
+  }
+  const { error } = await supabase.from('wishlist_items').update({ buy_lines: buyLinesToRow(lines) }).eq('id', id).neq('status', 'bought')
+  if (error) throw error
+  return { demo: false }
+}
+
+/** AI 看過的提醒（B7.3）：存使用者貼回的外部 AI 回覆；空字串＝清除。平台不呼叫 AI。 */
+export async function saveWishlistAiReview(id: string, text: string): Promise<{ aiReview?: string; aiReviewedAt?: string; demo: boolean }> {
+  const aiReview = text.trim() || undefined
+  const aiReviewedAt = aiReview ? new Date().toISOString() : undefined
+  if (!supabase) {
+    demoWishlistItems = demoWishlistItems.map((item) => (item.id === id ? { ...item, aiReview, aiReviewedAt } : item))
+    return { aiReview, aiReviewedAt, demo: true }
+  }
+  const { error } = await supabase.from('wishlist_items').update({ ai_review: aiReview ?? null, ai_reviewed_at: aiReviewedAt ?? null }).eq('id', id)
+  if (error) throw error
+  return { aiReview, aiReviewedAt, demo: false }
+}
+
+let demoShoppingTarget: number | null = 5000
+
+/** 採購籃目標金額（profiles.shopping_target，選填） */
+export async function fetchShoppingTarget(): Promise<number | null> {
+  if (!supabase) return demoShoppingTarget
+  const { data, error } = await supabase.from('profiles').select('shopping_target').maybeSingle()
+  if (error) throw error
+  return typeof data?.shopping_target === 'number' ? data.shopping_target : null
+}
+
+export async function saveShoppingTarget(target: number | null): Promise<{ demo: boolean }> {
+  const value = target == null || !Number.isFinite(target) ? null : Math.max(0, Math.round(target))
+  if (!supabase) {
+    demoShoppingTarget = value
+    return { demo: true }
+  }
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError) throw userError
+  if (!user) throw new Error('請重新登入後再儲存目標金額。')
+  const { error } = await supabase.from('profiles').upsert({ id: user.id, shopping_target: value })
+  if (error) throw error
+  return { demo: false }
+}
+
+/**
  * 移至已購買：建立一件衣櫃衣物（帶入名稱、顏色、品牌、尺寸、圖片），
  * 選購候選保留原資料，狀態改為 bought 並指向新衣物。
  */
-export async function markWishlistBought(id: string, purchase: { purchaseDate: string; paidPrice: number | null; colorFamilies?: string[] }): Promise<{ itemIds: string[]; demo: boolean }> {
+export async function markWishlistBought(id: string, purchase: { purchaseDate: string; paidPrice: number | null; colorFamilies?: string[]; lines?: BuyLine[] }): Promise<{ itemIds: string[]; demo: boolean }> {
+  // 從採購籃來：依明細每一件建立一件衣物，單價記為實付價格
+  const pieces = (colors: WishlistColor[]) => purchase.lines?.length
+    ? purchase.lines.flatMap((line) => {
+      const color = colors.find((entry) => entry.name === line.colorName) ?? colorFromName(line.colorName, line.hex)
+      return Array.from({ length: Math.max(1, line.qty) }, () => ({ color, price: line.unitPrice as number | null }))
+    })
+    : colors.filter((color) => new Set(purchase.colorFamilies?.length ? purchase.colorFamilies : colors.map((entry) => entry.name)).has(color.name)).map((color) => ({ color, price: purchase.paidPrice }))
   if (!supabase) {
     const wish = demoWishlistItems.find((item) => item.id === id)
     if (!wish) throw new Error('找不到這件商品，可能已被刪除。')
     if (wish.status === 'bought') throw new Error('這件已經移至已購買了。')
-    const colors = wish.colors?.length ? wish.colors : [{ family: wish.colorName || '其他', hex: wish.colorHex }]
-    const selected = new Set(purchase.colorFamilies?.length ? purchase.colorFamilies : colors.map((color) => color.family))
-    const selectedColors = colors.filter((color) => selected.has(color.family))
-    if (!selectedColors.length) throw new Error('請至少選擇一個購買顏色。')
-    const itemIds = selectedColors.map((color, index) => {
+    const colors = wish.colors?.length ? wish.colors : [colorFromName(wish.colorName || '其他', wish.colorHex)]
+    const selectedPieces = pieces(colors)
+    if (!selectedPieces.length) throw new Error('請至少選擇一個購買顏色。')
+    const itemIds = selectedPieces.map(({ color, price }, index) => {
       const itemId = `demo-bought-${Date.now()}-${index}`
       const category = SAMPLE_CATEGORIES.find((entry) => entry.slot === (wish.primaryPart ?? wish.slot))
-      const photoFamily = color.family
+      const photoFamily = color.name
       const photos = (wish.photos ?? []).filter((photo) => !photo.colorFamily || photo.colorFamily === photoFamily)
       demoClosetItems.unshift({
         id: itemId,
         name: wish.name,
         categoryId: category?.id ?? SAMPLE_CATEGORIES[0].id,
         slot: wish.primaryPart ?? wish.slot,
-        colorName: color.family,
-        colorHex: color.hex ?? GARMENT_COLORS.find((entry) => entry.name === color.family)?.hex ?? wish.colorHex,
+        colorName: color.name,
+        colorHex: color.hex || wish.colorHex,
         brand: wish.brand,
         size: wish.size,
         necklineSize: wish.necklineSize,
         flatMeasurements: { ...wish.flatMeasurements },
         flatStretch: { ...wish.flatStretch },
+        features: normalizeFeatureTags(wish.features),
+        featureSuggestionsDismissed: [...(wish.featureSuggestionsDismissed ?? [])],
         status: 'ok',
+        purchasePrice: price ?? undefined,
         cutoutUrl: photos.find((photo) => photo.isCover)?.url ?? wish.cutoutUrl,
         shape: wish.shape,
         wearCount: 0,
@@ -880,24 +980,23 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
       if (photos.length) demoClosetPhotos.set(itemId, photos.map((photo, photoIndex) => ({ ...photo, sortOrder: photoIndex, isCover: photoIndex === 0 })))
       return itemId
     })
-    demoWishlistItems = demoWishlistItems.map((item) => item.id === id ? { ...item, status: 'bought', boughtItemId: itemIds[0], boughtItemIds: itemIds } : item)
+    demoWishlistItems = demoWishlistItems.map((item) => item.id === id ? { ...item, status: 'bought', boughtItemId: itemIds[0], boughtItemIds: itemIds, buyLines: purchase.lines ?? item.buyLines } : item)
     return { itemIds, demo: true }
   }
 
   const client = supabase
   const { data, error } = await client
     .from('wishlist_items')
-    .select('id,name,slot,primary_part,also_parts,colors,category_id,color_hex,color_name,second_color_hex,brand,size,size_note,neckline_size,seasons,material,material_composition,material_percentages,flat_measurements,flat_stretch,shop,url,reason,status,image_original_path,image_cutout_path,bought_item_id')
+    .select('id,name,slot,primary_part,also_parts,colors,category_id,color_hex,color_name,second_color_hex,brand,size,size_note,neckline_size,seasons,material,material_composition,material_percentages,feature_tags,feature_suggestions_dismissed,flat_measurements,flat_stretch,shop,url,reason,status,image_original_path,image_cutout_path,bought_item_id')
     .eq('id', id)
     .single()
   if (error) throw error
   if (data.status === 'bought') throw new Error('這件已經移至已購買了。')
   const { data: wishlistPhotos, error: wishlistPhotosError } = await client.from('item_photos').select('storage_path,sort_order,is_cover,color_family').eq('wishlist_item_id', id).order('sort_order')
   if (wishlistPhotosError) throw wishlistPhotosError
-  const allColors = data.colors?.length ? data.colors as WishlistColor[] : [{ family: data.color_name || '未標色', hex: data.color_hex }]
-  const selectedColorFamilies = new Set(purchase.colorFamilies?.length ? purchase.colorFamilies : allColors.map((color) => color.family))
-  const colors = allColors.filter((color) => selectedColorFamilies.has(color.family))
-  if (!colors.length) throw new Error('請至少選擇一個購買顏色。')
+  const allColors = normalizeWishColors(Array.isArray(data.colors) && data.colors.length ? data.colors : [{ family: data.color_name || '未標色', hex: data.color_hex }])
+  const selectedPieces = pieces(allColors)
+  if (!selectedPieces.length) throw new Error('請至少選擇一個購買顏色。')
   const categories = await fetchCategories()
   const primaryPart = data.primary_part ?? data.slot
   const category = categories.find((entry) => entry.slot === primaryPart) ?? categories.find((entry) => entry.id === data.category_id)
@@ -910,9 +1009,9 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
   const insertedItems: string[] = []
   const outputIds: string[] = []
   try {
-    for (const color of colors) {
+    for (const { color, price } of selectedPieces) {
       const itemId = crypto.randomUUID()
-      const familyPhotos = (wishlistPhotos ?? []).filter((photo) => !photo.color_family || photo.color_family === color.family)
+      const familyPhotos = (wishlistPhotos ?? []).filter((photo) => !photo.color_family || photo.color_family === color.name)
       const legacyCover = !(wishlistPhotos?.length) ? data.image_original_path : null
       const coverSource = familyPhotos.find((photo) => photo.is_cover)?.storage_path ?? familyPhotos[0]?.storage_path ?? legacyCover
       const copyImage = async (path: string | null | undefined, name: string) => {
@@ -932,8 +1031,8 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
         id: itemId,
         category_id: category.id,
         name: data.name,
-        color_name: color.family,
-        color_hex: color.hex ?? GARMENT_COLORS.find((entry) => entry.name === color.family)?.hex ?? data.color_hex,
+        color_name: color.name,
+        color_hex: color.hex || data.color_hex,
         second_color_hex: null,
         size: data.size || data.size_note || '',
         neckline_size: data.neckline_size,
@@ -942,10 +1041,12 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
         material: data.material,
         material_composition: data.material_composition,
         material_percentages: data.material_percentages ?? {},
+        feature_tags: normalizeFeatureTags(data.feature_tags as FeatureTag[] | null),
+        feature_suggestions_dismissed: data.feature_suggestions_dismissed ?? [],
         flat_measurements: data.flat_measurements ?? {},
         flat_stretch: data.flat_stretch ?? {},
         purchase_date: purchase.purchaseDate,
-        purchase_price: purchase.paidPrice,
+        purchase_price: price,
         store: data.shop,
         product_url: data.url,
         note: data.reason,
@@ -970,7 +1071,7 @@ export async function markWishlistBought(id: string, purchase: { purchaseDate: s
         if (photoError) throw photoError
       }
     }
-    const { error: updateError } = await client.from('wishlist_items').update({ status: 'bought', bought_item_id: outputIds[0], bought_item_ids: outputIds }).eq('id', id)
+    const { error: updateError } = await client.from('wishlist_items').update({ status: 'bought', bought_item_id: outputIds[0], bought_item_ids: outputIds, ...(purchase.lines?.length ? { buy_lines: buyLinesToRow(purchase.lines) } : {}) }).eq('id', id)
     if (updateError) throw updateError
   } catch (err) {
     if (insertedItems.length) await client.from('items').delete().in('id', insertedItems)
@@ -993,11 +1094,11 @@ export async function fetchCompareGroups(): Promise<CompareGroup[]> {
 /** 讀取選購商品在比較中的順序與指定尺碼。 */
 export async function fetchCompareGroupItems(groupId?: string): Promise<CompareGroupItem[]> {
   if (!supabase) return demoCompareGroupItems.filter((entry) => !groupId || entry.groupId === groupId).map((entry) => ({ ...entry })).sort((a, b) => a.position - b.position)
-  let query = supabase.from('compare_group_items').select('group_id,wishlist_item_id,position,chosen_size,is_decided,added_at').order('position').order('added_at')
+  let query = supabase.from('compare_group_items').select('group_id,wishlist_item_id,position,chosen_size,is_decided,cover_photo_path,added_at').order('position').order('added_at')
   if (groupId) query = query.eq('group_id', groupId)
   const { data, error } = await query
   if (error) throw error
-  return (data ?? []).map((row) => ({ groupId: row.group_id, wishlistItemId: row.wishlist_item_id, position: row.position, chosenSize: row.chosen_size ?? undefined, isDecided: row.is_decided, addedAt: row.added_at }))
+  return (data ?? []).map((row) => ({ groupId: row.group_id, wishlistItemId: row.wishlist_item_id, position: row.position, chosenSize: row.chosen_size ?? undefined, isDecided: row.is_decided, coverPhotoPath: row.cover_photo_path ?? undefined, addedAt: row.added_at }))
 }
 
 /** 讀取候選已加入的比較名稱，供挑選器及卡片標記使用。 */
@@ -1090,6 +1191,17 @@ export async function setCompareChosenSize(groupId: string, wishlistId: string, 
     return { demo: true }
   }
   const { error } = await supabase.from('compare_group_items').update({ chosen_size: chosenSize }).eq('group_id', groupId).eq('wishlist_item_id', wishlistId)
+  if (error) throw error
+  return { demo: false }
+}
+
+/** 這個比較的欄頂封面（商品圖的 storage_path）；null＝改回商品封面。不影響選購清單本身的封面。 */
+export async function setCompareCoverPhoto(groupId: string, wishlistId: string, path: string | null): Promise<{ demo: boolean }> {
+  if (!supabase) {
+    demoCompareGroupItems = demoCompareGroupItems.map((entry) => entry.groupId === groupId && entry.wishlistItemId === wishlistId ? { ...entry, coverPhotoPath: path ?? undefined } : entry)
+    return { demo: true }
+  }
+  const { error } = await supabase.from('compare_group_items').update({ cover_photo_path: path }).eq('group_id', groupId).eq('wishlist_item_id', wishlistId)
   if (error) throw error
   return { demo: false }
 }
@@ -1244,6 +1356,8 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         necklineSize: input.necklineSize ?? undefined,
         status: input.closetStatus ?? 'ok',
         seasons: [...input.seasons],
+        features: normalizeFeatureTags(input.features),
+        featureSuggestionsDismissed: [...new Set(input.featureSuggestionsDismissed ?? [])],
         material: input.material || undefined,
         materialComposition: input.materialComposition || undefined,
         materialPercentages: input.materialPercentages ? { ...input.materialPercentages } : undefined,
@@ -1264,7 +1378,7 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         slot: category.slot!,
         primaryPart: category.slot!,
         alsoParts: [],
-        colors: [{ family: input.colorName || '其他', hex: input.colorHex }],
+        colors: [colorFromName(input.colorName || '其他', input.colorHex)],
         colorHex: input.colorHex,
         shop: input.store || '尚未決定',
         brand: input.brand || undefined,
@@ -1304,6 +1418,8 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
     neckline_size: input.necklineSize ?? null,
     brand: input.brand?.trim() || null,
     seasons: input.seasons,
+    feature_tags: normalizeFeatureTags(input.features),
+    feature_suggestions_dismissed: [...new Set(input.featureSuggestionsDismissed ?? [])],
     material: input.material?.trim() || null,
     material_composition: input.materialComposition?.trim() || null,
     material_percentages: input.materialPercentages ?? {},
@@ -1330,7 +1446,7 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         slot: category.slot,
         primary_part: category.slot,
         also_parts: [],
-        colors: [{ family: input.colorName || '其他', hex: input.colorHex }],
+        colors: wishColorsToRow([colorFromName(input.colorName || '其他', input.colorHex)]),
         color_name: input.colorName,
         color_hex: input.colorHex,
         second_color_hex: input.secondColorHex || null,
@@ -1341,6 +1457,8 @@ export async function createGarment(input: NewGarmentInput, files: File[]): Prom
         material: input.material?.trim() || null,
         material_composition: input.materialComposition?.trim() || null,
         material_percentages: input.materialPercentages ?? {},
+        feature_tags: normalizeFeatureTags(input.features),
+        feature_suggestions_dismissed: [...new Set(input.featureSuggestionsDismissed ?? [])],
         shop: input.store?.trim() || '尚未決定',
         price: input.purchasePrice ?? 0,
         url: input.productUrl?.trim() || null,
@@ -1449,6 +1567,8 @@ export async function updateGarmentDraft(id: string, input: NewGarmentInput): Pr
     size: input.size?.trim() || '',
     neckline_size: input.necklineSize ?? null,
     seasons: input.seasons,
+    feature_tags: normalizeFeatureTags(input.features),
+    feature_suggestions_dismissed: [...new Set(input.featureSuggestionsDismissed ?? [])],
     material: input.material?.trim() || null,
     material_composition: input.materialComposition?.trim() || null,
     material_percentages: input.materialPercentages ?? {},
@@ -1494,7 +1614,7 @@ export async function finalizeGarmentDraft(id: string, input: NewGarmentInput): 
     slot: category.slot,
     primary_part: category.slot,
     also_parts: [],
-    colors: [{ family: input.colorName || '其他', hex: input.colorHex }],
+    colors: wishColorsToRow([colorFromName(input.colorName || '其他', input.colorHex)]),
     color_hex: input.colorHex,
     shop: input.store?.trim() || '尚未決定',
     price: input.purchasePrice ?? 0,
@@ -1504,6 +1624,8 @@ export async function finalizeGarmentDraft(id: string, input: NewGarmentInput): 
     material: input.material?.trim() || null,
     material_composition: input.materialComposition?.trim() || null,
     material_percentages: input.materialPercentages ?? {},
+    feature_tags: normalizeFeatureTags(input.features),
+    feature_suggestions_dismissed: [...new Set(input.featureSuggestionsDismissed ?? [])],
     ...flatPayload(input.flatMeasurements, input.flatStretch),
     reason: input.note?.trim() || null,
     status: 'considering',
@@ -2442,6 +2564,7 @@ export async function copyClosetItem(source: ClosetItem, input: CopyItemInput): 
       materialComposition: input.materialComposition || undefined,
       materialPercentages: input.materialPercentages,
       seasons: [...input.seasons],
+      features: normalizeFeatureTags(source.features),
       purchaseDate: input.purchaseDate || undefined,
       purchasePrice: input.purchasePrice ?? undefined,
       store: input.store || undefined,
@@ -2479,6 +2602,8 @@ export async function copyClosetItem(source: ClosetItem, input: CopyItemInput): 
     material: input.material?.trim() || null,
     material_composition: input.materialComposition?.trim() || null,
     material_percentages: input.materialPercentages ?? {},
+    feature_tags: normalizeFeatureTags(source.features),
+    feature_suggestions_dismissed: [],
     purchase_date: input.purchaseDate || null,
     purchase_price: input.purchasePrice ?? null,
     store: input.store?.trim() || null,
@@ -2914,6 +3039,167 @@ export async function markManagedEntriesDistinct(kind: ManagedListKind, groupKey
   const table = kind === 'shops' ? 'shop_distinct_groups' : 'material_distinct_groups'
   const { error } = await supabase.from(table).upsert({ group_key: groupKey }, { onConflict: 'owner_id,group_key', ignoreDuplicates: true })
   if (error) throw error
+}
+
+function featureFromRow(row: Record<string, unknown>, counts: { closet: number; wishlist: number } = { closet: 0, wishlist: 0 }): FeatureDefinition {
+  return {
+    name: String(row.name),
+    dimension: row.dimension as FeatureDefinition['dimension'],
+    aliases: Array.isArray(row.aliases) ? row.aliases as string[] : [],
+    applicableTypes: Array.isArray(row.applicable_types) ? row.applicable_types as string[] : [],
+    sortOrder: Number(row.sort_order ?? 100),
+    isHidden: row.is_hidden === true,
+    closetCount: counts.closet,
+    wishCount: counts.wishlist,
+  }
+}
+
+function incrementFeatureCounts(rows: { feature_tags?: FeatureTag[] | null }[], counts: Map<string, { closet: number; wishlist: number }>, kind: 'closet' | 'wishlist') {
+  for (const row of rows) {
+    const names = new Set(normalizeFeatureTags(row.feature_tags).map((tag) => tag.name))
+    for (const name of names) {
+      const count = counts.get(name) ?? { closet: 0, wishlist: 0 }
+      count[kind] += 1
+      counts.set(name, count)
+    }
+  }
+}
+
+/** 讀取使用者的特徵字典及衣物／候選使用件數；首次進入會補上預設特徵。 */
+export async function fetchGarmentFeatures(includeHidden = false): Promise<FeatureDefinition[]> {
+  if (!supabase) {
+    for (const [name, feature] of demoFeatures) {
+      const closetCount = demoClosetItems.filter((item) => item.features?.some((tag) => tag.name === name)).length
+      const wishCount = demoWishlistItems.filter((item) => item.features?.some((tag) => tag.name === name)).length
+      demoFeatures.set(name, { ...feature, closetCount, wishCount })
+    }
+    return [...demoFeatures.values()].filter((feature) => includeHidden || !feature.isHidden).sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, 'zh-TW'))
+  }
+
+  const seeds = FEATURE_DEFAULTS.map((feature) => ({
+    name: feature.name,
+    dimension: feature.dimension,
+    aliases: feature.aliases,
+    applicable_types: feature.applicableTypes,
+    sort_order: feature.sortOrder,
+    is_hidden: false,
+  }))
+  const { error: seedError } = await supabase.from('garment_features').upsert(seeds, { onConflict: 'owner_id,name', ignoreDuplicates: true })
+  if (seedError) throw seedError
+
+  const [featuresResult, closetResult, wishResult] = await Promise.all([
+    supabase.from('garment_features').select('name,dimension,aliases,applicable_types,sort_order,is_hidden').order('sort_order').order('name'),
+    supabase.from('items').select('feature_tags').eq('is_draft', false),
+    supabase.from('wishlist_items').select('feature_tags'),
+  ])
+  for (const result of [featuresResult, closetResult, wishResult]) if (result.error) throw result.error
+  const counts = new Map<string, { closet: number; wishlist: number }>()
+  incrementFeatureCounts((closetResult.data ?? []) as { feature_tags?: FeatureTag[] | null }[], counts, 'closet')
+  incrementFeatureCounts((wishResult.data ?? []) as { feature_tags?: FeatureTag[] | null }[], counts, 'wishlist')
+  return ((featuresResult.data ?? []) as unknown as Record<string, unknown>[])
+    .map((row) => featureFromRow(row, counts.get(String(row.name))))
+    .filter((feature) => includeHidden || !feature.isHidden)
+}
+
+export async function createGarmentFeature(input: FeatureDefinitionInput): Promise<void> {
+  const name = input.name.trim()
+  if (!name) throw new Error('請輸入特徵名稱。')
+  const aliases = normalizeFeatureAliases(input.aliases, name)
+  if (!supabase) {
+    if (demoFeatures.has(name)) throw new Error(`「${name}」已經在特徵清單。`)
+    demoFeatures.set(name, { ...input, name, aliases, closetCount: 0, wishCount: 0 })
+    return
+  }
+  const { error } = await supabase.from('garment_features').insert({
+    name,
+    dimension: input.dimension,
+    aliases,
+    applicable_types: input.applicableTypes,
+    sort_order: input.sortOrder,
+    is_hidden: input.isHidden,
+  })
+  if (error) throw error
+}
+
+export async function updateGarmentFeature(oldName: string, input: FeatureDefinitionInput): Promise<void> {
+  const name = input.name.trim()
+  if (!name) throw new Error('特徵名稱不能空白。')
+  if (input.dimension !== (demoFeatures.get(oldName)?.dimension ?? input.dimension)) throw new Error('已建立的特徵維度不可直接更改，請在同維度內新增或合併。')
+  const aliases = normalizeFeatureAliases(input.aliases, name)
+  if (!supabase) {
+    const old = demoFeatures.get(oldName)
+    if (!old) throw new Error('找不到這個特徵。')
+    if (name !== oldName && demoFeatures.has(name)) throw new Error(`「${name}」已存在，請改用合併。`)
+    demoFeatures.delete(oldName)
+    demoFeatures.set(name, { ...input, name, aliases, closetCount: old.closetCount, wishCount: old.wishCount })
+    for (const [key, feature] of demoFeatures) {
+      if (key !== name && feature.aliases.some((alias) => alias === oldName)) demoFeatures.set(key, { ...feature, aliases: feature.aliases.map((alias) => alias === oldName ? name : alias) })
+    }
+    const rename = (tags?: FeatureTag[]) => normalizeFeatureTags(tags?.map((tag) => tag.name === oldName ? { ...tag, name } : tag))
+    demoClosetItems = demoClosetItems.map((item) => item.features?.some((tag) => tag.name === oldName) ? { ...item, features: rename(item.features) } : item)
+    demoWishlistItems = demoWishlistItems.map((item) => item.features?.some((tag) => tag.name === oldName) ? { ...item, features: rename(item.features) } : item)
+    return
+  }
+  const old = await supabase.from('garment_features').select('dimension').eq('name', oldName).maybeSingle()
+  if (old.error) throw old.error
+  if (!old.data) throw new Error('找不到這個特徵。')
+  if (old.data.dimension !== input.dimension) throw new Error('已建立的特徵維度不可直接更改。')
+  if (name !== oldName) {
+    const { error: replaceError } = await supabase.rpc('replace_garment_feature_tags', { p_from: [oldName], p_to: name, p_to_dimension: input.dimension })
+    if (replaceError) throw replaceError
+  }
+  const { error } = await supabase.from('garment_features').update({
+    name,
+    aliases,
+    applicable_types: input.applicableTypes,
+    sort_order: input.sortOrder,
+    is_hidden: input.isHidden,
+  }).eq('name', oldName)
+  if (error) throw error
+}
+
+/** 合併特徵或刪除；關聯更新由單一資料庫 RPC 同步套用到衣物及選購候選。 */
+export async function replaceGarmentFeatures(names: string[], targetName: string | null): Promise<void> {
+  const from = [...new Set(names)].filter((name) => name !== targetName)
+  if (!from.length) return
+  const target = targetName ? demoFeatures.get(targetName) : undefined
+  if (!supabase) {
+    const definitions = from.map((name) => demoFeatures.get(name)).filter((feature): feature is FeatureDefinition => !!feature)
+    const targetDefinition = target ?? [...demoFeatures.values()].find((feature) => feature.name === targetName)
+    if (targetName && !targetDefinition) throw new Error('找不到合併後要保留的特徵。')
+    if (targetDefinition && definitions.some((feature) => feature.dimension !== targetDefinition.dimension)) throw new Error('只能合併相同維度的特徵。')
+    const namesToReplace = new Set(from)
+    const remap = (tags?: FeatureTag[]) => normalizeFeatureTags(tags?.flatMap((tag) => {
+      if (!namesToReplace.has(tag.name)) return [tag]
+      return targetDefinition ? [{ name: targetDefinition.name, dimension: targetDefinition.dimension }] : []
+    }))
+    demoClosetItems = demoClosetItems.map((item) => ({ ...item, features: remap(item.features) }))
+    demoWishlistItems = demoWishlistItems.map((item) => ({ ...item, features: remap(item.features) }))
+    for (const name of from) demoFeatures.delete(name)
+    if (targetDefinition) {
+      const aliases = [...new Set([...targetDefinition.aliases, ...definitions.flatMap((feature) => [feature.name, ...feature.aliases])].filter((alias) => alias !== targetDefinition.name))]
+      demoFeatures.set(targetDefinition.name, { ...targetDefinition, aliases })
+    }
+    return
+  }
+  let targetDimension: FeatureDefinition['dimension'] | null = null
+  if (targetName) {
+    const { data, error } = await supabase.from('garment_features').select('dimension').eq('name', targetName).single()
+    if (error) throw error
+    targetDimension = data.dimension as FeatureDefinition['dimension']
+    const { data: sources, error: sourceError } = await supabase.from('garment_features').select('name,dimension,aliases').in('name', from)
+    if (sourceError) throw sourceError
+    if ((sources ?? []).some((feature) => feature.dimension !== targetDimension)) throw new Error('只能合併相同維度的特徵。')
+    const targetCurrent = await supabase.from('garment_features').select('aliases').eq('name', targetName).single()
+    if (targetCurrent.error) throw targetCurrent.error
+    const mergedAliases = [...new Set([...(targetCurrent.data.aliases as string[] ?? []), ...(sources ?? []).flatMap((feature) => [feature.name, ...(feature.aliases as string[] ?? [])])].filter((alias) => alias !== targetName))]
+    const { error: aliasError } = await supabase.from('garment_features').update({ aliases: mergedAliases }).eq('name', targetName)
+    if (aliasError) throw aliasError
+  }
+  const { error: replaceError } = await supabase.rpc('replace_garment_feature_tags', { p_from: from, p_to: targetName, p_to_dimension: targetDimension })
+  if (replaceError) throw replaceError
+  const { error: deleteError } = await supabase.from('garment_features').delete().in('name', from)
+  if (deleteError) throw deleteError
 }
 
 /** 登出；示範模式沒有登入狀態 */

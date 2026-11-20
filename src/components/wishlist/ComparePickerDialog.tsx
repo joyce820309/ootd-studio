@@ -108,7 +108,7 @@ export function ComparePickerDialog({ groupId, groupName, items, groupWishlistId
   }
 
   return (
-    <dialog ref={dialogRef} aria-labelledby="compare-picker-title" onClose={handleNativeClose} onPointerUp={handleBackdrop} className="compare-picker fixed inset-x-0 top-auto bottom-0 m-0 flex max-h-[92dvh] w-full max-w-none flex-col gap-3 overflow-hidden rounded-t-block border-0 bg-card px-4 pt-2 pb-[calc(16px+env(safe-area-inset-bottom))] text-ink shadow-sheet backdrop:bg-scrim md:inset-auto md:left-1/2 md:top-1/2 md:bottom-auto md:max-h-[min(88dvh,984px)] md:w-[min(720px,calc(100vw-32px))] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-card md:px-5 md:pt-4 md:pb-0 md:shadow-float">
+    <dialog ref={dialogRef} aria-labelledby="compare-picker-title" onClose={handleNativeClose} onPointerUp={handleBackdrop} className="compare-picker fixed inset-x-0 top-auto bottom-0 m-0 hidden max-h-[92dvh] w-full max-w-none flex-col gap-3 overflow-hidden rounded-t-block border-0 bg-card px-4 pt-2 pb-[calc(16px+env(safe-area-inset-bottom))] text-ink shadow-sheet backdrop:bg-scrim md:inset-auto md:left-1/2 md:top-1/2 md:bottom-auto md:max-h-[min(88dvh,984px)] md:w-[min(720px,calc(100vw-32px))] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-card md:px-5 md:pt-4 md:pb-0 md:shadow-float">
       <span aria-hidden="true" className="mx-auto h-1 w-10 flex-none rounded-sm bg-line-strong md:hidden" />
       <header className="flex flex-none items-center gap-2">
         <h2 id="compare-picker-title" className="m-0 min-w-0 flex-1 truncate font-hd text-xl md:text-2xl">加入「{groupName}」</h2>

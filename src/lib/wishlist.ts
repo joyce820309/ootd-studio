@@ -1,5 +1,8 @@
 import { isInCloset, isWearable, SLOT_META, SLOTS } from './slots'
-import type { ClosetItem, GarmentLength, Slot, WishlistItem, WishPriority, WishStatus } from '@/types'
+import { FEATURE_DIMENSIONS, FEATURE_SINGLE_DIMENSIONS } from './features'
+import { materialNames } from './materials'
+import type { ClosetItem, FeatureTag, GarmentLength, Slot, WishlistItem, WishPriority, WishStatus } from '@/types'
+import { familyOfHex } from '@/lib/wishColors'
 
 export const WISH_STATUS: Record<WishStatus, { label: string; className: string }> = {
   considering: { label: '考慮中', className: 'bg-status-stored-bg text-status-stored-fg' },
@@ -306,9 +309,6 @@ export function colorsGoTogether(a: string, b: string) {
   return hue <= 45 || hue >= 150
 }
 
-export type Overlap = 'low' | 'mid' | 'high'
-export const OVERLAP_LABEL: Record<Overlap, string> = { low: '重複度低', mid: '重複度中', high: '重複度高' }
-
 export interface LookCell {
   slot: Slot
   name: string
@@ -321,16 +321,90 @@ export interface LookCell {
 export interface WishInsights {
   /** 其他部位、目前可穿、配色合得來的衣物件數 */
   matchCount: number
-  overlap: Overlap
   closest?: ClosetItem
   /** 拿來比重複的範圍：候選有類型時只比同類型（例：寬褲），沒類型時比同部位 */
   compareLabel: string
+  comparison: {
+    conclusion: 'very' | 'some' | 'not' | 'few'
+    /** 僅供同類候選內排序，不在 UI 顯示百分比。 */
+    score: number
+    shared: string[]
+    different: string[]
+    featureEvidence: number
+    featureDataMissing: boolean
+  }
   /** 不重複使用單品的情況下，能組出幾套新穿搭 */
   lookCount: number
   looks: LookCell[][]
 }
 
 const LOOK_SLOTS: Slot[] = ['top', 'bottom', 'shoes']
+
+const featureNames = (features: FeatureTag[], dimension: FeatureTag['dimension']) => features.filter((feature) => feature.dimension === dimension).map((feature) => feature.name)
+const cleanMaterial = (value: string) => value.normalize('NFKC').toLocaleLowerCase().replace(/\s|\d+(?:\.\d+)?%/g, '')
+
+function itemMaterials(item: Pick<ClosetItem, 'material' | 'materialPercentages'> | Pick<WishlistItem, 'material' | 'materialPercentages'>) {
+  return [...new Set([...materialNames(item.material), ...Object.keys(item.materialPercentages ?? {})].map(cleanMaterial).filter(Boolean))]
+}
+
+function compareGarments(wish: WishlistItem, closetItem: ClosetItem, compareLabel: string, closetFamily: string, wishFamilies: Set<string>): WishInsights['comparison'] {
+  const shared = [compareLabel]
+  const different: string[] = []
+  // 顏色用「歸類」比：候選任一色跟衣櫃這件同色系就算顏色重複（B22 ⑤：篩選和重複度都用 family）
+  const sameFamily = wishFamilies.has(closetFamily)
+  const scores = [sameFamily ? 1 : 0]
+  if (sameFamily) shared.push(`同色系：${closetFamily}`)
+  else different.push(`色系：${[...wishFamilies].join('、')}／${closetFamily}`)
+
+  const wishMaterials = itemMaterials(wish)
+  const closetMaterials = itemMaterials(closetItem)
+  let featureDataMissing = !wishMaterials.length || !closetMaterials.length
+  if (wishMaterials.length && closetMaterials.length) {
+    const same = wishMaterials.filter((material) => closetMaterials.includes(material))
+    const union = new Set([...wishMaterials, ...closetMaterials])
+    scores.push(same.length / union.size)
+    if (same.length) shared.push(`材質：${same.join('、')}`)
+    const unmatched = [...new Set([...wishMaterials.filter((value) => !same.includes(value)), ...closetMaterials.filter((value) => !same.includes(value))])]
+    if (unmatched.length) different.push(`材質：${unmatched.join('、')}`)
+  }
+
+  const wishLength = wish.garmentLength
+  const closetLength = closetItem.garmentLength
+  if (wishLength && closetLength) {
+    scores.push(wishLength === closetLength ? 1 : 0)
+    if (wishLength === closetLength) shared.push(`長度：${{ short: '短', mid: '中', long: '長' }[wishLength]}`)
+    else different.push(`長度：${{ short: '短', mid: '中', long: '長' }[wishLength]}／${{ short: '短', mid: '中', long: '長' }[closetLength]}`)
+  } else if (wishLength || closetLength) featureDataMissing = true
+
+  const wishFeatures = wish.features ?? []
+  const closetFeatures = closetItem.features ?? []
+  let featureEvidence = 0
+  let singleMismatch = false
+  for (const dimension of FEATURE_DIMENSIONS.map((entry) => entry.id)) {
+    const a = featureNames(wishFeatures, dimension)
+    const b = featureNames(closetFeatures, dimension)
+    if (!a.length && !b.length) continue
+    if (!a.length || !b.length) { featureDataMissing = true; continue }
+    featureEvidence += 1
+    if (FEATURE_SINGLE_DIMENSIONS.has(dimension)) {
+      const same = a[0] === b[0]
+      scores.push(same ? 1 : 0)
+      if (same) shared.push(a[0])
+      else { different.push(`${FEATURE_DIMENSIONS.find((entry) => entry.id === dimension)?.label}：${a[0]}／${b[0]}`); singleMismatch = true }
+      continue
+    }
+    const same = a.filter((feature) => b.includes(feature))
+    const union = new Set([...a, ...b])
+    scores.push(same.length / union.size)
+    if (same.length) shared.push(...same)
+    const unmatched = [...new Set([...a.filter((feature) => !same.includes(feature)), ...b.filter((feature) => !same.includes(feature))])]
+    if (unmatched.length) different.push(...unmatched)
+  }
+  if (!featureEvidence) featureDataMissing = true
+  const score = scores.reduce((sum, value) => sum + value, 0) / scores.length
+  const conclusion = singleMismatch ? 'not' : featureDataMissing ? 'few' : score < 0.4 ? 'not' : score >= 0.72 ? 'very' : 'some'
+  return { conclusion, score, shared: [...new Set(shared)], different: [...new Set(different)], featureEvidence, featureDataMissing }
+}
 
 /** 依衣櫃現況估算：能搭幾件、跟現有單品像不像、可以怎麼穿（簡單規則，不是 AI）。 */
 export function wishInsights(wish: WishlistItem, closet: ClosetItem[]): WishInsights {
@@ -344,15 +418,21 @@ export function wishInsights(wish: WishlistItem, closet: ClosetItem[]): WishInsi
   const compareLabel = type ? type.label : SLOT_META[part].label
   const sameSlot = closet.filter((item) => item.slot === part && isInCloset(item.status) && (!type || closetItemHasType(item, type)))
   let closest: ClosetItem | undefined
-  let best = Infinity
+  let closestColorDistance = Infinity
+  let bestSimilarity = -Infinity
+  let comparison: WishInsights['comparison'] = { conclusion: 'few', score: 0, shared: [], different: [], featureEvidence: 0, featureDataMissing: true }
+  const wishFamilies = new Set(wish.colors?.length ? wish.colors.map((color) => color.family) : [familyOfHex(wish.colorHex)])
   for (const item of sameSlot) {
+    // 同分時取色碼最接近的那件
     const d = colorDistance(item.colorHex, wish.colorHex)
-    if (d < best) {
-      best = d
+    const evaluated = compareGarments(wish, item, compareLabel, familyOfHex(item.colorHex), wishFamilies)
+    if (evaluated.score > bestSimilarity || (evaluated.score === bestSimilarity && d < closestColorDistance)) {
+      bestSimilarity = evaluated.score
+      closestColorDistance = d
       closest = item
+      comparison = evaluated
     }
   }
-  const overlap: Overlap = !closest ? 'low' : best < 50 ? 'high' : best < 120 ? 'mid' : 'low'
 
   const needed = LOOK_SLOTS.filter((slot) => slot !== wish.slot)
   const bySlot = Object.fromEntries(SLOTS.map((s) => [s.slot, matching.filter((item) => item.slot === s.slot)])) as Record<Slot, ClosetItem[]>
@@ -367,5 +447,26 @@ export function wishInsights(wish: WishlistItem, closet: ClosetItem[]): WishInsi
     })
     looks.push([wishCell, ...cells])
   }
-  return { matchCount, overlap, closest, compareLabel, lookCount, looks }
+  return { matchCount, closest, compareLabel, comparison, lookCount, looks }
+}
+
+/** 用既有 B20 判斷函式，僅取數字與已核定的判斷；不建立新的寬鬆門檻。 */
+export function wishAsClosetItem(item: WishlistItem): ClosetItem {
+  return {
+    id: item.id,
+    name: item.name,
+    categoryId: item.primaryPart ?? item.slot,
+    slot: item.primaryPart ?? item.slot,
+    categorySlot: item.primaryPart ?? item.slot,
+    colorName: item.colorName ?? '其他',
+    colorHex: item.colorHex,
+    brand: item.brand,
+    size: item.size,
+    material: item.material,
+    materialComposition: item.materialComposition,
+    materialPercentages: item.materialPercentages,
+    flatMeasurements: item.flatMeasurements,
+    flatStretch: item.flatStretch,
+    status: 'ok',
+  }
 }

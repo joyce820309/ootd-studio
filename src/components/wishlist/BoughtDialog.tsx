@@ -20,8 +20,8 @@ export function BoughtDialog({
   const uid = useId()
   const [date, setDate] = useState<string | null>(todayISO())
   const [paid, setPaid] = useState(String(totalPrice(item)))
-  const colors = item.colors?.length ? item.colors : [{ family: item.colorName || '未標色', hex: item.colorHex }]
-  const [selectedColors, setSelectedColors] = useState<string[]>(() => colors.map((color) => color.family))
+  const colors = item.colors?.length ? item.colors.map((color) => ({ name: color.name, hex: color.hex })) : [{ name: item.colorName || '未標色', hex: item.colorHex }]
+  const [selectedColors, setSelectedColors] = useState<string[]>(() => colors.map((color) => color.name))
   const [error, setError] = useState<{ date?: string; paid?: string }>({})
 
   const submit = (event: FormEvent) => {
@@ -63,10 +63,10 @@ export function BoughtDialog({
         </div>
         {colors.length > 0 && <fieldset className="m-0 space-y-2 border-0 p-0">
           <legend className="mb-1 text-[13px] font-medium text-ink">這次買了哪些顏色？</legend>
-          <div className="flex flex-wrap gap-2">{colors.map((color) => <label key={color.family} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-[1.5px] border-line bg-paper px-3 text-sm text-ink">
-            <input type="checkbox" checked={selectedColors.includes(color.family)} onChange={(event) => setSelectedColors((current) => event.target.checked ? [...current, color.family] : current.filter((family) => family !== color.family))} className="size-4 accent-[var(--color-sage-deep)]" />
+          <div className="flex flex-wrap gap-2">{colors.map((color) => <label key={color.name} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-[1.5px] border-line bg-paper px-3 text-sm text-ink">
+            <input type="checkbox" checked={selectedColors.includes(color.name)} onChange={(event) => setSelectedColors((current) => event.target.checked ? [...current, color.name] : current.filter((name) => name !== color.name))} className="size-4 accent-[var(--color-sage-deep)]" />
             <span aria-hidden="true" className="size-5 rounded-[5px] border border-ink/15" style={{ background: color.hex ?? item.colorHex }} />
-            {color.family}
+            {color.name}
           </label>)}</div>
           {error.paid === '請至少選擇一個購買顏色。' && <p role="alert" className="m-0 text-xs text-rose-deep">{error.paid}</p>}
         </fieldset>}

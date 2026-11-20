@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { DestructiveActionDialog } from '@/components/ui/B10States'
 import { Icon } from '@/components/ui/Icon'
@@ -289,6 +290,7 @@ function ManagedListsPage({ kind }: Props) {
           <h1 className="m-0 font-hd text-3xl text-ink">{title}</h1>
           <p className="m-0 text-sm leading-6 text-ink-2">{isShop ? '管理常用店家與網站；改名、合併時會一起更新衣物和選購清單。' : '管理新增衣物時可選的材質；比例依每件衣物的標籤分別記錄。'}</p>
         </div>
+        <Link to="/me/features" className="flex min-h-11 items-center gap-1 px-2 text-xs font-medium text-mist-deep">特徵<Icon name="next" size={14} /></Link>
         <Button variant="oat" onClick={() => openEditor()}><Icon name="plus" />新增{isShop ? '通路' : '材質'}</Button>
       </header>
       {loading && !entries.length ? <LoadingState label={`正在載入${title}…`} /> : loadError ? <PageState icon="alert" tone="rose" title={`${title}載入失敗`} description={loadError} action={<Button variant="secondary" onClick={reload}>重新載入</Button>} /> : <>

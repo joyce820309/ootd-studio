@@ -1,3 +1,4 @@
+import { MaterialMix } from "@/components/ui/MaterialMix";
 import {
   useCallback,
   useEffect,
@@ -5,9 +6,10 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { CutoutRegionDialog } from "@/components/closet/CutoutRegionDialog";
 import { FlatMeasureField } from "@/components/closet/FlatMeasureField";
+import { FeatureTagPicker } from "@/components/ui/FeatureTagPicker";
 import { collectMeasures, elasticFiberPercent, toFieldValue, type FlatFieldValue, type MeasureField } from "@/lib/stretch";
 import { ItemImage } from "@/components/closet/ItemImage";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -26,6 +28,8 @@ import {
   deleteClosetItem,
   fetchCategories,
   fetchClosetBrands,
+  fetchGarmentFeatures,
+  createGarmentFeature,
   fetchManagedList,
   fetchClosetItemDetail,
   recordClosetItemWear,
@@ -37,8 +41,10 @@ import {
   useLatestBody,
 } from "@/lib/data";
 import { isLessonStatus, isWearable, STATUS_LABEL } from "@/lib/slots";
+import { closetItemTypeOf } from "@/lib/wishlist";
+import { featureTypeKeys } from "@/lib/features";
 import { ReviewMarkDialog } from "@/components/review/ReviewMarkDialog";
-import type { Category, ClosetItem, CutoutRegion, ItemStatus } from "@/types";
+import type { Category, ClosetItem, CutoutRegion, FeatureDefinition, FeatureDimension, ItemStatus } from "@/types";
 
 const SEASONS = ["春", "夏", "秋", "冬"];
 const MEASURE_LABELS: Record<string, string> = {
@@ -76,6 +82,8 @@ type EditableFields = Pick<
   | "materialComposition"
   | "materialPercentages"
   | "seasons"
+  | "features"
+  | "featureSuggestionsDismissed"
   | "occasions"
   | "purchaseDate"
   | "purchasePrice"
@@ -100,6 +108,8 @@ function editableFields(item: ClosetItem): EditableFields {
     materialComposition: item.materialComposition ?? "",
     materialPercentages: item.materialPercentages ?? {},
     seasons: item.seasons ?? [],
+    features: item.features ?? [],
+    featureSuggestionsDismissed: item.featureSuggestionsDismissed ?? [],
     occasions: item.occasions ?? [],
     purchaseDate: item.purchaseDate ?? "",
     purchasePrice: item.purchasePrice ?? undefined,
@@ -138,11 +148,13 @@ function formatPrice(value?: number) {
 
 export function ItemDetailPage() {
   const { id = "" } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const [item, setItem] = useState<ClosetItem | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brandSuggestions, setBrandSuggestions] = useState<string[]>([]);
   const [shopSuggestions, setShopSuggestions] = useState<string[]>([]);
+  const [featureDefinitions, setFeatureDefinitions] = useState<FeatureDefinition[]>([]);
   const [form, setForm] = useState<EditableFields | null>(null);
   const [measureFields, setMeasureFields] = useState<Record<string, FlatFieldValue>>({});
   const body = useLatestBody();
@@ -166,18 +178,21 @@ export function ItemDetailPage() {
     async (showLoading = true) => {
       if (showLoading) setLoading(true);
       try {
-        const [nextItem, nextCategories, nextBrands, nextShops] =
+        const [nextItem, nextCategories, nextBrands, nextShops, nextFeatures] =
           await Promise.all([
             fetchClosetItemDetail(id),
             fetchCategories(),
             fetchClosetBrands().catch(() => []),
             fetchManagedList("shops"),
+            fetchGarmentFeatures(),
           ]);
         setItem(nextItem);
         setCategories(nextCategories);
         setBrandSuggestions(nextBrands);
         setShopSuggestions(nextShops.entries.map((entry) => entry.name));
+        setFeatureDefinitions(nextFeatures);
         setForm(nextItem ? editableFields(nextItem) : null);
+        if (new URLSearchParams(location.search).get("edit") === "1" && nextItem) setEditing(true);
         setError(null);
       } catch (cause) {
         setError(cause instanceof Error ? cause.message : "衣物資料讀取失敗。");
@@ -185,7 +200,7 @@ export function ItemDetailPage() {
         if (showLoading) setLoading(false);
       }
     },
-    [id],
+    [id, location.search],
   );
 
   useEffect(() => {
@@ -193,6 +208,10 @@ export function ItemDetailPage() {
   }, [reload]);
 
   const category = categories.find((entry) => entry.id === item?.categoryId);
+  const featureCategory = categories.find((entry) => entry.id === form?.categoryId)
+  const featureSlot = featureCategory?.slot ?? item?.slot
+  const featureType = featureSlot ? closetItemTypeOf({ name: form?.name ?? item?.name ?? '', categoryName: featureCategory?.name ?? item?.categoryName, slot: featureSlot }) : null
+  const featureTypeIds = featureSlot ? featureTypeKeys(featureSlot, featureType?.id) : []
   const photos = item?.photos?.length ? item.photos : [];
   const activePhoto =
     photos.find((photo) => photo.id === selectedPhoto) ??
@@ -216,6 +235,31 @@ export function ItemDetailPage() {
     value: EditableFields[K],
   ) {
     setForm((current) => (current ? { ...current, [key]: value } : current));
+  }
+
+  function returnToComparison() {
+    const destination = new URLSearchParams(location.search).get("return");
+    if (destination?.startsWith("/wishlist/compare/")) navigate(destination, { replace: true });
+  }
+
+  function cancelEdits() {
+    if (item) setForm(editableFields(item));
+    setEditing(false);
+    returnToComparison();
+  }
+
+  async function createFeatureFromPicker(name: string, dimension: FeatureDimension) {
+    const normalized = name.normalize('NFKC').trim().toLocaleLowerCase();
+    const existing = featureDefinitions.find((feature) => [feature.name, ...feature.aliases].some((value) => value.normalize('NFKC').trim().toLocaleLowerCase() === normalized));
+    if (existing) return existing;
+    const feature: FeatureDefinition = {
+      name: name.trim(), dimension, aliases: [], applicableTypes: featureTypeIds,
+      sortOrder: Math.max(0, ...featureDefinitions.filter((entry) => entry.dimension === dimension).map((entry) => entry.sortOrder)) + 10,
+      isHidden: false, closetCount: 0, wishCount: 0,
+    };
+    await createGarmentFeature(feature);
+    setFeatureDefinitions((current) => [...current.filter((entry) => entry.name !== feature.name), feature]);
+    return feature;
   }
 
   async function saveEdits(event: FormEvent<HTMLFormElement>) {
@@ -245,6 +289,7 @@ export function ItemDetailPage() {
       await reload();
       setEditing(false);
       setToast({ tone: "success", text: "衣物資料已更新。" });
+      returnToComparison();
     } catch (cause) {
       setError(
         cause instanceof Error ? cause.message : "儲存失敗，修改內容仍保留。",
@@ -811,6 +856,20 @@ export function ItemDetailPage() {
                     />
                   </label>
                 </div>
+                <section className="space-y-2 rounded-tile bg-paper p-3">
+                  <div className="flex justify-end"><Link to="/me/features" target="_blank" rel="noreferrer" className="flex min-h-11 items-center gap-1 text-xs font-medium text-mist-deep">管理特徵<Icon name="link" size={13} /><span className="sr-only">（在新分頁開啟）</span></Link></div>
+                  <FeatureTagPicker
+                    name={form?.name ?? item.name}
+                    definitions={featureDefinitions}
+                    value={form?.features ?? []}
+                    dismissed={form?.featureSuggestionsDismissed ?? []}
+                    typeKeys={featureTypeIds}
+                    onChange={(features) => updateForm("features", features)}
+                    onDismissedChange={(dismissed) => updateForm("featureSuggestionsDismissed", dismissed)}
+                    onCreate={createFeatureFromPicker}
+                    disabled={saving}
+                  />
+                </section>
                 {categories.find((entry) => entry.id === form?.categoryId)
                   ?.slot === "top" && (
                   <label className="flex flex-col gap-1.5 text-[13px]">
@@ -992,8 +1051,7 @@ export function ItemDetailPage() {
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    setForm(editableFields(item));
-                    setEditing(false);
+                    cancelEdits();
                   }}
                 >
                   取消
@@ -1117,8 +1175,14 @@ export function ItemDetailPage() {
                   />
                 )}
                 <InfoRow label="版型" value={item.fit} />
-                <InfoRow label="材質" value={item.material} />
-                <InfoRow label="成分" value={item.materialComposition} />
+                <InfoRow label="特徵" value={item.features?.map((feature) => feature.name).join("、")} />
+                {(item.material || item.materialComposition || Object.keys(item.materialPercentages ?? {}).length > 0) && (
+                  <div className="flex flex-col gap-2 border-t border-dashed border-line py-3 text-sm">
+                    <span className="text-ink-2">材質</span>
+                    <MaterialMix material={item.material} materialComposition={item.materialComposition} materialPercentages={item.materialPercentages} />
+                  </div>
+                )}
+                {Object.keys(item.materialPercentages ?? {}).length > 0 && <InfoRow label="成分原文" value={item.materialComposition} />}
                 <InfoRow label="季節" value={item.seasons?.join("、")} />
                 <InfoRow label="場合" value={item.occasions?.join("、")} />
                 <InfoRow
@@ -1231,8 +1295,7 @@ export function ItemDetailPage() {
             <Button
               variant="secondary"
               onClick={() => {
-                setForm(editableFields(item));
-                setEditing(false);
+                cancelEdits();
               }}
             >
               取消

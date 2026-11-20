@@ -31,8 +31,3 @@
 .compare-preview__grip { align-self: center; width: 40px; height: 4px; flex: none; margin-top: 8px; border-radius: 2px; background: var(--color-line-strong); }
 @keyframes compare-preview-up { from { transform: translateY(24px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .compare-preview.is-mobile { animation: none; } }
-
-/* 桌機寬螢幕：預覽開著時表格讓出右邊 520px，不被抽屜蓋住 */
-@media (min-width: 1200px) {
-  .compare-page.has-preview { max-width: none; margin-right: 520px; }
-}

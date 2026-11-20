@@ -1,22 +1,28 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ItemImage } from '@/components/closet/ItemImage'
 import { DestructiveActionDialog } from '@/components/ui/B10States'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Chip } from '@/components/ui/Chip'
 import { Checkbox, CheckboxMark } from '@/components/ui/Checkbox'
+import { FloatActions } from '@/components/ui/FloatActions'
 import { Icon } from '@/components/ui/Icon'
 import { MarkdownNote } from '@/components/ui/MarkdownNote'
+import { MaterialMix } from '@/components/ui/MaterialMix'
+import { OpenFullPageLink } from '@/components/wishlist/OpenFullPageLink'
+import { WishItemMoreMenu } from '@/components/wishlist/WishItemMoreMenu'
+import { materialMix, materialMixText } from '@/lib/materialMix'
 import { LoadingState, PageState } from '@/components/ui/PageState'
-import { TiltLabel } from '@/components/ui/Paper'
 import { Toast, type ToastMessage } from '@/components/ui/Toast'
 import { BoughtDialog } from '@/components/wishlist/BoughtDialog'
+import { BuyLinesEditor } from '@/components/wishlist/BuyLinesEditor'
+import { ShoppingBasket } from '@/components/wishlist/ShoppingBasket'
 import { CompareSelectionDialog } from '@/components/wishlist/CompareSelectionDialog'
 import { WishlistAiPanel } from '@/components/wishlist/WishlistAiPanel'
 import { WishlistCompareMenu } from '@/components/wishlist/WishlistCompareMenu'
 import { WishlistFilters } from '@/components/wishlist/WishlistFilters'
 import { WishlistForm } from '@/components/wishlist/WishlistForm'
-import { WishlistTabs } from '@/components/wishlist/WishlistTabs'
+import { WishlistBar } from '@/components/wishlist/WishlistLayout'
 import {
   createWishlistItem,
   createCompareWithItems,
@@ -24,6 +30,7 @@ import {
   fetchAllWishlist,
   fetchClosetItems,
   fetchCompareGroups,
+  fetchCompareGroupItems,
   fetchCompareMemberships,
   fetchProfileData,
   markWishlistBought,
@@ -36,6 +43,7 @@ import { SLOT_META, SLOTS } from '@/lib/slots'
 import { FLAT_LABELS } from '@/lib/review'
 import { formatStretch } from '@/lib/stretch'
 import { useIsMobile } from '@/lib/useIsMobile'
+import { useBasket } from '@/lib/useBasket'
 import {
   ACTIVE_STATUSES,
   applyWishFacets,
@@ -45,7 +53,6 @@ import {
   garmentTypeOf,
   isActiveWish,
   normalizeFacets,
-  OVERLAP_LABEL,
   PRIORITY_LABEL,
   totalPrice,
   typeKey,
@@ -55,8 +62,10 @@ import {
   type LookCell,
   type WishFacets,
 } from '@/lib/wishlist'
+import { effectiveBuyLines } from '@/lib/basket'
+import { photoColorLabel } from '@/lib/wishColors'
 import { defaultAiIncludes, flatMeasurementEntries, flatMeasurementText, type AiInclude } from '@/lib/wishlistAi'
-import type { BodyMeasurement, BodyProfile, ClosetItem, CompareGroup, GarmentLength, Slot, WishlistInput, WishlistItem, WishStatus } from '@/types'
+import type { BodyMeasurement, BodyProfile, BuyLine, ClosetItem, CompareGroup, CompareGroupItem, GarmentLength, Slot, WishlistInput, WishlistItem, WishStatus } from '@/types'
 
 type TabKey = WishStatus | 'all'
 type Dialog = { kind: 'create' } | { kind: 'edit'; item: WishlistItem } | { kind: 'bought'; item: WishlistItem } | { kind: 'delete'; item: WishlistItem } | null
@@ -92,6 +101,7 @@ export function WishlistPage() {
   const [closet, setCloset] = useState<ClosetItem[]>([])
   const [compareGroups, setCompareGroups] = useState<CompareGroup[]>([])
   const [compareMemberships, setCompareMemberships] = useState<Record<string, { groupId: string; groupName: string }[]>>({})
+  const [compareLinks, setCompareLinks] = useState<CompareGroupItem[]>([])
   const [bodyData, setBodyData] = useState<{ body: BodyMeasurement | null; bodyProfile: BodyProfile | null; allowBody: boolean }>({ body: null, bodyProfile: null, allowBody: true })
   const [loadError, setLoadError] = useState<Error | null>(null)
   const [dialog, setDialog] = useState<Dialog>(null)
@@ -105,12 +115,13 @@ export function WishlistPage() {
   const closeToast = useCallback(() => setToast(null), [])
 
   const load = useCallback(() => {
-    Promise.all([fetchAllWishlist(), fetchClosetItems(), fetchProfileData().catch(() => null), fetchCompareGroups().catch(() => []), fetchCompareMemberships().catch(() => ({}))])
-      .then(([wish, closetItems, profileData, groups, memberships]) => {
+    return Promise.all([fetchAllWishlist(), fetchClosetItems(), fetchProfileData().catch(() => null), fetchCompareGroups().catch(() => []), fetchCompareMemberships().catch(() => ({})), fetchCompareGroupItems().catch(() => [])])
+      .then(([wish, closetItems, profileData, groups, memberships, links]) => {
         setItems(wish)
         setCloset(closetItems)
         setCompareGroups(groups)
         setCompareMemberships(memberships)
+        setCompareLinks(links)
         if (profileData) {
           const latest = [...profileData.measurements].sort((a, b) => b.measuredOn.localeCompare(a.measuredOn))[0] ?? null
           setBodyData({ body: latest, bodyProfile: profileData.bodyProfile, allowBody: profileData.profile.aiUseBodyData })
@@ -119,12 +130,17 @@ export function WishlistPage() {
       .catch((error: unknown) => setLoadError(error instanceof Error ? error : new Error(String(error))))
   }, [])
 
-  useEffect(load, [load])
+  useEffect(() => { void load() }, [load])
 
   const retry = () => {
     setLoadError(null)
-    load()
+    void load()
   }
+
+  // 採購籃（B23.3）：所有準備購買依比較分組
+  const basketItems = useMemo(() => items ?? [], [items])
+  const setBasketItems: Dispatch<SetStateAction<WishlistItem[]>> = useCallback((update) => setItems((current) => (current ? (typeof update === 'function' ? update(current) : update) : current)), [])
+  const shopping = useBasket({ items: basketItems, setItems: setBasketItems, groups: compareGroups, links: compareLinks, setToast, reload: load })
 
   const updateParams = (next: { status?: TabKey; facets?: WishFacets; item?: string | null }, replace = false) => {
     const p = new URLSearchParams(params)
@@ -255,12 +271,15 @@ export function WishlistPage() {
       setToast({ tone: 'success', text: `已儲存變更${demoSuffix(demo)}` })
     })
 
-  const onStatus = (item: WishlistItem, status: WishlistInput['status']) =>
-    run(async () => {
+  const onStatus = (item: WishlistItem, status: WishlistInput['status']) => {
+    // 進出「準備購買」走採購籃流程：第一次準備購買會寫入預設的顏色／件數明細
+    if (status === 'ready' || (item.status === 'ready' && status === 'considering')) return shopping.toggleReady(item)
+    return run(async () => {
       const { demo } = await setWishlistStatus(item.id, status)
       replaceItem({ ...item, status })
       setToast({ tone: 'success', text: `「${item.name}」改為${WISH_STATUS[status].label}${demoSuffix(demo)}` })
     })
+  }
 
   const onCompareMembership = (item: WishlistItem, groupId: string, included: boolean) =>
     run(async () => {
@@ -312,13 +331,12 @@ export function WishlistPage() {
 
   // 選取模式時手機不顯示詳細，只留列表、工具列與整理面板。
   const showDetailOnMobile = !selecting && !!selectedParam && !!selected
+  const floatHidden = selecting || !!dialog || compareDialogOpen || aiSheetOpen || shopping.open
   const showAiAside = selecting && !isMobile
 
   return (
-    <main className={`wishlist-page mx-auto flex max-w-[1320px] flex-col gap-5 px-[clamp(16px,3vw,40px)] pt-7 md:pb-14 ${selecting ? 'pb-44' : 'pb-24'}`}>
-      <div className={`wishlist-page__header ${showDetailOnMobile ? 'hidden md:flex' : 'flex'} flex-wrap items-center gap-3.5`}>
-        <TiltLabel accent="rose" as="h1">選購清單</TiltLabel>
-        <WishlistTabs />
+    <div className={`wishlist-page flex flex-col gap-5 [--float-actions-bottom:calc(154px+env(safe-area-inset-bottom))] md:pb-20 ${selecting ? 'pb-44' : 'pb-24'}`}>
+      <WishlistBar mobileHidden={showDetailOnMobile}>
         {items && (
           <span className="font-num text-sm text-ink-2 tabular">
             進行中 {active.length} 件・預估合計 {formatNT(activeTotal)}
@@ -357,7 +375,7 @@ export function WishlistPage() {
             加入選購
           </Button>
         </div>
-      </div>
+      </WishlistBar>
 
       {items && items.length > 0 && (
         <WishlistFilters
@@ -436,7 +454,7 @@ export function WishlistPage() {
                 key={item.id}
                 item={item}
                 current={!selecting && selected?.id === item.id}
-                similar={insightsById[item.id]?.overlap === 'high'}
+                similar={insightsById[item.id]?.comparison.conclusion === 'very'}
                 selecting={selecting}
                 checked={item.status !== 'bought' && selectedForAi.has(item.id)}
                 selectable={item.status !== 'bought'}
@@ -475,6 +493,7 @@ export function WishlistPage() {
               onBought={() => setDialog({ kind: 'bought', item: selected })}
               onDelete={() => setDialog({ kind: 'delete', item: selected })}
               onStatus={(status) => void onStatus(selected, status)}
+              onLines={(lines) => void shopping.saveLines(selected, lines)}
               onCompareToggle={(groupId, included) => void onCompareMembership(selected, groupId, included)}
               onNewCompare={() => void onCreateCompareFromItem(selected)}
             />
@@ -542,8 +561,10 @@ export function WishlistPage() {
           onConfirm={() => void onDelete(dialog.item)}
         />
       )}
+      <FloatActions hidden={floatHidden} basket={{ qty: shopping.basket.qty, onOpen: () => shopping.setOpen(true) }} />
+      {shopping.open && <ShoppingBasket basket={shopping.basket} target={shopping.target} mobile={isMobile} saving={shopping.saving} onClose={() => shopping.setOpen(false)} onTarget={(value) => void shopping.changeTarget(value)} onLines={(item, lines) => void shopping.saveLines(item, lines)} onBought={(input) => void shopping.markBought(input)} onCopied={(ok) => setToast(ok ? { tone: 'success', text: '採購清單已複製。' } : { tone: 'error', text: '無法複製，請再試一次。' })} />}
       <Toast message={toast} onClose={closeToast} />
-    </main>
+    </div>
   )
 }
 
@@ -568,10 +589,12 @@ function WishCard({
   onSelect: () => void
 }) {
   const status = WISH_STATUS[item.status]
-  const colorNames = item.colors?.map((color) => color.family).filter(Boolean).join('、')
+  const colorNames = item.colors?.map((color) => color.name).filter(Boolean).join('、')
   const meta = [item.brand ?? item.shop, item.size, colorNames ? `顏色 ${colorNames}` : null, item.priority ? `優先 ${PRIORITY_LABEL[item.priority]}` : null].filter(Boolean).join(' · ')
   const flatText = flatMeasurementText(item)
   const flatSummary = flatText ? `平放尺寸 ${flatText} cm` : null
+  // 清單卡片只寫前兩種：「聚酯 85%・彈性 15%」
+  const materialSummary = materialMixText(materialMix(item), { limit: 2, short: true })
   const type = garmentTypeOf(item)
   const typeLabel = type ? garmentLengthName(type.id, item.garmentLength) ?? type.label : null
   const partTag = `${SLOT_META[partOf(item)].label}${typeLabel ? `・${typeLabel}` : ''}`
@@ -588,6 +611,7 @@ function WishCard({
           <span className="flex-none font-num text-[15px] font-bold tabular">{formatNT(item.price)}</span>
         </span>
         {meta && <span className="truncate text-xs text-ink-2">{meta}</span>}
+        {materialSummary && <span className="truncate text-[11px] text-ink-2">{materialSummary}</span>}
         {flatSummary && <span className="line-clamp-2 text-[11px] leading-5 text-ink-2">{flatSummary}</span>}
         <span className="flex flex-wrap gap-1.5">
           <span className="inline-flex h-6 items-center rounded-full bg-oat-soft px-2.5 text-xs font-medium text-oat-ink">{partTag}</span>
@@ -636,6 +660,7 @@ function WishDetail({
   onBought,
   onDelete,
   onStatus,
+  onLines,
   onCompareToggle,
   onNewCompare,
 }: {
@@ -650,6 +675,7 @@ function WishDetail({
   onBought: () => void
   onDelete: () => void
   onStatus: (status: WishlistInput['status']) => void
+  onLines: (lines: BuyLine[]) => void
   onCompareToggle: (groupId: string, included: boolean) => void
   onNewCompare: () => void
 }) {
@@ -661,7 +687,7 @@ function WishDetail({
   const selectedPhoto = photos.find((photo) => photo.id === selectedPhotoId) ?? photos.find((photo) => photo.isCover) ?? photos[0]
   const displayedImageUrl = selectedPhoto?.url ?? item.cutoutUrl
   const lightboxSlides = [
-    ...photos.filter((photo) => photo.url).map((photo) => ({ id: photo.id, url: photo.url!, colorFamily: photo.colorFamily })),
+    ...photos.filter((photo) => photo.url).map((photo) => ({ id: photo.id, url: photo.url!, colorFamily: photoColorLabel(photo.colorFamily) })),
     ...(item.cutoutUrl && !photos.some((photo) => photo.url === item.cutoutUrl) ? [{ id: `cutout-${item.id}`, url: item.cutoutUrl, colorFamily: undefined }] : []),
   ]
   const currentLightboxSlide = lightboxIndex === null ? null : lightboxSlides[lightboxIndex] ?? null
@@ -693,8 +719,7 @@ function WishDetail({
     item.shipping !== undefined ? ['運費', item.shipping === 0 ? '免運' : formatNT(item.shipping)] : null,
     item.brand && item.shop !== item.brand ? ['店家', item.shop] : null,
     item.returnPolicy ? ['退換貨', item.returnPolicy] : null,
-    item.material ? ['材質', item.material] : null,
-    (item.colors?.length ? item.colors.map((color) => color.family).join('、') : item.colorName) ? ['顏色', item.colors?.map((color) => color.family).join('、') ?? item.colorName!] : null,
+    (item.colors?.length ? item.colors.map((color) => color.name).join('、') : item.colorName) ? ['顏色', item.colors?.map((color) => color.name).join('、') ?? item.colorName!] : null,
   ].filter((entry): entry is [string, string] => !!entry)
 
   return (
@@ -704,21 +729,28 @@ function WishDetail({
         <button type="button" onClick={onBack} aria-label="返回選購清單" className="flex size-11 items-center justify-center rounded-btn bg-transparent text-ink">
           <Icon name="back" />
         </button>
-        <span className="min-w-0 truncate font-hd text-lg">{item.name}</span>
+        <span className="min-w-0 flex-1 truncate font-hd text-lg">{item.name}</span>
+        <OpenFullPageLink itemId={item.id} iconOnly />
+        <WishItemMoreMenu item={item} disabled={busy} onDrop={() => onStatus('dropped')} onReconsider={() => onStatus('considering')} onDelete={onDelete} />
       </div>
 
       <div className="relative flex flex-col gap-5 rounded-[18px] bg-card p-4 shadow-paper sm:p-[22px]">
         <span aria-hidden="true" className="absolute -top-2.5 left-10 h-[22px] w-[84px] rounded-[2px] bg-rose-wash mix-blend-multiply" style={{ rotate: '-4deg' }} />
-        {item.status !== 'bought' && <button type="button" disabled={busy} onClick={onEdit} aria-label={`編輯「${item.name}」`} title="編輯" className="absolute top-3 right-3 hidden size-11 items-center justify-center rounded-btn text-ink-2 hover:bg-tile hover:text-ink disabled:opacity-50 md:flex"><Icon name="edit" size={20} /></button>}
+        {/* 右上角：開完整頁面（新分頁）、編輯、⋯（放棄購買、刪除） */}
+        <div className="absolute top-3 right-3 z-10 hidden items-center gap-1 md:flex">
+          <OpenFullPageLink itemId={item.id} />
+          {item.status !== 'bought' && <Button variant="secondary" disabled={busy} onClick={onEdit} aria-label={`編輯「${item.name}」`} className="h-10 px-3 text-[13px]"><Icon name="edit" size={16} />編輯</Button>}
+          <WishItemMoreMenu item={item} disabled={busy} onDrop={() => onStatus('dropped')} onReconsider={() => onStatus('considering')} onDelete={onDelete} />
+        </div>
 
         <div className="flex flex-wrap gap-[22px]">
           <div className="mx-auto w-[200px] flex-none sm:mx-0">
             <div className="flex aspect-[4/5] items-center justify-center rounded-card border-[1.5px] border-dashed border-rose-edge bg-rose-soft">
               {displayedImageUrl ? <button type="button" onClick={() => showLightboxImage(displayedImageUrl)} aria-label="放大查看商品圖片" className="flex size-full cursor-zoom-in items-center justify-center rounded-card bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-mist-deep"><img src={displayedImageUrl} alt={`${item.name}商品圖片，點擊放大`} className="size-full rounded-card object-contain" /></button> : <ItemImage name={item.name} shape={item.shape} colorHex={item.colorHex} className="h-[74%] w-[74%]" />}
             </div>
-            {photos.length > 1 && <div role="group" aria-label="商品圖片" className="mt-2 flex flex-wrap gap-2">{photos.map((photo, index) => <button key={photo.id} type="button" aria-label={`查看第 ${index + 1} 張商品圖片${photo.colorFamily ? `，${photo.colorFamily}色` : ''}`} aria-pressed={selectedPhoto?.id === photo.id} onClick={() => setSelectedPhotoId(photo.id)} className={`relative size-12 overflow-hidden rounded-sm border-[1.5px] bg-paper ${selectedPhoto?.id === photo.id ? 'border-ink' : 'border-line'}`}>{photo.url && <img src={photo.url} alt="" className="size-full object-cover" loading="lazy" />}{photo.colorFamily && <span className="absolute inset-x-0 bottom-0 truncate bg-card/90 px-0.5 text-[8px]">{photo.colorFamily}</span>}</button>)}</div>}
+            {photos.length > 1 && <div role="group" aria-label="商品圖片" className="mt-2 flex flex-wrap gap-2">{photos.map((photo, index) => <button key={photo.id} type="button" aria-label={`查看第 ${index + 1} 張商品圖片${photoColorLabel(photo.colorFamily) ? `，${photoColorLabel(photo.colorFamily)}色` : ''}`} aria-pressed={selectedPhoto?.id === photo.id} onClick={() => setSelectedPhotoId(photo.id)} className={`relative size-12 overflow-hidden rounded-sm border-[1.5px] bg-paper ${selectedPhoto?.id === photo.id ? 'border-ink' : 'border-line'}`}>{photo.url && <img src={photo.url} alt="" className="size-full object-cover" loading="lazy" />}{photoColorLabel(photo.colorFamily) && <span className="absolute inset-x-0 bottom-0 truncate bg-card/90 px-0.5 text-[8px]">{photoColorLabel(photo.colorFamily)}</span>}</button>)}</div>}
           </div>
-          <div className="flex min-w-0 flex-[1_1_240px] flex-col gap-2.5 md:pr-9">
+          <div className="flex min-w-0 flex-[1_1_240px] flex-col gap-2.5 md:pt-11">
             <span className={`inline-flex h-6 items-center gap-1.5 self-start rounded-full px-2.5 text-xs font-medium ${status.className}`}>
               <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
               {status.label}
@@ -728,6 +760,7 @@ function WishDetail({
               <span className="font-num text-[26px] font-bold tabular">{formatNT(item.price)}</span>
             </div>
             {facts && <span className="text-[13px] text-ink-2">{facts}</span>}
+            {!!item.features?.length && <div role="group" aria-label="商品特徵" className="flex flex-wrap gap-1.5">{item.features.map((feature) => <span key={`${feature.dimension}-${feature.name}`} className="rounded-full bg-tile px-2.5 py-1 text-[11px] text-ink-2">{feature.name}</span>)}</div>}
             {item.url && (
               <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-8 items-center gap-1 self-start text-[13px]">
                 前往商品頁
@@ -744,6 +777,10 @@ function WishDetail({
                   <dd className="m-0 font-num text-sm font-bold tabular text-ink">{formatStretch(value, item.flatStretch?.[key])}<span className="ml-1 text-[10px] font-normal text-ink-3">cm</span></dd>
                 </div>)}
               </dl>
+            </section>}
+            {materialMix(item).parts.length > 0 && <section aria-label="材質" className="rounded-btn bg-paper p-3">
+              <h3 className="m-0 mb-2 text-xs font-medium text-ink-2">材質 <span className="font-normal">・依比例</span></h3>
+              <MaterialMix material={item.material} materialComposition={item.materialComposition} materialPercentages={item.materialPercentages} />
             </section>}
             {item.reason && <div className="mt-1 rounded-btn bg-paper px-3.5 py-2.5 text-sm leading-[1.7] text-ink"><MarkdownNote value={item.reason} /></div>}
             {extra.length > 0 && (
@@ -787,6 +824,7 @@ function WishDetail({
             ))}
           </div>
         )}
+        {item.status === 'ready' && <BuyLinesEditor item={item} lines={effectiveBuyLines(item)} disabled={busy} onChange={onLines} />}
 
         <div className="grid grid-cols-3 gap-2.5">
           <div className="rounded-tile bg-sage-soft p-3.5 text-sage-ink">
@@ -794,13 +832,14 @@ function WishDetail({
             <span className="text-xs">件現有衣物能搭</span>
           </div>
           <div className="flex min-w-0 flex-col gap-1.5 rounded-tile bg-mist-soft p-3.5 text-mist-ink">
-            <span className="text-[15px] font-bold sm:text-[17px]">{OVERLAP_LABEL[insights.overlap]}</span>
+            <span className="text-[15px] font-bold sm:text-[17px]">{{ very: '很像', some: '有點像', not: '不太像', few: '依據較少' }[insights.comparison.conclusion]}</span>
             <span aria-hidden="true" className="flex gap-[3px]">
               {[0, 1, 2].map((i) => (
-                <span key={i} className={`h-1.5 flex-1 rounded-[2px] ${i <= ['low', 'mid', 'high'].indexOf(insights.overlap) ? 'bg-mist-deep' : 'bg-mist'}`} />
+                <span key={i} className={`h-1.5 flex-1 rounded-[2px] ${i <= ['not', 'some', 'very'].indexOf(insights.comparison.conclusion) ? 'bg-mist-deep' : 'bg-mist'}`} />
               ))}
             </span>
-            <span className="text-xs">{insights.closest ? `最接近：${insights.closest.name}` : `衣櫃裡沒有${insights.compareLabel}`}</span>
+            <span className="text-xs">{insights.closest ? `像：${insights.closest.name}` : `衣櫃裡沒有${insights.compareLabel}`}</span>
+            {insights.closest && <span className="text-[11px] leading-4">{insights.comparison.shared.length ? `同：${insights.comparison.shared.join('、')}` : ''}{insights.comparison.different.length ? `${insights.comparison.shared.length ? '；' : ''}不同：${insights.comparison.different.join('、')}` : ''}</span>}
           </div>
           <div className="rounded-tile bg-oat-soft p-3.5 text-oat-ink">
             <span className="block font-num text-[28px] font-bold tabular">{insights.lookCount}</span>
@@ -824,15 +863,13 @@ function WishDetail({
 
         {/* 桌面動作列 */}
         <div className="hidden flex-wrap items-center gap-2 border-t-[1.5px] border-dashed border-line-strong pt-4 md:flex">
-          <DetailActions item={item} busy={busy} compareGroups={compareGroups} compareGroupIds={compareGroupIds} onBought={onBought} onDelete={onDelete} onStatus={onStatus} onCompareToggle={onCompareToggle} onNewCompare={onNewCompare} />
+          <DetailActions item={item} busy={busy} compareGroups={compareGroups} compareGroupIds={compareGroupIds} onBought={onBought} onStatus={onStatus} onCompareToggle={onCompareToggle} onNewCompare={onNewCompare} />
         </div>
         {activeItem && <span className="-mt-3.5 hidden text-xs text-ink-2 md:block">移至已購買時，名稱、圖片、品牌與尺寸都會帶過去，只需補購買日期與實付價格。</span>}
 
         {/* 手機：次要動作放內容底部 */}
         <div className="flex flex-col gap-2 border-t-[1.5px] border-dashed border-line-strong pt-4 md:hidden">
           {activeItem && <WishlistCompareMenu item={item} groups={compareGroups} groupIds={compareGroupIds} disabled={busy} onToggle={onCompareToggle} onCreate={onNewCompare} />}
-          {activeItem && <Button variant="ghost" disabled={busy} onClick={() => onStatus('dropped')}>放棄購買</Button>}
-          <Button variant="ghost" className="text-rose-deep" disabled={busy} onClick={onDelete}>永久刪除</Button>
         </div>
       </div>
 
@@ -858,13 +895,12 @@ function WishDetail({
   )
 }
 
-function DetailActions({ item, busy, compareGroups, compareGroupIds, onBought, onDelete, onStatus, onCompareToggle, onNewCompare }: { item: WishlistItem; busy: boolean; compareGroups: CompareGroup[]; compareGroupIds: string[]; onBought: () => void; onDelete: () => void; onStatus: (status: WishlistInput['status']) => void; onCompareToggle: (groupId: string, included: boolean) => void; onNewCompare: () => void }) {
+function DetailActions({ item, busy, compareGroups, compareGroupIds, onBought, onStatus, onCompareToggle, onNewCompare }: { item: WishlistItem; busy: boolean; compareGroups: CompareGroup[]; compareGroupIds: string[]; onBought: () => void; onStatus: (status: WishlistInput['status']) => void; onCompareToggle: (groupId: string, included: boolean) => void; onNewCompare: () => void }) {
   if (item.status === 'bought') {
     return (
       <>
         <ButtonLink to={item.boughtItemId ? `/closet/${item.boughtItemId}` : '/closet'} variant="primary">到衣櫃查看</ButtonLink>
         <span className="text-xs text-ink-2">已購買的紀錄只保留查看，不能再編輯。</span>
-        <Button variant="ghost" className="ml-auto text-[13px] font-normal text-rose-deep" disabled={busy} onClick={onDelete}>刪除紀錄</Button>
       </>
     )
   }
@@ -872,7 +908,6 @@ function DetailActions({ item, busy, compareGroups, compareGroupIds, onBought, o
     return (
       <>
         <Button variant="primary" disabled={busy} onClick={() => onStatus('considering')}>重新考慮</Button>
-        <Button variant="ghost" className="ml-auto text-[13px] font-normal text-rose-deep" disabled={busy} onClick={onDelete}>永久刪除</Button>
       </>
     )
   }
@@ -880,8 +915,6 @@ function DetailActions({ item, busy, compareGroups, compareGroupIds, onBought, o
     <>
       <Button variant="primary" disabled={busy} onClick={onBought}><Icon name="check" />移至已購買</Button>
       <WishlistCompareMenu item={item} groups={compareGroups} groupIds={compareGroupIds} disabled={busy} onToggle={onCompareToggle} onCreate={onNewCompare} />
-      <Button variant="ghost" className="ml-auto text-[13px] font-normal" disabled={busy} onClick={() => onStatus('dropped')}>放棄購買</Button>
-      <Button variant="ghost" aria-label={`永久刪除「${item.name}」`} className="w-11 px-0 text-rose-deep" disabled={busy} onClick={onDelete}><Icon name="x" /></Button>
     </>
   )
 }

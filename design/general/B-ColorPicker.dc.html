@@ -60,7 +60,7 @@ a{color:#3E6270}
 .mono{font:600 13px Nunito}
 </style>
 </helmet>
-<div style="width:1440px;height:1700px;box-sizing:border-box;padding:56px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:34px">
+<div style="width:1440px;height:2260px;box-sizing:border-box;padding:56px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:34px">
   <header style="display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap">
     <div style="display:flex;flex-direction:column;gap:10px">
       <span class="lbl" style="background:#A9C6CF;transform:rotate(-2deg);align-self:flex-start">元件</span>
@@ -113,9 +113,9 @@ a{color:#3E6270}
           </div>
           <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#FBF4E8">
             <span style="width:40px;height:40px;border-radius:10px;background:#782A37;flex:none"></span>
-            <span style="display:flex;flex-direction:column;gap:2px;flex:1"><span style="font-size:13px">取到 <b class="mono">#782A37</b></span><span style="font-size:12px;color:#5A4A3C">最接近色名：<b style="color:#3B2F25">酒紅</b>（很接近）</span></span>
+            <span style="display:flex;flex-direction:column;gap:2px;flex:1"><span style="font-size:13px">取到 <b class="mono">#782A37</b></span><span style="font-size:12px;color:#5A4A3C">歸類：<b style="color:#3B2F25">紅粉</b>・建議名稱「酒紅」</span></span>
           </div>
-          <div style="display:flex;gap:8px"><button type="button" class="btn btn-g" style="height:40px;padding:0 10px">只用色名</button><button type="button" class="btn btn-p" style="flex:1;height:40px">套用「酒紅 #782A37」</button></div>
+          <div style="display:flex;gap:8px"><button type="button" class="btn btn-g" style="height:40px;padding:0 10px">取消</button><button type="button" class="btn btn-p" style="flex:1;height:40px">套用這個顏色</button></div><span style="font-size:11.5px;line-height:1.6;color:#5A4A3C">套用只換色碼和歸類。名稱是你改過的（例如「紫紅」）就保持不動；還沒改過的，先填「酒紅」當建議名。</span>
         </div>
       </div>
       <span class="cap">只能在這件衣服自己的照片上取色（新增時上傳的圖）。圓圈裡是一小塊區域，不是單一像素；上方放大鏡讓手指不會擋住。</span>
@@ -163,8 +163,8 @@ a{color:#3E6270}
             <span style="position:absolute;left:40%;top:52%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;box-shadow:0 0 0 2px #FFFCF6,0 0 0 3.5px #3B2F25"></span>
             <span style="position:absolute;left:28%;top:12%;width:88px;height:88px;border-radius:50%;background:#782A37;box-shadow:0 0 0 3px #FFFCF6"></span>
           </div>
-          <div style="display:flex;align-items:center;gap:10px"><span style="width:36px;height:36px;border-radius:10px;background:#782A37"></span><span style="font-size:13px;flex:1">最接近：<b>酒紅</b> <span class="mono" style="color:#5A4A3C">#782A37</span></span></div>
-          <button type="button" class="btn btn-p" style="height:48px">套用</button>
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:36px;height:36px;border-radius:10px;background:#782A37"></span><span style="font-size:13px;flex:1">歸類 <b>紅粉</b>・<span class="mono" style="color:#5A4A3C">#782A37</span><br><span style="font-size:11.5px;color:#5A4A3C">改過的名稱不會被換掉</span></span></div>
+          <button type="button" class="btn btn-p" style="height:48px">套用這個顏色</button>
         </div>
       </div>
     </div>
@@ -173,9 +173,40 @@ a{color:#3E6270}
       <span class="cap">從下方滑出，分頁和桌機一樣。取色時手指按住拖曳，放大鏡出現在手指上方；放開才更新結果。照片可以雙指放大，取更小的區域。</span>
     </div>
   </section>
+  <section aria-labelledby="p5" style="display:flex;flex-direction:column;gap:16px">
+    <h2 id="p5" class="hd" style="margin:0;font-size:24px">⑤ 一個顏色＝三個獨立的欄位</h2>
+    <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:start">
+      <div role="table" aria-label="欄位規則" style="display:flex;flex-direction:column;border-radius:14px;background:#FFFCF6;box-shadow:inset 0 0 0 1.5px #EADCC6;overflow:hidden">
+        <div role="row" style="display:grid;grid-template-columns:120px 1fr 1fr;gap:12px;padding:10px 16px;background:#F3E7D4;font-size:12px;color:#5A4A3C"><span role="columnheader">欄位</span><span role="columnheader">誰決定</span><span role="columnheader">只會被這些改到</span></div>
+        <sc-for list="{{rules}}" as="r" hint-placeholder-count="3">
+          <div role="row" style="display:grid;grid-template-columns:120px 1fr 1fr;gap:12px;padding:12px 16px;border-top:1.5px dashed #EADCC6;font-size:13px;line-height:1.7"><b role="cell">{{r.k}}</b><span role="cell">{{r.who}}</span><span role="cell" style="color:#5A4A3C">{{r.by}}</span></div>
+        </sc-for>
+        <div style="padding:12px 16px;border-top:1.5px dashed #EADCC6;font-size:12.5px;line-height:1.75;color:#5A4A3C">每一色用自己的 <span class="mono">id</span> 當 key（不用名稱或順序）。新增、刪除、修改只動那一筆；刪掉一色，其他色的名稱、色碼、歸類都不變。選色器打開時一定綁定「新增」或某一筆 id。</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <span style="font-size:13px;font-weight:700">顏色列的四種狀態</span>
+        <sc-for list="{{rows}}" as="c" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:12px;background:#FBF4E8">
+              <span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:32px;height:32px;border-radius:8px;background:{{c.hex}};box-shadow:inset 0 0 0 1px rgba(59,47,37,.18)"></span></span>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+                <span style="height:34px;display:flex;align-items:center;padding:0 8px;margin-left:-9px;border-radius:8px;border:{{c.bd}};background:{{c.ibg}};font-size:15px;font-weight:500;color:{{c.fg}}">{{c.name}}</span>
+                <span style="font-size:11.5px;color:#5A4A3C"><span>照片取色・</span><span style="color:#3E6270">歸類 {{c.fam}} ▾</span><span style="color:#24424D;padding-left:4px">{{c.extra}}</span></span>
+              </div>
+              <span style="flex:none;height:36px;padding:0 10px;border-radius:999px;border:1.5px dashed #D9C7AC;display:inline-flex;align-items:center;font-size:12px;color:#5A4A3C">☆</span>
+              <span style="width:44px;text-align:center;color:#5A4A3C">×</span>
+            </div>
+            <span style="font-size:12px;color:#5A4A3C;padding-left:6px"><b style="color:#3B2F25">{{c.t}}</b><span>：{{c.d}}</span></span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <p style="margin:0;font-size:12.5px;line-height:1.75;color:#5A4A3C">名稱只顯示一次，就是輸入框本身（平常無框線、看起來像文字）；HEX 不在列上顯示，只在選色器裡。資料：<span class="mono">{ id, name, name_custom, hex, family, family_custom, source, favorite }</span></p>
+  </section>
+
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2260}}'>
 class Component extends DCLogic {
   renderVals() {
     const G = [
@@ -191,11 +222,24 @@ class Component extends DCLogic {
     ];
     const bgOf = h => h === 'heather' ? 'radial-gradient(#7d7b77 1px,transparent 1.4px) 0 0/5px 5px,radial-gradient(#c9c7c2 1px,transparent 1.4px) 2.5px 2.5px/5px 5px,#A9A7A3' : h === 'multi' ? 'conic-gradient(#A8423A,#E8C66A,#8C9A86,#8FA3BC,#8E7AA6,#A8423A)' : h;
     const sw = (n, h, on) => ({ n, bg: bgOf(h), on: on ? 'true' : 'false', fg: on ? '#3B2F25' : '#5A4A3C', fw: on ? 700 : 400, sh: on ? '0 0 0 2px #FFFCF6,0 0 0 3.5px #3B2F25' : 'inset 0 0 0 1px rgba(59,47,37,.15)' });
-    return {
+    const ruleRows = {
+      rules: [
+        { k: '色碼 hex', who: '照片取色的結果，或點選的色票', by: '重新取色、點另一個色票' },
+        { k: '名稱 name', who: '你（官網的叫法，例如「紫紅」）；沒改過時先填建議名', by: '只有你打字。改名不會動到色碼和歸類' },
+        { k: '歸類 family', who: '系統依色碼找最接近的色系', by: '色碼改變時重算；你手動選過就不再自動改' }
+      ],
+      rows: [
+        { name: '紫', fg: '#74624F', bd: '1.5px solid transparent', ibg: 'transparent', hex: '#8C3B5E', fam: '紫', extra: '建議名，可直接改', t: '建議名', d: '取色後先填最接近的色票名，淡色顯示' },
+        { name: '紫紅', fg: '#3B2F25', bd: '2px solid #3E6270', ibg: '#FFFCF6', hex: '#8C3B5E', fam: '紫', extra: '', t: '正在改名', d: '一打字就變成你的名稱（name_custom）' },
+        { name: '紫紅', fg: '#3B2F25', bd: '1.5px solid transparent', ibg: 'transparent', hex: '#8C3B5E', fam: '紫', extra: '', t: '自訂名', d: '之後重新取色，名稱也不會被換' },
+        { name: '黃瓜綠', fg: '#3B2F25', bd: '1.5px solid transparent', ibg: 'transparent', hex: '#7E9A5A', fam: '綠', extra: '', t: '色票對不到也沒關係', d: '名稱自訂，歸類照樣是綠，篩選和比對重複都找得到' }
+      ]
+    };
+    return Object.assign(ruleRows, {
       recent: [['酒紅', '#6E2E34'], ['奶白', '#F3EDE1'], ['炭灰', '#3E3E3D'], ['杏', '#EAD9C6'], ['寶寶藍', '#B9D3EA'], ['卡其', '#BFAE8C']].map(([n, h]) => sw(n, h, n === '酒紅')),
       fams: G.map(([t, cs]) => ({ t, c: cs.map(([n, h]) => sw(n, h, n === '酒紅')) })),
       thumbs: [['酒紅正面', '#76293A', 1], ['黑', '#262424'], ['米', '#EDE4D3'], ['細節', '#8E3540']].map(([a, bg, on]) => ({ a, bg, on: on ? 'true' : 'false', ring: on ? '0 0 0 2px #FFFCF6,0 0 0 3.5px #3B2F25' : 'inset 0 0 0 1px rgba(59,47,37,.15)' }))
-    };
+    });
   }
 }
 </script>

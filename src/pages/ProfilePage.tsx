@@ -263,6 +263,7 @@ export function ProfilePage() {
           <Link to="/me/brands" className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] border-line-strong bg-card px-4 text-sm text-ink no-underline hover:border-ink-3"><Icon name="closet" size={16} />品牌管理<Icon name="next" size={14} className="text-ink-3" /></Link>
           <Link to="/me/shops" className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] border-line-strong bg-card px-4 text-sm text-ink no-underline hover:border-ink-3"><Icon name="closet" size={16} />購買通路<Icon name="next" size={14} className="text-ink-3" /></Link>
           <Link to="/me/materials" className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] border-line-strong bg-card px-4 text-sm text-ink no-underline hover:border-ink-3"><Icon name="closet" size={16} />材質<Icon name="next" size={14} className="text-ink-3" /></Link>
+          <Link to="/me/features" className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] border-line-strong bg-card px-4 text-sm text-ink no-underline hover:border-ink-3"><Icon name="closet" size={16} />特徵<Icon name="next" size={14} className="text-ink-3" /></Link>
         </nav>
 
         {error && <div role="alert"><PageState icon="alert" tone="rose" compact title="尺寸筆記暫時載入失敗" description={`${error} 目前仍可編輯示範欄位。`} action={<Button onClick={() => window.location.reload()} variant="secondary">重新載入</Button>} /></div>}

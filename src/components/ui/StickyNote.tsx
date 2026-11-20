@@ -7,21 +7,31 @@ import { TiltLabel } from './Paper'
  * 便利貼 StickyNote（設計稿 B19：design/general/B-StickyNote.dc.html）
  *
  * - variant：hand 手帳字＋橫線（使用者自己寫的短筆記）／mixed 標題手帳字、內文圓體（數字、AI、長內容）／grid 白色方格紙＋膠帶標題
- * - tone：顏色＝內容的意思。mist 我寫的、sage AI 產生、rose 踩雷／警告、oat 提示／心情
- * - 一個畫面最多 2 張；AI 內容不要用 hand；不要用在表單、表格、錯誤訊息或主要按鈕上。
+ * - tone：顏色＝內容的意思。mist 我寫的、sage AI 產生、rose 踩雷／警告、oat 提示／心情、lavender 照抄的原文（商品頁尺寸表）
+ * - 本體一律不旋轉（旋轉會讓瀏覽器重新取樣文字而變糊）：角度只放在膠帶（-3°）和後面墊的那張紙（1°）。
+ * - 摺角：右下 22px，右下那塊是頁面底色、摺起來的三角在左上。
+ * - 一個畫面最多 2 張（完整頁面 B7.3 例外：三張各自不同色）；AI 內容不要用 hand；不要用在表單、表格、錯誤訊息或主要按鈕上。
  */
 
 export type StickyNoteVariant = 'hand' | 'mixed' | 'grid'
-export type StickyNoteTone = 'mist' | 'sage' | 'rose' | 'oat'
-export type StickyNoteTape = 'auto' | 'oat' | 'rose' | 'mist' | false
+export type StickyNoteTone = 'mist' | 'sage' | 'rose' | 'oat' | 'lavender'
+export type StickyNoteTape = 'auto' | 'oat' | 'rose' | 'mist' | 'sage' | 'peach' | 'lavender' | false
 /** auto：手機用 sm、md 以上用 md；也可固定其中一種 */
-export type StickyNoteSize = 'auto' | 'md' | 'sm'
+export type StickyNoteSize = 'auto' | 'md' | 'sm' | 'compact'
 
 export interface StickyNoteProps {
   variant?: StickyNoteVariant
   tone?: StickyNoteTone
   /** 標題（hand、mixed 寫在紙上；grid 變成膠帶標籤） */
   title: string
+  /** 標題字：hand 手帳字 22px（預設）；label 圓體 14px 粗體（資訊頁的小便利貼，B7.3） */
+  titleStyle?: 'hand' | 'label'
+  /** 標題旁的小字，例如「原文照抄」「11/20 貼上」 */
+  titleNote?: string
+  /** 紙：plain 素面；squared 22px 方格紙 */
+  paper?: 'plain' | 'squared'
+  /** 右下摺角；方格紙那張（尺寸表）不摺 */
+  fold?: boolean
   /** 標題層級，依頁面結構調整 */
   headingLevel?: 'h2' | 'h3'
   /** 自訂內容；優先於 items / value */
@@ -30,7 +40,7 @@ export interface StickyNoteProps {
   items?: string[]
   /** 純文字內容（可編輯時的原始文字）：「- 」開頭的行會變成清單 */
   value?: string
-  /** auto 依 id 算角度；grid 與編輯中永遠不傾斜 */
+  /** auto：後面墊一張旋轉 1° 的紙；none：不墊。本體永遠不旋轉 */
   tilt?: 'auto' | 'none'
   /** 算傾斜角度與草稿 key 用，例如 item.id */
   id?: string
@@ -56,49 +66,49 @@ export interface StickyNoteProps {
 /** 每一行的高度（px）：hand 17px／行高 32px；mixed 14px／行高 1.85 ≈ 26px */
 const LINE_PX = { hand: 32, mixed: 26 } as const
 const DEFAULT_LINES = { hand: 4, mixed: 6 } as const
-const TILTS = [-0.8, -0.4, 0.4, 0.8] as const
 
 /** 便利貼內距：桌面 28/22/26/24（B-StickyNote）；手機 26/16/22/18（B-M-Review） */
 const PAD = {
   md: 'pt-7 pr-[22px] pb-[26px] pl-6',
   sm: 'pt-[26px] pr-4 pb-[22px] pl-[18px]',
   auto: 'pt-[26px] pr-4 pb-[22px] pl-[18px] md:pt-7 md:pr-[22px] md:pb-[26px] md:pl-6',
+  compact: 'pt-[22px] px-4 pb-4 md:px-[18px]',
 } as const
 /** grid 方格紙內距：桌面 28/22/22 */
 const GRID_PAD = {
   md: 'pt-7 px-[22px] pb-[22px]',
   sm: 'pt-[26px] px-4 pb-[18px]',
   auto: 'pt-[26px] px-4 pb-[18px] md:pt-7 md:px-[22px] md:pb-[22px]',
+  compact: 'pt-[22px] px-4 pb-4',
 } as const
 /** 膠帶：96×24，往上凸出 11px */
 const TAPE_SIZE = {
   md: 'w-24 -ml-12',
   sm: 'w-20 -ml-10',
   auto: 'w-20 -ml-10 md:w-24 md:-ml-12',
+  compact: 'w-[88px] -ml-11 md:w-[92px] md:-ml-[46px]',
 } as const
 
 const TAPE_BG = {
   oat: 'bg-note-tape-oat',
   rose: 'bg-note-tape-rose',
   mist: 'bg-note-tape-mist',
+  sage: 'bg-washi-sage',
+  peach: 'bg-washi-peach',
+  lavender: 'bg-washi-lavender',
 } as const
+type TapeTone = keyof typeof TAPE_BG
 /** 膠帶 auto：和便利貼底色錯開 */
-const AUTO_TAPE: Record<StickyNoteTone, 'oat' | 'rose' | 'mist'> = {
+const AUTO_TAPE: Record<StickyNoteTone, TapeTone> = {
   mist: 'oat',
   sage: 'rose',
   rose: 'oat',
   oat: 'mist',
+  lavender: 'peach',
 }
-const LABEL_ACCENT: Record<StickyNoteTone, StickyNoteTone> = { mist: 'mist', sage: 'sage', rose: 'rose', oat: 'oat' }
+const LABEL_ACCENT: Record<StickyNoteTone, 'mist' | 'sage' | 'rose' | 'oat'> = { mist: 'mist', sage: 'sage', rose: 'rose', oat: 'oat', lavender: 'mist' }
 
 /* ── 工具 ──────────────────────────────────────────── */
-
-/** 依 id 算出固定角度，同一張每次打開都一樣 */
-function stickyNoteTilt(seed: string) {
-  let hash = 0
-  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) | 0
-  return TILTS[Math.abs(hash) % TILTS.length]
-}
 
 function renderInline(text: string): ReactNode[] {
   const parts: ReactNode[] = []
@@ -156,6 +166,10 @@ export function StickyNote({
   variant = 'mixed',
   tone = 'mist',
   title,
+  titleStyle = 'hand',
+  titleNote,
+  paper = 'plain',
+  fold: showFold = true,
   headingLevel = 'h3',
   children,
   items,
@@ -195,7 +209,7 @@ export function StickyNote({
   const maxHeight = maxLines ? maxLines * LINE_PX[lineVariant] : null
   const collapsed = maxHeight !== null && overflowing && !expanded
 
-  const angle = tilt === 'none' || isGrid || editing ? 0 : stickyNoteTilt(id ?? title)
+  const underlay = tilt !== 'none' && !isGrid
   const tapeTone = tape === 'auto' ? AUTO_TAPE[tone] : tape
   const Heading = headingLevel
 
@@ -326,27 +340,37 @@ export function StickyNote({
     )
   }
 
-  const shell = `sticky-note relative block w-full min-w-0 rounded-tag text-left shadow-note transition-transform duration-200 ${PAD[size]} ${className}`
+  const shell = `sticky-note relative block w-full min-w-0 rounded-tag text-left ${underlay ? '' : 'shadow-note'} ${paper === 'squared' ? 'sticky-note--squared' : ''} ${PAD[size]}`
   const tapeEl =
     tapeTone !== false ? (
       <span
         aria-hidden="true"
-        className={`pointer-events-none absolute left-1/2 -top-[11px] h-6 shadow-[0_1px_2px_rgb(59_47_37/0.08)] ${TAPE_SIZE[size]} ${TAPE_BG[tapeTone]}`}
-        style={{ rotate: angle > 0 ? '2deg' : '-3deg' }}
+        className={`pointer-events-none absolute left-1/2 -top-[11px] -rotate-3 shadow-[0_1px_2px_rgb(59_47_37/0.08)] ${size === 'compact' ? 'h-[22px]' : 'h-6'} ${TAPE_SIZE[size]} ${TAPE_BG[tapeTone]}`}
       />
     ) : null
-  const fold = <span aria-hidden="true" className="sticky-note__fold pointer-events-none absolute right-0 bottom-0 size-[26px] rounded-bl-[4px]" />
+  const fold = showFold && <span aria-hidden="true" className="sticky-note__fold pointer-events-none absolute right-0 bottom-0 size-[22px]" />
+  /** 外層：放 className 與墊紙；墊紙和本體分開，本體才不會因為旋轉而字糊 */
+  const wrap = (node: ReactNode) => (
+    <div data-tone={tone} className={`sticky-note-wrap relative min-w-0 ${className}`}>
+      {underlay && <span aria-hidden="true" className="sticky-note__under pointer-events-none absolute inset-0 rotate-1 rounded-tag shadow-note" />}
+      {node}
+    </div>
+  )
+  const labelTitle = titleStyle === 'label'
+  const headingClass = labelTitle
+    ? 'm-0 flex flex-wrap items-baseline gap-x-2 text-sm font-bold leading-6 text-(--note-title)'
+    : 'm-0 font-hd text-[22px] leading-8 font-normal text-(--note-title)'
+  const titleNoteEl = titleNote ? <small className="text-[11.5px] font-normal text-(--note-accent)">{titleNote}</small> : null
 
   /* ── 空的：整張是按鈕 ── */
   if (!hasContent && editable && !editing) {
-    return (
+    return wrap(
       <button
         type="button"
         data-tone={tone}
         data-empty=""
         onClick={startEdit}
         className={`${shell} border-0 font-sans`}
-        style={{ rotate: `${angle / 1.5}deg` }}
       >
         {tapeEl && <span className="opacity-70">{tapeEl}</span>}
         <span className="block font-hd text-[22px] leading-8 text-(--note-title)">{title}</span>
@@ -355,13 +379,13 @@ export function StickyNote({
           {placeholder}
         </span>
         {fold}
-      </button>
+      </button>,
     )
   }
 
   /* ── 編輯中：轉正，方便打字 ── */
   if (editing) {
-    return (
+    return wrap(
       <section data-tone={tone} aria-labelledby={headingId} className={shell}>
         {tapeEl}
         <div className="flex flex-col gap-2">
@@ -393,17 +417,16 @@ export function StickyNote({
             {saving ? '儲存中…' : '儲存'}
           </Button>
         </div>
-      </section>
+      </section>,
     )
   }
 
   /* ── 一般顯示 ── */
-  return (
+  return wrap(
     <section
       data-tone={tone}
       aria-labelledby={headingId}
       className={`${shell} ${variant === 'hand' ? 'sticky-note--ruled' : ''}`}
-      style={{ rotate: `${angle}deg` }}
     >
       {tapeEl}
       {badge && (
@@ -426,16 +449,15 @@ export function StickyNote({
       )}
       <Heading
         id={headingId}
-        className={`m-0 font-hd text-[22px] leading-8 font-normal text-(--note-title) ${variant === 'mixed' ? 'mb-2' : ''} ${
-          editable || badge ? 'pr-12' : ''
-        }`}
+        className={`${headingClass} ${variant === 'mixed' ? (labelTitle ? 'mb-1.5' : 'mb-2') : ''} ${editable || badge ? 'pr-12' : ''}`}
       >
         {title}
+        {titleNoteEl}
       </Heading>
       {hasContent ? body : <p className="m-0 text-sm text-ink-2">{placeholder}</p>}
       {expandButton}
       {footnote && <span className="mt-2 block text-xs text-(--note-accent)">{footnote}</span>}
       {fold}
-    </section>
+    </section>,
   )
 }

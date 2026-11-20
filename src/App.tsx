@@ -1,6 +1,7 @@
 import { createBrowserRouter, Link, RouterProvider, useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProfileLayout } from "@/components/layout/ProfileNav";
+import { WishlistLayout } from "@/components/wishlist/WishlistLayout";
 import { AuthProvider, RequireAuth } from "@/lib/auth";
 import { ClosetPage } from "@/pages/ClosetPage";
 import { HomePage } from "@/pages/HomePage";
@@ -17,10 +18,12 @@ import { BrandsPage } from "@/pages/BrandsPage";
 import { DiaryPage } from "@/pages/DiaryPage";
 import { ComparePage } from "@/pages/ComparePage";
 import { WishlistPage } from "@/pages/WishlistPage";
+import { WishlistItemPage } from "@/pages/WishlistItemPage";
 import { MaterialsPage, ShopsPage } from "@/pages/ManagedListsPage";
 import { LessonsPage } from "@/pages/LessonsPage";
 import { ReviewPage } from "@/pages/ReviewPage";
 import { CopyItemPage } from "@/pages/CopyItemPage";
+import { FeaturesPage } from "@/pages/FeaturesPage";
 
 /** /closet/new：有 ?from= 時是複製衣物（換貨下一步、複製這件），否則是一般新增 */
 function NewItemRoute() {
@@ -60,9 +63,17 @@ const router = createBrowserRouter([
       { path: "/diary/new", element: <DiaryPage /> },
       { path: "/diary/:id", element: <DiaryPage /> },
       { path: "/diary/:id/edit", element: <DiaryPage /> },
-      { path: "/wishlist", element: <WishlistPage /> },
-      { path: "/wishlist/compare", element: <ComparePage /> },
-      { path: "/wishlist/compare/:id", element: <ComparePage /> },
+      {
+        // 清單／比較共用頁首，切換分頁時頁首不重繪
+        path: "/wishlist",
+        element: <WishlistLayout />,
+        children: [
+          { index: true, element: <WishlistPage /> },
+          { path: "compare", element: <ComparePage /> },
+          { path: "compare/:id", element: <ComparePage /> },
+        ],
+      },
+      { path: "/wishlist/:id", element: <WishlistItemPage /> },
       {
         // 個人資料：大螢幕共用左側子導覽
         element: <ProfileLayout />,
@@ -75,6 +86,7 @@ const router = createBrowserRouter([
           { path: "/me/brands", element: <BrandsPage /> },
           { path: "/me/shops", element: <ShopsPage /> },
           { path: "/me/materials", element: <MaterialsPage /> },
+          { path: "/me/features", element: <FeaturesPage /> },
         ],
       },
     ],

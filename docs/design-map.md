@@ -25,6 +25,7 @@
 | 今日搭配 | `design/general/B-Outfit.dc.html` | `design/mobile/B-M-Outfit.dc.html`、`B-M-Sheet.dc.html` | `/outfit`；選單品、三種板型 |
 | 自由畫布與背景 | `design/general/B-Studio.dc.html` | `design/mobile/B-M-Studio.dc.html`、`B-M-Studio-Bg.dc.html` | `/outfit` 的自由擺放 |
 | 選購清單 | `design/general/B-Wishlist.dc.html` | — | `/wishlist` |
+| 選購商品完整頁面 | `design/general/B-Wishlist-Item.dc.html` | `design/mobile/B-M-Wishlist-Item.dc.html` | `/wishlist/:id`（新分頁開啟） |
 | 加入選購 | `design/general/B-Wishlist-Add.dc.html` | `design/mobile/B-M-Wishlist-Add.dc.html` | 選購清單新增／編輯 |
 | 篩選與選取給 AI | `design/general/B-Wishlist-Select.dc.html` | `design/mobile/B-M-Wishlist-Select.dc.html` | `/wishlist` 選取模式 |
 | 選購比較 | `design/general/B-Compare.dc.html`、`B-Compare-Picker.dc.html` | `design/mobile/B-M-Compare.dc.html`、`B-M-Compare-Picker.dc.html` | `/wishlist/compare/:id`；比較挑選器為 Dialog／Bottom Sheet |
@@ -33,6 +34,7 @@
 | 穿搭日記 | `design/general/B-Diary.dc.html`、`B-Diary-List.dc.html`、`B-Diary-New.dc.html` | `design/mobile/B-M-Diary.dc.html`、`B-M-Diary-Day.dc.html`、`B-M-Diary-New.dc.html` | `/diary`、`/diary/new`、`/diary/:id` |
 | 品牌管理 | `design/general/B-Brands.dc.html`、`B-Combobox.dc.html` | `design/mobile/B-M-Brands.dc.html`、`B-M-Brands-Actions.dc.html`、`B-M-Brands-Merge.dc.html`、`B-M-Brands-Delete.dc.html`、`B-M-Combobox.dc.html` | `/me/brands`、品牌 Combobox |
 | 通路與材質 | `design/general/B-Shops.dc.html`、`design/mobile/B-Materials.dc.html`（桌面尺寸稿） | `design/mobile/B-M-Shops.dc.html`、`design/mobile/B-M-Materials.dc.html` | `/me/shops`、`/me/materials` |
+| 特徵標籤與管理 | `design/general/B-Features.dc.html`、`B-Features-Manage.dc.html` | `design/mobile/B-M-Features.dc.html`、`B-M-Features-Manage.dc.html` | `/me/features`；共用於 B7.1／BM19／B6／BM8.2 |
 | 踩雷覆盤與筆記本 | `design/general/B-Review-Mark.dc.html`、`B-Review.dc.html`、`B-Review-AI.dc.html`、`B-Exchange.dc.html`、`B-Lessons.dc.html` | `design/mobile/B-M-Review-Mark.dc.html`、`B-M-Review.dc.html`、`B-M-Review-AI.dc.html`、`B-M-Exchange.dc.html`、`B-M-Lessons.dc.html` | 衣物踩雷、換貨、`/closet/:id/review`、`/closet/lessons` |
 | 共用狀態 | `design/general/B-States.dc.html` | — | 空狀態、載入、錯誤、離線 |
 | 共用元件 | `design/general/B-DatePicker.dc.html`、`B-Combobox.dc.html`、`B-StickyNote.dc.html`、`B-Checkbox.dc.html`、`B-Stretch.dc.html` | `design/mobile/B-M-Stretch.dc.html` | DatePicker、Combobox、StickyNote、Checkbox、彈性尺寸 |
@@ -48,10 +50,12 @@
 | `/closet/:id` | 衣物詳細：完成 | B-Detail、B-M-Detail |
 | `/outfit` | 今日搭配：完成 | B-Outfit、B-M-Outfit、B-Studio |
 | `/wishlist` | 選購清單、選取給 AI：完成 | B-Wishlist、B-Wishlist-Select、B-M-Wishlist-Select |
+| `/wishlist/:id` | 選購商品完整頁面：完成（v2：狀態膠囊、顏色篩照片、紙膠帶顏色標籤、三張便利貼、AI 看過的提醒） | B7.3、BM19.2、B27 |
 | `/wishlist/compare`、`/wishlist/compare/:id` | 選購比較：完成 | B23、B23.1、BM20、BM20.1 |
 | `/diary`、`/diary/new`、`/diary/:id` | 穿搭日記：完成 | B-Diary 系列 |
 | `/me`、`/me/measurements/*` | 個人資料與量測：完成 | B-Body、B-History 系列 |
 | `/me/brands`、`/me/shops`、`/me/materials` | 清單管理：完成 | B-Brands、B-Shops、B-Materials 系列 |
+| `/me/features` | 特徵標籤管理：完成 | B25、BM22 |
 | `/closet/:id/review`、`/closet/lessons` | 踩雷覆盤、踩雷筆記本：完成 | B-Review、B-Lessons 系列 |
 
 新頁面需拆成 `src/pages/XxxPage.tsx`，並優先查找桌面與手機對應設計稿。設計稿不存在的手機畫面，依手機單欄、底部主要按鈕、選擇操作改 bottom sheet 的原則延伸。
@@ -76,8 +80,9 @@
 | B5-P  | 我的筆記三種樣式比較（參考）     | `B-Note-Explore.dc.html`      | 1440 | —（已定案，見 B19）                          |
 | B6    | 新增衣物流程（去背可略過）       | `B-Add.dc.html`               | 1440 | `/closet/new`                                |
 | B7    | 選購清單                         | `B-Wishlist.dc.html`          | 1440 | `/wishlist`                                  |
-| B7.1  | 加入選購清單（Dialog）           | `B-Wishlist-Add.dc.html`      | 760  | 選購清單 › 加入（無獨立路徑）                |
+| B7.1  | 加入選購清單（Dialog・顏色列＋選色器） | `B-Wishlist-Add.dc.html` | 760 | `/wishlist`（Dialog：新增／編輯） |
 | B7.2  | 選購清單・篩選與選取給 AI        | `B-Wishlist-Select.dc.html`   | 1440 | `/wishlist`（選取模式）                      |
+| B7.3  | 選購商品完整頁面 | `B-Wishlist-Item.dc.html` | 1440 | `/wishlist/:id` |
 | B7+   | 舊版比較試搭台（作廢）           | 舊檔名沿用；內容已由 B23 取代   | —    | 不再參照                                      |
 | B8    | 個人體態資料・新增量測・固定資料 | `B-Body.dc.html`              | 1440 | `/me`                                        |
 | B8.1  | 量測紀錄・依日期                 | `B-History.dc.html`           | 1440 | `/me/measurements`                           |
@@ -101,13 +106,15 @@
 | B19   | 元件：便利貼 StickyNote          | `B-StickyNote.dc.html`        | 1440 | `components/ui/StickyNote.tsx`（元件）       |
 | B20   | 規格：彈性尺寸（平放＋可拉伸）   | `B-Stretch.dc.html`           | 1440 | —（共用狀態，見表內「各頁套用」）            |
 | B21   | 元件：勾選框 Checkbox            | `B-Checkbox.dc.html`          | 1440 | `components/ui/Checkbox.tsx`（元件）         |
-| B22   | 元件：選色器 ColorPicker         | `B-ColorPicker.dc.html`       | 1440 | `components/ui/ColorPicker.tsx`（元件）      |
+| B22   | 元件：選色器（色名＋照片取色・三欄位規則） | `B-ColorPicker.dc.html` | 1440 | 元件（用在 B7.1、BM19、B6、BM8.2） |
 | B23   | 選購比較 | `B-Compare.dc.html` | 1440 | `/wishlist/compare/:id` |
 | B23.1 | 比較・加入商品 | `B-Compare-Picker.dc.html` | 1440 | `/wishlist/compare/:id`（Dialog） |
 | B23.2 | 比較・快速預覽 | `B-Compare-Preview.dc.html` | 1440 | `/wishlist/compare/:id?preview=:itemId` |
+| B23.3 | 比較・準備購買＋採購籃 | `B-Compare-Buy.dc.html` | 1440 | `/wishlist/compare/:id`（採購籃為抽屜） |
 | B24   | 元件：特徵標籤 | `B-Features.dc.html` | 1440 | 元件（用在 B7.1、B6） |
 | B25   | 特徵管理 | `B-Features-Manage.dc.html` | 1440 | `/me/features` |
-| B26   | 元件：懸浮展開鈕 | `B-FloatToggle.dc.html` | 1440 | 元件（用在 B23、BM20） |
+| B26   | 元件：右下角懸浮按鈕（回到頂端・展開／收起・採購籃） | `B-FloatToggle.dc.html` | 1440 | 元件（用在 B23、BM20、/wishlist） |
+| B27   | 元件：照片顏色標籤（紙膠帶） | `B-PhotoTag.dc.html` | 1440 | 元件（用在 B7.3、BM19.2、預覽） |
 
 ## 手機
 
@@ -148,13 +155,16 @@
 | BM16   | 手機衣物詳細                 | `B-M-Detail.dc.html`           | 390 | `/closet/:id`                                       |
 | BM17   | 手機彈性尺寸                 | `B-M-Stretch.dc.html`          | 390 | —（共用狀態）                                       |
 | BM18   | 手機新增量測                 | `B-M-Body.dc.html`             | 390 | `/me/measurements/new`、`/me/measurements/:id/edit` |
-| BM19   | 手機加入選購清單             | `B-M-Wishlist-Add.dc.html`     | 390 | 選購清單 › 加入（全螢幕）                           |
+| BM19  | 手機加入選購清單 | `B-M-Wishlist-Add.dc.html` | 390 | `/wishlist`（全頁：新增／編輯） |
 | BM19.1 | 手機選購清單・選取給 AI      | `B-M-Wishlist-Select.dc.html`  | 390 | `/wishlist`（選取模式）                             |
+| BM19.2| 手機選購商品完整頁面 | `B-M-Wishlist-Item.dc.html` | 390 | `/wishlist/:id` |
 | BM20  | 手機選購比較 | `B-M-Compare.dc.html` | 390 | `/wishlist/compare/:id` |
 | BM20.1| 手機比較・加入商品 | `B-M-Compare-Picker.dc.html` | 390 | `/wishlist/compare/:id`（Bottom Sheet） |
 | BM20.2| 手機比較・快速預覽 | `B-M-Compare-Preview.dc.html` | 390 | `/wishlist/compare/:id?preview=:itemId` |
+| BM20.3| 手機準備購買＋採購籃 | `B-M-Compare-Buy.dc.html` | 390 | `/wishlist/compare/:id`（採購籃為 Bottom Sheet） |
 | BM21  | 手機特徵標籤 | `B-M-Features.dc.html` | 390 | 元件（用在 BM19、BM8.2） |
-| BM22  | 手機特徵管理 | `B-M-Features-Manage.dc.html` | 390 | `/me/features` |
+| BM22   | 手機特徵管理                 | `B-M-Features-Manage.dc.html`  | 390 | `/me/features`                                      |
+
 
 
 

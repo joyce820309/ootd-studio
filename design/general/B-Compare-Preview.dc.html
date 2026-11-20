@@ -86,7 +86,7 @@ a{color:#3E6270}
       <button type="button" class="ibtn" onClick="{{prev}}" aria-label="上一件" style="color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
       <span class="num" style="font-size:14px;font-weight:700">{{pos}}</span>
       <button type="button" class="ibtn" onClick="{{next}}" aria-label="下一件" style="color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
-      <a class="btn btn-g" href="B-Wishlist.dc.html" style="margin-left:auto;height:40px;padding:0 10px;color:#3E6270;font-size:13px">開完整頁面<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M14 5h5v5M19 5l-8 8M18 14v5H5V6h5"></path></svg></a>
+      <a class="btn btn-g" href="B-Wishlist-Item.dc.html" target="_blank" rel="noopener" style="margin-left:auto;height:40px;padding:0 10px;color:#3E6270;font-size:13px">開完整頁面<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M14 5h5v5M19 5l-8 8M18 14v5H5V6h5"></path></svg></a>
       <button type="button" class="btn btn-s" style="height:40px;padding:0 12px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"></path></svg>編輯</button>
       <button type="button" class="ibtn" aria-label="關閉預覽" style="color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
     </div>
@@ -110,7 +110,7 @@ a{color:#3E6270}
       </div>
       <div style="padding:10px 12px;border-radius:12px;background:#EEF4F6"><span style="font-size:12px;color:#24424D">商品頁尺寸表</span><div style="margin-top:4px;font-size:13px;line-height:1.75;white-space:pre-line">{{cur.chart}}</div></div>
       <div style="padding:10px 12px;border-radius:12px;background:#E6EEE2"><span style="font-size:12px;color:#3F5A3B">平放尺寸（{{cur.size}}）</span><div class="num" style="margin-top:4px;font-size:13px;line-height:1.75">{{cur.flat}}</div></div>
-      <div class="sticky" style="padding:16px 18px 14px;background:#DCE8EC;transform:rotate(-0.6deg)"><span class="tape" aria-hidden="true"></span><span class="fold" aria-hidden="true" style="background:linear-gradient(225deg,#FFFCF6 50%,#C5D8DE 50%)"></span><ul class="bn"><sc-for list="{{cur.notes}}" as="t" hint-placeholder-count="2"><li><span>{{t}}</span></li></sc-for></ul></div>
+      <div class="sticky" style="padding:16px 18px 14px;background:#DCE8EC;transform:rotate(-0.6deg)"><span class="tape" aria-hidden="true"></span><span class="fold" aria-hidden="true" style="background:linear-gradient(135deg,#C5D8DE 50%,#FFFCF6 50%)"></span><ul class="bn"><sc-for list="{{cur.notes}}" as="t" hint-placeholder-count="2"><li><span>{{t}}</span></li></sc-for></ul></div>
     </div>
     <div style="display:flex;gap:8px;padding:12px 16px;border-top:1.5px dashed #D9C7AC">
       <button type="button" class="btn btn-g" style="color:#8E4A3E">從這個比較移除</button>
@@ -121,7 +121,7 @@ a{color:#3E6270}
 
   <div style="position:absolute;left:40px;top:540px;width:840px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
     <div class="box"><b style="font-size:14px">打開與切換</b><p class="cap">點欄頂的名稱或圖片打開，不換頁。抽屜裡用 ‹ ›、上方縮圖、或鍵盤 ← → 切換，順序跟比較表的欄位一樣；到最後一件再按 › 回到第一件。</p><p class="cap">網址加 <span class="num">?preview=:id</span>：重新整理還在、瀏覽器「上一頁」會先關掉預覽，不會跳離比較頁。</p></div>
-    <div class="box"><b style="font-size:14px">跟完整頁面的差別</b><p class="cap">預覽只放比較時會想回頭看的：照片、價格、店家、顏色、尺寸表、平放尺寸、我的筆記。完整頁面（<span class="num">/wishlist/:id</span>）用新分頁開，比較頁不會被換掉。</p><p class="cap">「編輯」在預覽裡直接開編輯對話框（B7.1），存好後表格和預覽一起更新。</p></div>
+    <div class="box"><b style="font-size:14px">跟完整頁面的差別</b><p class="cap">預覽只放比較時會想回頭看的：照片、價格、店家、顏色、尺寸表、平放尺寸、我的筆記。完整頁面（<span class="num">/wishlist/:id</span>，B7.3）用新分頁開，比較頁不會被換掉。</p><p class="cap">「編輯」在預覽裡直接開編輯對話框（B7.1），存好後表格和預覽一起更新。</p></div>
     <div class="box"><b style="font-size:14px">版面</b><p class="cap">桌機寬 520 px，貼右邊、全高、不蓋灰底，表格維持可操作。視窗小於 1200 px 時改成蓋住右半邊並加淡灰底。</p></div>
     <div class="box"><b style="font-size:14px">欄上的小鉛筆</b><p class="cap">目前每欄縮圖上有編輯鉛筆，有了預覽之後可以拿掉，縮圖上只留 ⋮⋮ 和 ×，比較乾淨。編輯從預覽進。</p></div>
   </div>

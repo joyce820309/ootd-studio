@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機準備購買與採購籃</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:12px}
+.tg{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;height:44px;border-radius:10px;font:500 14px 'Chiron GoRound TC'}
+.stp{display:inline-flex;align-items:center;border-radius:10px;border:1.5px solid #E2D2B8;background:#FFFCF6;height:40px}
+.stp button{width:40px;height:38px;border:0;background:none;font:600 17px Nunito;color:#3B2F25}
+.stp span{min-width:22px;text-align:center;font:700 15px Nunito}
+.pr{display:inline-flex;align-items:center;gap:2px;height:40px;padding:0 10px;border-radius:10px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:600 14px Nunito;width:90px}
+.dt{display:inline-block;width:18px;height:18px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1.5px rgba(59,47,37,.18)}
+.fstack{position:fixed;right:24px;bottom:24px;z-index:25;display:flex;flex-direction:column;align-items:center;gap:8px}
+.fa{position:relative;width:44px;height:44px;border-radius:8px;border:1.5px solid #D9C7AC;background:#FFFCF6;color:#3B2F25;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;box-shadow:0 1px 0 rgba(59,47,37,.05),0 10px 20px -10px rgba(59,47,37,.45);transition:border-color .15s,transform .15s}
+.fa svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fa:hover,.fa[data-v="hover"]{border-color:#3B2F25;transform:translateY(-1px)}
+.fa[data-v="focus"]{outline:2.5px solid #3E6270;outline-offset:3px}
+.fa[data-open="true"]{background:#DCE8EC;border-color:#A9C6CF;color:#24424D}
+.fa.dark{background:#3B2F25;border-color:#3B2F25;color:#F2CF8E}
+.fa .q{position:absolute;right:-6px;top:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:#F2CF8E;color:#3B2F25;font:700 10.5px Nunito;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #FBF4E8}
+.fa .tip{position:absolute;right:54px;top:50%;transform:translateY(-50%);padding:5px 10px;border-radius:8px;background:#3B2F25;color:#FBF4E8;font:500 12px 'Chiron GoRound TC';white-space:nowrap;pointer-events:none;opacity:0}
+.fa:hover .tip,.fa[data-v="hover"] .tip,.fa[data-v="focus"] .tip{opacity:1}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden">
+  <header style="display:flex;align-items:center;gap:2px;padding:6px 4px;border-bottom:1.5px dashed #D9C7AC">
+    <a class="ibtn" href="B-M-Wishlist-Select.dc.html" aria-label="回選購清單" style="color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></a>
+    <h1 class="hd" style="margin:0;font-size:21px">冬天的寬褲</h1>
+    <button type="button" class="ibtn" aria-label="更多：收尾這個比較、封存、刪除" style="margin-left:auto;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h.01M12 12h.01M18 12h.01" style="stroke-width:3"></path></svg></button>
+  </header>
+  <main style="padding:10px 12px 0">
+    <div class="two">
+      <div style="display:flex;flex-direction:column;gap:6px"><span style="position:relative;height:110px;border-radius:12px;background:#F6E7C6;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 100 100" style="width:56%;height:80%" aria-hidden="true"><path d="M30 8H70L80 92H56L50 36L44 92H20Z" fill="#2B2724"></path></svg><span class="tag" style="position:absolute;left:6px;bottom:6px;height:22px;font-size:11px;background:#F2CF8E">✓ 準備購買</span></span><span style="font-size:13px;font-weight:700;line-height:1.45">#802556 撞色收邊毛呢褲</span><b class="num">NT$590</b></div>
+      <div style="display:flex;flex-direction:column;gap:6px"><span style="height:110px;border-radius:12px;background:#E6EEE2;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 100 100" style="width:56%;height:80%" aria-hidden="true"><path d="M30 8H70L80 92H56L50 36L44 92H20Z" fill="#3A332E"></path></svg></span><span style="font-size:13px;font-weight:700;line-height:1.45">#66936 抽繩羊絨直筒褲</span><b class="num">NT$590</b></div>
+    </div>
+    <div style="margin-top:8px;padding:10px 4px;border-top:1.5px dashed #EADCC6;font-size:12px;color:#74624F;text-align:center">⋯ 比較內容照 BM20 ⋯</div>
+    <div class="two" style="padding-top:10px;border-top:2px solid #3B2F25">
+      <button type="button" class="tg" aria-pressed="true" style="background:#F2CF8E;border:1.5px solid #E2B866;color:#3B2F25">✓ 準備購買</button>
+      <button type="button" class="tg" aria-pressed="false" style="background:#FFFCF6;border:1.5px solid #D9C7AC;color:#3B2F25">＋ 準備購買</button>
+    </div>
+    <p style="margin:8px 4px 0;font-size:11.5px;line-height:1.6;color:#5A4A3C">手機版按下「準備購買」後，顏色、件數、單價在採購籃裡調整（點下方採購籃）。</p>
+  </main>
+
+  <sc-if value="{{notOpen}}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;display:flex;gap:8px;padding:10px 12px 26px;background:#FFFCF6;border-top:1.5px dashed #D9C7AC"><span class="btn btn-o" style="flex:1;height:48px">＋ 加入商品</span><span class="btn btn-s" style="flex:1;height:48px">整理給 AI</span></div>
+    <div class="fstack" style="position:absolute;right:12px;bottom:96px">
+      <button type="button" class="fa" aria-label="回到頂端"><svg viewBox="0 0 24 24"><path d="M6 5h12M12 19V9M7 13l5-5 5 5"></path></svg><span class="tip">回到頂端</span></button>
+      <button type="button" class="fa" aria-label="展開其餘 3 區"><svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg></button>
+      <button type="button" class="fa dark" onClick="{{toggle}}" aria-expanded="false" aria-label="打開採購籃，7 件"><svg viewBox="0 0 24 24"><path d="M4 8h16l-1.5 11h-13zM9 8V6a3 3 0 0 1 6 0v2"></path></svg><span class="q" aria-hidden="true">7</span></button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{open}}" hint-placeholder-val="{{ true }}">
+    <div aria-hidden="true" onClick="{{toggle}}" style="position:absolute;inset:0;background:rgba(59,47,37,.42)"></div>
+    <section role="dialog" aria-modal="true" aria-labelledby="mbk" style="position:absolute;left:0;right:0;top:70px;bottom:0;background:#FFFCF6;border-radius:22px 22px 0 0;display:flex;flex-direction:column">
+      <span aria-hidden="true" style="align-self:center;width:40px;height:4px;border-radius:2px;background:#D9C7AC;margin-top:8px"></span>
+      <div style="display:flex;align-items:center;gap:6px;padding:4px 6px 6px 16px"><h2 id="mbk" class="hd" style="margin:0;font-size:21px">採購籃</h2><span style="font-size:12px;color:#5A4A3C">目標 <span class="num">NT$5,000</span> ✎</span><button type="button" class="ibtn" onClick="{{toggle}}" aria-label="關閉" style="margin-left:auto;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+      <div style="flex:1;overflow:hidden;padding:0 16px">
+        <h3 style="margin:6px 0 2px;font-size:13px;display:flex;gap:8px;align-items:baseline"><span class="hd" style="font-size:16px;font-weight:400">冬天的寬褲</span><span style="font-weight:400;color:#5A4A3C">3 件</span></h3>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:10px 0;border-top:1.5px dashed #EADCC6">
+          <div style="display:flex;gap:10px;align-items:center"><span style="width:40px;height:48px;border-radius:8px;background:#F6E7C6;flex:none"></span><span style="flex:1;min-width:0;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">#802556 撞色收邊毛呢褲</span><b class="num">NT$1,000</b></div>
+          <sc-for list="{{lines}}" as="l" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:8px;padding-left:50px"><span class="dt" style="background:{{l.h}}"></span><span style="font-size:13px;width:28px">{{l.n}}</span><span class="stp"><button type="button" aria-label="減一件" onClick="{{l.dec}}">−</button><span>{{l.q}}</span><button type="button" aria-label="加一件" onClick="{{l.inc}}">＋</button></span><span class="pr"><span style="color:#74624F;font-size:11px">$</span>500</span></div>
+          </sc-for>
+          <button type="button" style="align-self:flex-start;margin-left:50px;min-height:36px;padding:0;border:0;background:none;font:500 13px 'Chiron GoRound TC';color:#3E6270">＋ 加一色</button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1.5px dashed #EADCC6"><span style="width:40px;height:48px;border-radius:8px;background:#E8E2DA;flex:none"></span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-size:13px;font-weight:500">#770552 高彈直筒褲</span><span style="font-size:12px;color:#5A4A3C">灰 × 1</span></span><b class="num">NT$590</b></div>
+        <h3 style="margin:10px 0 2px;font-size:13px;display:flex;gap:8px;align-items:baseline"><span class="hd" style="font-size:16px;font-weight:400">短褲＆短裙</span><span style="font-weight:400;color:#5A4A3C">3 件</span></h3>
+        <div style="display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1.5px dashed #EADCC6"><span style="width:40px;height:48px;border-radius:8px;background:#E8E2DA;flex:none"></span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-size:13px;font-weight:500">#329815 柔面毛呢百褶短裙</span><span style="font-size:12px;color:#5A4A3C">黑 × 1・灰 × 1（各 $520）</span></span><b class="num">NT$1,040</b></div>
+      </div>
+      <div style="padding:12px 16px 26px;border-top:2px solid #3B2F25;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline"><span style="font-size:13px">共 <b class="num">5</b> 款・<b class="num">7</b> 件</span><b class="num" style="margin-left:auto;font-size:22px">NT$3,670</b></div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5A3F12"><span style="flex:1;height:8px;border-radius:4px;background:#F3E7D4;overflow:hidden"><span style="display:block;height:100%;width:73%;background:#E2B866"></span></span>還差 NT$1,330</div>
+        <div style="display:flex;gap:8px"><button type="button" class="btn btn-s" style="height:48px">複製清單</button><button type="button" class="btn btn-p" style="flex:1;height:48px">買好了，移到已購買…</button></div>
+      </div>
+    </section>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { open: true, q: [1, 1] }; }
+  renderVals() {
+    const q = this.state.q;
+    const L = [['#2B2724', '黑'], ['#EAD9C6', '杏']];
+    return {
+      open: this.state.open, notOpen: !this.state.open, toggle: () => this.setState({ open: !this.state.open }),
+      lines: L.map(([h, n], i) => ({ h, n, q: q[i],
+        inc: () => { const a = q.slice(); a[i]++; this.setState({ q: a }); },
+        dec: () => { const a = q.slice(); a[i] = Math.max(1, a[i] - 1); this.setState({ q: a }); } }))
+    };
+  }
+}
+</script>
+</body>
+</html>

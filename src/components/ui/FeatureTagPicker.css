@@ -1,0 +1,22 @@
+.feature-picker__line { display: grid; grid-template-columns: 58px minmax(0, 1fr); align-items: start; gap: 8px; }
+.feature-picker__label { padding-top: 10px; color: var(--color-ink-2); font-size: 12px; }
+.feature-chip { display: inline-flex; min-height: 44px; flex: none; align-items: center; gap: 5px; border: 1.5px solid var(--color-line-strong); border-radius: 999px; background: var(--color-card); padding: 0 12px; color: var(--color-ink); font: 500 13px var(--font-sans); white-space: nowrap; }
+.feature-chip--selected { border-color: var(--color-ink); background: var(--color-ink); color: var(--color-paper); }
+.feature-chip--suggested { border-style: dashed; border-color: var(--color-mist-deep); background: var(--color-mist-soft); color: var(--color-mist-ink); }
+.feature-chip__source { border-radius: 999px; background: var(--color-mist-soft); padding: 1px 5px; color: var(--color-mist-ink); font-size: 10px; }
+.feature-chip--selected .feature-chip__source { background: var(--color-paper); color: var(--color-ink-2); }
+.feature-picker-dialog[open] { display: flex; }
+.feature-picker-dialog:modal { overscroll-behavior: contain; }
+.feature-picker-dialog::backdrop { overflow: hidden; overscroll-behavior: contain; }
+.feature-picker-dialog__groups { scrollbar-gutter: stable; }
+
+@media (max-width: 767px) {
+  .feature-picker__line { grid-template-columns: 44px minmax(0, 1fr); gap: 5px; }
+  .feature-picker__line [role='radiogroup'] { flex-wrap: nowrap; overflow-x: auto; margin-inline: -4px; padding: 2px 4px; }
+  .feature-picker__label { font-size: 11px; }
+}
+
+@media (forced-colors: active) {
+  .feature-chip--suggested { outline: 1px dashed LinkText; }
+  .feature-picker-dialog { border: 1px solid CanvasText; }
+}

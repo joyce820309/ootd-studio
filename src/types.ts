@@ -2,6 +2,7 @@
 export type Slot = 'outer' | 'top' | 'bottom' | 'shoes' | 'bag' | 'acc'
 
 export type ItemStatus = 'ok' | 'not_arrived' | 'cleaning' | 'repair' | 'lent' | 'stored' | 'retired' | LessonStatus
+export type GarmentLength = 'short' | 'mid' | 'long'
 
 /** 踩雷後的衣物狀態：不出現在衣櫃、今日搭配、統計，照片與尺寸保留 */
 export type LessonStatus = 'returned' | 'exchanged' | 'unworn' | 'given_away'
@@ -43,6 +44,24 @@ export type AddItemDestination = 'closet' | 'wishlist'
 export type ShopKind = 'online' | 'physical' | 'other'
 export type MaterialPercentages = Record<string, number>
 
+export type FeatureDimension = 'waist' | 'silhouette' | 'shoulder' | 'texture' | 'detail' | 'occasion'
+export interface FeatureTag {
+  name: string
+  dimension: FeatureDimension
+}
+export interface FeatureDefinition {
+  name: string
+  dimension: FeatureDimension
+  aliases: string[]
+  /** 以「部位:類型」表示；空陣列代表所有類型。 */
+  applicableTypes: string[]
+  sortOrder: number
+  isHidden: boolean
+  closetCount?: number
+  wishCount?: number
+}
+export type FeatureDefinitionInput = Omit<FeatureDefinition, 'closetCount' | 'wishCount'>
+
 export interface NewGarmentInput {
   name: string
   categoryId: string
@@ -53,6 +72,8 @@ export interface NewGarmentInput {
   size?: string
   necklineSize?: number | null
   seasons: string[]
+  features?: FeatureTag[]
+  featureSuggestionsDismissed?: string[]
   material?: string
   materialComposition?: string
   materialPercentages?: MaterialPercentages
@@ -90,6 +111,8 @@ export interface ClosetItem {
   secondColorHex?: string
   brand?: string
   size?: string
+  /** 有明確資料時用於比較長度；未記錄時不推測。 */
+  garmentLength?: GarmentLength
   necklineSize?: number
   fit?: string
   material?: string
@@ -97,6 +120,8 @@ export interface ClosetItem {
   materialPercentages?: MaterialPercentages
   seasons?: string[]
   occasions?: string[]
+  features?: FeatureTag[]
+  featureSuggestionsDismissed?: string[]
   purchaseDate?: string
   purchasePrice?: number
   store?: string
@@ -132,12 +157,24 @@ export interface ClosetPhoto {
   colorFamily?: string
 }
 
+export type WishColorSource = 'photo' | 'palette'
+
+/**
+ * 選購商品的一個顏色（B22 ⑤）：色碼、名稱、歸類三個欄位各自獨立，以 id 為 key。
+ * - hex 只在照片重新取樣或點色票時改變
+ * - name 使用者改過就 nameCustom=true，之後換色碼也不覆蓋；清空回到建議名
+ * - family 是色系（COLOR_FAMILIES 名稱，如「紫」「紅粉」），依 hex 自動歸類；手動改過 familyCustom=true
+ */
 export interface WishlistColor {
+  id: string
+  name: string
+  nameCustom: boolean
+  hex: string
   family: string
-  hex?: string
+  familyCustom: boolean
+  source: WishColorSource
   /** 這批候選中最想要的顏色；最多一項為 true。 */
-  favorite?: boolean
-  source?: 'photo' | 'pick'
+  favorite: boolean
 }
 
 export interface WishlistPhotoUpload {
@@ -146,7 +183,6 @@ export interface WishlistPhotoUpload {
 }
 
 export type WishStatus = 'considering' | 'ready' | 'bought' | 'dropped'
-export type GarmentLength = 'short' | 'mid' | 'long'
 
 export interface WishlistItem {
   id: string
@@ -185,12 +221,28 @@ export interface WishlistItem {
   material?: string
   materialComposition?: string
   materialPercentages?: MaterialPercentages
+  features?: FeatureTag[]
+  featureSuggestionsDismissed?: string[]
   flatMeasurements?: Record<string, number | null>
   flatStretch?: Record<string, number>
   returnPolicy?: string
+  /** AI 看過的提醒：使用者從外部 AI 貼回的文字（平台不呼叫 AI） */
+  aiReview?: string
+  /** aiReview 貼上的時間（ISO） */
+  aiReviewedAt?: string
+  /** 準備購買明細（每色一行）；改回考慮中時保留 */
+  buyLines?: BuyLine[]
   boughtItemId?: string
   boughtItemIds?: string[]
   createdAt?: string
+}
+
+/** 準備購買的一行：顏色 × 件數 × 單價（單價可填活動後的價格） */
+export interface BuyLine {
+  colorName: string
+  hex?: string
+  qty: number
+  unitPrice: number
 }
 
 export type WishPriority = 1 | 2 | 3
@@ -222,6 +274,8 @@ export interface WishlistInput {
   material?: string
   materialComposition?: string
   materialPercentages?: MaterialPercentages
+  features?: FeatureTag[]
+  featureSuggestionsDismissed?: string[]
   flatMeasurements?: Record<string, number | null>
   flatStretch?: Record<string, number>
   returnPolicy?: string
@@ -254,6 +308,8 @@ export interface CompareGroupItem {
   position: number
   chosenSize?: string
   isDecided?: boolean
+  /** 這個比較的欄頂封面（商品圖 storage_path）；沒設時用商品封面 */
+  coverPhotoPath?: string
   addedAt?: string
 }
 

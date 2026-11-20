@@ -2,6 +2,7 @@ import { FLAT_LABELS } from '@/lib/review'
 import { isInCloset, SLOT_META } from '@/lib/slots'
 import { formatStretch, SIZING } from '@/lib/stretch'
 import { closetItemHasType, garmentTypeOf } from '@/lib/wishlist'
+import { materialMix, materialMixText } from '@/lib/materialMix'
 import type { BodyMeasurement, BodyProfile, ClosetItem, WishlistItem } from '@/types'
 
 /** 「整理給 AI」要包含的資料區塊（B7.2）。平台不呼叫 AI，只產生可複製的文字。 */
@@ -90,11 +91,11 @@ export function buildAiText({ items, closet, body, bodyProfile, include }: AiTex
     lines.push(`- 類別：${category}`)
     if (has('basics')) lines.push(`- 價格：NT$${item.price.toLocaleString('zh-TW')}${item.shipping ? `（運費 NT$${item.shipping.toLocaleString('zh-TW')}）` : ''}`)
     if (has('colorSize')) {
-      const colors = item.colors?.map((color) => `${color.family}${color.hex ? `（${color.hex}）` : ''}`).join('、') || item.colorName || '未提供'
+      const colors = item.colors?.map((color) => `${color.name}（${color.family}系${color.hex ? `・${color.hex}` : ''}）`).join('、') || item.colorName || '未提供'
       lines.push(`- 顏色：${colors}`, `- 預計尺寸：${item.size?.trim() || '未提供'}`)
     }
     if (has('material')) {
-      const material = [item.materialComposition, item.material, ...Object.entries(item.materialPercentages ?? {}).map(([name, percent]) => `${name} ${percent}%`)].filter(Boolean).join('；') || '未提供'
+      const material = materialMixText(materialMix(item)) ?? '未提供'
       lines.push(`- 材質與厚薄：${material}；厚薄：未提供`)
     }
     if (has('flat')) {

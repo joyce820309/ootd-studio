@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "test": "node --test \"src/**/*.test.ts\"",
     "commit": "node scripts/commit.mjs",
     "preview": "vite preview"
   },

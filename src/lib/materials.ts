@@ -1,4 +1,4 @@
-import type { MaterialPercentages } from '@/types'
+import type { MaterialPercentages } from '../types.ts'
 
 export const MATERIAL_DEFAULTS = [
   { name: '棉', aliases: ['Cotton'], sortOrder: 10 },

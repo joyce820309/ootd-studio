@@ -3,8 +3,12 @@ import { ItemImage } from '@/components/closet/ItemImage'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import { MarkdownNote } from '@/components/ui/MarkdownNote'
+import { MaterialMix } from '@/components/ui/MaterialMix'
+import { OpenFullPageLink } from '@/components/wishlist/OpenFullPageLink'
+import { materialMix } from '@/lib/materialMix'
 import { FLAT_LABELS } from '@/lib/review'
 import { formatStretch } from '@/lib/stretch'
+import { photoColorLabel } from '@/lib/wishColors'
 import { formatAddedDate, formatNT, WISH_STATUS } from '@/lib/wishlist'
 import { flatMeasurementEntries } from '@/lib/wishlistAi'
 import type { WishlistItem } from '@/types'
@@ -21,8 +25,11 @@ interface ComparePreviewProps {
   onClose: () => void
   onEdit: (item: WishlistItem) => void
   onRemove: (item: WishlistItem) => void
-  onBuy: (item: WishlistItem) => void
+  onToggleReady: (item: WishlistItem) => void
   studioUrl: (item: WishlistItem) => string
+  /** 每件在這個比較的欄頂封面（storage_path） */
+  coverPaths: Record<string, string | undefined>
+  onSetCover: (item: WishlistItem, path: string | null) => void
 }
 
 /**
@@ -30,7 +37,7 @@ interface ComparePreviewProps {
  * 桌機是貼右邊的抽屜（寬 520、不蓋灰底，比較表照樣能捲能點；視窗小於 1200 加淡灰底）；手機是 top 40px 的 Bottom Sheet。
  * ← → 循環切換、Esc 關閉。
  */
-export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, onClose, onEdit, onRemove, onBuy, studioUrl }: ComparePreviewProps) {
+export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, onClose, onEdit, onRemove, onToggleReady, studioUrl, coverPaths, onSetCover }: ComparePreviewProps) {
   const panelRef = useRef<HTMLElement>(null)
   const index = Math.max(0, items.findIndex((item) => item.id === currentId))
   const item = items[index]
@@ -73,7 +80,7 @@ export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, o
   if (!item) return null
   const status = WISH_STATUS[item.status]
   const added = formatAddedDate(item.createdAt)
-  const colors = item.colors?.length ? item.colors.map((color) => `${color.family}${color.favorite ? '（最想要）' : ''}`).join('、') : item.colorName
+  const colors = item.colors?.length ? item.colors.map((color) => `${color.name}${color.favorite ? '（最想要）' : ''}`).join('、') : item.colorName
   const facts = [item.shop || item.brand, added ? `加入於 ${added}` : null].filter(Boolean).join('・')
   const flat = flatMeasurementEntries(item)
   const bought = item.status === 'bought'
@@ -84,9 +91,9 @@ export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, o
     <button type="button" className="compare-preview__icon-btn" disabled={total < 2} onClick={() => move(1)} aria-label="下一件"><Icon name="next" size={20} /></button>
   </div>
   const editBtn = !bought && (mobile
-    ? <button type="button" className="compare-preview__icon-btn ml-auto" onClick={() => onEdit(item)} aria-label={`編輯「${item.name}」`}><Icon name="edit" size={20} /></button>
+    ? <button type="button" className="compare-preview__icon-btn" onClick={() => onEdit(item)} aria-label={`編輯「${item.name}」`}><Icon name="edit" size={20} /></button>
     : <Button variant="secondary" className="h-10 px-3 text-[13px]" onClick={() => onEdit(item)}><Icon name="edit" size={16} />編輯</Button>)
-  const closeBtn = <button type="button" className={`compare-preview__icon-btn ${mobile && bought ? 'ml-auto' : ''}`} onClick={onClose} aria-label="關閉預覽"><Icon name="x" size={20} /></button>
+  const closeBtn = <button type="button" className="compare-preview__icon-btn" onClick={onClose} aria-label="關閉預覽"><Icon name="x" size={20} /></button>
 
   return <>
     <div aria-hidden="true" onClick={onClose} className={`compare-preview__scrim ${mobile ? 'is-mobile' : ''}`} />
@@ -102,7 +109,8 @@ export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, o
       <div className="compare-preview__top">
         {!mobile && <span className="text-xs text-ink-2">預覽</span>}
         {pager}
-        {!mobile && <a href={`/wishlist?item=${encodeURIComponent(item.id)}`} target="_blank" rel="noopener noreferrer" className="ml-auto inline-flex h-10 items-center gap-1 rounded-btn px-2.5 text-[13px] text-mist-deep no-underline hover:bg-tile">開完整頁面<span className="sr-only">（另開新分頁）</span><svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-none stroke-current" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round"><path d="M14 5h5v5M19 5l-8 8M18 14v5H5V6h5" /></svg></a>}
+        {/* 開完整頁面：新分頁打開 /wishlist/:id，比較頁不動；手機只留 ↗ 圖示 */}
+        <OpenFullPageLink itemId={item.id} iconOnly={mobile} className="ml-auto" />
         {editBtn}
         {closeBtn}
       </div>
@@ -116,7 +124,7 @@ export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, o
 
       <div className="compare-preview__body">
         <div className={mobile ? 'flex flex-col gap-3' : 'flex gap-3.5'}>
-          <PreviewPhotos key={item.id} item={item} mobile={mobile} />
+          <PreviewPhotos key={item.id} item={item} mobile={mobile} coverPath={coverPaths[item.id]} onSetCover={(path) => onSetCover(item, path)} />
           <div className="flex min-w-0 flex-col gap-2">
             <span className={`inline-flex h-[22px] items-center gap-1.5 self-start rounded-full px-2.5 text-[11px] font-medium ${status.className}`}><span aria-hidden="true" className="size-1.5 rounded-full bg-current" />{status.label}</span>
             <h2 id="compare-preview-title" className="m-0 font-hd text-[19px] leading-[1.4] md:text-[22px] md:leading-[1.35]">{item.name}</h2>
@@ -136,6 +144,11 @@ export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, o
           <p className="m-0 mt-1 font-num text-[13px] leading-[1.75] text-ink tabular">{flat.map(([key, value]) => `${FLAT_LABELS[key] ?? key} ${formatStretch(value, item.flatStretch?.[key])}`).join('・')}</p>
         </section>}
 
+        {materialMix(item).parts.length > 0 && <section aria-label="材質" className="rounded-btn bg-card px-3 py-2.5 shadow-[inset_0_0_0_1.5px_var(--color-line)]">
+          <span className="mb-1.5 block text-xs text-ink-2">材質・依比例</span>
+          <MaterialMix material={item.material} materialComposition={item.materialComposition} materialPercentages={item.materialPercentages} />
+        </section>}
+
         {item.reason?.trim() && <section aria-label="我的筆記" className="compare-preview__note">
           <span aria-hidden="true" className="compare-preview__tape" />
           <MarkdownNote value={item.reason.trim()} />
@@ -145,24 +158,32 @@ export function ComparePreview({ items, currentId, mobile, keyboard, onSelect, o
       <div className="compare-preview__foot">
         {!mobile && <Button variant="ghost" className="text-rose-ink" onClick={() => onRemove(item)}>從這個比較移除</Button>}
         <ButtonLink to={studioUrl(item)} variant="secondary" className={mobile ? 'h-12 flex-1' : 'ml-auto'}>拿去試搭</ButtonLink>
-        <Button variant="primary" disabled={bought} className={mobile ? 'h-12 flex-1' : ''} onClick={() => onBuy(item)}>{bought ? '已購買' : '就買這件'}</Button>
+        {bought ? <span className="inline-flex h-11 items-center px-3 text-sm text-ink-2">已購買</span> : <button type="button" aria-pressed={item.status === 'ready'} onClick={() => onToggleReady(item)} className={`compare-ready ${item.status === 'ready' ? 'is-on' : ''} ${mobile ? 'h-12 flex-1' : 'w-auto px-5'}`}>{item.status === 'ready' ? '✓ 準備購買' : '＋ 準備購買'}</button>}
       </div>
     </aside>
   </>
 }
 
-/** 主圖＋縮圖；沒有照片時用去背圖或示意圖 */
-function PreviewPhotos({ item, mobile }: { item: WishlistItem; mobile: boolean }) {
+/**
+ * 主圖＋縮圖；沒有照片時用去背圖或示意圖。
+ * 可把目前看的這張設為「這個比較的封面」（只影響比較表欄頂，不改選購清單的封面）。
+ */
+function PreviewPhotos({ item, mobile, coverPath, onSetCover }: { item: WishlistItem; mobile: boolean; coverPath?: string; onSetCover: (path: string | null) => void }) {
   const photos = (item.photos ?? []).filter((photo) => photo.url)
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const selected = photos.find((photo) => photo.id === selectedId) ?? photos.find((photo) => photo.isCover) ?? photos[0]
+  const selected = photos.find((photo) => photo.id === selectedId) ?? photos.find((photo) => photo.path === coverPath) ?? photos.find((photo) => photo.isCover) ?? photos[0]
   const url = selected?.url ?? item.cutoutUrl
+  const selectedIsCover = !!selected && selected.path === coverPath
   return <div className={`flex flex-none flex-col gap-1.5 ${mobile ? '' : 'w-[190px]'}`}>
-    <span className={`flex items-center justify-center overflow-hidden rounded-[12px] ${mobile ? 'h-[260px]' : 'h-[220px]'}`} style={{ backgroundColor: item.colorHex + '26' }}>
+    <span className={`relative flex items-center justify-center overflow-hidden rounded-[12px] ${mobile ? 'h-[260px]' : 'h-[220px]'}`} style={{ backgroundColor: item.colorHex + '26' }}>
       {url ? <img src={url} alt={`${item.name}商品圖片`} className="size-full object-contain" /> : <ItemImage name={item.name} shape={item.shape} colorHex={item.colorHex} className="h-[82%] w-[60%]" />}
+      {selectedIsCover && <span className="absolute bottom-1.5 left-1.5 rounded-full bg-ink px-2 py-0.5 text-[10.5px] text-paper">比較封面</span>}
     </span>
     {photos.length > 1 && <span role="group" aria-label="商品圖片" className="flex flex-wrap gap-1.5">
-      {photos.map((photo, photoIndex) => <button key={photo.id} type="button" aria-pressed={selected?.id === photo.id} aria-label={`查看第 ${photoIndex + 1} 張商品圖片${photo.colorFamily ? `，${photo.colorFamily}色` : ''}`} onClick={() => setSelectedId(photo.id)} className={`size-11 overflow-hidden rounded-sm border-[1.5px] bg-paper p-0 ${selected?.id === photo.id ? 'border-ink' : 'border-line'}`}><img src={photo.url} alt="" loading="lazy" className="size-full object-cover" /></button>)}
+      {photos.map((photo, photoIndex) => <button key={photo.id} type="button" aria-pressed={selected?.id === photo.id} aria-label={`查看第 ${photoIndex + 1} 張商品圖片${photoColorLabel(photo.colorFamily) ? `，${photoColorLabel(photo.colorFamily)}色` : ''}${photo.path === coverPath ? '（比較封面）' : ''}`} onClick={() => setSelectedId(photo.id)} className={`relative size-11 overflow-hidden rounded-sm border-[1.5px] bg-paper p-0 ${selected?.id === photo.id ? 'border-ink' : 'border-line'}`}><img src={photo.url} alt="" loading="lazy" className="size-full object-cover" />{photo.path === coverPath && <span aria-hidden="true" className="absolute inset-x-0 bottom-0 bg-ink/85 text-center text-[9px] leading-[14px] text-paper">封面</span>}</button>)}
     </span>}
+    {photos.length > 1 && selected && (selectedIsCover
+      ? <button type="button" onClick={() => onSetCover(null)} className="min-h-9 self-start rounded-btn px-1 text-left text-xs text-ink-2 underline decoration-line-strong underline-offset-2">改回商品原本的封面</button>
+      : <button type="button" onClick={() => onSetCover(selected.path)} className="min-h-9 self-start rounded-btn border-[1.5px] border-dashed border-line-strong px-3 text-xs font-medium text-mist-deep hover:bg-tile">設為比較封面</button>)}
   </div>
 }

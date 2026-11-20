@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<title>元件：懸浮展開鈕</title>
+<title>元件：右下角懸浮按鈕</title>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -47,61 +47,55 @@ ul.bn b{font-weight:700}
 .chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
 :focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
 a{color:#3E6270}
-.ftg{position:relative;display:inline-flex;align-items:center;gap:10px;height:50px;padding:0 18px 0 8px;border-radius:14px;border:1.5px solid #E2B866;background:#F2CF8E;color:#3B2F25;font:500 14px 'Chiron GoRound TC';cursor:pointer;transform:rotate(-2deg);box-shadow:0 2px 0 rgba(59,47,37,.08),0 16px 26px -12px rgba(59,47,37,.5);transition:transform .15s}
-.ftg[data-v="hover"]{transform:rotate(0) translateY(-2px);box-shadow:0 2px 0 rgba(59,47,37,.08),0 20px 30px -12px rgba(59,47,37,.55)}
-.ftg[data-v="focus"]{outline:2.5px solid #3E6270;outline-offset:3px}
-.ftg[data-open="true"]{background:#FFFCF6;border-color:#3B2F25;transform:rotate(1.5deg)}
-.ftg[data-v="m"]{height:44px;padding:0 14px 0 6px;font-size:13px;gap:8px}
-.ftg-tape{position:absolute;left:14px;top:-8px;width:44px;height:15px;background:rgba(169,198,207,.8);transform:rotate(-8deg);box-shadow:0 1px 2px rgba(59,47,37,.1)}
-.ftg-ic{width:32px;height:32px;border-radius:50%;background:#FFFCF6;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1.5px rgba(59,47,37,.15)}
-.ftg[data-open="true"] .ftg-ic{background:#F3E7D4}
-.ftg-ic svg{width:18px;height:18px;fill:none;stroke:#3B2F25;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.ftg-n{min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#3B2F25;color:#FBF4E8;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
-.st{display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:16px;padding:30px 12px 16px;border-radius:14px;background:#FFFCF6;min-height:170px}
+.fstack{position:fixed;right:24px;bottom:24px;z-index:25;display:flex;flex-direction:column;align-items:center;gap:8px}
+.fa{position:relative;width:44px;height:44px;border-radius:8px;border:1.5px solid #D9C7AC;background:#FFFCF6;color:#3B2F25;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;box-shadow:0 1px 0 rgba(59,47,37,.05),0 10px 20px -10px rgba(59,47,37,.45);transition:border-color .15s,transform .15s}
+.fa svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fa:hover,.fa[data-v="hover"]{border-color:#3B2F25;transform:translateY(-1px)}
+.fa[data-v="focus"]{outline:2.5px solid #3E6270;outline-offset:3px}
+.fa[data-open="true"]{background:#DCE8EC;border-color:#A9C6CF;color:#24424D}
+.fa.dark{background:#3B2F25;border-color:#3B2F25;color:#F2CF8E}
+.fa .q{position:absolute;right:-6px;top:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:#F2CF8E;color:#3B2F25;font:700 10.5px Nunito;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #FBF4E8}
+.fa .tip{position:absolute;right:54px;top:50%;transform:translateY(-50%);padding:5px 10px;border-radius:8px;background:#3B2F25;color:#FBF4E8;font:500 12px 'Chiron GoRound TC';white-space:nowrap;pointer-events:none;opacity:0}
+.fa:hover .tip,.fa[data-v="hover"] .tip,.fa[data-v="focus"] .tip{opacity:1}
+
+.st{display:flex;flex-direction:column;align-items:center;gap:12px;padding:26px 10px 16px;border-radius:14px;background:#FBF4E8}
 .cap{margin:0;font-size:12.5px;line-height:1.75;color:#5A4A3C}
 .box{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border-radius:14px;background:#FFFCF6;box-shadow:inset 0 0 0 1.5px #EADCC6}
+.lab{font-size:12px;text-align:center;line-height:1.6;color:#5A4A3C}
+.lab b{color:#3B2F25}
 </style>
 </helmet>
-<div style="width:1440px;min-height:660px;box-sizing:border-box;padding:48px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:32px">
+<div style="width:1440px;min-height:600px;box-sizing:border-box;padding:48px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:28px">
   <header style="display:flex;align-items:flex-end;gap:24px">
     <div style="display:flex;flex-direction:column;gap:10px">
       <span class="lbl" style="background:#A9C6CF;transform:rotate(-2deg);align-self:flex-start">元件</span>
-      <h1 class="hd" style="margin:0;font-size:36px">懸浮展開鈕 FloatToggle</h1>
+      <h1 class="hd" style="margin:0;font-size:36px">右下角懸浮按鈕 FloatActions</h1>
     </div>
-    <p class="cap" style="margin:0 0 4px auto;max-width:620px;font-size:13px">固定在畫面右下角，不跟著版面跑。用在「一頁裡有收起來的區塊」：選購比較（B23／BM20）。外觀是一張貼了紙膠帶的便利貼，收起時是燕麥黃，展開後變成紙色加深色框。檔案：<span class="num">components/ui/FloatToggle.tsx</span></p>
+    <p class="cap" style="margin:0 0 4px auto;max-width:620px;font-size:13px">三顆 44 × 44 的小方塊（圓角 8 px），只放圖示，靠右下角上下疊放。滑過或鍵盤停在上面時，左側出現文字提示。由上到下：回到頂端、展開／收起、採購籃。檔案：<span class="num">components/ui/FloatActions.tsx</span></p>
   </header>
 
-  <section aria-labelledby="s1" style="display:flex;flex-direction:column;gap:14px">
-    <h2 id="s1" class="hd" style="margin:0;font-size:24px">狀態</h2>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
-      <div class="st"><button type="button" class="ftg"><span class="ftg-tape" aria-hidden="true"></span><span class="ftg-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg></span><span>展開全部</span><span class="num ftg-n">3</span></button><span class="cap" style="text-align:center"><b style="color:#3B2F25">收起中</b><br>數字＝還有幾區沒展開</span></div>
-      <div class="st"><button type="button" class="ftg" data-v="hover"><span class="ftg-tape" aria-hidden="true"></span><span class="ftg-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg></span><span>展開全部</span><span class="num ftg-n">3</span></button><span class="cap" style="text-align:center"><b style="color:#3B2F25">滑過</b><br>擺正、往上浮 2 px</span></div>
-      <div class="st"><button type="button" class="ftg" data-v="focus"><span class="ftg-tape" aria-hidden="true"></span><span class="ftg-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg></span><span>展開全部</span><span class="num ftg-n">3</span></button><span class="cap" style="text-align:center"><b style="color:#3B2F25">鍵盤焦點</b><br>霧藍外框</span></div>
-      <div class="st"><button type="button" class="ftg" data-open="true"><span class="ftg-tape" aria-hidden="true"></span><span class="ftg-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17l5-5 5 5M7 11l5-5 5 5"></path></svg></span><span>收起</span></button><span class="cap" style="text-align:center"><b style="color:#3B2F25">展開中</b><br>紙色、深色框、往另一邊歪</span></div>
-      <div class="st"><button type="button" class="ftg" data-v="m"><span class="ftg-tape" aria-hidden="true"></span><span class="ftg-ic" aria-hidden="true" style="width:30px;height:30px"><svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg></span><span>展開</span><span class="num ftg-n">3</span></button><span class="cap" style="text-align:center"><b style="color:#3B2F25">手機</b><br>高 44、文字縮短</span></div>
+  <section aria-labelledby="s1" class="paper" style="padding:18px;display:flex;flex-direction:column;gap:14px">
+    <h2 id="s1" class="hd" style="margin:0;font-size:22px">三顆按鈕與狀態</h2>
+    <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:10px">
+      <div class="st"><button type="button" class="fa" aria-label="回到頂端"><svg viewBox="0 0 24 24"><path d="M6 5h12M12 19V9M7 13l5-5 5 5"></path></svg></button><span class="lab"><b>回到頂端</b><br>往下捲超過一個畫面才出現</span></div>
+      <div class="st"><button type="button" class="fa" aria-label="展開其餘 3 區" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg></button><span class="lab"><b>展開</b><br>有收起的區塊才出現</span></div>
+      <div class="st"><button type="button" class="fa" data-open="true" aria-label="收起後面幾區" aria-expanded="true"><svg viewBox="0 0 24 24"><path d="M7 17l5-5 5 5M7 11l5-5 5 5"></path></svg></button><span class="lab"><b>已展開</b><br>箭頭朝上、霧藍底</span></div>
+      <div class="st"><button type="button" class="fa dark" aria-label="打開採購籃，7 件"><svg viewBox="0 0 24 24"><path d="M4 8h16l-1.5 11h-13zM9 8V6a3 3 0 0 1 6 0v2"></path></svg><span class="q" aria-hidden="true">7</span></button><span class="lab"><b>採購籃</b><br>角標只放件數</span></div>
+      <div class="st" style="align-items:flex-end;padding-right:24px"><button type="button" class="fa" data-v="hover" aria-label="展開其餘 3 區"><svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg><span class="tip">展開其餘 3 區</span></button><span class="lab" style="align-self:center"><b>滑過</b><br>框變深＋左側提示</span></div>
+      <div class="st"><button type="button" class="fa" data-v="focus" aria-label="回到頂端"><svg viewBox="0 0 24 24"><path d="M6 5h12M12 19V9M7 13l5-5 5 5"></path></svg></button><span class="lab"><b>鍵盤焦點</b><br>霧藍外框</span></div>
+      <div class="st" style="align-items:flex-end;padding-right:24px"><button type="button" class="fa dark" data-v="hover" aria-label="打開採購籃，7 件"><svg viewBox="0 0 24 24"><path d="M4 8h16l-1.5 11h-13zM9 8V6a3 3 0 0 1 6 0v2"></path></svg><span class="q" aria-hidden="true">7</span><span class="tip">採購籃・7 件</span></button><span class="lab" style="align-self:center"><b>採購籃滑過</b><br>提示寫件數</span></div>
+      <div class="st"><span style="display:flex;flex-direction:column;gap:8px"><button type="button" class="fa" aria-label="回到頂端"><svg viewBox="0 0 24 24"><path d="M6 5h12M12 19V9M7 13l5-5 5 5"></path></svg></button><button type="button" class="fa" aria-label="展開其餘 3 區"><svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg></button><button type="button" class="fa dark" aria-label="打開採購籃，7 件"><svg viewBox="0 0 24 24"><path d="M4 8h16l-1.5 11h-13zM9 8V6a3 3 0 0 1 6 0v2"></path></svg><span class="q" aria-hidden="true">7</span></button></span><span class="lab"><b>疊起來</b><br>間距 8 px</span></div>
     </div>
   </section>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
-    <div class="box">
-      <b style="font-size:15px">位置</b>
-      <p class="cap">桌機：<span class="num">position:fixed; right:32px; bottom:32px</span>。<br>手機：<span class="num">right:12px</span>，底部要讓開底部操作列：<span class="num">bottom: 列高 + 12px + env(safe-area-inset-bottom)</span>。</p>
-      <p class="cap">頁面底部加留白（桌機 96 px、手機再加操作列高度），最後一列不會被它蓋住。z-index 低於對話框和底部面板，打開那些時它要藏起來。</p>
-    </div>
-    <div class="box">
-      <b style="font-size:15px">行為</b>
-      <p class="cap">點一下切換「展開全部／收起」，所有可收起的區塊一起動。收起時捲回第一個被收起的區塊上緣，不要讓人掉到頁面中間。</p>
-      <p class="cap">頁面上沒有可收起的區塊時（例如資料都空，被藏起來了）不顯示。表格裡收起的地方另有一條「還有 3 區收起來了」的橫條，點它效果一樣。</p>
-    </div>
-    <div class="box">
-      <b style="font-size:15px">無障礙</b>
-      <p class="cap">用 <span class="num">&lt;button aria-expanded aria-controls&gt;</span>，aria-label 寫完整：「展開其餘 3 區」「收起後面幾區」。數字徽章和膠帶都 aria-hidden。</p>
-      <p class="cap">使用者設定「減少動態」時，不做浮起和旋轉動畫，只換顏色。</p>
-    </div>
-  </div>
+  <section style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+    <div class="box"><b style="font-size:14px">位置</b><p class="cap">桌機：position:fixed; right:24px; bottom:24px。手機：right:12px；bottom = 底部操作列高度 + 12px + safe-area。頁面底部留白 80 px，最後一列不會被擋。</p></div>
+    <div class="box"><b style="font-size:14px">什麼時候出現</b><p class="cap">回到頂端：往下捲超過一個畫面高度才淡入。展開／收起：頁面有收起的區塊才出現。採購籃：有「準備購買」才出現。沒出現的按鈕不佔位，其他的往下靠。打開抽屜、對話框、預覽時整組藏起來。</p></div>
+    <div class="box"><b style="font-size:14px">行為與無障礙</b><p class="cap">回到頂端：平滑捲動（減少動態時直接跳），焦點移到頁面標題。展開／收起加 aria-expanded。每顆都要有 aria-label：「回到頂端」「展開其餘 3 區」「打開採購籃，7 件」。提示文字只是視覺輔助，觸控裝置不顯示。</p></div>
+  </section>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":660}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":600}}'>
 class Component extends DCLogic {
   renderVals() { return {}; }
 }

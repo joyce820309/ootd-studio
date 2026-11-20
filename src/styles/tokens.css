@@ -92,6 +92,26 @@
   --color-note-tape-rose: rgb(222 166 152 / 0.6);
   --color-note-tape-mist: rgb(150 186 198 / 0.6);
   --color-note-rule: rgb(62 98 112 / 0.22);
+  /* 便利貼後面墊的那張紙：同色系較深，旋轉 1°（B19、B7.3） */
+  --color-note-mist-under: #C5D8DE;
+  --color-note-sage-under: #C9D8C2;
+  --color-note-rose-under: #EBCBC1;
+  --color-note-oat-under: #EEDBAF;
+  --color-note-lavender-under: #DDD3EA;
+  /* 薰衣草方格紙（商品頁尺寸表，B7.3） */
+  --color-lavender-soft: #EEE8F5;
+  --color-lavender-ink: #4E3F63;
+  --color-lavender-deep: #6B5C80;
+  --color-note-lavender-fold: #DDD3EA;
+  --color-note-lavender-empty: #F5F1FA;
+  --color-note-lavender-empty-fold: #E6DFF0;
+  --color-note-lavender-grid: rgb(142 122 166 / 0.13);
+  /* 紙膠帶（PhotoColorTag B27 與便利貼膠帶）：半透明、平光 */
+  --color-washi-oat: rgb(240 196 118 / 0.62);
+  --color-washi-mist: rgb(169 198 207 / 0.62);
+  --color-washi-sage: rgb(183 203 176 / 0.65);
+  --color-washi-peach: rgb(240 184 170 / 0.6);
+  --color-washi-lavender: rgb(201 187 217 / 0.65);
   --color-note-grid: rgb(150 186 198 / 0.22);
 
   /* 勾選框（B21）：沒勾的細框線、鎖定且已勾選的底色 */

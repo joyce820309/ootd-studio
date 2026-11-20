@@ -364,6 +364,7 @@ export function BrandsPage() {
           <Link to="/me" aria-label="返回我的" className="flex size-11 items-center justify-center text-ink"><Icon name="back" size={22} /></Link>
           <h1 className="m-0 font-hd text-xl">品牌</h1>
           {data && <span className="ml-1 font-num text-xs text-ink-3 tabular">{brands.length}</span>}
+          <Link to="/me/features" aria-label="前往特徵管理" className="ml-auto flex min-h-11 items-center gap-1 px-2 text-xs text-mist-deep">特徵<Icon name="next" size={14} /></Link>
           <button type="button" aria-label="新增品牌" onClick={startAdding} className="ml-auto flex size-11 items-center justify-center rounded-btn bg-transparent text-ink"><Icon name="plus" size={22} /></button>
           {brands.length > 1 && (
             <button type="button" aria-pressed={selectMode} onClick={() => { setSelectMode((value) => !value); setSelected(new Set()) }} className="h-11 bg-transparent px-2.5 text-sm font-medium text-mist-deep">
@@ -379,6 +380,7 @@ export function BrandsPage() {
             <h1 className="m-0 font-hd text-[32px]">品牌</h1>
             <p className="m-0 text-[13px] text-ink-2">新增衣物時輸入過的品牌都在這裡。改名、合併會一起更新所有衣物。</p>
           </div>
+          <Link to="/me/features" className="flex min-h-10 items-center gap-1 text-xs font-medium text-mist-deep">特徵管理<Icon name="next" size={14} /></Link>
           <Button variant="secondary" onClick={startAdding} className="h-10 px-3.5 text-[13px]"><Icon name="plus" size={16} />新增品牌</Button>
         </div>
 

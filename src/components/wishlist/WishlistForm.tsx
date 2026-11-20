@@ -8,16 +8,20 @@ import { Icon } from '@/components/ui/Icon'
 import { MarkdownNoteField } from '@/components/ui/MarkdownNote'
 import { Select } from '@/components/ui/Select'
 import { FlatMeasureField } from '@/components/closet/FlatMeasureField'
-import { fetchClosetBrands, fetchLessonRules, fetchManagedList, markLessonRulesNotified, useLatestBody } from '@/lib/data'
+import { FeatureTagPicker } from '@/components/ui/FeatureTagPicker'
+import { createGarmentFeature, fetchClosetBrands, fetchGarmentFeatures, fetchLessonRules, fetchManagedList, markLessonRulesNotified, useLatestBody } from '@/lib/data'
 import { FLAT_LABELS, isLessonRuleReminderDue, matchWishlistLessonRules } from '@/lib/review'
 import { collectMeasures, SIZING, toFieldValue, type FlatFieldValue, type MeasureField } from '@/lib/stretch'
 import { toUploadableImage } from '@/lib/image'
-import { GARMENT_COLORS } from '@/lib/colors'
+import { COLOR_FAMILY_NAMES } from '@/lib/colors'
+import { addColor, applyColorPick, colorFromName, createColor, photoColorLabel, removeColor, renameColor, setColorFamily, toggleFavoriteColor, UNTAGGED_PHOTO_COLOR } from '@/lib/wishColors'
 import { SLOTS } from '@/lib/slots'
-import { garmentTypeOptions, hasGarmentLength, isValidProductUrl, PRIORITY_LABEL, shopFromUrl, WISH_STATUS } from '@/lib/wishlist'
+import { garmentTypeOf, garmentTypeOptions, hasGarmentLength, isValidProductUrl, PRIORITY_LABEL, shopFromUrl, WISH_STATUS } from '@/lib/wishlist'
+import { featureTypeKeys } from '@/lib/features'
 import { materialNames, parsePercentages } from '@/lib/materials'
-import type { GarmentLength, ManagedListSummary } from '@/types'
+import type { FeatureDefinition, FeatureDimension, FeatureTag, GarmentLength, ManagedListSummary } from '@/types'
 import type { LessonRule, Slot, WishlistColor, WishlistInput, WishlistItem, WishPriority } from '@/types'
+import './WishlistForm.css'
 
 type EditableStatus = WishlistInput['status']
 const STATUS_OPTIONS: EditableStatus[] = ['considering', 'ready', 'dropped']
@@ -31,6 +35,8 @@ interface Draft {
   garmentType: string
   garmentLength: GarmentLength | ''
   alsoParts: Slot[]
+  features: FeatureTag[]
+  featureSuggestionsDismissed: string[]
   colors: WishlistColor[]
   shop: string
   brand: string
@@ -55,7 +61,8 @@ interface PendingPhoto {
   id: string
   file: File
   url: string
-  colorFamily: string | null
+  /** 對應的顏色 id（存檔時換成該色名稱） */
+  colorId: string | null
 }
 
 export interface WishlistFormDefaults {
@@ -64,14 +71,11 @@ export interface WishlistFormDefaults {
   primaryPart?: Slot
 }
 
-const COLOR_FAMILIES = GARMENT_COLORS.filter((color) => color.name !== '多色' && color.name !== '其他')
-const fallbackHex = (family?: string) => COLOR_FAMILIES.find((color) => color.name === family)?.hex ?? '#D9CBB3'
-const resolvedColor = (color?: WishlistColor) => color?.hex ?? fallbackHex(color?.family)
 
 function toDraft(item?: WishlistItem, defaults?: WishlistFormDefaults): Draft {
   const num = (value?: number) => (value === undefined ? '' : String(value))
   const primaryPart = item?.primaryPart ?? item?.slot ?? defaults?.primaryPart ?? defaults?.slot ?? ''
-  const colors = item?.colors !== undefined ? item.colors.map((color) => ({ ...color })) : item?.colorName || item?.colorHex ? [{ family: item.colorName || '其他', hex: item.colorHex }] : []
+  const colors: WishlistColor[] = item?.colors !== undefined ? item.colors.map((color) => ({ ...color })) : item?.colorName || item?.colorHex ? [colorFromName(item.colorName || '其他', item.colorHex)] : []
   return {
     url: item?.url ?? defaults?.url ?? '',
     name: item?.name ?? '',
@@ -80,6 +84,8 @@ function toDraft(item?: WishlistItem, defaults?: WishlistFormDefaults): Draft {
     garmentType: item?.garmentType ?? '',
     garmentLength: item?.garmentLength ?? '',
     alsoParts: (item?.alsoParts ?? []).filter((part) => part !== primaryPart),
+    features: (item?.features ?? []).map((feature) => ({ ...feature })),
+    featureSuggestionsDismissed: [...(item?.featureSuggestionsDismissed ?? [])],
     colors,
     shop: item?.shop === '尚未決定' ? '' : (item?.shop ?? ''),
     brand: item?.brand ?? '',
@@ -130,7 +136,6 @@ function validate(draft: Draft): { errors: Errors; input?: WishlistInput } {
   if (necklineSize !== null && (!Number.isFinite(necklineSize) || necklineSize < 0)) errors.necklineSize = '領口尺寸請填 0 以上的數字。'
   if (Object.entries(draft.materialPercentages).some(([name, value]) => materialNames(draft.material).includes(name) && value.trim() && (!Number.isFinite(Number(value)) || Number(value) < 0 || Number(value) > 100))) errors.materialPercentages = '材質比例請填 0 到 100 之間的數字。'
   if (draft.url.trim() && !isValidProductUrl(draft.url)) errors.url = '請輸入有效的 http:// 或 https:// 網址。'
-  if (draft.colors.some((color) => !color.family.trim())) errors.colors = '請為每個顏色輸入名稱。'
   if (draft.colors.some((color) => color.hex?.trim() && !/^#[0-9A-F]{6}$/i.test(color.hex.trim()))) errors.colors = '色碼請使用 #RRGGBB 格式，例如 #EFE6D2。'
   const measures = collectMeasures(measureFields(draft.primaryPart, draft.flat), draft.flat)
   if (measures.error) errors.flat = `平放尺寸「${measures.error.field.label}」：${measures.error.message}`
@@ -145,9 +150,11 @@ function validate(draft: Draft): { errors: Errors; input?: WishlistInput } {
       garmentType: garmentTypeOptions(draft.primaryPart || undefined).some((option) => option.id === draft.garmentType) ? draft.garmentType : null,
       garmentLength: draft.primaryPart === 'bottom' && hasGarmentLength(draft.garmentType) ? draft.garmentLength || null : null,
       alsoParts: draft.alsoParts.filter((part) => part !== draft.primaryPart),
+      features: draft.features,
+      featureSuggestionsDismissed: draft.featureSuggestionsDismissed,
       colors: draft.colors,
-      colorHex: resolvedColor(draft.colors[0]),
-      colorName: draft.colors[0]?.family,
+      colorHex: draft.colors[0]?.hex ?? '#D9CBB3',
+      colorName: draft.colors[0]?.name,
       shop: draft.shop,
       url: draft.url,
       price: price as number,
@@ -217,11 +224,11 @@ export function WishlistForm({
     return guessed ? { ...draft, shop: guessed } : draft
   })
   const [errors, setErrors] = useState<Errors>({})
-  const [editingColorIndex, setEditingColorIndex] = useState<number | null>(null)
   const [shopSuggestions, setShopSuggestions] = useState<string[]>([])
   const [brandSuggestions, setBrandSuggestions] = useState<string[]>([])
   const [pendingPhotos, setPendingPhotos] = useState<PendingPhoto[]>([])
-  const [photoColorById, setPhotoColorById] = useState<Record<string, string | null>>(() => Object.fromEntries((item?.photos ?? []).map((photo) => [photo.id, photo.colorFamily ?? null])))
+  // 圖片對應的顏色以顏色 id 記錄；改名、換色碼都不會讓圖片掉標記，存檔時才換成名稱
+  const [photoColorById, setPhotoColorById] = useState<Record<string, string | null>>(() => Object.fromEntries((item?.photos ?? []).map((photo) => [photo.id, photo.colorFamily ? draft.colors.find((color) => color.name === photo.colorFamily)?.id ?? UNTAGGED_PHOTO_COLOR : null])))
   const [removedPhotoIds, setRemovedPhotoIds] = useState<string[]>([])
   const [photoError, setPhotoError] = useState<string | null>(null)
   const [preparingPhotos, setPreparingPhotos] = useState(false)
@@ -229,6 +236,7 @@ export function WishlistForm({
   const photoInputRef = useRef<HTMLInputElement>(null)
   const pendingPhotosRef = useRef<PendingPhoto[]>([])
   const [materials, setMaterials] = useState<ManagedListSummary[]>([])
+  const [featureDefinitions, setFeatureDefinitions] = useState<FeatureDefinition[]>([])
   const [lessonRules, setLessonRules] = useState<LessonRule[]>([])
   const [shownRuleIds, setShownRuleIds] = useState<string[]>([])
   const shownRuleIdsRef = useRef(new Set<string>())
@@ -239,6 +247,11 @@ export function WishlistForm({
   const body = useLatestBody()
   const fields = useMemo(() => measureFields(draft.primaryPart, draft.flat), [draft.primaryPart, draft.flat])
   const measures = useMemo(() => collectMeasures(fields, draft.flat), [fields, draft.flat])
+  const featureTypeIds = useMemo(() => {
+    if (!draft.primaryPart) return []
+    const type = garmentTypeOf({ name: draft.name, slot: draft.primaryPart, primaryPart: draft.primaryPart, garmentType: draft.garmentType })
+    return featureTypeKeys(draft.primaryPart, type?.id)
+  }, [draft.garmentType, draft.name, draft.primaryPart])
   const matchedRuleAlerts = useMemo(() => matchWishlistLessonRules(lessonRules, {
     brand: draft.brand,
     shop: draft.shop,
@@ -265,10 +278,11 @@ export function WishlistForm({
 
   useEffect(() => {
     let active = true
-    void Promise.all([fetchManagedList('shops'), fetchManagedList('materials'), fetchClosetBrands()]).then(([shops, materialList, brands]) => {
+    void Promise.all([fetchManagedList('shops'), fetchManagedList('materials'), fetchClosetBrands(), fetchGarmentFeatures()]).then(([shops, materialList, brands, features]) => {
       if (!active) return
       setShopSuggestions(shops.entries.map((entry) => entry.name))
       setBrandSuggestions(brands)
+      setFeatureDefinitions(features)
       const current = materialNames(item?.material)
       const extras = current.filter((name) => !materialList.entries.some((entry) => entry.name === name)).map((name) => ({ name, aliases: [], sortOrder: 1000, isDefault: false, isHidden: false, closetCount: 0, wishCount: 0, lastUsed: null }))
       setMaterials([...materialList.entries.filter((entry) => !entry.isHidden), ...extras])
@@ -294,6 +308,20 @@ export function WishlistForm({
 
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) => setDraft((d) => ({ ...d, [key]: value }))
 
+  async function createFeatureFromPicker(name: string, dimension: FeatureDimension) {
+    const normalized = name.normalize('NFKC').trim().toLocaleLowerCase()
+    const existing = featureDefinitions.find((feature) => [feature.name, ...feature.aliases].some((value) => value.normalize('NFKC').trim().toLocaleLowerCase() === normalized))
+    if (existing) return existing
+    const sortOrder = Math.max(0, ...featureDefinitions.filter((feature) => feature.dimension === dimension).map((feature) => feature.sortOrder)) + 10
+    const feature: FeatureDefinition = {
+      name: name.trim(), dimension, aliases: [], applicableTypes: featureTypeIds,
+      sortOrder, isHidden: false, closetCount: 0, wishCount: 0,
+    }
+    await createGarmentFeature(feature)
+    setFeatureDefinitions((current) => [...current.filter((entry) => entry.name !== feature.name), feature])
+    return feature
+  }
+
   function toggleMaterial(name: string) {
     const current = materialNames(draft.material)
     const next = current.includes(name) ? current.filter((entry) => entry !== name) : [...current, name]
@@ -305,35 +333,13 @@ export function WishlistForm({
     }
   }
 
-  function toggleColorFamily(family: string) {
-    const exists = draft.colors.some((color) => color.family === family)
-    if (!exists) {
-      set('colors', [...draft.colors.map((color) => ({ ...color })), { family }])
-      return
-    }
-    set('colors', draft.colors.filter((color) => color.family !== family))
-    setPendingPhotos((current) => current.map((photo) => photo.colorFamily === family ? { ...photo, colorFamily: null } : photo))
-    setPhotoColorById((current) => Object.fromEntries(Object.entries(current).map(([photoId, selected]) => [photoId, selected === family ? null : selected])))
-  }
+  // 顏色操作都只動指定 id 那一筆（lib/wishColors，有測試）
+  const colorNameOf = (colorId: string | null | undefined) => colorId === UNTAGGED_PHOTO_COLOR ? UNTAGGED_PHOTO_COLOR : draft.colors.find((color) => color.id === colorId)?.name ?? null
 
-  function toggleFavoriteColor(index: number) {
-    const removing = !!draft.colors[index]?.favorite
-    set('colors', draft.colors.map((color, colorIndex) => ({ ...color, favorite: !removing && colorIndex === index })))
-  }
-
-  function applyPickedColor(index: number, picked: { name: string; hex: string; source: 'photo' | 'pick' }) {
-    const previousFamily = draft.colors[index]?.family
-    set('colors', draft.colors.map((color, colorIndex) => colorIndex === index ? { ...color, family: picked.name, hex: picked.hex, source: picked.source } : color))
-    if (previousFamily && previousFamily !== picked.name) {
-      setPendingPhotos((current) => current.map((photo) => photo.colorFamily === previousFamily ? { ...photo, colorFamily: picked.name } : photo))
-      setPhotoColorById((current) => Object.fromEntries(Object.entries(current).map(([photoId, family]) => [photoId, family === previousFamily ? picked.name : family])))
-    }
-  }
-
-  function renameColor(previousFamily: string, nextFamily: string) {
-    set('colors', draft.colors.map((color) => color.family === previousFamily ? { ...color, family: nextFamily } : color))
-    setPendingPhotos((current) => current.map((photo) => photo.colorFamily === previousFamily ? { ...photo, colorFamily: nextFamily || null } : photo))
-    setPhotoColorById((current) => Object.fromEntries(Object.entries(current).map(([photoId, family]) => [photoId, family === previousFamily ? nextFamily || null : family])))
+  function removeColorById(colorId: string) {
+    set('colors', removeColor(draft.colors, colorId))
+    setPendingPhotos((current) => current.map((photo) => photo.colorId === colorId ? { ...photo, colorId: UNTAGGED_PHOTO_COLOR } : photo))
+    setPhotoColorById((current) => Object.fromEntries(Object.entries(current).map(([photoId, selected]) => [photoId, selected === colorId ? UNTAGGED_PHOTO_COLOR : selected])))
   }
 
   async function appendPhotos(files: FileList | File[]) {
@@ -352,7 +358,7 @@ export function WishlistForm({
     try {
       for (const source of selected) {
         const file = await toUploadableImage(source)
-        prepared.push({ id: crypto.randomUUID(), file, url: URL.createObjectURL(file), colorFamily: null })
+        prepared.push({ id: crypto.randomUUID(), file, url: URL.createObjectURL(file), colorId: UNTAGGED_PHOTO_COLOR })
       }
       setPendingPhotos((current) => [...current, ...prepared])
     } catch (cause) {
@@ -374,12 +380,12 @@ export function WishlistForm({
     setPhotoError(null)
   }
 
-  function setPhotoColor(photoId: string, colorFamily: string | null) {
+  function setPhotoColor(photoId: string, colorId: string | null) {
     const pending = pendingPhotos.find((photo) => photo.id === photoId)
     if (pending) {
-      setPendingPhotos((current) => current.map((photo) => photo.id === photoId ? { ...photo, colorFamily } : photo))
+      setPendingPhotos((current) => current.map((photo) => photo.id === photoId ? { ...photo, colorId } : photo))
     } else {
-      setPhotoColorById((current) => ({ ...current, [photoId]: colorFamily }))
+      setPhotoColorById((current) => ({ ...current, [photoId]: colorId }))
     }
   }
 
@@ -409,9 +415,9 @@ export function WishlistForm({
     }
     onSubmit({
       ...result.input,
-      photosToAdd: pendingPhotos.map(({ file, colorFamily }) => ({ file, colorFamily })),
+      photosToAdd: pendingPhotos.map(({ file, colorId }) => ({ file, colorFamily: colorNameOf(colorId) })),
       photoIdsToRemove: removedPhotoIds,
-      photoColorAssignments: existingPhotos.map((photo) => ({ photoId: photo.id, colorFamily: photoColorById[photo.id] ?? null })),
+      photoColorAssignments: existingPhotos.map((photo) => ({ photoId: photo.id, colorFamily: colorNameOf(photoColorById[photo.id]) })),
     })
   }
 
@@ -449,15 +455,15 @@ export function WishlistForm({
             {visiblePhotos.length > 0 ? <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">{visiblePhotos.map((photo, index) => {
               const url = 'file' in photo ? photo.url : photo.url ?? photo.path
               const name = 'file' in photo ? photo.file.name : `商品圖片 ${index + 1}`
-              const colorValue = photo.colorFamily ?? (photo.id in photoColorById ? photoColorById[photo.id] : null)
-              const colorOptions = [{ value: '__none__', label: '未標顏色' }, ...draft.colors.map((color) => ({ value: color.family, label: color.family }))]
+              const colorValue = 'file' in photo ? photo.colorId : photoColorById[photo.id] ?? null
+              const colorOptions = [{ value: UNTAGGED_PHOTO_COLOR, label: '未標顏色' }, { value: '__all__', label: '全色' }, ...draft.colors.map((color) => ({ value: color.id, label: color.name }))]
               return <div key={photo.id} className="min-w-0 space-y-1.5">
                 <div className="relative aspect-square overflow-hidden rounded-sm border border-line bg-paper">
                   {url ? <img src={url} alt={`${name}${index === 0 ? '，封面' : ''}`} className="size-full object-cover" loading="lazy" /> : <div className="flex size-full items-center justify-center text-xs text-ink-3">無法預覽</div>}
                   {index === 0 && <span className="absolute bottom-1 left-1 rounded-full bg-ink px-2 py-0.5 text-[10px] text-paper">封面</span>}
                   <button type="button" aria-label={`移除${name}`} onClick={() => removePhoto(photo.id)} className="absolute right-1 top-1 flex size-9 items-center justify-center rounded-full bg-card/95 text-ink"><Icon name="x" size={15} /></button>
                 </div>
-                <Select label={`${name}對應顏色`} value={colorValue ?? '__none__'} options={colorOptions} onChange={(value) => setPhotoColor(photo.id, value === '__none__' ? null : value)} placeholder="圖片顏色" triggerClassName="h-9 w-full rounded-sm border border-line bg-card px-2 text-[11px]" />
+                <Select label={`${name}對應顏色`} value={colorValue ?? '__all__'} options={colorOptions} onChange={(value) => setPhotoColor(photo.id, value === '__all__' ? null : value)} placeholder="圖片顏色" triggerClassName="h-9 w-full rounded-sm border border-line bg-card px-2 text-[11px]" />
               </div>
             })}</div> : <p className="m-0 rounded-tile border-[1.5px] border-dashed border-line-strong px-3 py-3 text-xs text-ink-2">可貼上、拖曳或選取商品圖、尺寸表與細節照；每張可標記對應顏色。</p>}
             {photoError && <p role="alert" className="m-0 text-xs text-rose-deep">{photoError}</p>}
@@ -498,6 +504,21 @@ export function WishlistForm({
             </div>
           </details>
 
+          <div className="space-y-2 border-b-[1.5px] border-dashed border-line pb-3">
+            <div className="flex items-center justify-between gap-2"><span className="sr-only">特徵</span><Link to="/me/features" target="_blank" className="ml-auto flex min-h-11 items-center gap-1 text-xs font-medium text-mist-deep">管理特徵<Icon name="link" size={13} /><span className="sr-only">（在新分頁開啟）</span></Link></div>
+            <FeatureTagPicker
+              name={draft.name}
+              definitions={featureDefinitions}
+              value={draft.features}
+              dismissed={draft.featureSuggestionsDismissed}
+              typeKeys={featureTypeIds}
+              onChange={(features) => set('features', features)}
+              onDismissedChange={(dismissed) => set('featureSuggestionsDismissed', dismissed)}
+              onCreate={createFeatureFromPicker}
+              disabled={saving}
+            />
+          </div>
+
           <details className="group border-t-[1.5px] border-dashed border-line py-3">
             <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 marker:hidden [&::-webkit-details-marker]:hidden">
               <span className="text-[13px] font-medium text-ink">也可以當</span>
@@ -518,33 +539,29 @@ export function WishlistForm({
           <section aria-labelledby={id('colors-title')} className="space-y-3 border-t-[1.5px] border-dashed border-line py-4">
             <div className="flex items-baseline gap-2"><h3 id={id('colors-title')} className="m-0 font-hd text-lg">考慮中的顏色</h3><span className="text-xs text-ink-2">可複選</span></div>
             {draft.colors.length > 0 && <div className="space-y-2">
-              {draft.colors.map((color, colorIndex) => {
-                const photoCount = visiblePhotos.filter((photo) => (photo.id in photoColorById ? photoColorById[photo.id] : photo.colorFamily ?? null) === color.family).length
-                return <div key={colorIndex} className="flex min-w-0 flex-wrap items-center gap-2 rounded-tile bg-paper p-2">
-                  <ColorPicker
-                    value={{ name: color.family || '其他', family: color.family || '其他', hex: resolvedColor(color), source: color.source ?? 'pick' }}
-                    photos={visiblePhotos.flatMap((photo) => photo.url ? [{ id: photo.id, src: photo.url, alt: `${draft.name || '商品'}照片`, label: photo.colorFamily ? `${photo.colorFamily}照片` : undefined }] : [])}
-                    label={`改${color.family || '顏色'}顏色`}
-                    onChange={(picked) => applyPickedColor(colorIndex, picked)}
-                    className="shrink-0"
-                  />
-                  {editingColorIndex === colorIndex ? <input autoFocus value={color.family} onChange={(event) => renameColor(color.family, event.target.value)} onBlur={() => setEditingColorIndex(null)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); setEditingColorIndex(null) } else if (event.key === 'Escape') setEditingColorIndex(null) }} aria-label="自訂顏色名稱" placeholder="顏色名稱" className="h-11 w-24 min-w-0 rounded-sm border border-line bg-card px-2 text-sm font-medium text-ink" /> : <button type="button" onClick={() => setEditingColorIndex(colorIndex)} aria-label={`編輯${color.family || '顏色'}名稱`} className="h-11 min-w-12 rounded-sm px-1 text-left text-sm font-medium text-ink hover:bg-card focus-visible:outline-2 focus-visible:outline-mist-deep">{color.family || '命名顏色'}</button>}
-                  <span className="min-w-0 flex-1 text-xs text-ink-2">{color.source === 'photo' ? '照片取色・' : ''}{photoCount ? `${photoCount} 張圖片` : ''}</span>
-                  <button type="button" aria-pressed={!!color.favorite} aria-label={`${color.favorite ? '取消' : '設為'}${color.family}最想要的顏色`} onClick={() => toggleFavoriteColor(colorIndex)} className={`min-h-11 rounded-btn border-[1.5px] px-2 text-[11px] font-medium ${color.favorite ? 'border-oat-edge bg-oat-soft text-oat-ink' : 'border-dashed border-line-strong bg-card text-ink-2'}`}>{color.favorite ? '★ 最想要' : '設為最想要'}</button>
-                  <button type="button" aria-label={`移除${color.family}`} onClick={() => toggleColorFamily(color.family)} className="flex size-11 items-center justify-center rounded-btn text-ink-2 hover:bg-tile"><Icon name="x" size={16} /></button>
-                </div>
+              {draft.colors.map((color) => {
+                const photoCount = visiblePhotos.filter((photo) => ('file' in photo ? photo.colorId : photoColorById[photo.id] ?? null) === color.id).length
+                return <ColorRow
+                  key={color.id}
+                  color={color}
+                  photoCount={photoCount}
+                  photos={visiblePhotos.flatMap((photo) => photo.url ? [{ id: photo.id, src: photo.url, alt: `${draft.name || '商品'}照片`, label: (() => { const name = photoColorLabel(colorNameOf('file' in photo ? photo.colorId : photoColorById[photo.id])); return name ? `${name}照片` : undefined })() }] : [])}
+                  onRename={(name) => set('colors', renameColor(draft.colors, color.id, name))}
+                  onPick={(picked) => set('colors', applyColorPick(draft.colors, color.id, picked))}
+                  onFamily={(family) => set('colors', setColorFamily(draft.colors, color.id, family))}
+                  onFavorite={() => set('colors', toggleFavoriteColor(draft.colors, color.id))}
+                  onRemove={() => removeColorById(color.id)}
+                />
               })}
             </div>}
-            <div role="group" aria-label="從色系新增顏色" className="flex flex-wrap gap-2">
-              {COLOR_FAMILIES.map((color) => {
-                const selected = draft.colors.some((entry) => entry.family === color.name)
-                return <button key={color.name} type="button" aria-label={`${selected ? '移除' : '加入'}${color.name}色`} aria-pressed={selected} title={color.name} onClick={() => toggleColorFamily(color.name)} className={`flex size-11 items-center justify-center rounded-sm ${selected ? 'ring-2 ring-ink ring-offset-2 ring-offset-card' : ''}`}>
-                  <span className="size-8 rounded-sm border border-ink/15" style={{ background: color.hex }} />
-                </button>
-              })}
-            </div>
+            <ColorPicker
+              trigger="add"
+              value={{ name: '燕麥', family: '白米', hex: '#D9CBB3', source: 'palette' }}
+              photos={visiblePhotos.flatMap((photo) => photo.url ? [{ id: photo.id, src: photo.url, alt: `${draft.name || '商品'}照片`, label: (() => { const name = photoColorLabel(colorNameOf('file' in photo ? photo.colorId : photoColorById[photo.id])); return name ? `${name}照片` : undefined })() }] : [])}
+              onChange={(picked) => set('colors', addColor(draft.colors, createColor({ hex: picked.hex, source: picked.source, name: picked.name, nameCustom: picked.nameCustom })))}
+            />
             {errors.colors && <p role="alert" className="m-0 text-xs text-rose-deep">{errors.colors}</p>}
-            <p className="m-0 text-xs leading-5 text-ink-2">買的時候再選定顏色；選多色會各建立一件衣物。圖片也可標記對應顏色。</p>
+            <p className="m-0 text-xs leading-5 text-ink-2">名稱可以直接改成官網的叫法，改名不會動到顏色；要換顏色就點色塊（只改那一色）。「歸類」用來篩選和比對重複。買的時候再選定哪一色；兩色都買，會各建立一件衣物。</p>
           </section>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -670,4 +687,75 @@ export function WishlistForm({
       </form>
     </div>
   )
+}
+
+/**
+ * B7.1 顏色列（B22 ⑤）：色塊｜名稱輸入框＋「來源・歸類 X ▾」｜★／☆｜×。
+ * 名稱輸入框是唯一一份名稱；建議名直接當預設文字，改字就變自訂名，清空回到建議名。
+ */
+function ColorRow({ color, photoCount, photos, onRename, onPick, onFamily, onFavorite, onRemove }: {
+  color: WishlistColor
+  photoCount: number
+  photos: { id: string; src: string; alt?: string; label?: string }[]
+  onRename: (name: string) => void
+  onPick: (picked: { hex: string; source: WishlistColor['source']; name: string; nameCustom?: boolean }) => void
+  onFamily: (family: string) => void
+  onFavorite: () => void
+  onRemove: () => void
+}) {
+  const inputId = useId()
+  // 編輯中的文字；清空時保持空白，離開後才顯示回建議名
+  const [nameText, setNameText] = useState<string | null>(null)
+  const [familyOpen, setFamilyOpen] = useState(false)
+  const familyRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!familyOpen) return
+    const close = (event: MouseEvent) => { if (!familyRef.current?.contains(event.target as Node)) setFamilyOpen(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [familyOpen])
+  const label = color.name || '這一色'
+  return <div className="wish-color-row">
+    <ColorPicker
+      value={{ name: color.name, family: color.family, hex: color.hex, source: color.source }}
+      title={`改「${label}」這一色`}
+      currentName={color.name}
+      nameFollows={!color.nameCustom}
+      photos={photos}
+      onChange={(picked) => onPick({ hex: picked.hex, source: picked.source, name: picked.name, nameCustom: picked.nameCustom })}
+    />
+    <div className="flex min-w-0 flex-1 flex-col gap-px">
+      <input
+        id={inputId}
+        value={nameText ?? color.name}
+        placeholder={color.name}
+        onChange={(event) => { const next = event.target.value; setNameText(next); if (color.nameCustom || next !== color.name) onRename(next) }}
+        onBlur={() => setNameText(null)}
+        onKeyDown={(event) => {
+          // Enter 只確認顏色名稱，不送出整張表單；輸入法選字中的 Enter 交給輸入法
+          if (event.key !== 'Enter' || event.nativeEvent.isComposing) return
+          event.preventDefault()
+          event.currentTarget.blur()
+        }}
+        enterKeyHint="done"
+        aria-label={color.nameCustom ? '顏色名稱' : `顏色名稱（建議：${color.name}）`}
+        aria-describedby={`${inputId}-meta`}
+        maxLength={30}
+        className="wish-color-row__name"
+      />
+      <span id={`${inputId}-meta`} className="flex flex-wrap items-center gap-1 text-[11.5px] text-ink-2">
+        <span>{color.source === 'photo' ? '照片取色' : '色票'}{photoCount ? `・${photoCount} 張圖片` : ''}</span>
+        <span aria-hidden="true">・</span>
+        <span ref={familyRef} className="relative" onKeyDown={(event) => { if (event.key === 'Escape' && familyOpen) { event.stopPropagation(); setFamilyOpen(false) } }}>
+          <button type="button" aria-expanded={familyOpen} aria-label={`歸類：${color.family}，點了可以改`} onClick={() => setFamilyOpen((value) => !value)} className="wish-color-row__family">歸類 {color.family} ▾</button>
+          {familyOpen && <span role="group" aria-label="選擇歸類" className="wish-color-row__family-menu">
+            {COLOR_FAMILY_NAMES.map((family) => <button key={family} type="button" aria-pressed={family === color.family} onClick={() => { onFamily(family); setFamilyOpen(false) }}>{family}</button>)}
+          </span>}
+        </span>
+        {!color.nameCustom && <span className="pl-1 text-mist-ink">建議名，可直接改</span>}
+      </span>
+    </div>
+    <button type="button" aria-pressed={color.favorite} aria-label={color.favorite ? `「${label}」是最想要（再按一次取消）` : `把「${label}」設為最想要`} onClick={onFavorite} className={`wish-color-row__fav ${color.favorite ? 'is-on' : ''}`}>{color.favorite ? '★ 最想要' : '☆'}</button>
+    <button type="button" aria-label={`移除「${label}」`} onClick={onRemove} className="flex size-11 flex-none items-center justify-center rounded-btn text-ink-2 hover:bg-tile"><Icon name="x" size={16} /></button>
+  </div>
 }

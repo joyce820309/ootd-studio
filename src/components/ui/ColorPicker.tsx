@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { Icon } from '@/components/ui/Icon'
-import { GARMENT_COLORS } from '@/lib/colors'
+import { GARMENT_COLORS, nearestGarmentColor } from '@/lib/colors'
+import type { WishColorSource } from '@/types'
 import './ColorPicker.css'
 
 export interface ColorPickerValue {
-  /** 色票名稱（自由輸入 HEX 時仍保留最接近的色名） */
+  /** 色票名稱（自由輸入 HEX 或照片取色時為最接近的色票名，當作建議名） */
   name: string
   /** 色系群組，例如「白米」、「灰黑」 */
   family: string
   /** 實際顯示用 HEX */
   hex: string
-  source: 'photo' | 'pick'
+  source: WishColorSource
+  /** 套用時回傳：true＝使用者自訂的名稱，之後重新取色不覆蓋 */
+  nameCustom?: boolean
 }
 
 export interface ColorPickerPhoto {
@@ -21,17 +24,25 @@ export interface ColorPickerPhoto {
 }
 
 interface ColorPickerProps {
+  /** 目前這一色；新增模式（trigger="add"）時是預設起點 */
   value: ColorPickerValue
   onChange: (value: ColorPickerValue) => void
   /** 僅可傳入這件衣物的照片，避免對非本人衣物照片取色。 */
   photos?: ColorPickerPhoto[]
-  label?: string
+  /** 觸發鈕：swatch＝44px 色塊（改這一色）；add＝「＋ 新增顏色」 */
+  trigger?: 'swatch' | 'add'
+  /** 選色器標題，例如「改『綠』這一色」 */
+  title?: string
+  /** 這一列目前的名稱，用來說明套用後名稱會不會跟著換 */
+  currentName?: string
+  /** true＝目前是建議名，套用後名稱一起換；false＝自訂名，不會被換掉 */
+  nameFollows?: boolean
   disabled?: boolean
   className?: string
 }
 
 interface PickerColor extends ColorPickerValue {
-  source: 'pick'
+  source: 'palette'
 }
 
 interface RecentColor {
@@ -69,7 +80,7 @@ const PICKER_COLORS: PickerColor[] = GARMENT_COLORS.map((color) => ({
   name: color.name,
   family: COLOR_FAMILY[color.name] ?? '其他',
   hex: color.hex,
-  source: 'pick',
+  source: 'palette',
 }))
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
@@ -84,32 +95,9 @@ function normalizeRecent(value: unknown): RecentColor[] {
     .slice(0, RECENT_LIMIT)
 }
 
-function rgbFromHex(hex: string) {
-  return [1, 3, 5].map((index) => Number.parseInt(hex.slice(index, index + 2), 16) / 255)
-}
-
-function linearize(channel: number) {
-  return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
-}
-
-/** sRGB 轉 OKLab，讓不同色相的色差比較符合人眼感受。 */
-function toOklab(hex: string): [number, number, number] {
-  const [r8, g8, b8] = rgbFromHex(hex).map(linearize)
-  const l = Math.cbrt(0.4122214708 * r8 + 0.5363325363 * g8 + 0.0514459929 * b8)
-  const m = Math.cbrt(0.2119034982 * r8 + 0.6806995451 * g8 + 0.1073969566 * b8)
-  const s = Math.cbrt(0.0883024619 * r8 + 0.2817188376 * g8 + 0.6299787005 * b8)
-  return [0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s, 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s]
-}
-
 function nearestColor(hex: string) {
-  const target = toOklab(hex)
-  return PICKER_COLORS
-    .filter((color) => color.name !== '多色' && color.name !== '其他')
-    .map((color) => {
-      const lab = toOklab(color.hex)
-      return { color, distance: Math.hypot(target[0] - lab[0], target[1] - lab[1], target[2] - lab[2]) }
-    })
-    .sort((a, b) => a.distance - b.distance)[0]
+  const nearest = nearestGarmentColor(hex)
+  return { color: { name: nearest.name, family: nearest.family, hex: nearest.hex }, distance: nearest.distance }
 }
 
 function closenessLabel(distance: number) {
@@ -180,8 +168,11 @@ function cssPosition(point: ImagePoint | null): CSSProperties | undefined {
   return point ? { left: `${point.left}px`, top: `${point.top}px` } : undefined
 }
 
-/** B22 自訂選色器：按色名挑選，或在本件衣物照片上取色。 */
-export function ColorPicker({ value, onChange, photos = [], label = '改顏色', disabled = false, className = '' }: ColorPickerProps) {
+/**
+ * B22 自訂選色器：按色名挑選，或在本件衣物照片上取色。
+ * 一次只綁定一色（或新增一色）；只回傳色碼與建議名，名稱要不要跟著換由呼叫端依 name_custom 決定。
+ */
+export function ColorPicker({ value, onChange, photos = [], trigger = 'swatch', title, currentName, nameFollows = true, disabled = false, className = '' }: ColorPickerProps) {
   const id = useId()
   const ids = { title: `${id}-title`, tabNames: `${id}-tab-names`, tabPhoto: `${id}-tab-photo`, panelNames: `${id}-panel-names`, panelPhoto: `${id}-panel-photo`, hex: `${id}-hex`, hexHelp: `${id}-hex-help` }
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -192,6 +183,8 @@ export function ColorPicker({ value, onChange, photos = [], label = '改顏色',
   const [tab, setTab] = useState<'names' | 'photo'>('names')
   const [draft, setDraft] = useState<ColorPickerValue>(value)
   const [hexText, setHexText] = useState(value.hex)
+  // null＝名稱跟著建議名；有字串＝使用者改過（或原本就是自訂名），重新取色不覆蓋
+  const [nameDraft, setNameDraft] = useState<string | null>(null)
   const [activePhotoId, setActivePhotoId] = useState(photos[0]?.id ?? '')
   const [recent, setRecent] = useState<RecentColor[]>(() => {
     if (typeof window === 'undefined') return []
@@ -246,7 +239,10 @@ export function ColorPicker({ value, onChange, photos = [], label = '改顏色',
 
   function handleHexChange(next: string) {
     setHexText(next)
-    if (validHex(next)) setDraft((current) => ({ ...current, hex: next.toUpperCase(), source: 'pick' }))
+    if (validHex(next)) {
+      const nearest = nearestColor(next)
+      setDraft({ name: nearest.color.name, family: nearest.color.family, hex: next.toUpperCase(), source: 'palette' })
+    }
   }
 
   function changeTab(next: 'names' | 'photo') {
@@ -267,6 +263,7 @@ export function ColorPicker({ value, onChange, photos = [], label = '改顏色',
     setTab('names')
     setDraft({ ...value })
     setHexText(value.hex)
+    setNameDraft(trigger === 'swatch' && !nameFollows ? currentName ?? value.name : null)
     setActivePhotoId(photos[0]?.id ?? '')
     setPoint(null)
     setSampledHex(null)
@@ -343,19 +340,20 @@ export function ColorPicker({ value, onChange, photos = [], label = '改顏色',
 
   return (
     <>
-      <button
+      {trigger === 'add' ? <button ref={triggerRef} type="button" aria-haspopup="dialog" aria-expanded={open} disabled={disabled} onClick={openPicker} className={`color-picker__add ${className}`}>
+        <Icon name="plus" size={16} />新增顏色
+      </button> : <button
         ref={triggerRef}
         type="button"
-        aria-label={`${label}：${value.name}，${value.hex}`}
+        aria-label={`${title ?? '改這一色'}（目前 ${value.hex}）`}
         aria-haspopup="dialog"
         aria-expanded={open}
         disabled={disabled}
         onClick={openPicker}
-        className={`color-picker__trigger ${disabled ? 'is-disabled' : ''} ${className}`}
+        className={`color-picker__swatch-trigger ${open ? 'is-open' : ''} ${disabled ? 'is-disabled' : ''} ${className}`}
       >
-        <span aria-hidden="true" className="color-picker__trigger-swatch" style={{ backgroundColor: value.hex }} />
-        <span className="color-picker__trigger-label">{value.name}</span>
-      </button>
+        <span aria-hidden="true" style={{ backgroundColor: value.hex }} />
+      </button>}
 
       <dialog
         ref={dialogRef}
@@ -366,7 +364,7 @@ export function ColorPicker({ value, onChange, photos = [], label = '改顏色',
         className="color-picker__dialog"
       >
         <header className="color-picker__header">
-          <h2 id={ids.title} className="color-picker__title">選擇顏色</h2>
+          <h2 id={ids.title} className="color-picker__title">{title ?? (trigger === 'add' ? '新增一色' : '選擇顏色')}<span className="color-picker__subtitle">{trigger === 'add' ? '加在最後，不影響其他顏色' : '只動這一列，其他顏色不受影響'}</span></h2>
           <button type="button" onClick={close} aria-label="關閉選色器" className="color-picker__close"><Icon name="x" size={18} /></button>
         </header>
 
@@ -376,7 +374,7 @@ export function ColorPicker({ value, onChange, photos = [], label = '改顏色',
         </div>
 
         <section id={ids.panelNames} role="tabpanel" aria-labelledby={ids.tabNames} hidden={tab !== 'names'} className="color-picker__panel color-picker__panel--names">
-            {recent.length > 0 && <ColorRow label="最近" colors={recent.map((entry) => ({ ...entry, source: 'pick' as const }))} selected={draft} onSelect={chooseNamedColor} />}
+            {recent.length > 0 && <ColorRow label="最近" colors={recent.map((entry) => ({ ...entry, source: 'palette' as const }))} selected={draft} onSelect={chooseNamedColor} />}
             {groupedColors.map((group) => <ColorRow key={group.family} label={group.family} colors={group.colors} selected={draft} onSelect={chooseNamedColor} />)}
             <div className="color-picker__selection">
               <span aria-hidden="true" className="color-picker__selection-swatch" style={{ backgroundColor: validHex(hexText) ? hexText : draft.hex }} />
@@ -403,24 +401,43 @@ export function ColorPicker({ value, onChange, photos = [], label = '改顏色',
                 {sampleError && <p role="alert" className="color-picker__error">{sampleError}</p>}
                 {sampledHex && closest && <div className="color-picker__sample-result" aria-live="polite">
                   <span aria-hidden="true" className="color-picker__result-swatch" style={{ backgroundColor: sampledHex }} />
-                  <span className="color-picker__result-copy"><span>取到 <b className="font-num">{sampledHex}</b></span><span>最接近色名：<b>{closest.color.name}</b>（{closenessLabel(closest.distance)}）</span></span>
+                  <span className="color-picker__result-copy"><span>歸類：<b>{closest.color.family}</b>・建議名稱「<b>{closest.color.name}</b>」</span><span>取到 <span className="font-num">{sampledHex}</span>，跟色票{closenessLabel(closest.distance)}</span></span>
                 </div>}
               </>
             )}
         </section>
 
         <footer className="color-picker__footer">
-          {tab === 'photo' && sampledHex && closest ? (
-            <>
-              <button type="button" onClick={() => applyColor({ name: closest.color.name, family: closest.color.family, hex: closest.color.hex, source: 'pick' })} className="color-picker__text-button">只用色名</button>
-              <button type="button" onClick={() => applyColor({ name: closest.color.name, family: closest.color.family, hex: sampledHex, source: 'photo' })} className="color-picker__apply-button">套用「{closest.color.name} {sampledHex}」</button>
+          {(() => {
+            const fromPhoto = tab === 'photo'
+            const next: ColorPickerValue | null = fromPhoto
+              ? (sampledHex && closest ? { name: closest.color.name, family: closest.color.family, hex: sampledHex, source: 'photo' } : null)
+              : (validHex(hexText) ? { ...draft, hex: hexText.toUpperCase(), source: 'palette' } : null)
+            const typedName = nameDraft?.trim() ?? ''
+            const nameCustom = !!next && !!typedName && typedName !== next.name
+            const result = next ? { ...next, name: nameCustom ? typedName : next.name, nameCustom } : null
+            const nameNote = nameCustom ? '用你改的名稱，重新取色不會換掉' : '建議名，可直接改'
+            return <>
+              <span className="color-picker__compare">
+                {trigger !== 'add' && <><span aria-hidden="true" className="color-picker__footer-swatch" style={{ backgroundColor: value.hex }} /><Icon name="next" size={14} className="flex-none text-ink-3" /></>}
+                <span aria-hidden="true" className="color-picker__footer-swatch" style={{ backgroundColor: next?.hex ?? value.hex }} />
+                <span className="color-picker__compare-copy">
+                  {next ? <input
+                    value={nameDraft ?? next.name}
+                    placeholder={next.name}
+                    onChange={(event) => setNameDraft(event.target.value)}
+                    aria-label={`顏色名稱（建議：${next.name}）`}
+                    maxLength={30}
+                    autoComplete="off"
+                    className="color-picker__name-input"
+                  /> : <b>還沒選</b>}
+                  <span>{next ? nameNote : fromPhoto ? '在照片上點一下取色' : '請輸入正確的 HEX'}</span>
+                </span>
+              </span>
+              <button type="button" onClick={close} className="color-picker__text-button">取消</button>
+              <button type="button" disabled={!result} onClick={() => result && applyColor(result)} className="color-picker__apply-button">{fromPhoto ? '套用這個顏色' : '套用'}</button>
             </>
-          ) : (
-            <>
-              <span className="color-picker__footer-current"><span aria-hidden="true" className="color-picker__footer-swatch" style={{ backgroundColor: validHex(hexText) ? hexText : draft.hex }} />{draft.name} <span className="font-num">{validHex(hexText) ? hexText.toUpperCase() : draft.hex}</span></span>
-              <button type="button" disabled={!validHex(hexText)} onClick={() => applyColor({ ...draft, hex: hexText.toUpperCase(), source: 'pick' })} className="color-picker__apply-button">套用顏色</button>
-            </>
-          )}
+          })()}
         </footer>
       </dialog>
     </>

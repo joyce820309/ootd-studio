@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>元件：照片顏色標籤</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.frame{position:relative;border-radius:14px}
+.frame .img{position:absolute;inset:0;border-radius:14px;overflow:hidden}
+.frame svg.cl{position:absolute;left:20%;top:10%;width:60%;height:78%}
+.wt{position:absolute;display:flex;align-items:center;justify-content:center;gap:7px;height:34px;padding:0 22px;font:400 18px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;white-space:nowrap;z-index:2}
+.wt::before{content:"";position:absolute;inset:0;background:var(--tc);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.wt span,.wt i{position:relative;z-index:1}
+.wt i{width:11px;height:11px;border-radius:50%;flex:none;box-shadow:0 0 0 1.5px rgba(255,252,246,.9)}
+.cap{margin:0;font-size:12.5px;line-height:1.75;color:#5A4A3C}
+.box{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:14px;background:#FFFCF6;box-shadow:inset 0 0 0 1.5px #EADCC6}
+.pick{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer}
+.pick[aria-pressed="true"]{border-color:#3B2F25;box-shadow:inset 0 0 0 1px #3B2F25}
+.pick b{width:26px;height:12px;border-radius:2px}
+.page{position:relative;border-radius:18px;background:#FFFCF6;box-shadow:inset 0 0 0 1.5px #EADCC6}
+</style>
+</helmet>
+<div style="width:1440px;min-height:1560px;box-sizing:border-box;padding:48px 64px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;display:flex;flex-direction:column;gap:28px">
+  <header style="display:flex;align-items:flex-end;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span class="lbl" style="background:#A9C6CF;transform:rotate(-2deg);align-self:flex-start">元件</span>
+      <h1 class="hd" style="margin:0;font-size:36px">照片顏色標籤 PhotoColorTag</h1>
+    </div>
+    <p class="cap" style="margin:0 0 4px auto;max-width:640px;font-size:13px">像把照片貼進手帳：一段半透明紙膠帶，一半壓在照片上、一半貼在本子上，上面隨手寫顏色名。直邊、不做鋸齒；顏色是明度高的可愛色，每件商品自動挑一色、角度和位置也略有不同，看起來不死板。檔案：<span class="num">components/ui/PhotoColorTag.tsx</span></p>
+  </header>
+
+  <section aria-labelledby="s1" style="display:grid;grid-template-columns:620px 1fr;gap:36px;align-items:start">
+    <div class="page" style="padding:40px 56px 56px;display:flex;justify-content:center">
+      <div class="frame" style="width:420px;aspect-ratio:4/5">
+        <div class="img" style="background:repeating-linear-gradient(90deg,#D8CBB6 0 18px,#CDBFA8 18px 36px)"><svg class="cl" viewBox="0 0 100 100" aria-hidden="true"><path d="M30 18L42 10Q50 16 58 10L70 18L86 34L78 44L70 38V92H30V38L22 44L14 34Z" fill="#CFC6B8"></path></svg></div>
+        <button type="button" class="ibtn" aria-label="放大看" style="position:absolute;right:12px;top:12px;background:rgba(255,252,246,.92);color:#3B2F25;z-index:3"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-4.5-4.5M11 8v6M8 11h6"></path></svg></button>
+        <span class="num" style="position:absolute;left:14px;bottom:16px;height:26px;padding:0 10px;border-radius:999px;background:rgba(59,47,37,.7);color:#FBF4E8;font-size:12px;display:flex;align-items:center;z-index:3">7 / 7</span>
+        <span class="wt" aria-hidden="true" style="--tc:{{tc}};{{pos}}"><i style="background:#CFC6B8"></i><span>灰杏</span></span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <h2 id="s1" class="hd" style="margin:0;font-size:22px">試試看（可點）</h2>
+      <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700">膠帶顏色</span><div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{colors}}" as="c" hint-placeholder-count="5"><button type="button" class="pick" aria-pressed="{{c.on}}" onClick="{{c.go}}"><b style="background:{{c.v}}"></b>{{c.n}}</button></sc-for></div></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700">貼的位置</span><div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{places}}" as="p" hint-placeholder-count="3"><button type="button" class="pick" aria-pressed="{{p.on}}" onClick="{{p.go}}">{{p.n}}</button></sc-for></div></div>
+      <div class="box"><b style="font-size:14px">膠帶色票（半透明、平光、直邊，跟「我的筆記」便利貼上的膠帶同一種）</b>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:4px">
+          <sc-for list="{{colors}}" as="c" hint-placeholder-count="5"><span style="display:flex;flex-direction:column;gap:4px;font-size:12px"><span style="height:26px;border-radius:2px;background:{{c.v}}"></span><b style="font-weight:500">{{c.n}}</b><span class="num" style="font-size:11px;color:#5A4A3C">{{c.v}}</span></span></sc-for>
+        </div>
+      </div>
+      <div class="box"><b style="font-size:14px">怎麼決定顏色、角度、位置</b><p class="cap">用商品（或衣物）的 id 算出固定的亂數：同一件每次打開都長一樣，不同件看起來各有不同。顏色從 5 色裡挑；角度在 −8° ~ −3° 或 3° ~ 7°；位置在三種裡挑。同一件的每張照片用同一捲膠帶顏色，只是角度微調。</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="s2" style="display:flex;flex-direction:column;gap:14px">
+    <h2 id="s2" class="hd" style="margin:0;font-size:22px">不同照片、不同膠帶</h2>
+    <div class="page" style="padding:32px 40px 52px;display:grid;grid-template-columns:repeat(4,1fr);gap:44px">
+      <sc-for list="{{samples}}" as="s" hint-placeholder-count="4">
+        <div class="frame" style="aspect-ratio:4/5">
+          <div class="img" style="background:{{s.bg}}"><svg class="cl" viewBox="0 0 100 100" aria-hidden="true"><path d="M30 18L42 10Q50 16 58 10L70 18L86 34L78 44L70 38V92H30V38L22 44L14 34Z" fill="{{s.fill}}"></path></svg></div>
+          <span class="wt" aria-hidden="true" style="--tc:{{s.tc}};{{s.pos}};font-size:16px;height:30px;padding:0 14px"><i style="background:{{s.fill}}"></i><span>{{s.n}}</span></span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+    <div class="box"><b style="font-size:14px">版面要留邊</b><p class="cap">膠帶有一半在照片外面，所以照片外框不能 overflow:hidden（圓角裁切放在內層 .img），照片四周要留至少 24 px 空白給膠帶。照片沒有標顏色就不貼。</p></div>
+    <div class="box"><b style="font-size:14px">字</b><p class="cap">霞鶩漫黑 18 px（手機、小卡片 16 px），#3B2F25。前面小色點用那個顏色的 hex，加紙色細外圈。膠帶本身半透明，字不透明。</p></div>
+    <div class="box"><b style="font-size:14px">手機</b><p class="cap">照片滿版、左右沒有空間時，只用「下緣」位置：膠帶一半壓在照片下緣、一半貼到下面的頁面上。縮圖不貼膠帶，右下角放小色點。</p></div>
+    <div class="box"><b style="font-size:14px">無障礙</b><p class="cap">膠帶 aria-hidden；主圖 alt 寫「灰杏・第 7 張」。使用者開「減少動態」時不影響（膠帶本來就是靜態）。</p></div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1560}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { c: 0, p: 0 }; }
+  renderVals() {
+    const C = [['燕麥黃', 'rgba(240,196,118,.62)'], ['霧藍', 'rgba(169,198,207,.62)'], ['鼠尾草', 'rgba(183,203,176,.65)'], ['蜜桃粉', 'rgba(240,184,170,.6)'], ['薰衣草', 'rgba(201,187,217,.65)']];
+    const P = [
+      ['右下角斜貼', 'right:-30px;bottom:34px;transform:rotate(-7deg)'],
+      ['壓在下緣', 'right:40px;bottom:-16px;transform:rotate(4deg)'],
+      ['右緣直貼', 'right:-44px;bottom:110px;transform:rotate(-82deg)']
+    ];
+    const st = this.state;
+    const S = [
+      ['#ECE6DE', '#E3D6C2', '米杏', 0, 'right:-26px;bottom:26px;transform:rotate(-6deg)'],
+      ['#4A4642', '#2B2724', '黑', 1, 'right:28px;bottom:-14px;transform:rotate(3deg)'],
+      ['repeating-linear-gradient(45deg,#C9B79C 0 12px,#8E7A64 12px 24px)', '#8C3B5E', '紫紅', 3, 'right:-24px;bottom:30px;transform:rotate(6deg)'],
+      ['#E6EEE2', '#8E9A7C', '黃瓜綠', 4, 'right:22px;bottom:-14px;transform:rotate(-4deg)']
+    ];
+    return {
+      tc: C[st.c][1], pos: P[st.p][1],
+      colors: C.map(([n, v], k) => ({ n, v, on: k === st.c ? 'true' : 'false', go: () => this.setState({ c: k }) })),
+      places: P.map(([n], k) => ({ n, on: k === st.p ? 'true' : 'false', go: () => this.setState({ p: k }) })),
+      samples: S.map(([bg, fill, n, ci, pos]) => ({ bg, fill, n, tc: C[ci][1], pos }))
+    };
+  }
+}
+</script>
+</body>
+</html>

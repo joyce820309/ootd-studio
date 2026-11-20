@@ -71,14 +71,17 @@ a{color:#3E6270}
 .ft[data-s="sug"]{border:1.5px dashed #3E6270;background:#EEF4F6;color:#24424D}
 .ft[data-s="on"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
 .why{flex-basis:100%;font-size:12px;line-height:1.6;color:#5A4A3C}
-.ftg{position:fixed;right:32px;bottom:32px;z-index:25;display:inline-flex;align-items:center;gap:10px;height:50px;padding:0 18px 0 8px;border-radius:14px;border:1.5px solid #E2B866;background:#F2CF8E;color:#3B2F25;font:500 14px 'Chiron GoRound TC';cursor:pointer;transform:rotate(-2deg);box-shadow:0 2px 0 rgba(59,47,37,.08),0 16px 26px -12px rgba(59,47,37,.5);transition:transform .15s,box-shadow .15s}
-.ftg:hover{transform:rotate(0) translateY(-2px)}
-.ftg[data-open="true"]{background:#FFFCF6;border-color:#3B2F25;transform:rotate(1.5deg)}
-.ftg-tape{position:absolute;left:14px;top:-8px;width:44px;height:15px;background:rgba(169,198,207,.8);transform:rotate(-8deg);box-shadow:0 1px 2px rgba(59,47,37,.1)}
-.ftg-ic{width:32px;height:32px;border-radius:50%;background:#FFFCF6;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1.5px rgba(59,47,37,.15)}
-.ftg[data-open="true"] .ftg-ic{background:#F3E7D4}
-.ftg-ic svg{width:18px;height:18px;fill:none;stroke:#3B2F25;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.ftg-n{min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#3B2F25;color:#FBF4E8;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.fstack{position:fixed;right:24px;bottom:24px;z-index:25;display:flex;flex-direction:column;align-items:center;gap:8px}
+.fa{position:relative;width:44px;height:44px;border-radius:8px;border:1.5px solid #D9C7AC;background:#FFFCF6;color:#3B2F25;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;box-shadow:0 1px 0 rgba(59,47,37,.05),0 10px 20px -10px rgba(59,47,37,.45);transition:border-color .15s,transform .15s}
+.fa svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fa:hover,.fa[data-v="hover"]{border-color:#3B2F25;transform:translateY(-1px)}
+.fa[data-v="focus"]{outline:2.5px solid #3E6270;outline-offset:3px}
+.fa[data-open="true"]{background:#DCE8EC;border-color:#A9C6CF;color:#24424D}
+.fa.dark{background:#3B2F25;border-color:#3B2F25;color:#F2CF8E}
+.fa .q{position:absolute;right:-6px;top:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:#F2CF8E;color:#3B2F25;font:700 10.5px Nunito;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #FBF4E8}
+.fa .tip{position:absolute;right:54px;top:50%;transform:translateY(-50%);padding:5px 10px;border-radius:8px;background:#3B2F25;color:#FBF4E8;font:500 12px 'Chiron GoRound TC';white-space:nowrap;pointer-events:none;opacity:0}
+.fa:hover .tip,.fa[data-v="hover"] .tip,.fa[data-v="focus"] .tip{opacity:1}
+
 </style>
 </helmet>
 <div style="position:relative;width:100%;min-height:2120px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif">
@@ -250,17 +253,17 @@ a{color:#3E6270}
           <b style="font-size:14px">3・開關、順序、收合、空的不顯示</b>
           <p>用 review.css 的 <span class="num">.sw</span> 開關，跟 B8.3 趨勢的「只看早上空腹」同一個。按了立刻生效的設定用開關；B21 Checkbox 留給「選商品」這種多選。</p>
           <p>用 <span class="num">button role="switch" aria-checked</span>，整個文字都可以點。</p>
-          <p>順序：價格（只留售價）→ 商品頁尺寸表 →（尺寸 vs 我的身體）→ 顏色 → 我的筆記 → 材質與版型 → 跟衣櫃 → 購買。某一列所有商品都沒資料就不顯示；整區都空就連標題一起藏。</p><p>收合改到最後面：價格、尺寸表、顏色、筆記一律完整顯示；材質與版型、跟衣櫃、購買預設收起，用右下角懸浮按鈕（B26）一次展開／收起。</p>
+          <p>順序：價格（只留售價）→ 商品頁尺寸表 →（尺寸 vs 我的身體）→ 顏色 → 我的筆記 → 材質與版型 → 跟衣櫃 → 購買。某一列所有商品都沒資料就不顯示；整區都空就連標題一起藏。</p><p>收合改到最後面：價格、尺寸表、顏色、筆記一律完整顯示；材質與版型、跟衣櫃、購買預設收起，用右下角懸浮按鈕（B26：回到頂端、展開／收起、採購籃）一次展開／收起。</p>
         </div>
       </div>
     </section>
   </main>
 
-  <button type="button" class="ftg" data-open="{{ftOpen}}" onClick="{{toggleFold}}" aria-expanded="{{ftOpen}}" aria-label="{{ftAria}}">
-    <span class="ftg-tape" aria-hidden="true"></span>
-    <span class="ftg-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="{{ftPath}}"></path></svg></span>
-    <span>{{ftText}}</span><sc-if value="{{folded}}" hint-placeholder-val="{{ true }}"><span class="num ftg-n">{{foldN}}</span></sc-if>
-  </button>
+  <div class="fstack">
+    <button type="button" class="fa" aria-label="回到頂端"><svg viewBox="0 0 24 24"><path d="M6 5h12M12 19V9M7 13l5-5 5 5"></path></svg><span class="tip">回到頂端</span></button>
+    <sc-if value="{{hasFold}}" hint-placeholder-val="{{ true }}"><button type="button" class="fa" data-open="{{ftOpen}}" onClick="{{toggleFold}}" aria-expanded="{{ftOpen}}" aria-label="{{ftAria}}"><svg viewBox="0 0 24 24"><path d="{{ftPath}}"></path></svg><span class="tip">{{ftAria}}</span></button></sc-if>
+    <button type="button" class="fa dark" aria-label="打開採購籃，2 件"><svg viewBox="0 0 24 24"><path d="M4 8h16l-1.5 11h-13zM9 8V6a3 3 0 0 1 6 0v2"></path></svg><span class="q" aria-hidden="true">2</span><span class="tip">採購籃・2 件</span></button>
+  </div>
 
   <sc-if value="{{dlg}}" hint-placeholder-val="{{ false }}">
     <div aria-hidden="true" onClick="{{cancel}}" style="position:absolute;inset:0;z-index:30;background:rgba(59,47,37,.42)"></div>
@@ -319,7 +322,7 @@ class Component extends DCLogic {
         { label: '', cells: [c('內磨毛很暖，怕太厚'), c('撞色收邊很可愛，毛呢會不會起毛球？'), c('—')] }
       ] },
       { t: '材質與版型', hint: '整列都沒資料就不顯示（這次「洗滌」沒資料，已藏起來）', fold: 1, rows: [
-        { label: '成分', cells: [c('聚酯・內磨毛'), c('聚酯 70%・羊毛 30%'), c('羊毛 50%・尼龍 50%')] },
+        { label: '成分', cells: [c('聚酯纖維 90%・彈性纖維 10%'), c('聚酯纖維 70%・羊毛 30%'), c('羊毛 50%・尼龍 50%')] },
         { label: '版型', same: 1, cells: [c('高腰寬褲'), c('高腰寬褲'), c('高腰寬褲')] },
         { label: '彈性', cells: [c('後鬆緊'), c('後鬆緊'), c('—')] },
         { label: '季節', same: 1, cells: [c('秋冬'), c('秋冬'), c('秋冬')] },
@@ -357,7 +360,7 @@ class Component extends DCLogic {
       compact: st.compact, notCompact: !st.compact, toggleCompact: () => this.setState({ compact: !st.compact }),
       folded: !open && foldList.length > 0, foldN: foldList.length, foldNames: foldList.map(x => x.t).join('、'),
       toggleFold: () => this.setState({ open: !open }),
-      ftOpen: open ? 'true' : 'false', ftText: open ? '收起' : '展開全部', ftAria: open ? '收起後面幾區' : `展開其餘 ${foldList.length} 區`,
+      hasFold: foldList.length > 0, ftOpen: open ? 'true' : 'false', ftText: open ? '收起' : '展開', ftAria: open ? '收起後面幾區' : `展開其餘 ${foldList.length} 區`,
       ftPath: open ? 'M7 17l5-5 5 5M7 11l5-5 5 5' : 'M7 7l5 5 5-5M7 13l5 5 5-5',
       diff: st.diff, diffA: st.diff ? 'true' : 'false', swBg: st.diff ? '#3E6270' : '#D9C7AC', swL: st.diff ? '20px' : '2px',
       toggleDiff: () => this.setState({ diff: !st.diff }),

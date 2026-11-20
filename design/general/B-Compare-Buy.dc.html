@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>比較・準備購買與採購籃</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=LXGW+Marker+Gothic&amp;family=Chiron+GoRound+TC:wght@400;500;700&amp;family=Nunito:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FBF4E8}
+*{font-synthesis-weight:none}
+*{box-sizing:border-box}
+.hd{font-family:'LXGW Marker Gothic','Chiron GoRound TC',sans-serif;font-weight:400}
+.logo{font-family:Fredoka,'Chiron GoRound TC',sans-serif}
+.num{font-family:Nunito,'Chiron GoRound TC',sans-serif;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;font:500 14px 'Chiron GoRound TC',sans-serif;border:1.5px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-p{background:#3B2F25;color:#FBF4E8}
+.btn-o{background:#F2CF8E;color:#3B2F25;border-color:#E2B866}
+.btn-s{background:#FFFCF6;border-color:#D9C7AC;color:#3B2F25}
+.btn-g{background:transparent;color:#5A4A3C}
+.ibtn{width:44px;height:44px;border:0;border-radius:10px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.paper{background:#FFFCF6;border-radius:14px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 12px 24px -14px rgba(59,47,37,.22)}
+.lbl{display:inline-flex;align-items:center;height:32px;padding:0 12px;font:400 17px 'LXGW Marker Gothic','Chiron GoRound TC';color:#3B2F25;border-radius:3px;box-shadow:0 2px 4px rgba(59,47,37,.10)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav-a{display:inline-flex;align-items:center;height:50px;padding:0 12px;border-bottom:4px solid transparent;font:500 15px 'Chiron GoRound TC';color:#5A4A3C;text-decoration:none}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1.5px dashed #EADCC6;font-size:13px}
+dt{color:#5A4A3C;flex:none}
+dd{margin:0;font-weight:500;text-align:right}
+.trow{display:grid;grid-template-columns:64px 52px 88px 64px minmax(160px,1fr) 70px;align-items:center;gap:10px;min-height:52px;border-top:1.5px dashed #EADCC6;font-size:14px}
+.sticky{position:relative;padding:28px 22px 26px 24px;border-radius:3px;box-shadow:0 1px 0 rgba(59,47,37,.05),0 14px 22px -14px rgba(36,66,77,.4)}
+.fold{position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:0 0 0 4px}
+.tape{position:absolute;left:50%;top:-11px;width:96px;height:24px;margin-left:-48px;background:rgba(240,196,118,.62);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(59,47,37,.08)}
+.edit{position:absolute;right:8px;top:8px;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#24424D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ul.bn{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bn li{position:relative;padding-left:18px;font-size:14px;line-height:1.85;color:#24323A}
+ul.bn li::before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dot,#3E6270)}
+ul.bn b{font-weight:700}
+.sw{position:relative;display:inline-block;width:42px;height:24px;border-radius:999px;flex:none}
+.sw span{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#FFFCF6;box-shadow:0 1px 2px rgba(59,47,37,.25)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:500 13px 'Chiron GoRound TC';color:#3B2F25;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:#3B2F25;border-color:#3B2F25;color:#FBF4E8}
+:focus-visible{outline:2.5px solid #3E6270;outline-offset:2px}
+a{color:#3E6270}
+.g{display:grid;grid-template-columns:110px repeat(4,minmax(0,1fr));column-gap:14px}
+.rw{padding:10px 0;border-top:1.5px dashed #EADCC6;font-size:13px}
+.col{border-radius:12px;padding:8px}
+.tg{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:44px;border-radius:10px;font:500 14px 'Chiron GoRound TC';cursor:pointer}
+.dt{display:inline-block;width:16px;height:16px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1.5px rgba(59,47,37,.18)}
+.stp{display:inline-flex;align-items:center;border-radius:10px;border:1.5px solid #E2D2B8;background:#FFFCF6;height:36px}
+.stp button{width:32px;height:34px;border:0;background:none;font:600 16px Nunito;color:#3B2F25;cursor:pointer}
+.stp span{min-width:22px;text-align:center;font:700 14px Nunito}
+.pr{display:inline-flex;align-items:center;gap:2px;height:36px;padding:0 8px;border-radius:10px;border:1.5px solid #E2D2B8;background:#FFFCF6;font:600 13px Nunito;width:82px}
+.cap{margin:0;font-size:12.5px;line-height:1.75;color:#5A4A3C}
+.bl{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-top:1.5px dashed #EADCC6}
+.fstack{position:fixed;right:24px;bottom:24px;z-index:25;display:flex;flex-direction:column;align-items:center;gap:8px}
+.fa{position:relative;width:44px;height:44px;border-radius:8px;border:1.5px solid #D9C7AC;background:#FFFCF6;color:#3B2F25;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;box-shadow:0 1px 0 rgba(59,47,37,.05),0 10px 20px -10px rgba(59,47,37,.45);transition:border-color .15s,transform .15s}
+.fa svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fa:hover,.fa[data-v="hover"]{border-color:#3B2F25;transform:translateY(-1px)}
+.fa[data-v="focus"]{outline:2.5px solid #3E6270;outline-offset:3px}
+.fa[data-open="true"]{background:#DCE8EC;border-color:#A9C6CF;color:#24424D}
+.fa.dark{background:#3B2F25;border-color:#3B2F25;color:#F2CF8E}
+.fa .q{position:absolute;right:-6px;top:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:#F2CF8E;color:#3B2F25;font:700 10.5px Nunito;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #FBF4E8}
+.fa .tip{position:absolute;right:54px;top:50%;transform:translateY(-50%);padding:5px 10px;border-radius:8px;background:#3B2F25;color:#FBF4E8;font:500 12px 'Chiron GoRound TC';white-space:nowrap;pointer-events:none;opacity:0}
+.fa:hover .tip,.fa[data-v="hover"] .tip,.fa[data-v="focus"] .tip{opacity:1}
+
+</style>
+</helmet>
+<div style="width:1440px;height:1110px;background:#FBF4E8;color:#3B2F25;font-family:'Chiron GoRound TC',sans-serif;position:relative;overflow:hidden">
+  <div style="position:absolute;left:40px;top:18px;width:{{mainW}};display:flex;align-items:center;gap:10px">
+    <span class="hd" style="font-size:24px">冬天的寬褲</span><span style="font-size:12px;color:#5A4A3C">4 件・準備購買 <b class="num">{{readyN}}</b></span>
+    <button type="button" class="btn btn-s" style="margin-left:auto;height:40px">收尾這個比較…</button>
+  </div>
+
+  <div class="paper" style="position:absolute;left:40px;top:70px;width:{{mainW}};padding:10px 16px 16px">
+    <div class="g" style="padding-bottom:10px;border-bottom:2px solid #3B2F25">
+      <span></span>
+      <sc-for list="{{items}}" as="it" hint-placeholder-count="4">
+        <div class="col" style="box-shadow:{{it.ring}};background:{{it.cbg}}">
+          <span style="position:relative;display:flex;height:92px;border-radius:10px;background:{{it.bg}};align-items:center;justify-content:center"><svg viewBox="0 0 100 100" style="width:56%;height:84%" aria-hidden="true"><path d="M30 8H70L80 92H56L50 36L44 92H20Z" fill="{{it.hex}}" stroke="rgba(59,47,37,.3)" stroke-width="1.2"></path></svg><sc-if value="{{it.on}}" hint-placeholder-val="{{ false }}"><span class="tag" style="position:absolute;left:6px;bottom:6px;height:22px;font-size:11px;background:#F2CF8E;color:#3B2F25">✓ 準備購買</span></sc-if></span>
+          <span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:6px;font-size:13px;font-weight:700;line-height:1.45;min-height:38px">{{it.name}}</span>
+          <b class="num" style="font-size:14px">{{it.price}}</b>
+        </div>
+      </sc-for>
+    </div>
+    <div class="g rw"><span style="color:#5A4A3C">售價</span><sc-for list="{{items}}" as="it" hint-placeholder-count="4"><span class="num" style="padding-left:8px">{{it.price}}</span></sc-for></div>
+    <div class="g rw"><span style="color:#5A4A3C">顏色</span><sc-for list="{{items}}" as="it" hint-placeholder-count="4"><span style="padding-left:8px;display:flex;gap:4px;align-items:center"><sc-for list="{{it.colors}}" as="c" hint-placeholder-count="2"><span class="dt" style="background:{{c.h}}" title="{{c.n}}"></span></sc-for><span style="font-size:12px;color:#5A4A3C;margin-left:4px">{{it.cnames}}</span></span></sc-for></div>
+    <div class="rw" style="font-size:12px;color:#74624F;text-align:center">⋯ 其他列（尺寸表、筆記、材質…）照 B23 ⋯</div>
+
+    <div class="g" style="margin-top:6px;padding-top:12px;border-top:2px solid #3B2F25;align-items:start">
+      <span style="font-size:12px;line-height:1.6;color:#5A4A3C;padding-top:12px">可以選好幾件，<br>也可以一件買多色</span>
+      <sc-for list="{{items}}" as="it" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+          <button type="button" class="tg" aria-pressed="{{it.ac}}" onClick="{{it.tog}}" style="background:{{it.tbg}};border:1.5px solid {{it.tbd}};color:#3B2F25">{{it.ttext}}</button>
+          <sc-if value="{{it.on}}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:12px;background:#FFF6E2;box-shadow:inset 0 0 0 1.5px #F2CF8E">
+              <span style="font-size:11.5px;color:#5A4A3C">顏色 × 件數 × 單價</span>
+              <sc-for list="{{it.lines}}" as="l" hint-placeholder-count="1">
+                <div style="display:flex;flex-direction:column;gap:6px;padding-bottom:6px;border-bottom:1.5px dashed #EADCC6">
+                  <span style="display:flex;align-items:center;gap:6px;font-size:13px"><span class="dt" style="background:{{l.h}}"></span><span>{{l.n}}</span><button type="button" aria-label="移除這個顏色" style="margin-left:auto;width:28px;height:28px;border:0;background:none;color:#8E4A3E;cursor:pointer">×</button></span>
+                  <span style="display:flex;align-items:center;gap:6px"><span class="stp"><button type="button" aria-label="減一件" onClick="{{l.dec}}">−</button><span>{{l.q}}</span><button type="button" aria-label="加一件" onClick="{{l.inc}}">＋</button></span><span class="pr"><span style="color:#74624F;font-size:11px">$</span>{{l.p}}</span></span>
+                </div>
+              </sc-for>
+              <button type="button" style="align-self:flex-start;min-height:32px;padding:0;border:0;background:none;font:500 12.5px 'Chiron GoRound TC';color:#3E6270;cursor:pointer">＋ 加一色</button>
+              <span style="display:flex;justify-content:space-between;font-size:13px"><span>小計 <b class="num">{{it.qty}}</b> 件</span><b class="num">{{it.sub}}</b></span>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="position:absolute;left:40px;top:{{noteTop}};width:{{mainW}};display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+    <div class="paper" style="padding:12px 14px;display:flex;flex-direction:column;gap:4px;box-shadow:inset 0 0 0 1.5px #EADCC6"><b style="font-size:13px">「準備購買」是開關</b><p class="cap">按一下變「✓ 準備購買」（狀態同步改），再按一下回「考慮中」。打開時預設帶入「最想要」的顏色 1 件、原價。</p></div>
+    <div class="paper" style="padding:12px 14px;display:flex;flex-direction:column;gap:4px;box-shadow:inset 0 0 0 1.5px #EADCC6"><b style="font-size:13px">多色、優惠價</b><p class="cap">每一色一行：件數用 − ＋，單價可以直接改（例如兩件 NT$1,000，就各填 500）。不幫你算活動規則。</p></div>
+    <div class="paper" style="padding:12px 14px;display:flex;flex-direction:column;gap:4px;box-shadow:inset 0 0 0 1.5px #EADCC6"><b style="font-size:13px">「就買這件」拿掉了</b><p class="cap">改成右上「收尾這個比較…」：沒勾準備購買的要不要改已放棄、比較要不要封存。採購籃是右下角的小方塊（B26），點開抽屜才看金額。</p></div>
+  </div>
+
+  <sc-if value="{{notOpen}}" hint-placeholder-val="{{ false }}">
+    <div class="fstack" style="position:absolute">
+      <button type="button" class="fa" aria-label="回到頂端"><svg viewBox="0 0 24 24"><path d="M6 5h12M12 19V9M7 13l5-5 5 5"></path></svg><span class="tip">回到頂端</span></button>
+      <button type="button" class="fa" aria-label="展開其餘 3 區"><svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5M7 13l5 5 5-5"></path></svg><span class="tip">展開其餘 3 區</span></button>
+      <button type="button" class="fa dark" onClick="{{toggleOpen}}" aria-expanded="false" aria-label="打開採購籃，{{allQty}} 件" data-v="hover"><svg viewBox="0 0 24 24"><path d="M4 8h16l-1.5 11h-13zM9 8V6a3 3 0 0 1 6 0v2"></path></svg><span class="q" aria-hidden="true">{{allQty}}</span><span class="tip">採購籃・{{allQty}} 件</span></button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{open}}" hint-placeholder-val="{{ true }}">
+    <aside role="dialog" aria-labelledby="bk" style="position:absolute;right:0;top:0;bottom:0;width:470px;background:#FFFCF6;box-shadow:-18px 0 36px -20px rgba(59,47,37,.45),-1.5px 0 0 #EADCC6;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:8px;padding:14px 10px 12px 20px;border-bottom:1.5px dashed #D9C7AC">
+        <h2 id="bk" class="hd" style="margin:0;font-size:24px;white-space:nowrap">採購籃</h2>
+        <span style="font-size:12px;color:#5A4A3C">所有「準備購買」・這個比較 <b class="num">{{cmpQty}}</b> 件</span>
+        <button type="button" class="ibtn" onClick="{{toggleOpen}}" aria-label="關閉" style="margin-left:auto;color:#3B2F25"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;background:#FBF4E8">
+        <span style="font-size:13px">目標金額</span>
+        <span class="pr" style="width:120px;height:40px"><span style="color:#74624F;font-size:11px">NT$</span>5,000</span>
+        <span style="font-size:12px;color:#5A4A3C">選填，只用來算「還差多少」</span>
+      </div>
+      <div style="flex:1;overflow:hidden;padding:4px 20px 0">
+        <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+          <section style="display:flex;flex-direction:column">
+            <h3 style="margin:12px 0 2px;display:flex;align-items:baseline;gap:8px;font-size:13px"><span class="hd" style="font-size:17px;font-weight:400">{{g.t}}</span><span style="font-weight:400;color:#5A4A3C">{{g.meta}}</span></h3>
+            <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="2">
+              <div class="bl">
+                <span style="width:44px;height:52px;border-radius:8px;background:{{r.bg}}"></span>
+                <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{r.name}}</span><span style="font-size:12px;color:#5A4A3C">{{r.lines}}</span></span>
+                <b class="num" style="font-size:14px">{{r.sub}}</b>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </div>
+      <div style="padding:14px 20px 18px;border-top:2px solid #3B2F25;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:baseline"><span style="font-size:14px">共 <b class="num">{{allKinds}}</b> 款・<b class="num">{{allQty}}</b> 件</span><b class="num" style="margin-left:auto;font-size:26px">{{allSum}}</b></div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#5A3F12"><span style="flex:1;height:8px;border-radius:4px;background:#F3E7D4;overflow:hidden"><span style="display:block;height:100%;width:{{pct}};background:#E2B866"></span></span>{{gap}}</div>
+        <div style="display:flex;gap:8px"><button type="button" class="btn btn-s"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><path d="M8 8h11v12H8zM5 16V4h11"></path></svg>複製清單</button><button type="button" class="btn btn-p" style="margin-left:auto">買好了，移到已購買…</button></div>
+      </div>
+    </aside>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1110}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { ready: [1, 2], open: true, q: { '1-0': 1, '1-1': 1, '2-0': 1 } }; }
+  renderVals() {
+    const st = this.state, ready = st.ready, q = st.q;
+    const I = [
+      { name: '#802559 後鬆緊高腰厚磅親膚毛呢內磨毛超顯瘦寬褲', price: 690, hex: '#D9CBB3', bg: '#F1E4E2', colors: [['#EAD9C6', '杏']] },
+      { name: '#802556 超顯瘦必買撞色收邊後鬆緊質感毛呢褲', price: 590, hex: '#2B2724', bg: '#F6E7C6', colors: [['#2B2724', '黑'], ['#EAD9C6', '杏']], deal: 500 },
+      { name: '#770552 本檔必收爆瘦褲 高彈寬鬆緊直筒褲', price: 590, hex: '#5E5E60', bg: '#E8E2DA', colors: [['#5E5E60', '灰']] },
+      { name: '#66936 全鬆緊抽繩羊絨顯瘦車線直筒褲', price: 590, hex: '#3A332E', bg: '#E6EEE2', colors: [['#3A332E', '深咖']] }
+    ];
+    const fmt = v => 'NT$' + v.toLocaleString('en-US');
+    let cmpQty = 0, cmpSum = 0;
+    const items = I.map((it, k) => {
+      const on = ready.includes(k);
+      const unit = it.deal || it.price;
+      const lines = it.colors.map(([h, n], j) => ({ h, n, key: k + '-' + j })).filter(l => q[l.key] !== undefined).map(l => Object.assign(l, {
+        q: q[l.key], p: unit,
+        inc: () => this.setState({ q: Object.assign({}, q, { [l.key]: q[l.key] + 1 }) }),
+        dec: () => this.setState({ q: Object.assign({}, q, { [l.key]: Math.max(1, q[l.key] - 1) }) })
+      }));
+      const qty = lines.reduce((a, l) => a + l.q, 0), sub = lines.reduce((a, l) => a + l.q * l.p, 0);
+      if (on) { cmpQty += qty; cmpSum += sub; }
+      return { name: it.name, price: fmt(it.price), hex: it.hex, bg: it.bg,
+        colors: it.colors.map(([h, n]) => ({ h, n })), cnames: it.colors.map(c => c[1]).join('、'),
+        on, ac: on ? 'true' : 'false', lines, qty, sub: fmt(sub),
+        ring: on ? 'inset 0 0 0 2px #E2B866' : 'none', cbg: on ? '#FFF9EE' : 'transparent',
+        tbg: on ? '#F2CF8E' : '#FFFCF6', tbd: on ? '#E2B866' : '#D9C7AC', ttext: on ? '✓ 準備購買' : '＋ 準備購買',
+        tog: () => {
+          if (on) this.setState({ ready: ready.filter(x => x !== k) });
+          else { const nq = Object.assign({}, q); if (nq[k + '-0'] === undefined) nq[k + '-0'] = 1; this.setState({ ready: ready.concat(k), q: nq }); }
+        } };
+    });
+    const other = [
+      { t: '短褲＆短裙', meta: '比較・下身', rows: [{ name: '#27629 高質感柔面毛呢短褲', lines: '杏 × 1', sub: 550, q: 1, bg: '#F1E4E2' }, { name: '#329815 柔面毛呢百褶短裙', lines: '黑 × 1・灰 × 1（各 $520）', sub: 1040, q: 2, bg: '#E8E2DA' }] },
+      { t: '冬天上衣', meta: '比較・上衣', rows: [{ name: '#431038 素面手標羊絨內刷寶寶絨上衣', lines: '杏 × 1', sub: 490, q: 1, bg: '#F6E7C6' }] }
+    ];
+    const pants = items.filter(x => x.on).map(x => ({ name: x.name, lines: x.lines.map(l => `${l.n} × ${l.q}`).join('・') + (x.lines.length > 1 || x.qty > 1 ? `（各 $${x.lines[0].p}）` : ''), sub: x.qty ? fmt(x.lines.reduce((a, l) => a + l.q * l.p, 0)) : 'NT$0', bg: x.bg }));
+    const oSum = other.reduce((a, g) => a + g.rows.reduce((b, r) => b + r.sub, 0), 0), oQty = other.reduce((a, g) => a + g.rows.reduce((b, r) => b + r.q, 0), 0), oKinds = 3;
+    const allSum = cmpSum + oSum, allQty = cmpQty + oQty, allKinds = ready.length + oKinds, target = 5000;
+    const groups = (pants.length ? [{ t: '冬天的寬褲', meta: `比較・下身・${cmpQty} 件`, rows: pants }] : []).concat(other.map(g => ({ t: g.t, meta: g.meta, rows: g.rows.map(r => Object.assign({}, r, { sub: fmt(r.sub) })) })));
+    const open = st.open;
+    return {
+      items, groups, readyN: ready.length, cmpQty,
+      allQty, allKinds, allSum: fmt(allSum),
+      gap: allSum >= target ? `已達標，多 ${fmt(allSum - target)}` : `還差 ${fmt(target - allSum)}`,
+      pct: Math.min(100, Math.round(allSum / target * 100)) + '%',
+      open, notOpen: !open, openA: open ? 'true' : 'false', openText: open ? '收起採購籃' : '打開採購籃', toggleOpen: () => this.setState({ open: !open }),
+      mainW: open ? '880px' : '1360px', noteTop: '780px'
+    };
+  }
+}
+</script>
+</body>
+</html>

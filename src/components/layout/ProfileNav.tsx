@@ -8,6 +8,7 @@ const LINKS = [
   { to: '/me/brands', label: '品牌', end: false },
   { to: '/me/shops', label: '購買通路', end: false },
   { to: '/me/materials', label: '材質', end: false },
+  { to: '/me/features', label: '特徵', end: false },
 ]
 
 /** 個人資料子導覽（大螢幕左欄）；目前頁面以燕麥色左側線標示 */
